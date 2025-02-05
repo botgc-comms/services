@@ -109,6 +109,7 @@ namespace Services.Services
 
         private static Rectangle CalculateCropBox(IEnumerable<FaceRectangle> faces, int imageWidth, int imageHeight)
         { 
+            // TODO: set this by appsettings
             // Aspect ratio of the crop box: 800x920
             const double aspectRatio = 800.0 / 920.0;
 
@@ -121,8 +122,8 @@ namespace Services.Services
             // Add padding around the faces (25% of the width and height of the bounding box)
             int faceBoxWidth = maxX - minX;
             int faceBoxHeight = maxY - minY;
-            int paddingX = (int)(faceBoxWidth * 0.25); // 25% horizontal padding
-            int paddingY = (int)(faceBoxHeight * 0.25); // 25% vertical padding
+            int paddingX = (int)(faceBoxWidth * 0.45); // 45% horizontal padding //TODO set this by appsettings
+            int paddingY = (int)(faceBoxHeight * 0.45); // 45% vertical padding // TODO set this by appsettings
 
             // Expand the bounding box with padding
             minX = Math.Max(0, minX - paddingX);

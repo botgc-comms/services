@@ -7,6 +7,13 @@
         public AzureFaceApi AzureFaceApi { get; set; }
 
         public GitHub GitHub { get; set; }
+
+        public Cache Cache { get; set; }
+    }
+
+    public class Cache
+    {
+        public int TTL_mins { get; set; } = 30;
     }
 
     public class AzureFaceApi

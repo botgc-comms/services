@@ -18,18 +18,22 @@ namespace Services.Services
     /// </summary>
     public class TrophyFilesDiskStorage : ITrophyFiles
     {
+        private const string __CACHE_TROPHYFILES = "Trophy_files";
+
         private readonly AppSettings _settings;
         private readonly ILogger<TrophyFilesDiskStorage> _logger;
+        private IServiceScopeFactory _serviceScopeFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TrophyFilesDiskStorage"/> class.
         /// </summary>
         /// <param name="settings">Application settings.</param>
         /// <param name="logger">Logger instance.</param>
-        public TrophyFilesDiskStorage(IOptions<AppSettings> settings, ILogger<TrophyFilesDiskStorage> logger)
+        public TrophyFilesDiskStorage(IOptions<AppSettings> settings, ILogger<TrophyFilesDiskStorage> logger, IServiceScopeFactory serviceScopeFactory)
         {
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
         }
 
         /// <summary>
@@ -38,6 +42,18 @@ namespace Services.Services
         /// <returns>A collection of <see cref="TrophyMetadata"/>.</returns>
         public async Task<IReadOnlyCollection<TrophyMetadata>> ListTrophiesAsync()
         {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+
+            // Attempt to retrieve from cache
+            var cachedTrophies = await cacheService.GetAsync<IReadOnlyCollection<TrophyMetadata>>(__CACHE_TROPHYFILES).ConfigureAwait(false);
+            if (cachedTrophies != null && cachedTrophies.Any())
+            {
+                _logger.LogInformation("Trophy data retrieved from cache.");
+                return cachedTrophies;
+            }
+
+            // Validate trophy storage path
             var trophiesPath = _settings.TrophyFilePath;
             if (string.IsNullOrWhiteSpace(trophiesPath))
             {
@@ -51,28 +67,28 @@ namespace Services.Services
                 return Array.Empty<TrophyMetadata>();
             }
 
-            var trophies = new ConcurrentBag<TrophyMetadata>();
-
+            // Read metadata from all directories
+            var trophies = new List<TrophyMetadata>();
             try
             {
                 var directories = Directory.GetDirectories(trophiesPath);
-                var tasks = directories.Select(async dir =>
+                foreach (var dir in directories)
                 {
                     var metadataPath = Path.Combine(dir, "metadata.json");
 
                     if (!File.Exists(metadataPath))
                     {
                         _logger.LogWarning("Metadata file missing in directory: {Dir}", dir);
-                        return;
+                        continue;
                     }
 
                     try
                     {
-                        var json = await File.ReadAllTextAsync(metadataPath);
+                        var json = await File.ReadAllTextAsync(metadataPath).ConfigureAwait(false);
                         if (string.IsNullOrWhiteSpace(json))
                         {
                             _logger.LogWarning("Metadata file is empty: {MetadataPath}", metadataPath);
-                            return;
+                            continue;
                         }
 
                         var metadata = JsonSerializer.Deserialize<TrophyMetadata>(json, new JsonSerializerOptions
@@ -83,7 +99,7 @@ namespace Services.Services
                         if (metadata == null)
                         {
                             _logger.LogWarning("Metadata file is invalid: {MetadataPath}", metadataPath);
-                            return;
+                            continue;
                         }
 
                         metadata.ImageUrl = ResolvePath(dir, metadata.ImageUrl);
@@ -99,12 +115,16 @@ namespace Services.Services
                     {
                         _logger.LogError(ex, "Unexpected error while reading metadata.json in {Dir}", dir);
                     }
-                });
+                }
 
-                await Task.WhenAll(tasks);
+                // Store the result in cache
+                if (trophies.Any())
+                {
+                    await cacheService.SetAsync(__CACHE_TROPHYFILES, trophies, TimeSpan.FromMinutes(_settings.Cache.TTL_mins)).ConfigureAwait(false);
+                }
 
                 _logger.LogInformation("Successfully loaded {Count} trophies.", trophies.Count);
-                return trophies.ToArray();
+                return trophies;
             }
             catch (Exception ex)
             {
