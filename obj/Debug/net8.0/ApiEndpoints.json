@@ -34,6 +34,34 @@
     ]
   },
   {
+    "ContainingType": "Services.Controllers.MembersController",
+    "Method": "GetJuniorMembers",
+    "RelativePath": "api/members/junior-members",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IReadOnlyCollection\u00601[[Services.Dto.MemberDto, Services, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 204
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 500
+      }
+    ]
+  },
+  {
     "ContainingType": "Servicesx.Controllers.TrophiesController",
     "Method": "GetTrophiesAsync",
     "RelativePath": "api/Trophies",

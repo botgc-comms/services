@@ -1,6 +1,7 @@
 using Microsoft.OpenApi.Models;
 using Services;
 using Services.Common;
+using Services.Extensions;
 using Services.Interfaces;
 using Services.Services;
 
@@ -35,6 +36,9 @@ builder.Services.AddSingleton<IImageServices, ImageServices>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
+
+// Add support for interacting with IG
+builder.Services.AddIGSupport();
 
 var app = builder.Build();
 

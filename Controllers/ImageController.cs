@@ -19,7 +19,7 @@ namespace Services.Controllers
         private readonly AppSettings _settings;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TrophiesController"/> class.
+        /// Initializes a new instance of the <see cref="MembersController"/> class.
         /// </summary>
         /// <param name="logger">Logger instance.</param>
         /// <param name="imageService">Service handling image processing.</param>

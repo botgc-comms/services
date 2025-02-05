@@ -9,6 +9,8 @@
         public GitHub GitHub { get; set; }
 
         public Cache Cache { get; set; }
+
+        public IG IG { get; set; }
     }
 
     public class Cache
@@ -29,4 +31,21 @@
         public string RawUrl { get; set; } = string.Empty; // e.g., "https://raw.githubusercontent.com/user/repo/main"
         public string TrophyDirectory { get; set; } = "trophies"; // Directory inside repo
     }
+
+    public class IG
+    {
+        public string BaseUrl { get; set; } = "https://www.botgc.co.uk";
+        public required string MemberId { get; set; } 
+        public required string MemberPassword { get; set; } 
+        public required string AdminPassword { get; set; }
+
+        public required IGReports IGReports { get; set; } = new IGReports();
+
+    }
+
+    public class IGReports
+    {
+        public string JuniorMembershipReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=b52f6bd4cf74cc5dbfd84dec616ceb42";
+    }
+
 }
