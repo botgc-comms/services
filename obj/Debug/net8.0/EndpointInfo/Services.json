@@ -49,12 +49,58 @@
         }
       }
     },
-    "/api/members/junior-members": {
+    "/api/members/juniors": {
       "get": {
         "tags": [
           "Members"
         ],
         "parameters": [
+          {
+            "name": "Cache-Control",
+            "in": "header",
+            "description": "Set to 'no-cache' to force a fresh response instead of a cached one.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/members/{memberId}/rounds": {
+      "get": {
+        "tags": [
+          "Members"
+        ],
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "Cache-Control",
             "in": "header",
@@ -201,9 +247,34 @@
   },
   "components": {
     "schemas": {
+      "HateoasLink": {
+        "type": "object",
+        "properties": {
+          "rel": {
+            "type": "string",
+            "nullable": true
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "method": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "MemberDto": {
         "type": "object",
         "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HateoasLink"
+            },
+            "nullable": true
+          },
           "memberId": {
             "type": "integer",
             "format": "int32"
@@ -326,6 +397,13 @@
       "TrophyDto": {
         "type": "object",
         "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HateoasLink"
+            },
+            "nullable": true
+          },
           "slug": {
             "type": "string",
             "nullable": true
@@ -336,13 +414,6 @@
           },
           "description": {
             "type": "string",
-            "nullable": true
-          },
-          "links": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
             "nullable": true
           }
         },

@@ -35,8 +35,42 @@
   },
   {
     "ContainingType": "Services.Controllers.MembersController",
+    "Method": "GetRoundsByMember",
+    "RelativePath": "api/members/{memberId}/rounds",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "memberId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IReadOnlyCollection\u00601[[Services.Dto.MemberDto, Services, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 204
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 500
+      }
+    ]
+  },
+  {
+    "ContainingType": "Services.Controllers.MembersController",
     "Method": "GetJuniorMembers",
-    "RelativePath": "api/members/junior-members",
+    "RelativePath": "api/members/juniors",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

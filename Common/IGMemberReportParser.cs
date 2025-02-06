@@ -5,10 +5,11 @@ using System.Text.RegularExpressions;
 using global::Services.Dto;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
+using Services.Interfaces;
 
 namespace Services.Common
 {
-    public class IGMemberReportParser
+    public class IGMemberReportParser: IReportParser<MemberDto>
     {
         private readonly ILogger<IGMemberReportParser> _logger;
 

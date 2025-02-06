@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Services.Dtos;
+using Services.Common;
 
 namespace Servicesx.Controllers
 {
@@ -12,7 +13,7 @@ namespace Servicesx.Controllers
     /// API for managing trophies and their data.
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/trophies")]
     [Produces("application/json")]
     public class TrophiesController : ControllerBase
     {
@@ -90,6 +91,8 @@ namespace Servicesx.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<TrophyDto>> GetTrophyByIdAsync(string id)
         {
+            id = id.ToUpper();
+
             _logger.LogInformation("Fetching trophy details for ID: {Id}", id);
             try
             {
@@ -149,14 +152,9 @@ namespace Servicesx.Controllers
                     Slug = trophy.Slug,
                     Name = trophy.Name,
                     Description = trophy.Description,
-                    Links = new Dictionary<string, string>
-                    {
-                        { "self", $"{Request.Scheme}://{Request.Host}/api/trophies/{trophy.Slug}" },
-                        { "previous", $"{Request.Scheme}://{Request.Host}/api/trophies/{previousSlug}" },
-                        { "next", $"{Request.Scheme}://{Request.Host}/api/trophies/{nextSlug}" },
-                        { "winnerImage", $"{Request.Scheme}://{Request.Host}/api/images/winners/{trophy.Slug}" }
-                    }
                 };
+
+                trophyDto.Links = HateOASLinks.GetTrophyLinks(trophyDto, nextSlug, previousSlug);
 
                 return Ok(trophyDto);
             }

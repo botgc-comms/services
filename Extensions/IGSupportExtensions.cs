@@ -1,4 +1,5 @@
 ﻿using Services.Common;
+using Services.Dto;
 using Services.Interfaces;
 using Services.Services;
 using System.Net;
@@ -35,7 +36,9 @@ namespace Services.Extensions
                 });
 
             services.AddSingleton<IGLoginService>();
-            services.AddSingleton<IGMemberReportParser>();
+            services.AddSingleton<IReportParser<MemberDto>, IGMemberReportParser>();
+            services.AddSingleton<IReportParser<RoundDto>, IGRoundReportParser>();
+            services.AddSingleton<IReportParser<PlayerIdLookupDto>, IGPlayerIdLookupReportParser>();
 
             services.AddSingleton<IReportService, IGReportsService>();
 

@@ -1,6 +1,6 @@
 ﻿namespace Services.Dto
 {
-    public class MemberDto
+    public class MemberDto : HateoasResource
     {
         public int MemberId { get; set; } 
         public string Title { get; set; }
