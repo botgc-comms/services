@@ -6,6 +6,7 @@ namespace Services.Interfaces
     {
         Task<List<MemberDto>> GetJuniorMembersAsync();
         Task<List<RoundDto>> GetRoundsByMemberIdAsync(string memberId);
+        Task<ScorecardDto?> GetScorecardForRoundAsync(string roundId);
     }
 
 }

@@ -48,6 +48,7 @@
         public string JuniorMembershipReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=b52f6bd4cf74cc5dbfd84dec616ceb42";
         public string MemberRoundsReportUrl { get; set; } = "/roundmgmt.php?playerid={memberId}";
         public string PlayerIdLookupReportUrl { get; set; } = "/membership_reports.php?tab=status";
+        public string RoundReportUrl { get; set; } = "/viewround.php?roundid={roundId}";
     }
 
 }

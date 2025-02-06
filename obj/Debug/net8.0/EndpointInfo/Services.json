@@ -133,7 +133,50 @@
         }
       }
     },
-    "/api/Trophies": {
+    "/api/rounds/{roundId}": {
+      "get": {
+        "tags": [
+          "Rounds"
+        ],
+        "parameters": [
+          {
+            "name": "roundId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Cache-Control",
+            "in": "header",
+            "description": "Set to 'no-cache' to force a fresh response instead of a cached one.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScorecardDto"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/trophies": {
       "get": {
         "tags": [
           "Trophies"
@@ -186,7 +229,7 @@
         }
       }
     },
-    "/api/Trophies/{id}": {
+    "/api/trophies/{id}": {
       "get": {
         "tags": [
           "Trophies"
@@ -393,6 +436,96 @@
           }
         },
         "additionalProperties": { }
+      },
+      "ScorecardDto": {
+        "type": "object",
+        "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HateoasLink"
+            },
+            "nullable": true
+          },
+          "playerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "shotsReceived": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "handicapAllowance": {
+            "type": "string",
+            "nullable": true
+          },
+          "competitionName": {
+            "type": "string",
+            "nullable": true
+          },
+          "teeColour": {
+            "type": "string",
+            "nullable": true
+          },
+          "competitionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalStrokes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalStablefordScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "holes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScorecardHoleDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScorecardHoleDto": {
+        "type": "object",
+        "properties": {
+          "holeNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "yardage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "strokeIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shotsReceived": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "par": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gross": {
+            "type": "string",
+            "nullable": true
+          },
+          "net": {
+            "type": "string",
+            "nullable": true
+          },
+          "stablefordScore": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "TrophyDto": {
         "type": "object",

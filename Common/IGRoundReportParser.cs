@@ -90,7 +90,7 @@ namespace Services.Common
         private static bool ExtractHandicapQualifying(string html)
         {
             var name = Regex.Replace(html, "<.*?>", "").Trim();
-            return Regex.IsMatch(name, @"\\sH\\s*$", RegexOptions.IgnoreCase);
+            return Regex.IsMatch(name, "\\sH\\s*$", RegexOptions.IgnoreCase);
         }
 
         /// <summary>

@@ -96,9 +96,43 @@
     ]
   },
   {
+    "ContainingType": "Services.Controllers.RoundsController",
+    "Method": "GetScorecardForRoundId",
+    "RelativePath": "api/rounds/{roundId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "roundId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Services.Dto.ScorecardDto",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 204
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 500
+      }
+    ]
+  },
+  {
     "ContainingType": "Servicesx.Controllers.TrophiesController",
     "Method": "GetTrophiesAsync",
-    "RelativePath": "api/Trophies",
+    "RelativePath": "api/trophies",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -131,7 +165,7 @@
   {
     "ContainingType": "Servicesx.Controllers.TrophiesController",
     "Method": "GetTrophyByIdAsync",
-    "RelativePath": "api/Trophies/{id}",
+    "RelativePath": "api/trophies/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
