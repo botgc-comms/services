@@ -2,6 +2,7 @@
 using Services.Dto;
 using Services.Interfaces;
 using Services.Services;
+using Services.Services.CompetitionProcessors;
 using System.Net;
 
 namespace Services.Extensions
@@ -40,6 +41,11 @@ namespace Services.Extensions
             services.AddSingleton<IReportParser<RoundDto>, IGRoundReportParser>();
             services.AddSingleton<IReportParser<PlayerIdLookupDto>, IGPlayerIdLookupReportParser>();
             services.AddSingleton<IReportParser<ScorecardDto>, IGScorecardReportParser>();
+
+            services.AddTransient<ICompetitionProcessor, JuniorEclecticCompetitionProcessor>();
+
+            services.AddSingleton<ICompetitionTaskQueue, CompetitionTaskQueue>();
+            services.AddHostedService<CompeitionStatus>
 
             services.AddSingleton<IReportService, IGReportsService>();
 

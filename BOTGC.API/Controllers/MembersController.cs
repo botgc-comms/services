@@ -13,9 +13,6 @@ namespace Services.Controllers
     [Produces("application/json")]
     public class MembersController : Controller
     {
-        private const string __CACHE_JUNIORMEMBERS = "Junior_Members";
-        private const string __CACHE_ROUNDSBYMEMBER = "Rounds_By_Member_{memberId}";
-
         private readonly AppSettings _settings;
         private readonly IReportService _reportService;
         private readonly ILogger<MembersController> _logger;

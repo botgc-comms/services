@@ -50,7 +50,7 @@ namespace Services.Common
                     ShotsReceived = ExtractShotsReceived(headers),
                     HandicapAllowance = ExtractHandicapAllowance(headers),
                     CompetitionName = ExtractCompetitionName(headers),
-                    CompetitionDate = ExtractCardDate(headers),
+                    DatePlayed = ExtractCardDate(headers),
                     TeeColour = ExtractTeeColour(scorecardTable)
                 };
 

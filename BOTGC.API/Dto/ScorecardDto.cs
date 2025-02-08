@@ -8,6 +8,7 @@ namespace Services.Dto
     /// </summary>
     public class ScorecardDto: HateoasResource
     {
+        public required int RoundId { get; set; }
         /// <summary>
         /// The player's name.
         /// </summary>
@@ -17,6 +18,11 @@ namespace Services.Dto
         /// The player's playing handicap.
         /// </summary>
         public int ShotsReceived { get; set; }
+
+        /// <summary>
+        /// Does the card relate to a general play round
+        /// </summary>
+        public bool IsGeneralPlay { get; set; }
 
         /// <summary>
         /// The handicap allowance (percentage).
@@ -36,7 +42,7 @@ namespace Services.Dto
         /// <summary>
         /// The date of the competition.
         /// </summary>
-        public DateTime CompetitionDate { get; set; }
+        public DateTime DatePlayed { get; set; }
 
         /// <summary>
         /// The total strokes taken in the round.
