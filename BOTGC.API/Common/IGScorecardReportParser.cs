@@ -43,9 +43,23 @@ namespace Services.Common
 
             try
             {
+                var roundId = 0;
+                var roundIdNodes = document.DocumentNode.SelectNodes("//a");
+                var roundIdNode = roundIdNodes.FirstOrDefault(a => Regex.IsMatch(a.OuterHtml, "roundid=\\d+"));
+                if (roundIdNode != null)
+                {
+                    roundId = int.Parse(Regex.Match(roundIdNode.OuterHtml, "roundId=(\\d+)").Groups[1].Value);
+                }
+                else
+                {
+                    _logger.LogError("Unable to locate round id.");
+                    return scorecards;
+                }
+
                 // Extract top-level details from header row
                 var scorecard = new ScorecardDto
                 {
+                    RoundId = roundId, 
                     PlayerName = ExtractPlayerName(headers),
                     ShotsReceived = ExtractShotsReceived(headers),
                     HandicapAllowance = ExtractHandicapAllowance(headers),

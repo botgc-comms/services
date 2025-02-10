@@ -1,5 +1,21 @@
 [
   {
+    "ContainingType": "Services.Controllers.CompetitionsController",
+    "Method": "RetrieveCompetitionStatus",
+    "RelativePath": "api/competitions/retrieve",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dateRange",
+        "Type": "Services.Models.DateRange",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Services.Controllers.ImagesController",
     "Method": "GetWinnerImage",
     "RelativePath": "api/images/winners/{id}",
@@ -49,7 +65,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IReadOnlyCollection\u00601[[Services.Dto.MemberDto, Services, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IReadOnlyCollection\u00601[[Services.Dto.MemberDto, BOTGC.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -77,7 +93,7 @@
     "Parameters": [],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IReadOnlyCollection\u00601[[Services.Dto.MemberDto, Services, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IReadOnlyCollection\u00601[[Services.Dto.MemberDto, BOTGC.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],

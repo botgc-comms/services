@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\_src\\BOTGC\\git\\Services\\Services.csproj": {}
+    "C:\\_src\\BOTGC\\git\\Services\\BOTGC.API\\Services.csproj": {}
   },
   "projects": {
-    "C:\\_src\\BOTGC\\git\\Services\\Services.csproj": {
+    "C:\\_src\\BOTGC\\git\\Services\\BOTGC.API\\Services.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\_src\\BOTGC\\git\\Services\\Services.csproj",
+        "projectUniqueName": "C:\\_src\\BOTGC\\git\\Services\\BOTGC.API\\Services.csproj",
         "projectName": "Services",
-        "projectPath": "C:\\_src\\BOTGC\\git\\Services\\Services.csproj",
+        "projectPath": "C:\\_src\\BOTGC\\git\\Services\\BOTGC.API\\Services.csproj",
         "packagesPath": "C:\\Users\\simon\\.nuget\\packages\\",
-        "outputPath": "C:\\_src\\BOTGC\\git\\Services\\obj\\",
+        "outputPath": "C:\\_src\\BOTGC\\git\\Services\\BOTGC.API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",

@@ -2,6 +2,7 @@
 using Services.Dto;
 using Services.Interfaces;
 using Services.Services;
+using Services.Services.BackgroundServices;
 using Services.Services.CompetitionProcessors;
 using System.Net;
 
@@ -45,7 +46,10 @@ namespace Services.Extensions
             services.AddTransient<ICompetitionProcessor, JuniorEclecticCompetitionProcessor>();
 
             services.AddSingleton<ICompetitionTaskQueue, CompetitionTaskQueue>();
-            services.AddHostedService<CompeitionStatus>
+            services.AddSingleton<ICompetitionProcessorResolver, CompetitionProcessorResolver>();
+            
+            services.AddHostedService<CompetitionBackgroundService>();
+
 
             services.AddSingleton<IReportService, IGReportsService>();
 

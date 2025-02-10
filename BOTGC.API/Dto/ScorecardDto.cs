@@ -8,7 +8,7 @@ namespace Services.Dto
     /// </summary>
     public class ScorecardDto: HateoasResource
     {
-        public required int RoundId { get; set; }
+        public int RoundId { get; set; }
         /// <summary>
         /// The player's name.
         /// </summary>

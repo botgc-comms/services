@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "StFNbhqbROY=",
+  "dgSpecHash": "fFdYNnNg6GY=",
   "success": true,
-  "projectFilePath": "C:\\_src\\BOTGC\\git\\Services\\Services.csproj",
+  "projectFilePath": "C:\\_src\\BOTGC\\git\\Services\\BOTGC.API\\BOTGC.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\simon\\.nuget\\packages\\htmlagilitypack\\1.11.72\\htmlagilitypack.1.11.72.nupkg.sha512",
     "C:\\Users\\simon\\.nuget\\packages\\microsoft.azure.cognitiveservices.vision.face\\2.8.0-preview.3\\microsoft.azure.cognitiveservices.vision.face.2.8.0-preview.3.nupkg.sha512",

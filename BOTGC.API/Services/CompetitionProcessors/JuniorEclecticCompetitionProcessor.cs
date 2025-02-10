@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using BOTGC.API.Dto;
+using Microsoft.Extensions.Options;
 using Services.Controllers;
 using Services.Dto;
 using Services.Interfaces;
@@ -30,23 +31,27 @@ namespace Services.Services.CompetitionProcessors
 
         public async Task ProcessCompetitionAsync(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
         {
+            throw new NotImplementedException();
+        }
+
+        public async Task<EclecticCompetitionResultsDto> GetCompetitionResultAsync(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+        {
             const int TOPSCORES = 5;
             const int TOPGPSCORES = 3;
 
-            var eclecticScorecards = new List<EclecticScorecardDto>();
+            var eclecticResults = new List<EclecticScoretDto>();
 
             #region STEP 1: Get all Junior Members
             
             var juniorMembers = await _reportService.GetJuniorMembersAsync();
-
-            var roundExlusions = new List<RoundExclusionReason>();
-            var holeExclusions = new List<HoleExclusionReason>();
 
             #endregion
 
             // step 2: for each junior member get that juniors rounds
             foreach (var juniorMember in juniorMembers)
             {
+                var roundExclusions = new List<EclecticRoundExclusionReasonDto>();
+
                 #region STEP 2: Get all rounds for each Junior Member
 
                 var rounds = await _reportService.GetRoundsByMemberIdAsync(juniorMember.MemberId.ToString());
@@ -66,11 +71,12 @@ namespace Services.Services.CompetitionProcessors
                 var validGeneralPlayRounds = generalPlayRounds.Where(gpr => competitionRounds.Any(cr => Math.Abs((gpr.DatePlayed - cr.DatePlayed).TotalDays) <= 42));
 
                 // step 3d: update the collection of exclusion reasons
-                roundExlusions.AddRange(
+                roundExclusions.AddRange(
                     generalPlayRounds
-                        .Except(validGeneralPlayRounds)
-                        .Select(gpr => new RoundExclusionReason()
+                        .Except(validGeneralPlayRounds ?? [])
+                        .Select(gpr => new EclecticRoundExclusionReasonDto()
                         {
+                            Type = "WholeRound", 
                             MemberId = juniorMember.MemberId.ToString(),
                             RoundId = gpr.RoundId.ToString(),
                             DatePlayed = gpr.DatePlayed, 
@@ -126,6 +132,7 @@ namespace Services.Services.CompetitionProcessors
                     {
                         var frontNineScorecard = new ScorecardDto
                         {
+                            RoundId = scorecard.RoundId, 
                             PlayerName = scorecard.PlayerName,
                             ShotsReceived = scorecard.ShotsReceived,
                             HandicapAllowance = scorecard.HandicapAllowance,
@@ -144,6 +151,7 @@ namespace Services.Services.CompetitionProcessors
                     {
                         var backNineScorecard = new ScorecardDto
                         {
+                            RoundId = scorecard.RoundId,
                             PlayerName = scorecard.PlayerName,
                             ShotsReceived = scorecard.ShotsReceived,
                             HandicapAllowance = scorecard.HandicapAllowance,
@@ -169,6 +177,7 @@ namespace Services.Services.CompetitionProcessors
                     {
                         var frontNineScorecard = new ScorecardDto
                         {
+                            RoundId = scorecard.RoundId,
                             PlayerName = scorecard.PlayerName,
                             ShotsReceived = scorecard.ShotsReceived,
                             HandicapAllowance = scorecard.HandicapAllowance,
@@ -187,6 +196,7 @@ namespace Services.Services.CompetitionProcessors
                     {
                         var backNineScorecard = new ScorecardDto
                         {
+                            RoundId = scorecard.RoundId,
                             PlayerName = scorecard.PlayerName,
                             ShotsReceived = scorecard.ShotsReceived,
                             HandicapAllowance = scorecard.HandicapAllowance,
@@ -205,30 +215,30 @@ namespace Services.Services.CompetitionProcessors
                 var bestFNineComp = frontNineCompetitionScorecards.GroupBy(s => s.TotalStablefordScore).OrderBy(g => g.Key).Take(TOPSCORES).SelectMany(g => g.ToList());
                 var bestFNineGeneral = frontNineGeneralPlayScorecards.GroupBy(s => s.TotalStablefordScore).OrderBy(g => g.Key).Take(TOPGPSCORES).SelectMany(g => g.ToList());
 
-                var bestFrontNineCards = bestFNineComp.Union(bestFNineGeneral).GroupBy(s => s.TotalStablefordScore).OrderBy(g => g.Key).Take(TOPSCORES).SelectMany(g => g.ToList()).ToList();
+                var bestFrontNineCards = bestFNineComp.Union(bestFNineGeneral ?? []).GroupBy(s => s.TotalStablefordScore).OrderBy(g => g.Key).Take(TOPSCORES).SelectMany(g => g.ToList()).ToList();
 
-                holeExclusions.AddRange(
+                roundExclusions.AddRange(
                    frontNineGeneralPlayScorecards
                        .Except(bestFNineGeneral)
-                       .Select(gpr => new HoleExclusionReason()
+                       .Select(gpr => new EclecticRoundExclusionReasonDto()
                        {
                            MemberId = juniorMember.MemberId.ToString(),
                            RoundId = gpr.RoundId.ToString(),
-                           FrontBack = "Front",
+                           Type = "FrontNine",
                            DatePlayed = gpr.DatePlayed,
                            ExclusionReason = $"This front nine score was not one of your {TOPGPSCORES} best general play rounds."
                        })
                        .ToList()
                    );
 
-                holeExclusions.AddRange(
-                    frontNineCompetitionScorecards.Union(frontNineGeneralPlayScorecards)
+                roundExclusions.AddRange(
+                    frontNineCompetitionScorecards.Union(frontNineGeneralPlayScorecards ?? [])
                         .Except(bestFrontNineCards)
-                        .Select(gpr => new HoleExclusionReason()
+                        .Select(gpr => new EclecticRoundExclusionReasonDto()
                         {
                             MemberId = juniorMember.MemberId.ToString(),
                             RoundId = gpr.RoundId.ToString(),
-                            FrontBack = "Front",
+                            Type = "FrontNine",
                             DatePlayed = gpr.DatePlayed,
                             ExclusionReason = $"This front nine score was not one of your {TOPSCORES} best overall."
                         })
@@ -240,30 +250,30 @@ namespace Services.Services.CompetitionProcessors
                 var bestBNineComp = backNineCompetitionScorecards.GroupBy(s => s.TotalStablefordScore).OrderBy(g => g.Key).Take(TOPSCORES).SelectMany(g => g.ToList());
                 var bestBNineGeneral = backNineGeneralPlayScorecards.GroupBy(s => s.TotalStablefordScore).OrderBy(g => g.Key).Take(TOPGPSCORES).SelectMany(g => g.ToList());
 
-                var bestBackNineCards = bestBNineComp.Union(bestBNineGeneral).GroupBy(s => s.TotalStablefordScore).OrderBy(g => g.Key).Take(TOPSCORES).SelectMany(g => g.ToList()).ToList();
+                var bestBackNineCards = bestBNineComp.Union(bestBNineGeneral ?? []).GroupBy(s => s.TotalStablefordScore).OrderBy(g => g.Key).Take(TOPSCORES).SelectMany(g => g.ToList()).ToList();
 
-                holeExclusions.AddRange(
+                roundExclusions.AddRange(
                   backNineGeneralPlayScorecards
                       .Except(bestBNineGeneral)
-                      .Select(gpr => new HoleExclusionReason()
+                      .Select(gpr => new EclecticRoundExclusionReasonDto()
                       {
                           MemberId = juniorMember.MemberId.ToString(),
                           RoundId = gpr.RoundId.ToString(),
-                          FrontBack = "Back",
+                          Type = "BackNine",
                           DatePlayed = gpr.DatePlayed,
                           ExclusionReason = $"This back nine score was not one of your {TOPGPSCORES} best general play rounds."
                       })
                       .ToList()
                   );
 
-                holeExclusions.AddRange(
-                    backNineCompetitionScorecards.Union(backNineGeneralPlayScorecards)
+                roundExclusions.AddRange(
+                    backNineCompetitionScorecards.Union(backNineGeneralPlayScorecards ?? [])
                         .Except(bestBackNineCards)
-                        .Select(gpr => new HoleExclusionReason()
+                        .Select(gpr => new EclecticRoundExclusionReasonDto()
                         {
                             MemberId = juniorMember.MemberId.ToString(),
                             RoundId = gpr.RoundId.ToString(),
-                            FrontBack = "Back",
+                            Type = "BackNine",
                             DatePlayed = gpr.DatePlayed,
                             ExclusionReason = $"This back nine score was not one of your {TOPSCORES} best overall."
                         })
@@ -291,7 +301,7 @@ namespace Services.Services.CompetitionProcessors
                     if (score > bestFrontEclecticScore)
                     {
                         bestFrontEclecticScore = score;
-                        finalBestBackNineCombination = combination;
+                        finalBestFrontNineCombination = combination;
                     }
                 }
 
@@ -305,28 +315,28 @@ namespace Services.Services.CompetitionProcessors
                     }
                 }
 
-                holeExclusions.AddRange(
+                roundExclusions.AddRange(
                   bestFrontNineCards
                       .Except(finalBestFrontNineCombination!)
-                      .Select(gpr => new HoleExclusionReason()
+                      .Select(gpr => new EclecticRoundExclusionReasonDto()
                       {
                           MemberId = juniorMember.MemberId.ToString(),
                           RoundId = gpr.RoundId.ToString(),
-                          FrontBack = "Front",
+                          Type = "FrontNine",
                           DatePlayed = gpr.DatePlayed,
                           ExclusionReason = $"This front nine scorecard did not result in the best eclectic score."
                       })
                       .ToList()
                   );
 
-                holeExclusions.AddRange(
+                roundExclusions.AddRange(
                   bestBackNineCards
                       .Except(finalBestBackNineCombination!)
-                      .Select(gpr => new HoleExclusionReason()
+                      .Select(gpr => new EclecticRoundExclusionReasonDto()
                       {
                           MemberId = juniorMember.MemberId.ToString(),
                           RoundId = gpr.RoundId.ToString(),
-                          FrontBack = "Front",
+                          Type = "BackNine",
                           DatePlayed = gpr.DatePlayed,
                           ExclusionReason = $"This back nine scorecard did not result in the best eclectic score."
                       })
@@ -340,7 +350,7 @@ namespace Services.Services.CompetitionProcessors
                 var finalEclecticScorecard = new EclecticScorecardDto
                 {
                     // Assuming you have a unique round ID, use it here for the full 18-hole scorecard
-                    PlayerName = finalBestFrontNineCombination.First().PlayerName, // Assuming the player name is the same for all cards
+                    PlayerName = finalBestFrontNineCombination!.First().PlayerName, // Assuming the player name is the same for all cards
                     TotalStablefordScore = bestFrontEclecticScore + bestbackEclecticScore, // Combine the total scores
                     Holes = new List<ExclecticScorecardHoleDto>()
                 };
@@ -397,8 +407,17 @@ namespace Services.Services.CompetitionProcessors
 
                 #endregion
 
-                eclecticScorecards.Add(finalEclecticScorecard);
+                eclecticResults.Add(new EclecticScoretDto
+                {
+                    Scorecard = finalEclecticScorecard,
+                    ExcludedRounds = roundExclusions
+                });
             }
+
+            return new EclecticCompetitionResultsDto
+            {
+                Scores = eclecticResults
+            };
         }
 
         // Get all combinations of a given size
@@ -415,13 +434,13 @@ namespace Services.Services.CompetitionProcessors
                     if ((i & (1 << j)) != 0) combination.Add(cards[j]);
                 }
 
-                if (combination.Count <= combinationSize)
+                if (combination.Count >= 1 && combination.Count <= combinationSize)
                 {
                     combinations.Add(combination);
                 }
             }
 
-            return combinations;
+            return combinations.OrderByDescending(c => c.Count).ToList();
         }
 
         private int CalculateEclecticScore(List<ScorecardDto> selectedCards)

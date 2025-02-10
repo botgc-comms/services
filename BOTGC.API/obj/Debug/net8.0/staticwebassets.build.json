@@ -1,8 +1,8 @@
 {
   "Version": 1,
-  "Hash": "3GQdSMRxCgPbMBMPMFQJbD42A4ZxD6P0YmXvRf+AjtU=",
-  "Source": "Services",
-  "BasePath": "_content/Services",
+  "Hash": "Kh0OS6b21swRNW50m1kjE9mngSRJIbQRKrOoRv6X0jk=",
+  "Source": "BOTGC.API",
+  "BasePath": "_content/BOTGC.API",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
