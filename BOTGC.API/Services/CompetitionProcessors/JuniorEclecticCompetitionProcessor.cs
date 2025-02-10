@@ -1,4 +1,5 @@
 ﻿using BOTGC.API.Dto;
+using BOTGC.API.Extensions;
 using Microsoft.Extensions.Options;
 using Services.Controllers;
 using Services.Dto;
@@ -80,7 +81,7 @@ namespace Services.Services.CompetitionProcessors
                             MemberId = juniorMember.MemberId.ToString(),
                             RoundId = gpr.RoundId.ToString(),
                             DatePlayed = gpr.DatePlayed, 
-                            ExclusionReason = $"General play round on {gpr.DatePlayed} was not played within 6 weeks of any competition round."
+                            ExclusionReason = $"General play round on {gpr.DatePlayed.ToOrdinalDateString()} was not played within 6 weeks of any competition round."
                         })
                         .ToList()
                     );
@@ -103,12 +104,15 @@ namespace Services.Services.CompetitionProcessors
 
                 var generalPlayScorecards = new List<ScorecardDto>();
 
-                foreach (var generalPlayRound in validGeneralPlayRounds)
+                if (validGeneralPlayRounds != null)
                 {
-                    var scorecard = await _reportService.GetScorecardForRoundAsync(generalPlayRound.RoundId.ToString());
-                    if (scorecard != null)
+                    foreach (var generalPlayRound in validGeneralPlayRounds)
                     {
-                        generalPlayScorecards.Add(scorecard);
+                        var scorecard = await _reportService.GetScorecardForRoundAsync(generalPlayRound.RoundId.ToString());
+                        if (scorecard != null)
+                        {
+                            generalPlayScorecards.Add(scorecard);
+                        }
                     }
                 }
 
