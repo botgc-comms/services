@@ -83,10 +83,11 @@ namespace BOTGC.API.Tests.Services.CompetitionProcessors
             Assert.Single(results.Scores);
 
             var result = results.Scores.First();
+            var expected = testCase.Expected.Scores.First();
 
             // ✅ Assert: Compare expected EclecticScorecardDto
-            Assert.Equal(testCase.Expected.PlayerName, result.Scorecard.PlayerName);
-            Assert.Equal(testCase.Expected.TotalStablefordScore, result.Scorecard.TotalStablefordScore);
+            Assert.Equal(expected.Scorecard.PlayerName, result.Scorecard.PlayerName);
+            Assert.Equal(expected.Scorecard.TotalStablefordScore, result.Scorecard.TotalStablefordScore);
 
             foreach (var expectedHole in result.Scorecard.Holes)
             {
@@ -114,7 +115,7 @@ namespace BOTGC.API.Tests.Services.CompetitionProcessors
         public string? TestName { get; set; } = default;
         public JuniorEclecticCompetitionProcessorTestInput Input { get; set; } = default!;
         public JuniorEclecticCompetitionProcessorTestMocks Mocks { get; set; } = default!;
-        public EclecticScorecardDto Expected { get; set; } = default!;
+        public EclecticCompetitionResultsDto Expected { get; set; } = default!;
     }
 
     public class JuniorEclecticCompetitionProcessorTestInput

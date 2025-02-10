@@ -10,10 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\rounds_that_are_outside_the_competition_period.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\general_play_not_near_enough_to_comp_date.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\Xbasic.json">
+    <Content Include="Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\basic.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

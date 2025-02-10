@@ -121,5 +121,6 @@ C:\_src\BOTGC\git\Services\BOTGC.API.Tests\obj\Debug\net8.0\refint\BOTGC.API.Tes
 C:\_src\BOTGC\git\Services\BOTGC.API.Tests\obj\Debug\net8.0\BOTGC.API.Tests.pdb
 C:\_src\BOTGC\git\Services\BOTGC.API.Tests\obj\Debug\net8.0\BOTGC.API.Tests.genruntimeconfig.cache
 C:\_src\BOTGC\git\Services\BOTGC.API.Tests\obj\Debug\net8.0\ref\BOTGC.API.Tests.dll
+C:\_src\BOTGC\git\Services\BOTGC.API.Tests\bin\Debug\net8.0\Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\rounds_that_are_outside_the_competition_period.json
 C:\_src\BOTGC\git\Services\BOTGC.API.Tests\bin\Debug\net8.0\Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\general_play_not_near_enough_to_comp_date.json
-C:\_src\BOTGC\git\Services\BOTGC.API.Tests\bin\Debug\net8.0\Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\Xbasic.json
+C:\_src\BOTGC\git\Services\BOTGC.API.Tests\bin\Debug\net8.0\Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\basic.json
