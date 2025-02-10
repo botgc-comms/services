@@ -293,35 +293,44 @@ namespace Services.Services.CompetitionProcessors
                 var allBackCombinations = GetCombinations(bestBackNineCards, TOPSCORES).Where(c => c.Where(s => s.IsGeneralPlay).Count() <= TOPGPSCORES); 
 
                 // Get best combination
-                var bestFrontEclecticScore = int.MinValue;
-                var bestbackEclecticScore = int.MinValue;
-
-                List<ScorecardDto> finalBestFrontNineCombination = null;
-                List<ScorecardDto> finalBestBackNineCombination = null;
-
-                foreach (var combination in allFrontCombinations)
-                {
-                    var score = CalculateEclecticScore(combination);
-                    if (score > bestFrontEclecticScore)
+                var frontEclecticScores = allFrontCombinations
+                    .Select(fc => new
                     {
-                        bestFrontEclecticScore = score;
-                        finalBestFrontNineCombination = combination;
-                    }
-                }
+                        scorecards = fc,
+                        eclecticScore = CalculateEclecticScore(fc),
+                        numScorecards = fc.Count,
+                        latestDate = fc.Max(sc => sc.DatePlayed),
+                        earliestDate = fc.Min(sc => sc.DatePlayed)
+                    })
+                    .OrderByDescending(e => e.eclecticScore)  
+                    .ThenByDescending(e => e.numScorecards)   
+                    .ThenByDescending(e => e.latestDate)      
+                    .ToList();
 
-                foreach (var combination in allBackCombinations)
-                {
-                    var score = CalculateEclecticScore(combination);
-                    if (score > bestbackEclecticScore)
+                var backEclecticScores = allBackCombinations
+                    .Select(fc => new
                     {
-                        bestbackEclecticScore = score;
-                        finalBestBackNineCombination = combination;
-                    }
-                }
+                        scorecards = fc,
+                        eclecticScore = CalculateEclecticScore(fc),
+                        numScorecards = fc.Count,
+                        latestDate = fc.Max(sc => sc.DatePlayed),
+                        earliestDate = fc.Min(sc => sc.DatePlayed)
+                    })
+                    .OrderByDescending(e => e.eclecticScore)
+                    .ThenByDescending(e => e.numScorecards)
+                    .ThenByDescending(e => e.latestDate)
+                    .ThenByDescending(e => e.earliestDate)
+                    .ToList();
+
+                List<ScorecardDto>? finalBestFrontNineCombination = frontEclecticScores.Select(f => f.scorecards).FirstOrDefault();
+                List<ScorecardDto>? finalBestBackNineCombination = backEclecticScores.Select(f => f.scorecards).FirstOrDefault();
+
+                var bestFrontEclecticScore = frontEclecticScores.Select(f => f.eclecticScore).FirstOrDefault();
+                var bestbackEclecticScore = backEclecticScores.Select(f => f.eclecticScore).FirstOrDefault();
 
                 roundExclusions.AddRange(
                   bestFrontNineCards
-                      .Except(finalBestFrontNineCombination!)
+                      .Except(finalBestFrontNineCombination ?? [])
                       .Select(gpr => new EclecticRoundExclusionReasonDto()
                       {
                           MemberId = juniorMember.MemberId.ToString(),
@@ -335,7 +344,7 @@ namespace Services.Services.CompetitionProcessors
 
                 roundExclusions.AddRange(
                   bestBackNineCards
-                      .Except(finalBestBackNineCombination!)
+                      .Except(finalBestBackNineCombination ?? [])
                       .Select(gpr => new EclecticRoundExclusionReasonDto()
                       {
                           MemberId = juniorMember.MemberId.ToString(),
@@ -360,7 +369,7 @@ namespace Services.Services.CompetitionProcessors
                 };
 
                 // Extract all front nine holes with their score and DatePlayed from the scorecard
-                var allFrontHoles = finalBestFrontNineCombination
+                var allFrontHoles = finalBestFrontNineCombination?
                     .SelectMany(card => card.Holes.Select(h => new {
                         HoleNumber = h.HoleNumber,  // Include HoleNumber for clarity
                         StablefordScore = h.StablefordScore,
@@ -369,7 +378,7 @@ namespace Services.Services.CompetitionProcessors
                     })).ToList();
 
                 // Extract all back nine holes with their score and DatePlayed from the scorecard
-                var allBackHoles = finalBestBackNineCombination
+                var allBackHoles = finalBestBackNineCombination?
                     .SelectMany(card => card.Holes.Select(h => new {
                         HoleNumber = h.HoleNumber,  // Include HoleNumber for clarity
                         StablefordScore = h.StablefordScore,
@@ -378,7 +387,7 @@ namespace Services.Services.CompetitionProcessors
                     })).ToList();
 
                 // Combine both front and back nine holes
-                var allHoles = allFrontHoles.Concat(allBackHoles).ToList();
+                var allHoles = (allFrontHoles ?? []).Concat(allBackHoles ?? []).ToList();
 
                 var allHolesResult = allHoles
                     .GroupBy(h => h.HoleNumber)

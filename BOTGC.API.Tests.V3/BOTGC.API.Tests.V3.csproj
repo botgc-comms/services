@@ -19,6 +19,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\a_maximum_of_three_casual_play_rounds_allowed.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\one_round_has_only_back_nine.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\basic.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -1,5 +1,5 @@
 {
-  "TestName": "One round has only the front 9 holes",
+  "TestName": "A maximum of 3 casual play rounds is allowed",
   "Input": {
     "FromDate": "2024-06-01T00:00:00",
     "ToDate": "2024-12-31T00:00:00"
@@ -49,9 +49,9 @@
             "Course": "Course 1001",
             "TeeColour": "White",
             "RoundId": 1001,
-            "GrossScore": "41",
-            "NetScore": 31,
-            "StablefordPoints": 23
+            "GrossScore": "81",
+            "NetScore": 72,
+            "StablefordPoints": 46
           },
           {
             "CompetitionName": "Monthly Medal",
@@ -62,9 +62,9 @@
             "Course": "Course 1002",
             "TeeColour": "Blue",
             "RoundId": 1002,
-            "GrossScore": "79",
-            "NetScore": 70,
-            "StablefordPoints": 49
+            "GrossScore": "38",
+            "NetScore": 34,
+            "StablefordPoints": 26
           },
           {
             "CompetitionName": "General Play",
@@ -104,6 +104,45 @@
             "GrossScore": "80",
             "NetScore": 71,
             "StablefordPoints": 49
+          },
+          {
+            "CompetitionName": "General Play",
+            "CompetitionId": 3,
+            "IsGeneralPlay": true,
+            "IsHandicappingRound": true,
+            "DatePlayed": "2024-08-05T00:00:00",
+            "Course": "Course 1003",
+            "TeeColour": "Yellow",
+            "RoundId": 1006,
+            "GrossScore": "78",
+            "NetScore": 69,
+            "StablefordPoints": 50
+          },
+          {
+            "CompetitionName": "General Play",
+            "CompetitionId": 3,
+            "IsGeneralPlay": true,
+            "IsHandicappingRound": true,
+            "DatePlayed": "2024-08-05T00:00:00",
+            "Course": "Course 1003",
+            "TeeColour": "Yellow",
+            "RoundId": 1007,
+            "GrossScore": "78",
+            "NetScore": 69,
+            "StablefordPoints": 50
+          },
+          {
+            "CompetitionName": "General Play",
+            "CompetitionId": 3,
+            "IsGeneralPlay": true,
+            "IsHandicappingRound": true,
+            "DatePlayed": "2024-08-05T00:00:00",
+            "Course": "Course 1003",
+            "TeeColour": "Yellow",
+            "RoundId": 1008,
+            "GrossScore": "78",
+            "NetScore": 69,
+            "StablefordPoints": 50
           }
         ]
       }
@@ -212,6 +251,96 @@
               "Gross": "5",
               "Net": "4",
               "StablefordScore": 2
+            },
+            {
+              "HoleNumber": 10,
+              "Yardage": 400,
+              "StrokeIndex": 11,
+              "ShotsReceived": 0,
+              "Par": 5,
+              "Gross": "4",
+              "Net": "4",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 11,
+              "Yardage": 410,
+              "StrokeIndex": 12,
+              "ShotsReceived": 0,
+              "Par": 6,
+              "Gross": "3",
+              "Net": "3",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 12,
+              "Yardage": 420,
+              "StrokeIndex": 13,
+              "ShotsReceived": 1,
+              "Par": 3,
+              "Gross": "6",
+              "Net": "5",
+              "StablefordScore": 2
+            },
+            {
+              "HoleNumber": 13,
+              "Yardage": 430,
+              "StrokeIndex": 14,
+              "ShotsReceived": 0,
+              "Par": 4,
+              "Gross": "5",
+              "Net": "4",
+              "StablefordScore": 2
+            },
+            {
+              "HoleNumber": 14,
+              "Yardage": 440,
+              "StrokeIndex": 15,
+              "ShotsReceived": 0,
+              "Par": 5,
+              "Gross": "4",
+              "Net": "4",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 15,
+              "Yardage": 400,
+              "StrokeIndex": 16,
+              "ShotsReceived": 0,
+              "Par": 6,
+              "Gross": "6",
+              "Net": "5",
+              "StablefordScore": 2
+            },
+            {
+              "HoleNumber": 16,
+              "Yardage": 410,
+              "StrokeIndex": 17,
+              "ShotsReceived": 1,
+              "Par": 3,
+              "Gross": "4",
+              "Net": "4",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 17,
+              "Yardage": 420,
+              "StrokeIndex": 18,
+              "ShotsReceived": 0,
+              "Par": 4,
+              "Gross": "3",
+              "Net": "3",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 18,
+              "Yardage": 430,
+              "StrokeIndex": 1,
+              "ShotsReceived": 0,
+              "Par": 5,
+              "Gross": "5",
+              "Net": "4",
+              "StablefordScore": 2
             }
           ]
         }
@@ -230,96 +359,6 @@
           "TeeColour": "Blue",
           "DatePlayed": "2024-07-10T00:00:00",
           "Holes": [
-            {
-              "HoleNumber": 1,
-              "Yardage": 410,
-              "StrokeIndex": 2,
-              "ShotsReceived": 0,
-              "Par": 4,
-              "Gross": "4",
-              "Net": "3",
-              "StablefordScore": 3
-            },
-            {
-              "HoleNumber": 2,
-              "Yardage": 420,
-              "StrokeIndex": 3,
-              "ShotsReceived": 0,
-              "Par": 5,
-              "Gross": "4",
-              "Net": "4",
-              "StablefordScore": 2
-            },
-            {
-              "HoleNumber": 3,
-              "Yardage": 430,
-              "StrokeIndex": 4,
-              "ShotsReceived": 0,
-              "Par": 6,
-              "Gross": "5",
-              "Net": "4",
-              "StablefordScore": 3
-            },
-            {
-              "HoleNumber": 4,
-              "Yardage": 440,
-              "StrokeIndex": 5,
-              "ShotsReceived": 1,
-              "Par": 3,
-              "Gross": "4",
-              "Net": "4",
-              "StablefordScore": 3
-            },
-            {
-              "HoleNumber": 5,
-              "Yardage": 400,
-              "StrokeIndex": 6,
-              "ShotsReceived": 0,
-              "Par": 4,
-              "Gross": "6",
-              "Net": "5",
-              "StablefordScore": 1
-            },
-            {
-              "HoleNumber": 6,
-              "Yardage": 410,
-              "StrokeIndex": 7,
-              "ShotsReceived": 0,
-              "Par": 5,
-              "Gross": "3",
-              "Net": "3",
-              "StablefordScore": 4
-            },
-            {
-              "HoleNumber": 7,
-              "Yardage": 420,
-              "StrokeIndex": 8,
-              "ShotsReceived": 0,
-              "Par": 6,
-              "Gross": "5",
-              "Net": "4",
-              "StablefordScore": 3
-            },
-            {
-              "HoleNumber": 8,
-              "Yardage": 430,
-              "StrokeIndex": 9,
-              "ShotsReceived": 1,
-              "Par": 3,
-              "Gross": "4",
-              "Net": "4",
-              "StablefordScore": 3
-            },
-            {
-              "HoleNumber": 9,
-              "Yardage": 440,
-              "StrokeIndex": 10,
-              "ShotsReceived": 0,
-              "Par": 4,
-              "Gross": "6",
-              "Net": "5",
-              "StablefordScore": 1
-            },
             {
               "HoleNumber": 10,
               "Yardage": 400,
@@ -1003,6 +1042,203 @@
             }
           ]
         }
+      },
+      {
+        "input": {
+          "RoundId": "1006"
+        },
+        "output": {
+          "RoundId": 1006,
+          "PlayerName": "John Doe",
+          "ShotsReceived": 12,
+          "IsGeneralPlay": true,
+          "HandicapAllowance": "N/A",
+          "CompetitionName": "General Play",
+          "TeeColour": "Yellow",
+          "DatePlayed": "2024-08-06T00:00:00",
+          "Holes": [
+            {
+              "HoleNumber": 1,
+              "Yardage": 410,
+              "StrokeIndex": 2,
+              "ShotsReceived": 0,
+              "Par": 4,
+              "Gross": "6",
+              "Net": "5",
+              "StablefordScore": 1
+            },
+            {
+              "HoleNumber": 2,
+              "Yardage": 420,
+              "StrokeIndex": 3,
+              "ShotsReceived": 0,
+              "Par": 5,
+              "Gross": "3",
+              "Net": "3",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 3,
+              "Yardage": 430,
+              "StrokeIndex": 4,
+              "ShotsReceived": 0,
+              "Par": 6,
+              "Gross": "5",
+              "Net": "4",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 4,
+              "Yardage": 440,
+              "StrokeIndex": 5,
+              "ShotsReceived": 1,
+              "Par": 3,
+              "Gross": "5",
+              "Net": "5",
+              "StablefordScore": 2
+            },
+            {
+              "HoleNumber": 5,
+              "Yardage": 400,
+              "StrokeIndex": 6,
+              "ShotsReceived": 0,
+              "Par": 4,
+              "Gross": "4",
+              "Net": "3",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 6,
+              "Yardage": 410,
+              "StrokeIndex": 7,
+              "ShotsReceived": 0,
+              "Par": 5,
+              "Gross": "3",
+              "Net": "3",
+              "StablefordScore": 4
+            },
+            {
+              "HoleNumber": 7,
+              "Yardage": 420,
+              "StrokeIndex": 8,
+              "ShotsReceived": 0,
+              "Par": 6,
+              "Gross": "4",
+              "Net": "3",
+              "StablefordScore": 4
+            },
+            {
+              "HoleNumber": 8,
+              "Yardage": 430,
+              "StrokeIndex": 9,
+              "ShotsReceived": 1,
+              "Par": 3,
+              "Gross": "5",
+              "Net": "5",
+              "StablefordScore": 2
+            },
+            {
+              "HoleNumber": 9,
+              "Yardage": 440,
+              "StrokeIndex": 10,
+              "ShotsReceived": 0,
+              "Par": 4,
+              "Gross": "6",
+              "Net": "5",
+              "StablefordScore": 1
+            },
+            {
+              "HoleNumber": 10,
+              "Yardage": 400,
+              "StrokeIndex": 11,
+              "ShotsReceived": 0,
+              "Par": 5,
+              "Gross": "3",
+              "Net": "3",
+              "StablefordScore": 4
+            },
+            {
+              "HoleNumber": 11,
+              "Yardage": 410,
+              "StrokeIndex": 12,
+              "ShotsReceived": 0,
+              "Par": 6,
+              "Gross": "4",
+              "Net": "3",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 12,
+              "Yardage": 420,
+              "StrokeIndex": 13,
+              "ShotsReceived": 1,
+              "Par": 3,
+              "Gross": "5",
+              "Net": "4",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 13,
+              "Yardage": 430,
+              "StrokeIndex": 14,
+              "ShotsReceived": 0,
+              "Par": 4,
+              "Gross": "3",
+              "Net": "3",
+              "StablefordScore": 4
+            },
+            {
+              "HoleNumber": 14,
+              "Yardage": 440,
+              "StrokeIndex": 15,
+              "ShotsReceived": 0,
+              "Par": 5,
+              "Gross": "6",
+              "Net": "5",
+              "StablefordScore": 1
+            },
+            {
+              "HoleNumber": 15,
+              "Yardage": 400,
+              "StrokeIndex": 16,
+              "ShotsReceived": 0,
+              "Par": 6,
+              "Gross": "2",
+              "Net": "2",
+              "StablefordScore": 4
+            },
+            {
+              "HoleNumber": 16,
+              "Yardage": 410,
+              "StrokeIndex": 17,
+              "ShotsReceived": 1,
+              "Par": 3,
+              "Gross": "4",
+              "Net": "4",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 17,
+              "Yardage": 420,
+              "StrokeIndex": 18,
+              "ShotsReceived": 0,
+              "Par": 4,
+              "Gross": "4",
+              "Net": "4",
+              "StablefordScore": 3
+            },
+            {
+              "HoleNumber": 18,
+              "Yardage": 430,
+              "StrokeIndex": 1,
+              "ShotsReceived": 0,
+              "Par": 5,
+              "Gross": "3",
+              "Net": "3",
+              "StablefordScore": 4
+            }
+          ]
+        }
       }
     ]
   },
@@ -1011,7 +1247,7 @@
       {
         "Scorecard": {
           "PlayerName": "John Doe",
-          "TotalStablefordScore": 66,
+          "TotalStablefordScore": 67,
           "Holes": [
             {
               "HoleNumber": 1,
@@ -1020,57 +1256,34 @@
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 1,
-                  "RoundDate": "2024-07-10T00:00:00",
-                  "RoundId": 1002,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 1,
                   "RoundDate": "2024-06-15T00:00:00",
                   "RoundId": 1001,
                   "StablefordScore": 2
                 },
                 {
-                  "HoleNumber": 1,
                   "RoundDate": "2024-09-20T00:00:00",
                   "RoundId": 1005,
                   "StablefordScore": 2
                 },
                 {
-                  "HoleNumber": 1,
                   "RoundDate": "2024-08-05T00:00:00",
                   "RoundId": 1003,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2024-08-06T00:00:00",
+                  "RoundId": 1006,
                   "StablefordScore": 1
                 }
               ]
             },
             {
               "HoleNumber": 2,
-              "RoundDate": "2024-06-15T00:00:00",
-              "RoundId": 1001,
+              "RoundDate": "2024-09-20T00:00:00",
+              "RoundId": 1005,
               "StablefordScore": 3,
               "UncountedScores": [
                 {
-                  "HoleNumber": 2,
-                  "RoundDate": "2024-08-05T00:00:00",
-                  "RoundId": 1003,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 2,
-                  "RoundDate": "2024-09-20T00:00:00",
-                  "RoundId": 1005,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 2,
-                  "RoundDate": "2024-07-10T00:00:00",
-                  "RoundId": 1002,
-                  "StablefordScore": 2
-                },
-                {
-                  "HoleNumber": 2,
                   "RoundDate": "2024-12-10T00:00:00",
                   "RoundId": 1004,
                   "StablefordScore": 1
@@ -1084,25 +1297,21 @@
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 3,
-                  "RoundDate": "2024-07-10T00:00:00",
-                  "RoundId": 1002,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 3,
-                  "RoundDate": "2024-08-05T00:00:00",
-                  "RoundId": 1003,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 3,
                   "RoundDate": "2024-06-15T00:00:00",
                   "RoundId": 1001,
                   "StablefordScore": 2
                 },
                 {
-                  "HoleNumber": 3,
+                  "RoundDate": "2024-08-05T00:00:00",
+                  "RoundId": 1003,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2024-08-06T00:00:00",
+                  "RoundId": 1006,
+                  "StablefordScore": 3
+                },
+                {
                   "RoundDate": "2024-12-10T00:00:00",
                   "RoundId": 1004,
                   "StablefordScore": 2
@@ -1111,33 +1320,24 @@
             },
             {
               "HoleNumber": 4,
-              "RoundDate": "2024-06-15T00:00:00",
-              "RoundId": 1001,
+              "RoundDate": "2024-12-10T00:00:00",
+              "RoundId": 1004,
               "StablefordScore": 3,
               "UncountedScores": [
                 {
-                  "HoleNumber": 4,
-                  "RoundDate": "2024-07-10T00:00:00",
-                  "RoundId": 1002,
-                  "StablefordScore": 3
+                  "RoundDate": "2024-09-20T00:00:00",
+                  "RoundId": 1005,
+                  "StablefordScore": 1
                 },
                 {
-                  "HoleNumber": 4,
-                  "RoundDate": "2024-12-10T00:00:00",
-                  "RoundId": 1004,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 4,
                   "RoundDate": "2024-08-05T00:00:00",
                   "RoundId": 1003,
                   "StablefordScore": 2
                 },
                 {
-                  "HoleNumber": 4,
-                  "RoundDate": "2024-09-20T00:00:00",
-                  "RoundId": 1005,
-                  "StablefordScore": 1
+                  "RoundDate": "2024-08-06T00:00:00",
+                  "RoundId": 1006,
+                  "StablefordScore": 2
                 }
               ]
             },
@@ -1148,92 +1348,65 @@
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 5,
-                  "RoundDate": "2024-08-05T00:00:00",
-                  "RoundId": 1003,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 5,
                   "RoundDate": "2024-06-15T00:00:00",
                   "RoundId": 1001,
                   "StablefordScore": 2
                 },
                 {
-                  "HoleNumber": 5,
                   "RoundDate": "2024-09-20T00:00:00",
                   "RoundId": 1005,
                   "StablefordScore": 2
                 },
                 {
-                  "HoleNumber": 5,
-                  "RoundDate": "2024-07-10T00:00:00",
-                  "RoundId": 1002,
-                  "StablefordScore": 1
+                  "RoundDate": "2024-08-05T00:00:00",
+                  "RoundId": 1003,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2024-08-06T00:00:00",
+                  "RoundId": 1006,
+                  "StablefordScore": 3
                 }
               ]
             },
             {
               "HoleNumber": 6,
-              "RoundDate": "2024-06-15T00:00:00",
-              "RoundId": 1001,
+              "RoundDate": "2024-08-06T00:00:00",
+              "RoundId": 1006,
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 6,
-                  "RoundDate": "2024-07-10T00:00:00",
-                  "RoundId": 1002,
-                  "StablefordScore": 4
-                },
-                {
-                  "HoleNumber": 6,
-                  "RoundDate": "2024-08-05T00:00:00",
-                  "RoundId": 1003,
-                  "StablefordScore": 4
-                },
-                {
-                  "HoleNumber": 6,
-                  "RoundDate": "2024-12-10T00:00:00",
-                  "RoundId": 1004,
+                  "RoundDate": "2024-09-20T00:00:00",
+                  "RoundId": 1005,
                   "StablefordScore": 3
                 },
                 {
-                  "HoleNumber": 6,
-                  "RoundDate": "2024-09-20T00:00:00",
-                  "RoundId": 1005,
+                  "RoundDate": "2024-12-10T00:00:00",
+                  "RoundId": 1004,
                   "StablefordScore": 3
                 }
               ]
             },
             {
               "HoleNumber": 7,
-              "RoundDate": "2024-08-05T00:00:00",
-              "RoundId": 1003,
+              "RoundDate": "2024-08-06T00:00:00",
+              "RoundId": 1006,
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 7,
-                  "RoundDate": "2024-07-10T00:00:00",
-                  "RoundId": 1002,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 7,
                   "RoundDate": "2024-06-15T00:00:00",
                   "RoundId": 1001,
                   "StablefordScore": 2
                 },
                 {
-                  "HoleNumber": 7,
-                  "RoundDate": "2024-12-10T00:00:00",
-                  "RoundId": 1004,
-                  "StablefordScore": 2
-                },
-                {
-                  "HoleNumber": 7,
                   "RoundDate": "2024-09-20T00:00:00",
                   "RoundId": 1005,
                   "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2024-12-10T00:00:00",
+                  "RoundId": 1004,
+                  "StablefordScore": 2
                 }
               ]
             },
@@ -1244,27 +1417,18 @@
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 8,
-                  "RoundDate": "2024-09-20T00:00:00",
-                  "RoundId": 1005,
-                  "StablefordScore": 4
-                },
-                {
-                  "HoleNumber": 8,
                   "RoundDate": "2024-06-15T00:00:00",
                   "RoundId": 1001,
                   "StablefordScore": 3
                 },
                 {
-                  "HoleNumber": 8,
-                  "RoundDate": "2024-07-10T00:00:00",
-                  "RoundId": 1002,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 8,
                   "RoundDate": "2024-08-05T00:00:00",
                   "RoundId": 1003,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2024-08-06T00:00:00",
+                  "RoundId": 1006,
                   "StablefordScore": 2
                 }
               ]
@@ -1276,25 +1440,21 @@
               "StablefordScore": 3,
               "UncountedScores": [
                 {
-                  "HoleNumber": 9,
                   "RoundDate": "2024-06-15T00:00:00",
                   "RoundId": 1001,
                   "StablefordScore": 2
                 },
                 {
-                  "HoleNumber": 9,
-                  "RoundDate": "2024-07-10T00:00:00",
-                  "RoundId": 1002,
-                  "StablefordScore": 1
-                },
-                {
-                  "HoleNumber": 9,
                   "RoundDate": "2024-08-05T00:00:00",
                   "RoundId": 1003,
                   "StablefordScore": 1
                 },
                 {
-                  "HoleNumber": 9,
+                  "RoundDate": "2024-08-06T00:00:00",
+                  "RoundId": 1006,
+                  "StablefordScore": 1
+                },
+                {
                   "RoundDate": "2024-12-10T00:00:00",
                   "RoundId": 1004,
                   "StablefordScore": 1
@@ -1303,33 +1463,24 @@
             },
             {
               "HoleNumber": 10,
-              "RoundDate": "2024-08-05T00:00:00",
-              "RoundId": 1003,
+              "RoundDate": "2024-08-06T00:00:00",
+              "RoundId": 1006,
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 10,
-                  "RoundDate": "2024-06-15T00:00:00",
-                  "RoundId": 1001,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 10,
                   "RoundDate": "2024-07-10T00:00:00",
                   "RoundId": 1002,
                   "StablefordScore": 3
                 },
                 {
-                  "HoleNumber": 10,
-                  "RoundDate": "2024-09-20T00:00:00",
-                  "RoundId": 1005,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 10,
                   "RoundDate": "2024-12-10T00:00:00",
                   "RoundId": 1004,
                   "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2024-09-20T00:00:00",
+                  "RoundId": 1005,
+                  "StablefordScore": 3
                 }
               ]
             },
@@ -1338,47 +1489,20 @@
               "RoundDate": "2024-12-10T00:00:00",
               "RoundId": 1004,
               "StablefordScore": 3,
-              "UncountedScores": [
-                {
-                  "HoleNumber": 11,
-                  "RoundDate": "2024-07-10T00:00:00",
-                  "RoundId": 1002,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 11,
-                  "RoundDate": "2024-08-05T00:00:00",
-                  "RoundId": 1003,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 11,
-                  "RoundDate": "2024-09-20T00:00:00",
-                  "RoundId": 1005,
-                  "StablefordScore": 3
-                }
-              ]
+              "UncountedScores": []
             },
             {
               "HoleNumber": 12,
-              "RoundDate": "2024-07-10T00:00:00",
-              "RoundId": 1002,
+              "RoundDate": "2024-08-06T00:00:00",
+              "RoundId": 1006,
               "StablefordScore": 3,
               "UncountedScores": [
                 {
-                  "HoleNumber": 12,
-                  "RoundDate": "2024-08-05T00:00:00",
-                  "RoundId": 1003,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 12,
                   "RoundDate": "2024-12-10T00:00:00",
                   "RoundId": 1004,
                   "StablefordScore": 2
                 },
                 {
-                  "HoleNumber": 12,
                   "RoundDate": "2024-09-20T00:00:00",
                   "RoundId": 1005,
                   "StablefordScore": 2
@@ -1387,27 +1511,19 @@
             },
             {
               "HoleNumber": 13,
-              "RoundDate": "2024-08-05T00:00:00",
-              "RoundId": 1003,
+              "RoundDate": "2024-12-10T00:00:00",
+              "RoundId": 1004,
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 13,
-                  "RoundDate": "2024-12-10T00:00:00",
-                  "RoundId": 1004,
-                  "StablefordScore": 4
-                },
-                {
-                  "HoleNumber": 13,
-                  "RoundDate": "2024-09-20T00:00:00",
-                  "RoundId": 1005,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 13,
                   "RoundDate": "2024-07-10T00:00:00",
                   "RoundId": 1002,
                   "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2024-09-20T00:00:00",
+                  "RoundId": 1005,
+                  "StablefordScore": 3
                 }
               ]
             },
@@ -1418,47 +1534,51 @@
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 14,
                   "RoundDate": "2024-07-10T00:00:00",
                   "RoundId": 1002,
                   "StablefordScore": 3
                 },
                 {
-                  "HoleNumber": 14,
                   "RoundDate": "2024-12-10T00:00:00",
                   "RoundId": 1004,
                   "StablefordScore": 3
                 },
                 {
-                  "HoleNumber": 14,
                   "RoundDate": "2024-08-05T00:00:00",
                   "RoundId": 1003,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2024-08-06T00:00:00",
+                  "RoundId": 1006,
                   "StablefordScore": 1
                 }
               ]
             },
             {
               "HoleNumber": 15,
-              "RoundDate": "2024-07-10T00:00:00",
-              "RoundId": 1002,
-              "StablefordScore": 3,
+              "RoundDate": "2024-08-06T00:00:00",
+              "RoundId": 1006,
+              "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 15,
-                  "RoundDate": "2024-08-05T00:00:00",
-                  "RoundId": 1003,
-                  "StablefordScore": 2
+                  "RoundDate": "2024-07-10T00:00:00",
+                  "RoundId": 1002,
+                  "StablefordScore": 3
                 },
                 {
-                  "HoleNumber": 15,
                   "RoundDate": "2024-12-10T00:00:00",
                   "RoundId": 1004,
                   "StablefordScore": 2
                 },
                 {
-                  "HoleNumber": 15,
                   "RoundDate": "2024-09-20T00:00:00",
                   "RoundId": 1005,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2024-08-05T00:00:00",
+                  "RoundId": 1003,
                   "StablefordScore": 2
                 }
               ]
@@ -1470,21 +1590,23 @@
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 16,
-                  "RoundDate": "2024-08-05T00:00:00",
-                  "RoundId": 1003,
-                  "StablefordScore": 3
-                },
-                {
-                  "HoleNumber": 16,
                   "RoundDate": "2024-12-10T00:00:00",
                   "RoundId": 1004,
                   "StablefordScore": 3
                 },
                 {
-                  "HoleNumber": 16,
                   "RoundDate": "2024-09-20T00:00:00",
                   "RoundId": 1005,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2024-08-05T00:00:00",
+                  "RoundId": 1003,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2024-08-06T00:00:00",
+                  "RoundId": 1006,
                   "StablefordScore": 3
                 }
               ]
@@ -1496,55 +1618,62 @@
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 17,
                   "RoundDate": "2024-07-10T00:00:00",
                   "RoundId": 1002,
                   "StablefordScore": 3
                 },
                 {
-                  "HoleNumber": 17,
+                  "RoundDate": "2024-12-10T00:00:00",
+                  "RoundId": 1004,
+                  "StablefordScore": 3
+                },
+                {
                   "RoundDate": "2024-08-05T00:00:00",
                   "RoundId": 1003,
                   "StablefordScore": 3
                 },
                 {
-                  "HoleNumber": 17,
-                  "RoundDate": "2024-12-10T00:00:00",
-                  "RoundId": 1004,
+                  "RoundDate": "2024-08-06T00:00:00",
+                  "RoundId": 1006,
                   "StablefordScore": 3
                 }
               ]
             },
             {
               "HoleNumber": 18,
-              "RoundDate": "2024-08-05T00:00:00",
-              "RoundId": 1003,
+              "RoundDate": "2024-12-10T00:00:00",
+              "RoundId": 1004,
               "StablefordScore": 4,
               "UncountedScores": [
                 {
-                  "HoleNumber": 18,
-                  "RoundDate": "2024-12-10T00:00:00",
-                  "RoundId": 1004,
-                  "StablefordScore": 4
-                },
-                {
-                  "HoleNumber": 18,
                   "RoundDate": "2024-07-10T00:00:00",
                   "RoundId": 1002,
                   "StablefordScore": 3
                 },
                 {
-                  "HoleNumber": 18,
                   "RoundDate": "2024-09-20T00:00:00",
                   "RoundId": 1005,
                   "StablefordScore": 2
                 }
               ]
             }
-          ]
+          ],
+          "Links": []
         },
-        "ExcludedRounds": []
+        "ExcludedRounds": [
+          {
+            "MemberId": "12345",
+            "RoundId": "1001",
+            "Type": "BackNine",
+            "DatePlayed": "2024-06-15T00:00:00",
+            "ExclusionReason": "This back nine scorecard did not result in the best eclectic score."
+          }
+        ]
       }
     ]
   }
 }
+
+
+
+
