@@ -14,7 +14,7 @@ namespace Services.Controllers
     public class MembersController : Controller
     {
         private readonly AppSettings _settings;
-        private readonly IReportService _reportService;
+        private readonly IDataService _reportService;
         private readonly ILogger<MembersController> _logger;
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Services.Controllers
         /// <param name="reportService">Service handling execution and retrieval of report data.</param>
         public MembersController(IOptions<AppSettings> settings,
                                  ILogger<MembersController> logger,
-                                 IReportService reportService)
+                                 IDataService reportService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));

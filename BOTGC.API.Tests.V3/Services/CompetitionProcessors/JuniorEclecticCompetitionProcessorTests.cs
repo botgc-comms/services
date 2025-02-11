@@ -17,19 +17,19 @@ namespace BOTGC.API.Tests.Services.CompetitionProcessors
 {
     public class JuniorEclecticCompetitionProcessorTests
     {
-        private readonly IReportService _mockReportService;
+        private readonly IDataService _mockReportService;
         private readonly ILogger<JuniorEclecticCompetitionProcessor> _mockLogger;
         private readonly JuniorEclecticCompetitionProcessor _processor;
 
         public JuniorEclecticCompetitionProcessorTests()
         {
-            _mockReportService = A.Fake<IReportService>();
+            _mockReportService = A.Fake<IDataService>();
             _mockLogger = A.Fake<ILogger<JuniorEclecticCompetitionProcessor>>();
 
             var mockSettings = A.Fake<IOptions<AppSettings>>();
             A.CallTo(() => mockSettings.Value).Returns(new AppSettings());
 
-            _processor = new JuniorEclecticCompetitionProcessor(mockSettings, _mockLogger, _mockReportService);
+            _processor = new JuniorEclecticCompetitionProcessor(mockSettings, _mockLogger, _mockReportService, null);
         }
 
         public static IEnumerable<ITheoryDataRow> GetTestData()

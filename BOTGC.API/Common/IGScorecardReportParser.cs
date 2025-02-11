@@ -23,7 +23,7 @@ namespace Services.Common
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public List<ScorecardDto> ParseReport(HtmlDocument document)
+        public List<ScorecardDto>? ParseReport(HtmlDocument document)
         {
             var scorecards = new List<ScorecardDto>();
 
@@ -31,29 +31,36 @@ namespace Services.Common
             if (scorecardTable == null)
             {
                 _logger.LogWarning("Unable to locate scorecard table in the report.");
-                return scorecards;
+                return null;
             }
 
             var headers = scorecardTable.SelectSingleNode(".//thead/tr/td")?.InnerText.Trim();
             if (string.IsNullOrEmpty(headers))
             {
                 _logger.LogError("Failed to extract player details from the scorecard.");
-                return scorecards;
+                return null;
             }
 
             try
             {
                 var roundId = 0;
                 var roundIdNodes = document.DocumentNode.SelectNodes("//a");
-                var roundIdNode = roundIdNodes.FirstOrDefault(a => Regex.IsMatch(a.OuterHtml, "roundid=\\d+"));
+                var roundIdNode = roundIdNodes.FirstOrDefault(a => Regex.IsMatch(a.OuterHtml, "admincontact[.]php[^\"]*roundid(?:=|%3D)\\d+"));
                 if (roundIdNode != null)
                 {
-                    roundId = int.Parse(Regex.Match(roundIdNode.OuterHtml, "roundId=(\\d+)").Groups[1].Value);
+                    roundId = int.Parse(Regex.Match(roundIdNode.OuterHtml, "admincontact[.]php[^\"]*roundid(?:=|%3D)(\\d+)", RegexOptions.IgnoreCase).Groups[1].Value);
                 }
                 else
                 {
                     _logger.LogError("Unable to locate round id.");
-                    return scorecards;
+                    return null;
+                }
+
+                var shotsReceived = ExtractShotsReceived(headers);
+                if (shotsReceived == null)
+                {
+                    _logger.LogError("Failed to determine the number of shots received.");
+                    return null;
                 }
 
                 // Extract top-level details from header row
@@ -61,7 +68,7 @@ namespace Services.Common
                 {
                     RoundId = roundId, 
                     PlayerName = ExtractPlayerName(headers),
-                    ShotsReceived = ExtractShotsReceived(headers),
+                    ShotsReceived = (int)shotsReceived,
                     HandicapAllowance = ExtractHandicapAllowance(headers),
                     CompetitionName = ExtractCompetitionName(headers),
                     DatePlayed = ExtractCardDate(headers),
@@ -75,7 +82,7 @@ namespace Services.Common
                 if (holeDataRows == null || holeDataRows.Count < 4)
                 {
                     _logger.LogWarning("Insufficient hole data found.");
-                    return scorecards;
+                    return null;
                 }
 
                 var yardageRow = holeDataRows[0].SelectNodes(".//td")?.Skip(1).ToArray();
@@ -87,7 +94,7 @@ namespace Services.Common
                 if (yardageRow == null || strokeIndexRow == null || parRow == null || scoreRow == null)
                 {
                     _logger.LogError("Hole data could not be parsed.");
-                    return scorecards;
+                    return null;
                 }
 
                 var holes = yardageRow.Count() > 11 ? 18 : 9;
@@ -166,23 +173,34 @@ namespace Services.Common
 
         private static string ExtractPlayerName(string headerText)
         {
-            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wede|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)", "");
-            text = Regex.Replace(text, @"\s*:\s*.*?$", "");
-            text = Regex.Replace(text, @"\s*\([^)]*\)\s*", "");
-            text = Regex.Replace(text, @"\s*\d+\s*$", "");
+            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)", "");
+            text = Regex.Replace(text, @"\s*\([^)]*\)\s*", " ");
+            text = Regex.Replace(text, @"\s*\d+\s*$", " ");
+            text = Regex.Match(text, @"^([^:\d]+)").Groups[1].Value;
+            text = Regex.Replace(text, "\\s{2,}", " ");
 
             return text.Trim();
         }
 
-        private static int ExtractShotsReceived(string headerText)
+        private static int? ExtractShotsReceived(string headerText)
         {
-            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wede|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)", "");
-            text = Regex.Replace(text, @"\s*:\s*.*?$", "");
-            text = Regex.Replace(text, @"\s*\([^)]*allowance[^)]*\)\s*", "");
-            text = Regex.Replace(text, @"[()]", "");
+            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)", "");
+            text = Regex.Match(text, @"^([^:]+)").Groups[1].Value;
+            text = Regex.Replace(text, @"\s*\([^)]*allowance[^)]*\)\s*", " ");
+            text = Regex.Replace(text, @"[()]", " ");
+            text = Regex.Replace(text, "\\s{2,}", " ");
 
             var match = Regex.Match(text, @"(\d+)\s*$");
-            return match.Success ? int.Parse(match.Groups[1].Value) : 0;
+            if (match.Success)
+            {
+                var shotsReceived = int.Parse(match.Groups[1].Value);
+                if (shotsReceived <= 54)
+                {
+                    return shotsReceived;
+                }
+            }
+
+            return null; 
         }
 
         private static string ExtractHandicapAllowance(string headerText)
@@ -193,14 +211,14 @@ namespace Services.Common
 
         private static string ExtractCompetitionName(string headerText)
         {
-            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wede|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)", "");
+            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)", "");
             var match = Regex.Match(text, @":\s*(.*?)\s*$");
             return match.Success ? match.Groups[1].Value.Trim() : string.Empty;
         }
 
         private static DateTime ExtractCardDate(string headerText)
         {
-            var match = Regex.Match(headerText, @"((?:Mon|Tues|Wede|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)");
+            var match = Regex.Match(headerText, @"((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)");
             var dateText = Regex.Replace(match.Groups[1].Value, @"(\d+)(?:st|nd|rd|th)", "$1");
             return match.Success && DateTime.TryParseExact(dateText, "dddd d MMMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) ? date : DateTime.MinValue;
         }

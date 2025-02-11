@@ -1,5 +1,6 @@
 ﻿using BOTGC.API.Dto;
 using BOTGC.API.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Services.Controllers;
 using Services.Dto;
@@ -7,14 +8,16 @@ using Services.Interfaces;
 using Services.Models;
 using System.Diagnostics;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Services.Services.CompetitionProcessors
 {
     public class JuniorEclecticCompetitionProcessor : ICompetitionProcessor
     {
         private readonly AppSettings _settings;
-        private readonly IReportService _reportService;
+        private readonly IDataService _reportService;
         private readonly ILogger<JuniorEclecticCompetitionProcessor> _logger;
+        private IServiceScopeFactory _serviceScopeFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JuniorEclecticCompetitionProcessor"/> class.
@@ -23,43 +26,56 @@ namespace Services.Services.CompetitionProcessors
         /// <param name="reportService">Service handling execution and retrieval of report data.</param>
         public JuniorEclecticCompetitionProcessor(IOptions<AppSettings> settings,
                                                   ILogger<JuniorEclecticCompetitionProcessor> logger,
-                                                  IReportService reportService)
+                                                  IDataService reportService,
+                                                  IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
             _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
+            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
         }
 
         public async Task ProcessCompetitionAsync(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            using var scope = _serviceScopeFactory.CreateScope();
+            var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+
+            var results = await GetCompetitionResultAsync(fromDate, toDate, cancellationToken);
+
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                await cacheService.SetAsync($"Junior_Eclectic_Results_{fromDate.ToString("yyyyMMdd")}_{toDate.ToString("yyyyMMdd")}", results, TimeSpan.FromMinutes(_settings.Cache.TTL_mins));
+            }
         }
 
-        public async Task<EclecticCompetitionResultsDto> GetCompetitionResultAsync(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+        private async Task<EclecticScoretDto> GetEclecticScoreByMember(MemberDto juniorMember, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
         {
             const int TOPSCORES = 5;
             const int TOPGPSCORES = 3;
 
-            var eclecticResults = new List<EclecticScoretDto>();
-
-            #region STEP 1: Get all Junior Members
-            
-            var juniorMembers = await _reportService.GetJuniorMembersAsync();
-
-            #endregion
-
-            // step 2: for each junior member get that juniors rounds
-            foreach (var juniorMember in juniorMembers)
+            try
             {
                 var roundExclusions = new List<EclecticRoundExclusionReasonDto>();
 
                 #region STEP 2: Get all rounds for each Junior Member
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Console.WriteLine("Cancellation requested, stopping...");
+                    return null;
+                }
 
                 var rounds = await _reportService.GetRoundsByMemberIdAsync(juniorMember.MemberId.ToString());
 
                 #endregion
 
                 #region STEP 3: Identify the eligable rounds
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Console.WriteLine("Cancellation requested, stopping...");
+                    return null;
+                }
 
                 // step 3a: Get rounds played in the date range
                 var roundsInDateRange = rounds.Where(r => r.DatePlayed >= fromDate && r.DatePlayed <= toDate);
@@ -77,10 +93,10 @@ namespace Services.Services.CompetitionProcessors
                         .Except(validGeneralPlayRounds ?? [])
                         .Select(gpr => new EclecticRoundExclusionReasonDto()
                         {
-                            Type = "WholeRound", 
+                            Type = "WholeRound",
                             MemberId = juniorMember.MemberId.ToString(),
                             RoundId = gpr.RoundId.ToString(),
-                            DatePlayed = gpr.DatePlayed, 
+                            DatePlayed = gpr.DatePlayed,
                             ExclusionReason = $"General play round on {gpr.DatePlayed.ToOrdinalDateString()} was not played within 6 weeks of any competition round."
                         })
                         .ToList()
@@ -89,6 +105,12 @@ namespace Services.Services.CompetitionProcessors
                 #endregion
 
                 #region STEP 4: Get separate front and back nine scorecards
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Console.WriteLine("Cancellation requested, stopping...");
+                    return null;
+                }
 
                 // step 4: get the score cards for each of the rounds
                 var competitionScorecards = new List<ScorecardDto>();
@@ -120,6 +142,12 @@ namespace Services.Services.CompetitionProcessors
 
                 #region STEP 5: Filter the best competition and general play cards for the front and back nine
 
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Console.WriteLine("Cancellation requested, stopping...");
+                    return null;
+                }
+
                 var frontNineCompetitionScorecards = new List<ScorecardDto>();
                 var backNineCompetitionScorecards = new List<ScorecardDto>();
                 var frontNineGeneralPlayScorecards = new List<ScorecardDto>();
@@ -136,7 +164,7 @@ namespace Services.Services.CompetitionProcessors
                     {
                         var frontNineScorecard = new ScorecardDto
                         {
-                            RoundId = scorecard.RoundId, 
+                            RoundId = scorecard.RoundId,
                             PlayerName = scorecard.PlayerName,
                             ShotsReceived = scorecard.ShotsReceived,
                             HandicapAllowance = scorecard.HandicapAllowance,
@@ -288,9 +316,15 @@ namespace Services.Services.CompetitionProcessors
 
                 #region STEP 6: Using every combination of cards determine the best combination that achieves the highest eclectic score
 
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Console.WriteLine("Cancellation requested, stopping...");
+                    return null;
+                }
+
                 // Generate all combinations (up to 5 cards that include only 2 general play cards)
                 var allFrontCombinations = GetCombinations(bestFrontNineCards, TOPSCORES).Where(c => c.Where(s => s.IsGeneralPlay).Count() <= TOPGPSCORES);
-                var allBackCombinations = GetCombinations(bestBackNineCards, TOPSCORES).Where(c => c.Where(s => s.IsGeneralPlay).Count() <= TOPGPSCORES); 
+                var allBackCombinations = GetCombinations(bestBackNineCards, TOPSCORES).Where(c => c.Where(s => s.IsGeneralPlay).Count() <= TOPGPSCORES);
 
                 // Get best combination
                 var frontEclecticScores = allFrontCombinations
@@ -302,9 +336,9 @@ namespace Services.Services.CompetitionProcessors
                         latestDate = fc.Max(sc => sc.DatePlayed),
                         earliestDate = fc.Min(sc => sc.DatePlayed)
                     })
-                    .OrderByDescending(e => e.eclecticScore)  
-                    .ThenByDescending(e => e.numScorecards)   
-                    .ThenByDescending(e => e.latestDate)      
+                    .OrderByDescending(e => e.eclecticScore)
+                    .ThenByDescending(e => e.numScorecards)
+                    .ThenByDescending(e => e.latestDate)
                     .ToList();
 
                 var backEclecticScores = allBackCombinations
@@ -360,78 +394,120 @@ namespace Services.Services.CompetitionProcessors
 
                 #region STEP 7: Create the final eclectic scorecard
 
-                var finalEclecticScorecard = new EclecticScorecardDto
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    // Assuming you have a unique round ID, use it here for the full 18-hole scorecard
-                    PlayerName = finalBestFrontNineCombination!.First().PlayerName, // Assuming the player name is the same for all cards
-                    TotalStablefordScore = bestFrontEclecticScore + bestbackEclecticScore, // Combine the total scores
-                    Holes = new List<ExclecticScorecardHoleDto>()
-                };
+                    Console.WriteLine("Cancellation requested, stopping...");
+                    return null;
+                }
 
-                // Extract all front nine holes with their score and DatePlayed from the scorecard
-                var allFrontHoles = finalBestFrontNineCombination?
-                    .SelectMany(card => card.Holes.Select(h => new {
-                        HoleNumber = h.HoleNumber,  // Include HoleNumber for clarity
-                        StablefordScore = h.StablefordScore,
-                        DatePlayed = card.DatePlayed, // Use DatePlayed from the scorecard
-                        RoundId = card.RoundId       // Use RoundId from the scorecard
-                    })).ToList();
+                if (finalBestFrontNineCombination != null && finalBestFrontNineCombination!.Any() &&
+                    finalBestBackNineCombination != null && finalBestBackNineCombination!.Any())
+                {
 
-                // Extract all back nine holes with their score and DatePlayed from the scorecard
-                var allBackHoles = finalBestBackNineCombination?
-                    .SelectMany(card => card.Holes.Select(h => new {
-                        HoleNumber = h.HoleNumber,  // Include HoleNumber for clarity
-                        StablefordScore = h.StablefordScore,
-                        DatePlayed = card.DatePlayed, // Use DatePlayed from the scorecard
-                        RoundId = card.RoundId       // Use RoundId from the scorecard
-                    })).ToList();
-
-                // Combine both front and back nine holes
-                var allHoles = (allFrontHoles ?? []).Concat(allBackHoles ?? []).ToList();
-
-                var allHolesResult = allHoles
-                    .GroupBy(h => h.HoleNumber)
-                    .Select(group => new ExclecticScorecardHoleDto
+                    var finalEclecticScorecard = new EclecticScorecardDto
                     {
-                        HoleNumber = group.Key,
-                        StablefordScore = group.Max(h => h.StablefordScore), // Take the best stableford score for each hole
+                        // Assuming you have a unique round ID, use it here for the full 18-hole scorecard
+                        PlayerName = finalBestFrontNineCombination!.First().PlayerName, // Assuming the player name is the same for all cards
+                        TotalStablefordScore = bestFrontEclecticScore + bestbackEclecticScore, // Combine the total scores
+                        Holes = new List<ExclecticScorecardHoleDto>()
+                    };
 
-                        // Select the most recent scorecard for the best score
-                        RoundDate = group.Where(h => h.StablefordScore == group.Max(g => g.StablefordScore)) 
-                                         .OrderByDescending(h => h.DatePlayed) 
-                                         .First().DatePlayed, 
+                    // Extract all front nine holes with their score and DatePlayed from the scorecard
+                    var allFrontHoles = finalBestFrontNineCombination?
+                        .SelectMany(card => card.Holes.Select(h => new
+                        {
+                            HoleNumber = h.HoleNumber,  // Include HoleNumber for clarity
+                            StablefordScore = h.StablefordScore,
+                            DatePlayed = card.DatePlayed, // Use DatePlayed from the scorecard
+                            RoundId = card.RoundId       // Use RoundId from the scorecard
+                        })).ToList();
 
-                        RoundId = group.Where(h => h.StablefordScore == group.Max(g => g.StablefordScore)) 
-                                       .OrderByDescending(h => h.DatePlayed) 
-                                       .First().RoundId, 
+                    // Extract all back nine holes with their score and DatePlayed from the scorecard
+                    var allBackHoles = finalBestBackNineCombination?
+                        .SelectMany(card => card.Holes.Select(h => new
+                        {
+                            HoleNumber = h.HoleNumber,  // Include HoleNumber for clarity
+                            StablefordScore = h.StablefordScore,
+                            DatePlayed = card.DatePlayed, // Use DatePlayed from the scorecard
+                            RoundId = card.RoundId       // Use RoundId from the scorecard
+                        })).ToList();
 
-                        UncountedScores = group.Where(h => h.StablefordScore != group.Max(g => g.StablefordScore)) // Collect uncounted scores
-                                               .Select(uncounted => new EclecticScorecardHoleUncountedScoreDto
-                                               {
-                                                   RoundDate = uncounted.DatePlayed,
-                                                   RoundId = uncounted.RoundId,
-                                                   StablefordScore = uncounted.StablefordScore
-                                               }).ToList()
-                    }).ToList();
+                    // Combine both front and back nine holes
+                    var allHoles = (allFrontHoles ?? []).Concat(allBackHoles ?? []).ToList();
+
+                    var allHolesResult = allHoles
+                        .GroupBy(h => h.HoleNumber)
+                        .Select(group => new ExclecticScorecardHoleDto
+                        {
+                            HoleNumber = group.Key,
+                            StablefordScore = group.Max(h => h.StablefordScore), // Take the best stableford score for each hole
+
+                            // Select the most recent scorecard for the best score
+                            RoundDate = group.Where(h => h.StablefordScore == group.Max(g => g.StablefordScore))
+                                             .OrderByDescending(h => h.DatePlayed)
+                                             .First().DatePlayed,
+
+                            RoundId = group.Where(h => h.StablefordScore == group.Max(g => g.StablefordScore))
+                                           .OrderByDescending(h => h.DatePlayed)
+                                           .First().RoundId,
+
+                            UncountedScores = group.Where(h => h.StablefordScore != group.Max(g => g.StablefordScore)) // Collect uncounted scores
+                                                   .Select(uncounted => new EclecticScorecardHoleUncountedScoreDto
+                                                   {
+                                                       RoundDate = uncounted.DatePlayed,
+                                                       RoundId = uncounted.RoundId,
+                                                       StablefordScore = uncounted.StablefordScore
+                                                   }).ToList()
+                        }).ToList();
 
 
-                // Add the selected holes to the EclecticScorecardDto
-                finalEclecticScorecard.Holes.AddRange(allHolesResult);
+                    // Add the selected holes to the EclecticScorecardDto
+                    finalEclecticScorecard.Holes.AddRange(allHolesResult);
 
-                #endregion
+                    #endregion
 
-                eclecticResults.Add(new EclecticScoretDto
-                {
-                    Scorecard = finalEclecticScorecard,
-                    ExcludedRounds = roundExclusions
-                });
+                    return new EclecticScoretDto
+                    {
+                        Scorecard = finalEclecticScorecard,
+                        ExcludedRounds = roundExclusions
+                    };
+                }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to calculate competition results for member {juniorMember.MemberId}.");
+            }
+
+            return null;
+        }
+
+        public async Task<EclecticCompetitionResultsDto> GetCompetitionResultAsync(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
+        {
+            var eclecticResults = new List<EclecticScoretDto>();
+
+            #region STEP 1: Get all Junior Members
+            var juniorMembers = await _reportService.GetJuniorMembersAsync();
+            #endregion
+
+            var tasks = juniorMembers
+                .Select(async juniorMember =>
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                        return null;
+
+                    return await GetEclecticScoreByMember(juniorMember, fromDate, toDate, cancellationToken);
+                });
+
+            var scores = await Task.WhenAll(tasks); // Run tasks in parallel
+
+            eclecticResults.AddRange(scores.Where(score => score != null)); // Filter out null results
 
             return new EclecticCompetitionResultsDto
             {
-                Scores = eclecticResults
+                Scores = eclecticResults.OrderByDescending(s => s.Scorecard.TotalStablefordScore).ToList()
             };
         }
+
 
         // Get all combinations of a given size
         private List<List<ScorecardDto>> GetCombinations(List<ScorecardDto> cards, int combinationSize)

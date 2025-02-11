@@ -1,0 +1,25 @@
+{
+  "Value": [
+    {
+      "CompetitionName": "Personal Scorecard",
+      "CompetitionId": null,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": false,
+      "DatePlayed": "2022-03-27T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 84772,
+      "GrossScore": "59 + 9 holes",
+      "NetScore": null,
+      "StablefordPoints": 3,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/84772",
+          "Method": "GET"
+        }
+      ]
+    }
+  ],
+  "Expiration": "2025-02-18T14:37:19.5079047Z"
+}

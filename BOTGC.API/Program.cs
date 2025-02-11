@@ -1,3 +1,4 @@
+using BOTGC.API.Services;
 using Microsoft.OpenApi.Models;
 using Services;
 using Services.Common;
@@ -34,8 +35,11 @@ builder.Services.AddSingleton<ICognitiveServices, AzureCognitiveServices>();
 builder.Services.AddSingleton<IImageServices, ImageServices>();
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddMemoryCache();
-builder.Services.AddScoped<ICacheService, MemoryCacheService>();
+
+//builder.Services.AddMemoryCache();
+//builder.Services.AddScoped<ICacheService, MemoryCacheService>();
+
+builder.Services.AddScoped<ICacheService, FileCacheService>();
 
 // Add support for interacting with IG
 builder.Services.AddIGSupport();

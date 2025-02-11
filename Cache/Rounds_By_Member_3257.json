@@ -1,0 +1,85 @@
+{
+  "Value": [
+    {
+      "CompetitionName": "Junior 9 Hole Stableford",
+      "CompetitionId": 6995,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": false,
+      "DatePlayed": "2024-08-04T00:00:00",
+      "Course": "Burton on Trent Front 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 105774,
+      "GrossScore": "75",
+      "NetScore": null,
+      "StablefordPoints": 15,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/105774",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "General Play Score",
+      "CompetitionId": null,
+      "IsGeneralPlay": true,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2024-07-28T00:00:00",
+      "Course": "Burton on Trent Front 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 105570,
+      "GrossScore": "63",
+      "NetScore": null,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/105570",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Golfer/Non-Golfer 2024",
+      "CompetitionId": 6731,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": false,
+      "DatePlayed": "2024-07-14T00:00:00",
+      "Course": "Burton on Trent Front 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 104671,
+      "GrossScore": "71",
+      "NetScore": null,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/104671",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "General Play Score",
+      "CompetitionId": null,
+      "IsGeneralPlay": true,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2024-05-12T00:00:00",
+      "Course": "Burton on Trent Front 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 102064,
+      "GrossScore": "72",
+      "NetScore": null,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/102064",
+          "Method": "GET"
+        }
+      ]
+    }
+  ],
+  "Expiration": "2025-02-18T14:37:08.2569559Z"
+}

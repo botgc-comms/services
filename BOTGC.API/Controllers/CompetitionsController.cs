@@ -15,7 +15,7 @@ namespace Services.Controllers
     public class CompetitionsController : Controller
     {
         private readonly AppSettings _settings;
-        private readonly IReportService _reportService;
+        private readonly IDataService _reportService;
         private readonly ICompetitionTaskQueue _taskQueue;
         private readonly ILogger<CompetitionsController> _logger;
 
@@ -25,9 +25,9 @@ namespace Services.Controllers
         /// <param name="logger">Logger instance.</param>
         /// <param name="reportService">Service handling execution and retrieval of report data.</param>
         public CompetitionsController(IOptions<AppSettings> settings,
-                                 ILogger<CompetitionsController> logger,
-                                 IReportService reportService,
-                                 ICompetitionTaskQueue taskQueue)
+                                      ILogger<CompetitionsController> logger,
+                                      IDataService reportService,
+                                      ICompetitionTaskQueue taskQueue)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
@@ -41,7 +41,8 @@ namespace Services.Controllers
             var taskItem = new CompetitionTaskItem
             {
                 FromDate = dateRange.Start, 
-                ToDate = dateRange.End
+                ToDate = dateRange.End, 
+                CompetitionType = "JuniorEclectic"
             };
 
             await _taskQueue.QueueTaskAsync(taskItem);

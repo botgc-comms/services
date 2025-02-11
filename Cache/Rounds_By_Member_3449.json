@@ -1,0 +1,45 @@
+{
+  "Value": [
+    {
+      "CompetitionName": "Junior 9 Hole Stableford",
+      "CompetitionId": 6995,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": false,
+      "DatePlayed": "2024-08-04T00:00:00",
+      "Course": "Burton on Trent Front 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 105773,
+      "GrossScore": "84",
+      "NetScore": null,
+      "StablefordPoints": 7,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/105773",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "General Play Score",
+      "CompetitionId": null,
+      "IsGeneralPlay": true,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2024-07-28T00:00:00",
+      "Course": "Burton on Trent Front 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 105568,
+      "GrossScore": "91",
+      "NetScore": 63,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/105568",
+          "Method": "GET"
+        }
+      ]
+    }
+  ],
+  "Expiration": "2025-02-18T14:37:11.0112198Z"
+}

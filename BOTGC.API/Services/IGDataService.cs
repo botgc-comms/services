@@ -12,10 +12,11 @@ using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Html;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.InteropServices;
+using BOTGC.API.Services;
 
 namespace Services.Services
 {
-    public class IGReportsService : IReportService
+    public class IGDataService : IDataService
     {
         private const string __CACHE_JUNIORMEMBERS = "Junior_Members";
         private const string __CACHE_PLAYERIDLOOKUP = "PlayerId_Lookup";
@@ -23,33 +24,29 @@ namespace Services.Services
         private const string __CACHE_SCORECARDBYROUND = "Scorecard_By_Round_{roundId}";
 
         private readonly AppSettings _settings;
-        private readonly HttpClient _httpClient;
-        private readonly ILogger<IGReportsService> _logger;
+        private readonly ILogger<IGDataService> _logger;
         private IServiceScopeFactory _serviceScopeFactory;
-
-        private readonly IGLoginService _loginService;
-
+        private readonly IGSessionService _igSessionManagementService;
+        
         private readonly IReportParser<MemberDto> _memberReportParser;
         private readonly IReportParser<RoundDto> _roundReportParser;
         private readonly IReportParser<PlayerIdLookupDto> _playerIdLookupParser;
         private readonly IReportParser<ScorecardDto> _scorecardReportParser;
 
-        public IGReportsService(IOptions<AppSettings> settings,
-                                ILogger<IGReportsService> logger,
-                                IGLoginService loginService,
+        public IGDataService(IOptions<AppSettings> settings,
+                                ILogger<IGDataService> logger,
                                 IReportParser<MemberDto> memberReportParser,
                                 IReportParser<RoundDto> roundReportParser,
                                 IReportParser<PlayerIdLookupDto> playerIdLookupParser,
                                 IReportParser<ScorecardDto> scorecardReportParser,
-                                HttpClient httpClient,
+                                IGSessionService igSessionManagementService,
                                 IServiceScopeFactory serviceScopeFactory)
         {
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
 
-            _loginService = loginService ?? throw new ArgumentNullException(nameof(loginService));
+            _igSessionManagementService = igSessionManagementService ?? throw new ArgumentNullException(nameof(igSessionManagementService));
             _memberReportParser = memberReportParser ?? throw new ArgumentNullException(nameof(memberReportParser));
             _roundReportParser = roundReportParser ?? throw new ArgumentNullException(nameof(roundReportParser));
             _playerIdLookupParser = playerIdLookupParser ?? throw new ArgumentNullException(nameof(playerIdLookupParser));
@@ -148,28 +145,11 @@ namespace Services.Services
             _logger.LogInformation("Starting report retrieval for {ReportType}...", typeof(T).Name);
 
             // Step 1: Log in
-            if (!await _loginService.LoginAsync())
-            {
-                _logger.LogError("Failed to log in. Cannot fetch {ReportType} report.", typeof(T).Name);
-                return new List<T>();
-            }
+            await _igSessionManagementService.WaitForLoginAsync();
 
             // Step 2: Fetch the report page
             _logger.LogInformation("Fetching {ReportType} report from {Url}", typeof(T).Name, reportUrl);
-            var response = await _httpClient.GetAsync(reportUrl);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogError("Failed to fetch {ReportType} report. Status: {StatusCode}", typeof(T).Name, response.StatusCode);
-                return new List<T>();
-            }
-
-            // Step 3: Parse the content of the report
-            var pageContent = await response.Content.ReadAsStringAsync();
-            _logger.LogInformation("Successfully retrieved {ReportType} report data.", typeof(T).Name);
-
-            var doc = new HtmlDocument();
-            doc.LoadHtml(pageContent);
+            var doc = await _igSessionManagementService.GetPageContent(reportUrl);
 
             var items = parser.ParseReport(doc);
 
@@ -182,7 +162,7 @@ namespace Services.Services
                 }
             }
 
-            if (cacheService != null)
+            if (cacheService != null && items != null)
             {
                 await cacheService.SetAsync(cacheKey!, items, TimeSpan.FromMinutes(_settings.Cache.TTL_mins)).ConfigureAwait(false);
             }

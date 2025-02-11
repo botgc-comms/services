@@ -1,0 +1,125 @@
+{
+  "Value": [
+    {
+      "CompetitionName": "General Play Score",
+      "CompetitionId": null,
+      "IsGeneralPlay": true,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2022-08-07T00:00:00",
+      "Course": "Burton on Trent Ladies",
+      "TeeColour": "Unknown",
+      "RoundId": 90812,
+      "GrossScore": "50 + 9 holes",
+      "NetScore": null,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/90812",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Personal Scorecard",
+      "CompetitionId": null,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": false,
+      "DatePlayed": "2022-03-27T00:00:00",
+      "Course": "Burton on Trent Front 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 84771,
+      "GrossScore": "48",
+      "NetScore": null,
+      "StablefordPoints": 30,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/84771",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Personal Scorecard",
+      "CompetitionId": null,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": false,
+      "DatePlayed": "2019-07-21T00:00:00",
+      "Course": "Burton on Trent Front 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 63402,
+      "GrossScore": "62",
+      "NetScore": null,
+      "StablefordPoints": 8,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/63402",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Junior U14's Short Course Championship",
+      "CompetitionId": null,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2019-06-01T00:00:00",
+      "Course": "Derbyshire",
+      "TeeColour": "Unknown",
+      "RoundId": 0,
+      "GrossScore": "NR",
+      "NetScore": 65,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/0",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Personal Scorecard",
+      "CompetitionId": null,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": false,
+      "DatePlayed": "2019-05-16T00:00:00",
+      "Course": "Burton on Trent Back 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 63403,
+      "GrossScore": "58",
+      "NetScore": null,
+      "StablefordPoints": 13,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/63403",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "General Play Score",
+      "CompetitionId": null,
+      "IsGeneralPlay": true,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2019-05-06T00:00:00",
+      "Course": "Burton on Trent Back 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 59728,
+      "GrossScore": "53",
+      "NetScore": null,
+      "StablefordPoints": 15,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/59728",
+          "Method": "GET"
+        }
+      ]
+    }
+  ],
+  "Expiration": "2025-02-18T14:36:56.518893Z"
+}

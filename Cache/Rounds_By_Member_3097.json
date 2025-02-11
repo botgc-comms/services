@@ -1,0 +1,25 @@
+{
+  "Value": [
+    {
+      "CompetitionName": "Personal Scorecard",
+      "CompetitionId": null,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": false,
+      "DatePlayed": "2022-10-02T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 92721,
+      "GrossScore": "136",
+      "NetScore": 79,
+      "StablefordPoints": 30,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/92721",
+          "Method": "GET"
+        }
+      ]
+    }
+  ],
+  "Expiration": "2025-02-18T14:37:14.3951933Z"
+}

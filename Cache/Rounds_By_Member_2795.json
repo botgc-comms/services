@@ -1,0 +1,105 @@
+{
+  "Value": [
+    {
+      "CompetitionName": "General Play Score",
+      "CompetitionId": null,
+      "IsGeneralPlay": true,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2024-10-13T00:00:00",
+      "Course": "Burton on Trent Front 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 108414,
+      "GrossScore": "51",
+      "NetScore": null,
+      "StablefordPoints": 25,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/108414",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Presidents Putter 2024",
+      "CompetitionId": 6773,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2024-08-25T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 106400,
+      "GrossScore": "112",
+      "NetScore": 68,
+      "StablefordPoints": 40,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/106400",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "General Play Score",
+      "CompetitionId": null,
+      "IsGeneralPlay": true,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2024-07-28T00:00:00",
+      "Course": "Burton on Trent Front 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 105569,
+      "GrossScore": "51",
+      "NetScore": null,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/105569",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "General Play Score",
+      "CompetitionId": null,
+      "IsGeneralPlay": true,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2024-07-22T00:00:00",
+      "Course": "Burton on Trent Back 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 105021,
+      "GrossScore": "59",
+      "NetScore": null,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/105021",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Captain's Day 2024",
+      "CompetitionId": 6721,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2024-07-06T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 104228,
+      "GrossScore": "127",
+      "NetScore": 77,
+      "StablefordPoints": 31,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/104228",
+          "Method": "GET"
+        }
+      ]
+    }
+  ],
+  "Expiration": "2025-02-18T14:37:25.8214587Z"
+}

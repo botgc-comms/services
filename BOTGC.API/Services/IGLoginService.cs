@@ -71,6 +71,11 @@ namespace Services.Services
 
             try
             {
+                if (IsSessionActive())
+                {
+                    _logger.LogInformation("Authenticated session already active.");
+                }
+
                 // Perform Member Login
                 var memberResponse = await _httpClient.PostAsync(loginUrl, loginData);
                 if (!memberResponse.IsSuccessStatusCode)
@@ -79,6 +84,13 @@ namespace Services.Services
                         memberResponse.StatusCode, await memberResponse.Content.ReadAsStringAsync());
                     return false;
                 }
+
+                var cookies = _cookieContainer.GetCookies(new Uri(loginUrl));
+                foreach (Cookie cookie in cookies)
+                {
+                    _logger.LogInformation($"Cookie {cookie.Name} set with value {cookie.Value}");
+                }
+
 
                 _logger.LogInformation("Member login successful. Proceeding with admin login...");
 
@@ -105,11 +117,11 @@ namespace Services.Services
                 return false;
             }
         }
-
-        public List<Cookie> GetCookies()
+        private bool IsSessionActive()
         {
             var uri = new Uri(_settings.IG.BaseUrl);
-            return _cookieContainer.GetCookies(uri).Cast<Cookie>().ToList();
+            var cookies = _cookieContainer.GetCookies(uri);
+            return cookies["PHPSESSID"] != null;
         }
     }
 }

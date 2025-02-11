@@ -1,0 +1,65 @@
+{
+  "Value": [
+    {
+      "CompetitionName": "Medal #6 - Alternate Day (Saturday) - Support our Juniors",
+      "CompetitionId": 6691,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2024-08-17T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 105945,
+      "GrossScore": "74 + 6 holes",
+      "NetScore": null,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/105945",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Stableford #17",
+      "CompetitionId": 6259,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2023-09-13T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 100347,
+      "GrossScore": "NR",
+      "NetScore": null,
+      "StablefordPoints": 33,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/100347",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Stableford  #12",
+      "CompetitionId": 6228,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2023-07-19T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 98226,
+      "GrossScore": "55 + 10 holes",
+      "NetScore": null,
+      "StablefordPoints": 7,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/98226",
+          "Method": "GET"
+        }
+      ]
+    }
+  ],
+  "Expiration": "2025-02-18T14:37:44.7358858Z"
+}

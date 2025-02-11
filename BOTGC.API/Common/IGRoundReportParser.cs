@@ -29,6 +29,13 @@ namespace Services.Common
         {
             var rounds = new List<RoundDto>();
 
+            var table = document.DocumentNode.SelectNodes("//table[@id='resultstable']");
+            if (table == null)
+            {
+                _logger.LogError("Failed to locate rounds for member");
+                return null;
+            }
+
             // Locate the rows in the table
             var rows = document.DocumentNode.SelectNodes("//table[@id='resultstable']/tr");
             if (rows == null || rows.Count == 0)
@@ -151,6 +158,7 @@ namespace Services.Common
         private static DateTime ParseDate(string text)
         {
             text = Regex.Replace(text, @"(\d+)(st|nd|rd|th)", "$1");
+            text = Regex.Replace(text, "\\s{2,}", " ");
             if (DateTime.TryParseExact(text, "dddd d MMMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
             {
                 return date;

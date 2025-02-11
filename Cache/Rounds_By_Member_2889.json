@@ -1,0 +1,125 @@
+{
+  "Value": [
+    {
+      "CompetitionName": "Junior Championships",
+      "CompetitionId": 6229,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2023-07-30T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 98742,
+      "GrossScore": "117",
+      "NetScore": 93,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/98742",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Junior Open",
+      "CompetitionId": 6216,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2023-07-09T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 97890,
+      "GrossScore": "129",
+      "NetScore": 102,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/97890",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Junior Medal #2",
+      "CompetitionId": 6473,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2023-05-07T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 94986,
+      "GrossScore": "99",
+      "NetScore": 73,
+      "StablefordPoints": null,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/94986",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Personal Scorecard",
+      "CompetitionId": null,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": false,
+      "DatePlayed": "2023-05-07T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 94983,
+      "GrossScore": "99",
+      "NetScore": 72,
+      "StablefordPoints": 34,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/94983",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Personal Scorecard",
+      "CompetitionId": null,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": false,
+      "DatePlayed": "2023-04-11T00:00:00",
+      "Course": "Burton on Trent Front 9 Hole Qualifier",
+      "TeeColour": "Unknown",
+      "RoundId": 94031,
+      "GrossScore": "57",
+      "NetScore": null,
+      "StablefordPoints": 11,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/94031",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "CompetitionName": "Junior Winter Stableford",
+      "CompetitionId": 6393,
+      "IsGeneralPlay": false,
+      "IsHandicappingRound": true,
+      "DatePlayed": "2023-02-21T00:00:00",
+      "Course": "Burton-on-Trent",
+      "TeeColour": "Unknown",
+      "RoundId": 93634,
+      "GrossScore": "97",
+      "NetScore": 66,
+      "StablefordPoints": 40,
+      "Links": [
+        {
+          "Rel": "self",
+          "Href": "/api/rounds/93634",
+          "Method": "GET"
+        }
+      ]
+    }
+  ],
+  "Expiration": "2025-02-18T14:38:35.2751196Z"
+}

@@ -11,11 +11,14 @@
         public Cache Cache { get; set; }
 
         public IG IG { get; set; }
+
     }
 
     public class Cache
     {
         public int TTL_mins { get; set; } = 30;
+
+        public FileCacheStorage FileCacheStorage { get; set; }
     }
 
     public class AzureFaceApi
@@ -41,14 +44,20 @@
 
         public required IGReports IGReports { get; set; } = new IGReports();
 
+        public int LoginEveryNMinutes { get; set; } = 30;
+
     }
 
     public class IGReports
     {
         public string JuniorMembershipReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=b52f6bd4cf74cc5dbfd84dec616ceb42";
-        public string MemberRoundsReportUrl { get; set; } = "/roundmgmt.php?playerid={memberId}";
+        public string MemberRoundsReportUrl { get; set; } = "/roundmgmt.php?playerid={playerId}";
         public string PlayerIdLookupReportUrl { get; set; } = "/membership_reports.php?tab=status";
         public string RoundReportUrl { get; set; } = "/viewround.php?roundid={roundId}";
     }
 
+    public class FileCacheStorage
+    {
+        public string Path { get; set; }
+    }
 }

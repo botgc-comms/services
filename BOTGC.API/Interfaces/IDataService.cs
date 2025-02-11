@@ -2,7 +2,7 @@
 
 namespace Services.Interfaces
 {
-    public interface IReportService
+    public interface IDataService
     {
         Task<List<MemberDto>> GetJuniorMembersAsync();
         Task<List<RoundDto>> GetRoundsByMemberIdAsync(string memberId);

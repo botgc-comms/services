@@ -16,7 +16,7 @@ namespace Services.Controllers
     [Produces("application/json")]
     public class RoundsController : ControllerBase
     {
-        private readonly IReportService _reportService;
+        private readonly IDataService _reportService;
         private readonly ILogger<RoundsController> _logger;
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Services.Controllers
         /// </summary>
         /// <param name="logger">Logger instance.</param>
         /// <param name="reportService">Service for handling round reports.</param>
-        public RoundsController(ILogger<RoundsController> logger, IReportService reportService)
+        public RoundsController(ILogger<RoundsController> logger, IDataService reportService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
