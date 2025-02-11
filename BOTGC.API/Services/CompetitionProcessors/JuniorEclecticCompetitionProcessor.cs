@@ -44,7 +44,7 @@ namespace Services.Services.CompetitionProcessors
 
             if (!cancellationToken.IsCancellationRequested)
             {
-                await cacheService.SetAsync($"Junior_Eclectic_Results_{fromDate.ToString("yyyyMMdd")}_{toDate.ToString("yyyyMMdd")}", results, TimeSpan.FromMinutes(_settings.Cache.TTL_mins));
+                await cacheService.SetAsync($"Junior_Eclectic_Results_{fromDate.ToString("yyyyMMdd")}_{toDate.ToString("yyyyMMdd")}", results, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins));
             }
         }
 
@@ -416,20 +416,20 @@ namespace Services.Services.CompetitionProcessors
                     var allFrontHoles = finalBestFrontNineCombination?
                         .SelectMany(card => card.Holes.Select(h => new
                         {
-                            HoleNumber = h.HoleNumber,  // Include HoleNumber for clarity
+                            HoleNumber = h.HoleNumber,  
                             StablefordScore = h.StablefordScore,
-                            DatePlayed = card.DatePlayed, // Use DatePlayed from the scorecard
-                            RoundId = card.RoundId       // Use RoundId from the scorecard
+                            DatePlayed = card.DatePlayed, 
+                            RoundId = card.RoundId       
                         })).ToList();
 
                     // Extract all back nine holes with their score and DatePlayed from the scorecard
                     var allBackHoles = finalBestBackNineCombination?
                         .SelectMany(card => card.Holes.Select(h => new
                         {
-                            HoleNumber = h.HoleNumber,  // Include HoleNumber for clarity
+                            HoleNumber = h.HoleNumber,  
                             StablefordScore = h.StablefordScore,
-                            DatePlayed = card.DatePlayed, // Use DatePlayed from the scorecard
-                            RoundId = card.RoundId       // Use RoundId from the scorecard
+                            DatePlayed = card.DatePlayed, 
+                            RoundId = card.RoundId       
                         })).ToList();
 
                     // Combine both front and back nine holes
@@ -437,27 +437,31 @@ namespace Services.Services.CompetitionProcessors
 
                     var allHolesResult = allHoles
                         .GroupBy(h => h.HoleNumber)
-                        .Select(group => new ExclecticScorecardHoleDto
+                        .Select(group =>
                         {
-                            HoleNumber = group.Key,
-                            StablefordScore = group.Max(h => h.StablefordScore), // Take the best stableford score for each hole
+                            var bestScore = group.Max(h => h.StablefordScore);
 
-                            // Select the most recent scorecard for the best score
-                            RoundDate = group.Where(h => h.StablefordScore == group.Max(g => g.StablefordScore))
-                                             .OrderByDescending(h => h.DatePlayed)
-                                             .First().DatePlayed,
+                            var bestScorecard = group
+                                .Where(h => h.StablefordScore == bestScore)
+                                .OrderByDescending(h => h.DatePlayed)
+                                .First();
 
-                            RoundId = group.Where(h => h.StablefordScore == group.Max(g => g.StablefordScore))
-                                           .OrderByDescending(h => h.DatePlayed)
-                                           .First().RoundId,
-
-                            UncountedScores = group.Where(h => h.StablefordScore != group.Max(g => g.StablefordScore)) // Collect uncounted scores
-                                                   .Select(uncounted => new EclecticScorecardHoleUncountedScoreDto
-                                                   {
-                                                       RoundDate = uncounted.DatePlayed,
-                                                       RoundId = uncounted.RoundId,
-                                                       StablefordScore = uncounted.StablefordScore
-                                                   }).ToList()
+                            return new ExclecticScorecardHoleDto
+                            {
+                                HoleNumber = group.Key,
+                                StablefordScore = bestScore,
+                                RoundDate = bestScorecard.DatePlayed,
+                                RoundId = bestScorecard.RoundId,
+                                UncountedScores = group
+                                    .Where(h => h.RoundId != bestScorecard.RoundId)
+                                    .Select(uncounted => new EclecticScorecardHoleUncountedScoreDto
+                                    {
+                                        RoundDate = uncounted.DatePlayed,
+                                        RoundId = uncounted.RoundId,
+                                        StablefordScore = uncounted.StablefordScore
+                                    })
+                                    .ToList()
+                            };
                         }).ToList();
 
 

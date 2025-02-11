@@ -16,7 +16,8 @@
 
     public class Cache
     {
-        public int TTL_mins { get; set; } = 30;
+        public int ShortTerm_TTL_mins { get; set; } = 30;
+        public int LongTerm_TTL_mins { get; set; } = 125000;
 
         public FileCacheStorage FileCacheStorage { get; set; }
     }

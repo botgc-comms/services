@@ -173,7 +173,7 @@ namespace Services.Common
 
         private static string ExtractPlayerName(string headerText)
         {
-            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)", "");
+            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s+\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s+\d+)", "");
             text = Regex.Replace(text, @"\s*\([^)]*\)\s*", " ");
             text = Regex.Replace(text, @"\s*\d+\s*$", " ");
             text = Regex.Match(text, @"^([^:\d]+)").Groups[1].Value;
@@ -184,7 +184,7 @@ namespace Services.Common
 
         private static int? ExtractShotsReceived(string headerText)
         {
-            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)", "");
+            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s+\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s+\d+)", "");
             text = Regex.Match(text, @"^([^:]+)").Groups[1].Value;
             text = Regex.Replace(text, @"\s*\([^)]*allowance[^)]*\)\s*", " ");
             text = Regex.Replace(text, @"[()]", " ");
@@ -211,15 +211,16 @@ namespace Services.Common
 
         private static string ExtractCompetitionName(string headerText)
         {
-            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)", "");
+            var text = Regex.Replace(headerText, @"\s*((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s+\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s+\d+)", "");
             var match = Regex.Match(text, @":\s*(.*?)\s*$");
             return match.Success ? match.Groups[1].Value.Trim() : string.Empty;
         }
 
         private static DateTime ExtractCardDate(string headerText)
         {
-            var match = Regex.Match(headerText, @"((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s\d+)");
+            var match = Regex.Match(headerText, @"((?:Mon|Tues|Wed|Thur|Fri|Sat|Sun)\w*\s+\d+(?:th|nd|st|th)?\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\w*\s+\d+)");
             var dateText = Regex.Replace(match.Groups[1].Value, @"(\d+)(?:st|nd|rd|th)", "$1");
+            dateText = Regex.Replace(dateText, "\\s{2,}", " ");
             return match.Success && DateTime.TryParseExact(dateText, "dddd d MMMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) ? date : DateTime.MinValue;
         }
 

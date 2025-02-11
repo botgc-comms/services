@@ -6,7 +6,7 @@
     "version": "v1"
   },
   "paths": {
-    "/api/competitions/retrieve": {
+    "/api/competitions/juniorEclectic/prepare": {
       "post": {
         "tags": [
           "Competitions"
@@ -40,6 +40,44 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/competitions/juniorEclectic/results": {
+      "get": {
+        "tags": [
+          "Competitions"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "Cache-Control",
+            "in": "header",
+            "description": "Set to 'no-cache' to force a fresh response instead of a cached one.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"

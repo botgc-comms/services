@@ -120,7 +120,7 @@ namespace Services.Services
                 // Store the result in cache
                 if (trophies.Any())
                 {
-                    await cacheService.SetAsync(__CACHE_TROPHYFILES, trophies, TimeSpan.FromMinutes(_settings.Cache.TTL_mins)).ConfigureAwait(false);
+                    await cacheService.SetAsync(__CACHE_TROPHYFILES, trophies, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins)).ConfigureAwait(false);
                 }
 
                 _logger.LogInformation("Successfully loaded {Count} trophies.", trophies.Count);

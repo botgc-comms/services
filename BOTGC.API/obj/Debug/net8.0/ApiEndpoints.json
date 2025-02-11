@@ -1,8 +1,8 @@
 [
   {
     "ContainingType": "Services.Controllers.CompetitionsController",
-    "Method": "RetrieveCompetitionStatus",
-    "RelativePath": "api/competitions/retrieve",
+    "Method": "PrepareJuniorEclecticResults",
+    "RelativePath": "api/competitions/juniorEclectic/prepare",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -11,6 +11,27 @@
         "Name": "dateRange",
         "Type": "Services.Models.DateRange",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Services.Controllers.CompetitionsController",
+    "Method": "GetJuniorEclecticResults",
+    "RelativePath": "api/competitions/juniorEclectic/results",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "fromDate",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      },
+      {
+        "Name": "toDate",
+        "Type": "System.DateTime",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []

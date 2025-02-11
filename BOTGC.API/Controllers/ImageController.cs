@@ -92,7 +92,7 @@ namespace Services.Controllers
             await processedImageStream.CopyToAsync(memoryStream);
             var processedImageBytes = memoryStream.ToArray();
 
-            await _cacheService.SetAsync(cacheKey, processedImageBytes, TimeSpan.FromMinutes(_settings.Cache.TTL_mins));
+            await _cacheService.SetAsync(cacheKey, processedImageBytes, TimeSpan.FromMinutes(_settings.Cache.LongTerm_TTL_mins));
             _logger.LogInformation("Cached winner image for trophy ID: {Id}", id);
 
             // Return the processed image

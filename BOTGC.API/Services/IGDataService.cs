@@ -58,7 +58,7 @@ namespace Services.Services
             var playerIdLookup = await GetPlayerIdsByMemberAsync();
 
             var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.IGReports.JuniorMembershipReportUrl}";
-            var members = await GetReportData<MemberDto>(reportUrl, _memberReportParser, __CACHE_JUNIORMEMBERS, HateOASLinks.GetMemberLinks);
+            var members = await GetReportData<MemberDto>(reportUrl, _memberReportParser, __CACHE_JUNIORMEMBERS, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins), HateOASLinks.GetMemberLinks);
 
             var now = DateTime.UtcNow;
             var cutoffDate = new DateTime(now.Year, 1, 1).AddYears(-18); // 1st January of the current year - 18 years
@@ -88,7 +88,7 @@ namespace Services.Services
             }
             
             var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.IGReports.MemberRoundsReportUrl.Replace("{playerId}", playerLookupId.PlayerId.ToString())}";
-            var memberRounds = await GetReportData<RoundDto>(reportUrl, _roundReportParser, cacheKey, HateOASLinks.GetRoundLinks);
+            var memberRounds = await GetReportData<RoundDto>(reportUrl, _roundReportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins), HateOASLinks.GetRoundLinks);
 
             _logger.LogInformation($"Retrieved {memberRounds.Count()} rounds for member {memberId}");
 
@@ -110,7 +110,7 @@ namespace Services.Services
             var cacheKey = __CACHE_SCORECARDBYROUND.Replace("{roundId}", roundId);
 
             var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.IGReports.RoundReportUrl.Replace("{roundId}", roundId)}";
-            var scorecards = await GetReportData<ScorecardDto>(reportUrl, _scorecardReportParser, cacheKey);
+            var scorecards = await GetReportData<ScorecardDto>(reportUrl, _scorecardReportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.LongTerm_TTL_mins));
 
             if (scorecards != null && scorecards.Any())
             {
@@ -125,6 +125,7 @@ namespace Services.Services
         private async Task<List<T>> GetReportData<T>(string reportUrl,
                                                      IReportParser<T> parser,
                                                      string? cacheKey = null,
+                                                     TimeSpan? cacheTTL = null, 
                                                      Func<T, List<HateoasLink>>? linkBuilder = null) where T : HateoasResource, new()
         {
             ICacheService? cacheService = null;
@@ -164,7 +165,7 @@ namespace Services.Services
 
             if (cacheService != null && items != null)
             {
-                await cacheService.SetAsync(cacheKey!, items, TimeSpan.FromMinutes(_settings.Cache.TTL_mins)).ConfigureAwait(false);
+                await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
             }
 
             return items;
