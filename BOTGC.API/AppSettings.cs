@@ -12,12 +12,16 @@
 
         public IG IG { get; set; }
 
+        public string PlayingMemberExpression { get; set; } = "^(?:5|6|7|Intermediate).*?$";
+        public string NonPlayingMemberExpression { get; set; } = "^(?!5|6|7|Intermediate|1894|Corporate|Staff|Professional).+$";
+
     }
 
     public class Cache
     {
         public int ShortTerm_TTL_mins { get; set; } = 30;
-        public int LongTerm_TTL_mins { get; set; } = 125000;
+        public int MediumTerm_TTL_mins { get; set; } = 12*60;
+        public int LongTerm_TTL_mins { get; set; } = 24*60*30;
 
         public FileCacheStorage FileCacheStorage { get; set; }
     }
@@ -55,6 +59,9 @@
         public string MemberRoundsReportUrl { get; set; } = "/roundmgmt.php?playerid={playerId}";
         public string PlayerIdLookupReportUrl { get; set; } = "/membership_reports.php?tab=status";
         public string RoundReportUrl { get; set; } = "/viewround.php?roundid={roundId}";
+        public string MembershipReportingUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=9be9f71c8988351887840f3826a552da";
+        public string MembershipEventHistoryReportUrl { get; set; } = "/membership_reports.php?tab=categorychanges&requestType=ajax&ajaxaction=getreport";
+
     }
 
     public class FileCacheStorage

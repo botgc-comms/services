@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BOTGC.API.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Services.Dto;
@@ -14,6 +15,7 @@ namespace Services.Controllers
     public class MembersController : Controller
     {
         private readonly AppSettings _settings;
+        private readonly IMembershipReportingService _membershipReporting;
         private readonly IDataService _reportService;
         private readonly ILogger<MembersController> _logger;
 
@@ -24,11 +26,48 @@ namespace Services.Controllers
         /// <param name="reportService">Service handling execution and retrieval of report data.</param>
         public MembersController(IOptions<AppSettings> settings,
                                  ILogger<MembersController> logger,
-                                 IDataService reportService)
+                                 IDataService reportService,
+                                 IMembershipReportingService membershipReporting)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
             _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
+            _membershipReporting = membershipReporting ?? throw new ArgumentNullException(nameof(membershipReporting));
+        }
+
+        /// <summary>
+        /// Retrieves the membership report.
+        /// </summary>
+        /// <returns>Retrieves the Membership menagement report</returns>
+        /// <response code="200">Returns the report data.</response>
+        /// <response code="204">No members found.</response>
+        /// <response code="500">An internal server error occurred.</response>
+        [HttpGet("report")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<MemberDto>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<MembershipReportDto>> GetMembershipReport()
+        {
+            _logger.LogInformation("Fetching membership report");
+
+            try
+            {
+                var membershipReport = await _membershipReporting.GetManagementReport();
+
+                if (membershipReport == null)
+                {
+                    _logger.LogWarning("Failed to generate management report.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation("Successfully generated the management report.");
+                return Ok(membershipReport);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving junior members.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving junior members.");
+            }
         }
 
         /// <summary>

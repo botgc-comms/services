@@ -58,6 +58,7 @@ namespace Services.Extensions
             services.AddSingleton<IReportParser<RoundDto>, IGRoundReportParser>();
             services.AddSingleton<IReportParser<PlayerIdLookupDto>, IGPlayerIdLookupReportParser>();
             services.AddSingleton<IReportParser<ScorecardDto>, IGScorecardReportParser>();
+            services.AddSingleton<IReportParser<MemberEventDto>, IGMemberEventsReportParser>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 

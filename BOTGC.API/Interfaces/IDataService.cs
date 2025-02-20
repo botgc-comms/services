@@ -7,6 +7,9 @@ namespace Services.Interfaces
         Task<List<MemberDto>> GetJuniorMembersAsync();
         Task<List<RoundDto>> GetRoundsByMemberIdAsync(string memberId);
         Task<ScorecardDto?> GetScorecardForRoundAsync(string roundId);
+
+        Task<List<MemberDto>> GetMembershipReportAsync();
+        Task<List<MemberEventDto>> GetMembershipEvents(DateTime fromDate, DateTime toDate);
     }
 
 }

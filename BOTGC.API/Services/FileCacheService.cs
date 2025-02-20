@@ -63,12 +63,6 @@ namespace BOTGC.API.Services
 
         public async Task SetAsync<T>(string key, T value, TimeSpan expiration) where T : class
         {
-            if (ShouldSkipCache())
-            {
-                _logger.LogInformation("Skipping cache storage due to 'Cache-Control: no-cache' header.");
-                return;
-            }
-
             string filePath = GetFilePath(key);
             var cachedItem = new CachedItem<T>
             {

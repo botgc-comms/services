@@ -1,4 +1,8 @@
+using BOTGC.API.Common;
+using BOTGC.API.Interfaces;
 using BOTGC.API.Services;
+using BOTGC.API.Services.ReportServices;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using Services;
 using Services.Common;
@@ -24,8 +28,12 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<CacheControlHeaderFilter>(); 
 });
 
-builder.Services.Configure<AppSettings>(builder.Configuration);
-builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+// Setup application configuration
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration.GetSection("AppSettings"));
+
+var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
+MembershipHelper.Configure(appSettings);
 
 builder.Services.AddSingleton<TrophyFilesDiskStorage>();
 builder.Services.AddSingleton<ITrophyDataStore, TrophyDataStore>();
@@ -33,6 +41,8 @@ builder.Services.AddSingleton<ITrophyService, TrophyService>();
 
 builder.Services.AddSingleton<ICognitiveServices, AzureCognitiveServices>();
 builder.Services.AddSingleton<IImageServices, ImageServices>();
+
+builder.Services.AddSingleton<IMembershipReportingService, MembershipReportingService>();
 
 builder.Services.AddHttpContextAccessor();
 

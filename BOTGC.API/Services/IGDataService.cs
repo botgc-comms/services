@@ -22,6 +22,8 @@ namespace Services.Services
         private const string __CACHE_PLAYERIDLOOKUP = "PlayerId_Lookup";
         private const string __CACHE_ROUNDSBYMEMBER = "Rounds_By_Member_{memberId}";
         private const string __CACHE_SCORECARDBYROUND = "Scorecard_By_Round_{roundId}";
+        private const string __CACHE_MEMBERREPORT = "Membership_Report";
+        private const string __CACHE_MEMBEREVENTHISTORYREPORT = "Membership_Event_History_{fromDate}_{toDate}";
 
         private readonly AppSettings _settings;
         private readonly ILogger<IGDataService> _logger;
@@ -32,6 +34,7 @@ namespace Services.Services
         private readonly IReportParser<RoundDto> _roundReportParser;
         private readonly IReportParser<PlayerIdLookupDto> _playerIdLookupParser;
         private readonly IReportParser<ScorecardDto> _scorecardReportParser;
+        private readonly IReportParser<MemberEventDto> _memberEventReportParser;
 
         public IGDataService(IOptions<AppSettings> settings,
                                 ILogger<IGDataService> logger,
@@ -39,6 +42,7 @@ namespace Services.Services
                                 IReportParser<RoundDto> roundReportParser,
                                 IReportParser<PlayerIdLookupDto> playerIdLookupParser,
                                 IReportParser<ScorecardDto> scorecardReportParser,
+                                IReportParser<MemberEventDto> memberEventReportParser,
                                 IGSessionService igSessionManagementService,
                                 IServiceScopeFactory serviceScopeFactory)
         {
@@ -51,6 +55,7 @@ namespace Services.Services
             _roundReportParser = roundReportParser ?? throw new ArgumentNullException(nameof(roundReportParser));
             _playerIdLookupParser = playerIdLookupParser ?? throw new ArgumentNullException(nameof(playerIdLookupParser));
             _scorecardReportParser = scorecardReportParser ?? throw new ArgumentNullException(nameof(scorecardReportParser));
+            _memberEventReportParser = memberEventReportParser ?? throw new ArgumentNullException(nameof(memberEventReportParser));
         }
         
         public async Task<List<MemberDto>> GetJuniorMembersAsync()
@@ -122,6 +127,85 @@ namespace Services.Services
             return null;
         }
 
+        public async Task<List<MemberEventDto>> GetMembershipEvents(DateTime fromDate, DateTime toDate)
+        {
+            var cacheKey = __CACHE_MEMBEREVENTHISTORYREPORT.Replace("{fromDate}", fromDate.ToString("yyyy-MM-dd")).Replace("{toDate}", toDate.ToString("yyyy-MM-dd"));
+
+            var data = new Dictionary<string, string>
+            {
+                { "layout3", "1" },
+                { "daterange", $"{fromDate.ToString("dd/MM/yyyy")} - {toDate.ToString("dd/MM/yyyy")}" },
+                { "fromDate", fromDate.ToString("dd/MM/yyyy") },
+                { "toDate", toDate.ToString("dd/MM/yyyy") }
+            };
+
+            var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.IGReports.MembershipEventHistoryReportUrl}";
+            var events = await PostReportData<MemberEventDto>(reportUrl, data, _memberEventReportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.MediumTerm_TTL_mins));
+
+            _logger.LogInformation($"Successfully retrieved the {events.Count} member event records.");
+
+            return events;
+        }
+
+        public async Task<List<MemberDto>> GetMembershipReportAsync()
+        {
+            var cacheKey = __CACHE_MEMBERREPORT;
+
+            var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.IGReports.MembershipReportingUrl}";
+            var members = await GetReportData<MemberDto>(reportUrl, _memberReportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.LongTerm_TTL_mins));
+
+            _logger.LogInformation($"Successfully retrieved the {members.Count} member records.");
+
+            return members;
+        }
+
+        private async Task<List<T>> PostReportData<T>(string reportUrl,
+                                                      Dictionary<string, string> data, 
+                                                      IReportParser<T> parser,
+                                                      string? cacheKey = null,
+                                                      TimeSpan? cacheTTL = null,
+                                                      Func<T, List<HateoasLink>>? linkBuilder = null) where T : HateoasResource, new()
+        {
+            ICacheService? cacheService = null;
+
+            if (!String.IsNullOrEmpty(cacheKey))
+            {
+                using var scope = _serviceScopeFactory.CreateScope();
+                cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+
+                var cachedResults = await cacheService!.GetAsync<List<T>>(cacheKey).ConfigureAwait(false);
+                if (cachedResults != null && cachedResults.Any())
+                {
+                    _logger.LogInformation("Retrieving results from cache for {ReportType}...", typeof(T).Name);
+                    return cachedResults;
+                }
+            }
+
+            _logger.LogInformation("Starting report retrieval for {ReportType}...", typeof(T).Name);
+
+            // Step 1: Log in
+            await _igSessionManagementService.WaitForLoginAsync();
+
+            // Step 2: Fetch the report page
+            _logger.LogInformation("Fetching {ReportType} report from {Url}", typeof(T).Name, reportUrl);
+            var doc = await _igSessionManagementService.PostPageContent(reportUrl, data);
+
+            var items = parser.ParseReport(doc);
+
+            // Step 4: Add Hateoas Links
+            if (linkBuilder != null)
+            {
+                foreach (var item in items)
+                {
+                    item.Links = linkBuilder(item);
+                }
+            }
+
+            await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
+
+            return items;
+        }
+
         private async Task<List<T>> GetReportData<T>(string reportUrl,
                                                      IReportParser<T> parser,
                                                      string? cacheKey = null,
@@ -163,10 +247,7 @@ namespace Services.Services
                 }
             }
 
-            if (cacheService != null && items != null)
-            {
-                await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
-            }
+            await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
 
             return items;
         }

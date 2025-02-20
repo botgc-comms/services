@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,6 +54,52 @@ namespace BOTGC.API.Services
             await _loginCompletionSource.Task;
         }
 
+        public async Task<HtmlDocument?> PostPageContent(string pageUrl, Dictionary<string, string> data)
+        {
+            var content = new FormUrlEncodedContent(data);
+
+            var response = await _httpClient.PostAsync(pageUrl, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Failed to fetch {pageUrl}. Status: {StatusCode}", pageUrl, response.StatusCode);
+                return null;
+            }
+
+            var pageContent = await response.Content.ReadAsStringAsync();
+
+            var doc = SafeParseResponse(pageContent);
+
+            var titleElement = doc.DocumentNode.SelectSingleNode("//title");
+
+            if (titleElement != null && Regex.IsMatch(titleElement.InnerText, "Login Required"))
+            {
+                _logger.LogWarning("Login required detected. Ensuring a valid session...");
+
+                await EnsureLoggedInAsync(); // Thread-safe login handling
+
+                response = await _httpClient.PostAsync(pageUrl, content);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Second attempt to fetch {pageUrl} failed. Status: {StatusCode}", pageUrl, response.StatusCode);
+                    return null;
+                }
+
+                pageContent = await response.Content.ReadAsStringAsync();
+                doc = SafeParseResponse(pageContent);
+
+                titleElement = doc.DocumentNode.SelectSingleNode("//title");
+                if (titleElement != null && Regex.IsMatch(titleElement.InnerText, "Login Required"))
+                {
+                    _logger.LogError("Login attempt failed. Unable to fetch {pageUrl}", pageUrl);
+                    return null;
+                }
+            }
+
+            _logger.LogInformation("Successfully fetched {pageUrl}.", pageUrl);
+            return doc;
+        }
+
         public async Task<HtmlDocument?> GetPageContent(string pageUrl)
         {
             var response = await _httpClient.GetAsync(pageUrl);
@@ -64,8 +111,7 @@ namespace BOTGC.API.Services
             }
 
             var pageContent = await response.Content.ReadAsStringAsync();
-            var doc = new HtmlDocument();
-            doc.LoadHtml(pageContent);
+            var doc = SafeParseResponse(pageContent);
 
             var titleElement = doc.DocumentNode.SelectSingleNode("//title");
 
@@ -83,7 +129,7 @@ namespace BOTGC.API.Services
                 }
 
                 pageContent = await response.Content.ReadAsStringAsync();
-                doc.LoadHtml(pageContent);
+                doc = SafeParseResponse(pageContent);
 
                 titleElement = doc.DocumentNode.SelectSingleNode("//title");
                 if (titleElement != null && Regex.IsMatch(titleElement.InnerText, "Login Required"))
@@ -157,6 +203,45 @@ namespace BOTGC.API.Services
                 _logger.LogError(ex, "An error occurred while logging in.");
                 _loginCompletionSource.SetResult(false);
             }
+        }
+
+        private HtmlDocument SafeParseResponse(string raw)
+        {
+            // Check if the response is JSON (starts with { or [)
+            if (raw.TrimStart().StartsWith("{") || raw.TrimStart().StartsWith("["))
+            {
+                try
+                {
+                    using var jsonDoc = JsonDocument.Parse(raw);
+                    if (jsonDoc.RootElement.TryGetProperty("actions", out var actions))
+                    {
+                        foreach (var action in actions.EnumerateArray())
+                        {
+                            if (action.TryGetProperty("html", out var htmlElement))
+                            {
+                                var encodedHtml = htmlElement.GetString();
+                                if (!string.IsNullOrEmpty(encodedHtml))
+                                {
+                                    return LoadHtmlDocument(encodedHtml);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError("Failed to parse JSON response: {Error}", ex.Message);
+                }
+            }
+
+            return LoadHtmlDocument(raw);
+        }
+
+        private HtmlDocument LoadHtmlDocument(string htmlContent)
+        {
+            var doc = new HtmlDocument();
+            doc.LoadHtml(htmlContent);
+            return doc;
         }
     }
 }

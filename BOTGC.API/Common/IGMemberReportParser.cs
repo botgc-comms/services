@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using BOTGC.API.Common;
 using global::Services.Dto;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
@@ -42,29 +43,29 @@ namespace Services.Common
 
             // Define regex patterns to match headers with DTO properties
             var columnMapping = new Dictionary<string, string>
-        {
-            { "^Account\\s*Number$", nameof(MemberDto.MemberId) },
-            { "^Title$", nameof(MemberDto.Title) },
-            { "^Forename$", nameof(MemberDto.FirstName) },
-            { "^Surname$", nameof(MemberDto.LastName) },
-            { "^Full\\s*Name$", nameof(MemberDto.FullName) },
-            { "^Gender$", nameof(MemberDto.Gender) },
-            { "^Current\\s*Category$", nameof(MemberDto.MembershipCategory) },
-            { "^Membership\\s*Status$", nameof(MemberDto.MembershipStatus) },
-            { "^Address\\s*1$", nameof(MemberDto.Address1) },
-            { "^Address\\s*2$", nameof(MemberDto.Address2) },
-            { "^Address\\s*3$", nameof(MemberDto.Address3) },
-            { "^Town$", nameof(MemberDto.Town) },
-            { "^County$", nameof(MemberDto.County) },
-            { "^Postcode$", nameof(MemberDto.Postcode) },
-            { "^Email$", nameof(MemberDto.Email) },
-            { "^Dob$", nameof(MemberDto.DateOfBirth) },
-            { "^Join\\s*Date$", nameof(MemberDto.JoinDate) },
-            { "^Leave\\s*Date$", nameof(MemberDto.LeaveDate) },
-            { "^Handicap$", nameof(MemberDto.Handicap) },
-            { "^Disabled\\s*Golfer$", nameof(MemberDto.IsDisabledGolfer) },
-            { "^Unpaid\\s*Total$", nameof(MemberDto.UnpaidTotal) }
-        };
+            {
+                { "^Member\\s*.*?Number$", nameof(MemberDto.MemberId) },
+                { "^Title$", nameof(MemberDto.Title) },
+                { "^Forename$", nameof(MemberDto.FirstName) },
+                { "^Surname$", nameof(MemberDto.LastName) },
+                { "^Full\\s*Name$", nameof(MemberDto.FullName) },
+                { "^Gender$", nameof(MemberDto.Gender) },
+                { "^Current\\s*Category$", nameof(MemberDto.MembershipCategory) },
+                { "^Membership\\s*Status$", nameof(MemberDto.MembershipStatus) },
+                { "^Address\\s*1$", nameof(MemberDto.Address1) },
+                { "^Address\\s*2$", nameof(MemberDto.Address2) },
+                { "^Address\\s*3$", nameof(MemberDto.Address3) },
+                { "^Town$", nameof(MemberDto.Town) },
+                { "^County$", nameof(MemberDto.County) },
+                { "^Postcode$", nameof(MemberDto.Postcode) },
+                { "^Email$", nameof(MemberDto.Email) },
+                { "^Dob$", nameof(MemberDto.DateOfBirth) },
+                { "^Join\\s*Date$", nameof(MemberDto.JoinDate) },
+                { "^Leave\\s*Date$", nameof(MemberDto.LeaveDate) },
+                { "^Handicap$", nameof(MemberDto.Handicap) },
+                { "^Disabled\\s*Golfer$", nameof(MemberDto.IsDisabledGolfer) },
+                { "^Unpaid\\s*Total$", nameof(MemberDto.UnpaidTotal) }
+            };
 
             // Build a dictionary to track the index of each column
             var headerIndexMap = new Dictionary<string, int>();
@@ -140,6 +141,9 @@ namespace Services.Common
 
                     // "R" means Active
                     member.IsActive = member.MembershipStatus.Equals("R", StringComparison.OrdinalIgnoreCase);
+
+                    // Set the primary membership category
+                    MembershipHelper.SetPrimaryCategory(member);
 
                     members.Add(member);
                 }

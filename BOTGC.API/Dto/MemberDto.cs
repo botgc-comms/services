@@ -1,5 +1,12 @@
 ﻿namespace Services.Dto
 {
+    public enum MembershipPrimaryCategories
+    {
+        None, 
+        PlayingMember, 
+        NonPlayingMember
+    }
+
     public class MemberDto : HateoasResource
     {
         public int MemberId { get; set; } 
@@ -10,6 +17,7 @@
         public string Gender { get; set; }
         public string MembershipCategory { get; set; }
         public string MembershipStatus { get; set; }
+        public MembershipPrimaryCategories PrimaryCategory { get; set; } = MembershipPrimaryCategories.None;
         public string Address1 { get; set; }
         public string Address2 { get; set; }
         public string Address3 { get; set; }
