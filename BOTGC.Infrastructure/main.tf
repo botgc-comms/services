@@ -23,10 +23,9 @@ data "azurerm_storage_account" "services_api_sa" {
   resource_group_name = "rg-botgc-shared"
 }
 
-resource "azurerm_storage_container" "data" {
+data "azurerm_storage_container" "data" {
   name                  = "data"
   storage_account_name  = data.azurerm_storage_account.services_api_sa.name
-  container_access_type = "private"
 }
 
 resource "azurerm_service_plan" "services_api_asp" {
