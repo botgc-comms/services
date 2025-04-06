@@ -54,6 +54,36 @@ namespace BOTGC.API.Services
             await _loginCompletionSource.Task;
         }
 
+        public async Task<string?> PostPageContentRaw(string pageUrl, Dictionary<string, string> data)
+        {
+            var content = new FormUrlEncodedContent(data);
+            var response = await _httpClient.PostAsync(pageUrl, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Failed to fetch {pageUrl}. Status: {StatusCode}", pageUrl, response.StatusCode);
+                return null;
+            }
+
+            var pageContent = await response.Content.ReadAsStringAsync();
+
+            if (Regex.IsMatch(pageContent, "Login Required"))
+            {
+                _logger.LogWarning("Login required detected. Ensuring a valid session...");
+                await EnsureLoggedInAsync();
+                response = await _httpClient.PostAsync(pageUrl, content);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Second attempt to fetch {pageUrl} failed. Status: {StatusCode}", pageUrl, response.StatusCode);
+                    return null;
+                }
+                pageContent = await response.Content.ReadAsStringAsync();
+            }
+
+            _logger.LogInformation("Successfully fetched {pageUrl}.", pageUrl);
+            return pageContent;
+        }
+
         public async Task<HtmlDocument?> PostPageContent(string pageUrl, Dictionary<string, string> data)
         {
             var content = new FormUrlEncodedContent(data);
@@ -225,6 +255,14 @@ namespace BOTGC.API.Services
                                     return LoadHtmlDocument(encodedHtml);
                                 }
                             }
+                        }
+                    }
+                    else if (jsonDoc.RootElement.TryGetProperty("html", out var html))
+                    {
+                        var encodedHtml = html.GetString();
+                        if (!string.IsNullOrEmpty(encodedHtml))
+                        {
+                            return LoadHtmlDocument(encodedHtml);
                         }
                     }
                 }

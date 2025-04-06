@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Trophy API",
-    "description": "API for retrieving trophy information, including processed winner images.",
+    "title": "BOTGC Data API",
+    "description": "API for membership, competition and player data",
     "version": "v1"
   },
   "paths": {
@@ -67,6 +67,88 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "Cache-Control",
+            "in": "header",
+            "description": "Set to 'no-cache' to force a fresh response instead of a cached one.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/competitions": {
+      "get": {
+        "tags": [
+          "Competitions"
+        ],
+        "parameters": [
+          {
+            "name": "Cache-Control",
+            "in": "header",
+            "description": "Set to 'no-cache' to force a fresh response instead of a cached one.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/{competitionId}": {
+      "get": {
+        "tags": [
+          "Competitions"
+        ],
+        "parameters": [
+          {
+            "name": "competitionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Cache-Control",
+            "in": "header",
+            "description": "Set to 'no-cache' to force a fresh response instead of a cached one.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/{competitionId}/leaderboard": {
+      "get": {
+        "tags": [
+          "Competitions"
+        ],
+        "parameters": [
+          {
+            "name": "competitionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -151,7 +233,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MemberDto"
+                    "$ref": "#/components/schemas/MembershipReportDto"
                   }
                 }
               }
@@ -167,6 +249,44 @@
       }
     },
     "/api/members/juniors": {
+      "get": {
+        "tags": [
+          "Members"
+        ],
+        "parameters": [
+          {
+            "name": "Cache-Control",
+            "in": "header",
+            "description": "Set to 'no-cache' to force a fresh response instead of a cached one.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/members/current": {
       "get": {
         "tags": [
           "Members"
@@ -235,7 +355,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MemberDto"
+                    "$ref": "#/components/schemas/RoundDto"
                   }
                 }
               }
@@ -243,6 +363,60 @@
           },
           "204": {
             "description": "No Content"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/members/application": {
+      "post": {
+        "tags": [
+          "Members"
+        ],
+        "parameters": [
+          {
+            "name": "Cache-Control",
+            "in": "header",
+            "description": "Set to 'no-cache' to force a fresh response instead of a cached one.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewMemberApplicationDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewMemberApplicationDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewMemberApplicationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal Server Error"
@@ -289,6 +463,91 @@
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/teesheets/{date}": {
+      "get": {
+        "tags": [
+          "Teesheet"
+        ],
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "Cache-Control",
+            "in": "header",
+            "description": "Set to 'no-cache' to force a fresh response instead of a cached one.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScorecardDto"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/teesheets/teeUsage/prepare": {
+      "post": {
+        "tags": [
+          "Teesheet"
+        ],
+        "parameters": [
+          {
+            "name": "Cache-Control",
+            "in": "header",
+            "description": "Set to 'no-cache' to force a fresh response instead of a cached one.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DateRange"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DateRange"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DateRange"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -453,9 +712,15 @@
             },
             "nullable": true
           },
-          "memberId": {
+          "playerId": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
+          },
+          "memberNumber": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           },
           "title": {
             "type": "string",
@@ -536,14 +801,111 @@
             "nullable": true
           },
           "isDisabledGolfer": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           },
           "unpaidTotal": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "isActive": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MemberSummmaryDto": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "membershipCategory": {
+            "type": "string",
+            "nullable": true
+          },
+          "membershipStatus": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MembershipAnomalyDto": {
+        "type": "object",
+        "properties": {
+          "detectedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "type": {
+            "$ref": "#/components/schemas/MembershipAnomalyType"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberSummmaryDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MembershipAnomalyType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "MembershipDeltaDto": {
+        "type": "object",
+        "properties": {
+          "fromDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "toDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "periodDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "newMembers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "leavers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deaths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "categoryChanges": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -556,6 +918,226 @@
         ],
         "type": "integer",
         "format": "int32"
+      },
+      "MembershipReportDto": {
+        "type": "object",
+        "properties": {
+          "dataPoints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MembershipReportEntryDto"
+            },
+            "nullable": true
+          },
+          "dataPointsCsv": {
+            "type": "string",
+            "nullable": true
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "anomalies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MembershipAnomalyDto"
+            },
+            "nullable": true
+          },
+          "quarterlyStats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MembershipDeltaDto"
+            },
+            "nullable": true
+          },
+          "monthlyStats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MembershipDeltaDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MembershipReportEntryDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalMembers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "playingMembers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averagePlayingMembersAge": {
+            "type": "number",
+            "format": "double"
+          },
+          "targetPlayingMembers": {
+            "type": "number",
+            "format": "double"
+          },
+          "nonPlayingMembers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ladyMembers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "juniorMembers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "playingCategoryBreakdown": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "nonPlayingCategoryBreakdown": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "trendPercentage": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NewMemberApplicationDto": {
+        "type": "object",
+        "properties": {
+          "gender": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "forename": {
+            "type": "string",
+            "nullable": true
+          },
+          "surname": {
+            "type": "string",
+            "nullable": true
+          },
+          "altForename": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "telephone1": {
+            "type": "string",
+            "nullable": true
+          },
+          "telephone2": {
+            "type": "string",
+            "nullable": true
+          },
+          "telephone3": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine1": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine2": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine3": {
+            "type": "string",
+            "nullable": true
+          },
+          "town": {
+            "type": "string",
+            "nullable": true
+          },
+          "county": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "postcode": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasCdhId": {
+            "type": "boolean"
+          },
+          "cdhIdLookup": {
+            "type": "string",
+            "nullable": true
+          },
+          "memberCategory": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paymentType": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "memberStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "newMemberId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "newCardSwipe": {
+            "type": "string",
+            "nullable": true
+          },
+          "joinDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "applicationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contactPreferences": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "nullable": true
+          },
+          "tillDiscountGroupId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "ProblemDetails": {
         "type": "object",
@@ -583,6 +1165,64 @@
           }
         },
         "additionalProperties": { }
+      },
+      "RoundDto": {
+        "type": "object",
+        "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HateoasLink"
+            },
+            "nullable": true
+          },
+          "competitionName": {
+            "type": "string",
+            "nullable": true
+          },
+          "competitionId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isGeneralPlay": {
+            "type": "boolean"
+          },
+          "isHandicappingRound": {
+            "type": "boolean"
+          },
+          "datePlayed": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "course": {
+            "type": "string",
+            "nullable": true
+          },
+          "teeColour": {
+            "type": "string",
+            "nullable": true
+          },
+          "roundId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "grossScore": {
+            "type": "string",
+            "nullable": true
+          },
+          "netScore": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "stablefordPoints": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "ScorecardDto": {
         "type": "object",

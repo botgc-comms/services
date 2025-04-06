@@ -20,9 +20,9 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Trophy API",
+        Title = "BOTGC Data API",
         Version = "v1",
-        Description = "API for retrieving trophy information, including processed winner images."
+        Description = "API for membership, competition and player data"
     });
 
     options.OperationFilter<CacheControlHeaderFilter>(); 

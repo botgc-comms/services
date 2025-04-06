@@ -1,0 +1,200 @@
+{
+  "Value": [
+    {
+      "RoundId": 100415,
+      "PlayerName": "Kian Moran",
+      "ShotsReceived": 10,
+      "IsGeneralPlay": false,
+      "HandicapAllowance": "95%",
+      "CompetitionName": "Stableford #18 (White Tees)",
+      "TeeColour": "White",
+      "DatePlayed": "2023-09-16T00:00:00",
+      "TotalStrokes": 0,
+      "TotalStablefordScore": 26,
+      "Holes": [
+        {
+          "HoleNumber": 1,
+          "Yardage": 350,
+          "StrokeIndex": 10,
+          "ShotsReceived": 1,
+          "Par": 4,
+          "Gross": "6",
+          "Net": "5",
+          "StablefordScore": 1
+        },
+        {
+          "HoleNumber": 2,
+          "Yardage": 142,
+          "StrokeIndex": 18,
+          "ShotsReceived": 0,
+          "Par": 3,
+          "Gross": "5",
+          "Net": "5",
+          "StablefordScore": 0
+        },
+        {
+          "HoleNumber": 3,
+          "Yardage": 558,
+          "StrokeIndex": 4,
+          "ShotsReceived": 1,
+          "Par": 5,
+          "Gross": "NR",
+          "Net": "NS",
+          "StablefordScore": 0
+        },
+        {
+          "HoleNumber": 4,
+          "Yardage": 484,
+          "StrokeIndex": 14,
+          "ShotsReceived": 0,
+          "Par": 5,
+          "Gross": "5",
+          "Net": "5",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 5,
+          "Yardage": 447,
+          "StrokeIndex": 2,
+          "ShotsReceived": 1,
+          "Par": 4,
+          "Gross": "6",
+          "Net": "5",
+          "StablefordScore": 1
+        },
+        {
+          "HoleNumber": 6,
+          "Yardage": 164,
+          "StrokeIndex": 16,
+          "ShotsReceived": 0,
+          "Par": 3,
+          "Gross": "6",
+          "Net": "6",
+          "StablefordScore": 0
+        },
+        {
+          "HoleNumber": 7,
+          "Yardage": 381,
+          "StrokeIndex": 6,
+          "ShotsReceived": 1,
+          "Par": 4,
+          "Gross": "5",
+          "Net": "4",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 8,
+          "Yardage": 349,
+          "StrokeIndex": 8,
+          "ShotsReceived": 1,
+          "Par": 4,
+          "Gross": "5",
+          "Net": "4",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 9,
+          "Yardage": 374,
+          "StrokeIndex": 12,
+          "ShotsReceived": 0,
+          "Par": 4,
+          "Gross": "4",
+          "Net": "4",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 10,
+          "Yardage": 196,
+          "StrokeIndex": 9,
+          "ShotsReceived": 1,
+          "Par": 3,
+          "Gross": "4",
+          "Net": "3",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 11,
+          "Yardage": 313,
+          "StrokeIndex": 17,
+          "ShotsReceived": 0,
+          "Par": 4,
+          "Gross": "6",
+          "Net": "6",
+          "StablefordScore": 0
+        },
+        {
+          "HoleNumber": 12,
+          "Yardage": 214,
+          "StrokeIndex": 5,
+          "ShotsReceived": 1,
+          "Par": 3,
+          "Gross": "4",
+          "Net": "3",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 13,
+          "Yardage": 508,
+          "StrokeIndex": 13,
+          "ShotsReceived": 0,
+          "Par": 5,
+          "Gross": "5",
+          "Net": "5",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 14,
+          "Yardage": 443,
+          "StrokeIndex": 1,
+          "ShotsReceived": 1,
+          "Par": 4,
+          "Gross": "5",
+          "Net": "4",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 15,
+          "Yardage": 344,
+          "StrokeIndex": 15,
+          "ShotsReceived": 0,
+          "Par": 4,
+          "Gross": "4",
+          "Net": "4",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 16,
+          "Yardage": 429,
+          "StrokeIndex": 7,
+          "ShotsReceived": 1,
+          "Par": 4,
+          "Gross": "5",
+          "Net": "4",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 17,
+          "Yardage": 439,
+          "StrokeIndex": 3,
+          "ShotsReceived": 1,
+          "Par": 4,
+          "Gross": "5",
+          "Net": "4",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 18,
+          "Yardage": 375,
+          "StrokeIndex": 11,
+          "ShotsReceived": 0,
+          "Par": 4,
+          "Gross": "4",
+          "Net": "4",
+          "StablefordScore": 2
+        }
+      ],
+      "Links": []
+    }
+  ],
+  "Expiration": "2025-03-06T11:03:40.5312046Z"
+}

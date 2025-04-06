@@ -19,9 +19,11 @@
 
     public class Cache
     {
+        public int Default_TTL_Mins { get; set; } = 12 * 60;
         public int ShortTerm_TTL_mins { get; set; } = 30;
         public int MediumTerm_TTL_mins { get; set; } = 12*60;
         public int LongTerm_TTL_mins { get; set; } = 24*60*30;
+        public int Forever_TTL_Mins { get; set; } = int.MaxValue;
 
         public FileCacheStorage FileCacheStorage { get; set; }
     }
@@ -47,21 +49,27 @@
         public required string MemberPassword { get; set; } 
         public required string AdminPassword { get; set; }
 
-        public required IGReports IGReports { get; set; } = new IGReports();
+        public required IGEndpoints Urls { get; set; } = new IGEndpoints();
 
         public int LoginEveryNMinutes { get; set; } = 30;
 
     }
 
-    public class IGReports
+    public class IGEndpoints
     {
         public string JuniorMembershipReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=b52f6bd4cf74cc5dbfd84dec616ceb42";
+        public string AllCurrentMembersReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=5d71e7119d780dba4850506f622c1cfb";
         public string MemberRoundsReportUrl { get; set; } = "/roundmgmt.php?playerid={playerId}";
         public string PlayerIdLookupReportUrl { get; set; } = "/membership_reports.php?tab=status";
         public string RoundReportUrl { get; set; } = "/viewround.php?roundid={roundId}";
         public string MembershipReportingUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=9be9f71c8988351887840f3826a552da";
         public string MembershipEventHistoryReportUrl { get; set; } = "/membership_reports.php?tab=categorychanges&requestType=ajax&ajaxaction=getreport";
-
+        public string NewMembershipApplicationUrl { get; set; } = "/membership_addmember.php?&requestType=ajax&ajaxaction=confirmadd";
+        public string TeeBookingsUrl { get; set; } = "/teetimes.php?date={date}";
+        public string UpcomingCompetitionsUrl { get; set; } = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=upcoming&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20";
+        public string ActiveCompetitionsUrl { get; set; } = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=active&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20";
+        public string CompetitionSettingsUrl { get; set; } = "/compadmin3.php?compid={compid}&tab=settings";
+        public string LeaderBoardUrl { get; set; } = "/competition.php?compid={compid}&preview=1";
     }
 
     public class FileCacheStorage

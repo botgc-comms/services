@@ -44,7 +44,7 @@ namespace Services.Common
             // Define regex patterns to match headers with DTO properties
             var columnMapping = new Dictionary<string, string>
             {
-                { "^Member\\s*.*?Number$", nameof(MemberDto.MemberId) },
+                { "^(?:Member|Account)\\s*.*?Number$", nameof(MemberDto.MemberNumber) },
                 { "^Title$", nameof(MemberDto.Title) },
                 { "^Forename$", nameof(MemberDto.FirstName) },
                 { "^Surname$", nameof(MemberDto.LastName) },
@@ -94,8 +94,8 @@ namespace Services.Common
                 {
                     var member = new MemberDto();
 
-                    if (headerIndexMap.TryGetValue(nameof(MemberDto.MemberId), out var memberIdIndex) && memberIdIndex < columns.Length)
-                        member.MemberId = int.TryParse(columns[memberIdIndex], out var id) ? id : 0;
+                    if (headerIndexMap.TryGetValue(nameof(MemberDto.MemberNumber), out var memberIdIndex) && memberIdIndex < columns.Length)
+                        member.MemberNumber = int.TryParse(columns[memberIdIndex], out var id) ? id : 0;
 
                     if (headerIndexMap.TryGetValue(nameof(MemberDto.Title), out var titleIndex) && titleIndex < columns.Length)
                         member.Title = columns[titleIndex];

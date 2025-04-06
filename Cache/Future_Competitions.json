@@ -1,0 +1,385 @@
+{
+  "Value": [
+    {
+      "Id": 7425,
+      "Name": "Spring Stableford #5",
+      "Date": "2025-04-05T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7425",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7425/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7505,
+      "Name": "Ladies 9 Hole Stableford 2",
+      "Date": "2025-04-08T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7505",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7505/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7506,
+      "Name": "Ladies 18 hole Stableford 2",
+      "Date": "2025-04-08T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7506",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7506/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7434,
+      "Name": "Spring Stableford  #6",
+      "Date": "2025-04-09T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7434",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7434/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7428,
+      "Name": "Spring Stableford #7",
+      "Date": "2025-04-12T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7428",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7428/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7509,
+      "Name": "Ladies 18 hole Stableford  3 & Tom Richards Cup (2024)",
+      "Date": "2025-04-13T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7509",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7509/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7510,
+      "Name": "Ladies 9 Hole Stableford 3",
+      "Date": "2025-04-13T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7510",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7510/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7512,
+      "Name": "Ladies 9 Hole Stableford  4",
+      "Date": "2025-04-15T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7512",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7512/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7513,
+      "Name": "Ladies 18 hole Stableford  4 & Tom Richards Cup (2024)",
+      "Date": "2025-04-15T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7513",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7513/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7448,
+      "Name": "Spring Stableford #8",
+      "Date": "2025-04-16T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7448",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7448/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7199,
+      "Name": "Captain's Drive In - Texas Scramble (Afternoon groups)",
+      "Date": "2025-04-19T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7199",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7199/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7457,
+      "Name": "Captain's Drive In - Texas Scramble (Morning groups)",
+      "Date": "2025-04-19T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7457",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7457/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7514,
+      "Name": "Ladies 18 hole Stableford  #5 Ladies and Gents red tees",
+      "Date": "2025-04-20T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7514",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7514/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7516,
+      "Name": "Ladies 18 hole Stableford  6",
+      "Date": "2025-04-22T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7516",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7516/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7517,
+      "Name": "Ladies 9 Hole Stableford  6",
+      "Date": "2025-04-22T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7517",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7517/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7442,
+      "Name": "Spring Stableford #9",
+      "Date": "2025-04-23T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7442",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7442/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7454,
+      "Name": "Spring 4BBB",
+      "Date": "2025-04-26T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7454",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7454/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7529,
+      "Name": "Ladies 18 hole Stableford 7",
+      "Date": "2025-04-27T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7529",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7529/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7576,
+      "Name": "Ladies 9 Hole Stableford 7",
+      "Date": "2025-04-27T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7576",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7576/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7530,
+      "Name": "Ladies 18 hole Stableford 8",
+      "Date": "2025-04-29T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7530",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7530/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    }
+  ],
+  "Expiration": "2025-04-10T07:45:33.2232107Z"
+}

@@ -1,7 +1,8 @@
 {
   "Value": [
     {
-      "MemberId": 3469,
+      "PlayerId": null,
+      "MemberNumber": 3469,
       "Title": "Mstr",
       "FirstName": "Max",
       "LastName": "Archer",
@@ -9,6 +10,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -37,7 +39,8 @@
       ]
     },
     {
-      "MemberId": 3361,
+      "PlayerId": null,
+      "MemberNumber": 3361,
       "Title": "Mr",
       "FirstName": "Benjamin",
       "LastName": "Astbury",
@@ -45,6 +48,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -54,7 +58,7 @@
       "Email": "benji.astbury12@outlook.com",
       "DateOfBirth": "2005-10-12T00:00:00",
       "JoinDate": "2023-08-16T00:00:00",
-      "LeaveDate": null,
+      "LeaveDate": "2025-04-01T00:00:00",
       "Handicap": "20.3",
       "IsDisabledGolfer": false,
       "UnpaidTotal": 746.00,
@@ -73,7 +77,8 @@
       ]
     },
     {
-      "MemberId": 3449,
+      "PlayerId": null,
+      "MemberNumber": 3449,
       "Title": "Mstr",
       "FirstName": "Casey",
       "LastName": "Aubrey",
@@ -81,6 +86,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -109,7 +115,8 @@
       ]
     },
     {
-      "MemberId": 2778,
+      "PlayerId": null,
+      "MemberNumber": 2778,
       "Title": "Mr",
       "FirstName": "Seve",
       "LastName": "Barron",
@@ -117,6 +124,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -145,7 +153,8 @@
       ]
     },
     {
-      "MemberId": 2777,
+      "PlayerId": null,
+      "MemberNumber": 2777,
       "Title": "Mr",
       "FirstName": "Stanley",
       "LastName": "Barron",
@@ -153,6 +162,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -181,7 +191,8 @@
       ]
     },
     {
-      "MemberId": 3258,
+      "PlayerId": null,
+      "MemberNumber": 3258,
       "Title": "Mr",
       "FirstName": "Bailey",
       "LastName": "Beal",
@@ -189,6 +200,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -217,7 +229,8 @@
       ]
     },
     {
-      "MemberId": 3257,
+      "PlayerId": null,
+      "MemberNumber": 3257,
       "Title": "Miss",
       "FirstName": "Charlie",
       "LastName": "Beal",
@@ -225,6 +238,7 @@
       "Gender": "female",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -253,7 +267,8 @@
       ]
     },
     {
-      "MemberId": 3203,
+      "PlayerId": null,
+      "MemberNumber": 3203,
       "Title": "Miss",
       "FirstName": "Niamh",
       "LastName": "Bell",
@@ -261,6 +276,7 @@
       "Gender": "female",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -289,7 +305,8 @@
       ]
     },
     {
-      "MemberId": 3461,
+      "PlayerId": null,
+      "MemberNumber": 3461,
       "Title": "Mr",
       "FirstName": "Jamie",
       "LastName": "Blower",
@@ -297,6 +314,7 @@
       "Gender": "male",
       "MembershipCategory": "MX - Student",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -325,7 +343,8 @@
       ]
     },
     {
-      "MemberId": 312,
+      "PlayerId": null,
+      "MemberNumber": 312,
       "Title": "Mr",
       "FirstName": "Mackenzie",
       "LastName": "Bondon",
@@ -333,6 +352,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -361,7 +381,8 @@
       ]
     },
     {
-      "MemberId": 2829,
+      "PlayerId": null,
+      "MemberNumber": 2829,
       "Title": "Mr",
       "FirstName": "Jake",
       "LastName": "Chatfield",
@@ -369,6 +390,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -397,7 +419,8 @@
       ]
     },
     {
-      "MemberId": 3260,
+      "PlayerId": null,
+      "MemberNumber": 3260,
       "Title": "Mr",
       "FirstName": "Willliam",
       "LastName": "Dent",
@@ -405,6 +428,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -433,7 +457,8 @@
       ]
     },
     {
-      "MemberId": 3301,
+      "PlayerId": null,
+      "MemberNumber": 3301,
       "Title": "Mr",
       "FirstName": "Thomas",
       "LastName": "Enion",
@@ -441,6 +466,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -469,7 +495,8 @@
       ]
     },
     {
-      "MemberId": 3459,
+      "PlayerId": null,
+      "MemberNumber": 3459,
       "Title": "Mstr",
       "FirstName": "Zach",
       "LastName": "Evans",
@@ -477,6 +504,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -505,7 +533,8 @@
       ]
     },
     {
-      "MemberId": 3483,
+      "PlayerId": null,
+      "MemberNumber": 3483,
       "Title": "Mstr",
       "FirstName": "Edward",
       "LastName": "Fox",
@@ -513,6 +542,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -541,7 +571,8 @@
       ]
     },
     {
-      "MemberId": 3390,
+      "PlayerId": null,
+      "MemberNumber": 3390,
       "Title": "Mstr",
       "FirstName": "Rhys",
       "LastName": "Gadsby",
@@ -549,6 +580,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -577,7 +609,8 @@
       ]
     },
     {
-      "MemberId": 2915,
+      "PlayerId": null,
+      "MemberNumber": 2915,
       "Title": "Mr",
       "FirstName": "Adam",
       "LastName": "Gentles",
@@ -585,6 +618,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -613,7 +647,8 @@
       ]
     },
     {
-      "MemberId": 3475,
+      "PlayerId": null,
+      "MemberNumber": 3475,
       "Title": "Mstr",
       "FirstName": "Ollie",
       "LastName": "Goodfellow",
@@ -621,6 +656,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -649,7 +685,8 @@
       ]
     },
     {
-      "MemberId": 3313,
+      "PlayerId": null,
+      "MemberNumber": 3313,
       "Title": "Mr",
       "FirstName": "Tom",
       "LastName": "Gould",
@@ -657,6 +694,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -685,7 +723,8 @@
       ]
     },
     {
-      "MemberId": 3190,
+      "PlayerId": null,
+      "MemberNumber": 3190,
       "Title": "Mr",
       "FirstName": "William",
       "LastName": "Goulding",
@@ -693,6 +732,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -721,7 +761,8 @@
       ]
     },
     {
-      "MemberId": 3249,
+      "PlayerId": null,
+      "MemberNumber": 3249,
       "Title": "Mr",
       "FirstName": "Jamey",
       "LastName": "Griffith",
@@ -729,6 +770,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -757,7 +799,8 @@
       ]
     },
     {
-      "MemberId": 3172,
+      "PlayerId": null,
+      "MemberNumber": 3172,
       "Title": "Mr",
       "FirstName": "Jack",
       "LastName": "Heath",
@@ -765,6 +808,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -793,7 +837,8 @@
       ]
     },
     {
-      "MemberId": 3454,
+      "PlayerId": null,
+      "MemberNumber": 3454,
       "Title": "Mstr",
       "FirstName": "George",
       "LastName": "Hemmings",
@@ -801,6 +846,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -829,7 +875,8 @@
       ]
     },
     {
-      "MemberId": 3061,
+      "PlayerId": null,
+      "MemberNumber": 3061,
       "Title": "Mr",
       "FirstName": "Noah",
       "LastName": "Hinsley",
@@ -837,6 +884,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -865,7 +913,8 @@
       ]
     },
     {
-      "MemberId": 3097,
+      "PlayerId": null,
+      "MemberNumber": 3097,
       "Title": "Mr",
       "FirstName": "Alex",
       "LastName": "Histed",
@@ -873,6 +922,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -901,7 +951,8 @@
       ]
     },
     {
-      "MemberId": 3300,
+      "PlayerId": null,
+      "MemberNumber": 3300,
       "Title": "Mr",
       "FirstName": "Charlie",
       "LastName": "Hockridge",
@@ -909,6 +960,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -937,7 +989,8 @@
       ]
     },
     {
-      "MemberId": 2831,
+      "PlayerId": null,
+      "MemberNumber": 2831,
       "Title": "Miss",
       "FirstName": "Jasmine",
       "LastName": "Knight",
@@ -945,6 +998,7 @@
       "Gender": "female",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -973,7 +1027,8 @@
       ]
     },
     {
-      "MemberId": 3220,
+      "PlayerId": null,
+      "MemberNumber": 3220,
       "Title": "Master",
       "FirstName": "George",
       "LastName": "Lancaster",
@@ -981,6 +1036,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1009,7 +1065,8 @@
       ]
     },
     {
-      "MemberId": 3219,
+      "PlayerId": null,
+      "MemberNumber": 3219,
       "Title": "Miss",
       "FirstName": "Sophie",
       "LastName": "Lancaster",
@@ -1017,6 +1074,7 @@
       "Gender": "female",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1045,7 +1103,8 @@
       ]
     },
     {
-      "MemberId": 3274,
+      "PlayerId": null,
+      "MemberNumber": 3274,
       "Title": "",
       "FirstName": "Max",
       "LastName": "Lyons",
@@ -1053,6 +1112,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1081,7 +1141,8 @@
       ]
     },
     {
-      "MemberId": 3273,
+      "PlayerId": null,
+      "MemberNumber": 3273,
       "Title": "",
       "FirstName": "Max",
       "LastName": "Lyons",
@@ -1089,6 +1150,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1117,7 +1179,8 @@
       ]
     },
     {
-      "MemberId": 3292,
+      "PlayerId": null,
+      "MemberNumber": 3292,
       "Title": "Mr",
       "FirstName": "Max",
       "LastName": "Mason",
@@ -1125,6 +1188,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1153,7 +1217,8 @@
       ]
     },
     {
-      "MemberId": 3451,
+      "PlayerId": null,
+      "MemberNumber": 3451,
       "Title": "Mstr",
       "FirstName": "Oliver",
       "LastName": "Mitchell",
@@ -1161,6 +1226,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1189,7 +1255,8 @@
       ]
     },
     {
-      "MemberId": 2815,
+      "PlayerId": null,
+      "MemberNumber": 2815,
       "Title": "Miss",
       "FirstName": "Georgie",
       "LastName": "Mole",
@@ -1197,6 +1264,7 @@
       "Gender": "female",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1225,7 +1293,8 @@
       ]
     },
     {
-      "MemberId": 1749,
+      "PlayerId": null,
+      "MemberNumber": 1749,
       "Title": "Mr",
       "FirstName": "Kian",
       "LastName": "Moran",
@@ -1233,6 +1302,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1261,7 +1331,8 @@
       ]
     },
     {
-      "MemberId": 3333,
+      "PlayerId": null,
+      "MemberNumber": 3333,
       "Title": "Miss",
       "FirstName": "Darcey",
       "LastName": "Owen",
@@ -1269,6 +1340,7 @@
       "Gender": "female",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1297,7 +1369,8 @@
       ]
     },
     {
-      "MemberId": 3183,
+      "PlayerId": null,
+      "MemberNumber": 3183,
       "Title": "",
       "FirstName": "Seth",
       "LastName": "Parsons",
@@ -1305,6 +1378,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1333,7 +1407,8 @@
       ]
     },
     {
-      "MemberId": 2842,
+      "PlayerId": null,
+      "MemberNumber": 2842,
       "Title": "Mr",
       "FirstName": "Eddie",
       "LastName": "Patchett",
@@ -1341,6 +1416,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1369,7 +1445,8 @@
       ]
     },
     {
-      "MemberId": 3480,
+      "PlayerId": null,
+      "MemberNumber": 3480,
       "Title": "Mstr",
       "FirstName": "Lenny",
       "LastName": "Pegg",
@@ -1377,6 +1454,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1405,7 +1483,8 @@
       ]
     },
     {
-      "MemberId": 3471,
+      "PlayerId": null,
+      "MemberNumber": 3471,
       "Title": "Mstr",
       "FirstName": "Riley",
       "LastName": "Sallis",
@@ -1413,6 +1492,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1441,7 +1521,8 @@
       ]
     },
     {
-      "MemberId": 2795,
+      "PlayerId": null,
+      "MemberNumber": 2795,
       "Title": "Mr",
       "FirstName": "Harvey",
       "LastName": "Sharland",
@@ -1449,6 +1530,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1477,7 +1559,8 @@
       ]
     },
     {
-      "MemberId": 3470,
+      "PlayerId": null,
+      "MemberNumber": 3470,
       "Title": "Mstr",
       "FirstName": "Thomas",
       "LastName": "Sherratt",
@@ -1485,6 +1568,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1513,7 +1597,8 @@
       ]
     },
     {
-      "MemberId": 3472,
+      "PlayerId": null,
+      "MemberNumber": 3472,
       "Title": "Miss",
       "FirstName": "Jessica",
       "LastName": "Skeet",
@@ -1521,6 +1606,7 @@
       "Gender": "female",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1549,7 +1635,8 @@
       ]
     },
     {
-      "MemberId": 3482,
+      "PlayerId": null,
+      "MemberNumber": 3482,
       "Title": "Mstr",
       "FirstName": "Alexander",
       "LastName": "Smith",
@@ -1557,6 +1644,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1585,7 +1673,8 @@
       ]
     },
     {
-      "MemberId": 3029,
+      "PlayerId": null,
+      "MemberNumber": 3029,
       "Title": "",
       "FirstName": "George",
       "LastName": "Smith",
@@ -1593,6 +1682,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1621,7 +1711,8 @@
       ]
     },
     {
-      "MemberId": 3028,
+      "PlayerId": null,
+      "MemberNumber": 3028,
       "Title": "",
       "FirstName": "Harry",
       "LastName": "Smith",
@@ -1629,6 +1720,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1657,7 +1749,8 @@
       ]
     },
     {
-      "MemberId": 3030,
+      "PlayerId": null,
+      "MemberNumber": 3030,
       "Title": "Burton-On-",
       "FirstName": "Jack",
       "LastName": "Smith",
@@ -1665,6 +1758,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1693,7 +1787,8 @@
       ]
     },
     {
-      "MemberId": 3265,
+      "PlayerId": null,
+      "MemberNumber": 3265,
       "Title": "",
       "FirstName": "Matthew",
       "LastName": "Smith",
@@ -1701,6 +1796,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1729,7 +1825,8 @@
       ]
     },
     {
-      "MemberId": 1745,
+      "PlayerId": null,
+      "MemberNumber": 1745,
       "Title": "Miss",
       "FirstName": "Summer",
       "LastName": "Smith",
@@ -1737,6 +1834,7 @@
       "Gender": "female",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1765,7 +1863,8 @@
       ]
     },
     {
-      "MemberId": 3379,
+      "PlayerId": null,
+      "MemberNumber": 3379,
       "Title": "Mr",
       "FirstName": "Tom",
       "LastName": "Stewart",
@@ -1773,6 +1872,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1801,7 +1901,8 @@
       ]
     },
     {
-      "MemberId": 3367,
+      "PlayerId": null,
+      "MemberNumber": 3367,
       "Title": "Mr",
       "FirstName": "Oliver",
       "LastName": "Stretch",
@@ -1809,6 +1910,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1837,7 +1939,8 @@
       ]
     },
     {
-      "MemberId": 3194,
+      "PlayerId": null,
+      "MemberNumber": 3194,
       "Title": "Master",
       "FirstName": "Benjamin",
       "LastName": "Toone",
@@ -1845,6 +1948,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1857,7 +1961,7 @@
       "LeaveDate": null,
       "Handicap": "",
       "IsDisabledGolfer": false,
-      "UnpaidTotal": 100.00,
+      "UnpaidTotal": 0.00,
       "IsActive": true,
       "Links": [
         {
@@ -1873,7 +1977,8 @@
       ]
     },
     {
-      "MemberId": 3266,
+      "PlayerId": null,
+      "MemberNumber": 3266,
       "Title": "Mr",
       "FirstName": "Finlay",
       "LastName": "Wadsley",
@@ -1881,6 +1986,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1893,7 +1999,7 @@
       "LeaveDate": null,
       "Handicap": "30.8",
       "IsDisabledGolfer": false,
-      "UnpaidTotal": 110.00,
+      "UnpaidTotal": 0.00,
       "IsActive": true,
       "Links": [
         {
@@ -1909,7 +2015,8 @@
       ]
     },
     {
-      "MemberId": 3285,
+      "PlayerId": null,
+      "MemberNumber": 3285,
       "Title": "Mr",
       "FirstName": "Samuel",
       "LastName": "Ward",
@@ -1917,6 +2024,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1945,7 +2053,8 @@
       ]
     },
     {
-      "MemberId": 3468,
+      "PlayerId": null,
+      "MemberNumber": 3468,
       "Title": "Mstr",
       "FirstName": "Harry",
       "LastName": "Webb",
@@ -1953,6 +2062,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -1981,7 +2091,8 @@
       ]
     },
     {
-      "MemberId": 3192,
+      "PlayerId": null,
+      "MemberNumber": 3192,
       "Title": "Mr",
       "FirstName": "Freddie",
       "LastName": "White",
@@ -1989,6 +2100,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -2017,7 +2129,8 @@
       ]
     },
     {
-      "MemberId": 3193,
+      "PlayerId": null,
+      "MemberNumber": 3193,
       "Title": "Mr",
       "FirstName": "Oliver",
       "LastName": "White",
@@ -2025,6 +2138,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 8-11",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -2053,7 +2167,8 @@
       ]
     },
     {
-      "MemberId": 3207,
+      "PlayerId": null,
+      "MemberNumber": 3207,
       "Title": "Master",
       "FirstName": "Peter",
       "LastName": "Whittingham",
@@ -2061,6 +2176,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -2089,7 +2205,8 @@
       ]
     },
     {
-      "MemberId": 2889,
+      "PlayerId": null,
+      "MemberNumber": 2889,
       "Title": "Mr",
       "FirstName": "Leo",
       "LastName": "Windsor",
@@ -2097,6 +2214,7 @@
       "Gender": "male",
       "MembershipCategory": "Junior 12-18",
       "MembershipStatus": "R",
+      "PrimaryCategory": 2,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -2125,7 +2243,8 @@
       ]
     },
     {
-      "MemberId": 0,
+      "PlayerId": null,
+      "MemberNumber": 0,
       "Title": "",
       "FirstName": "",
       "LastName": "",
@@ -2133,6 +2252,7 @@
       "Gender": "",
       "MembershipCategory": "",
       "MembershipStatus": "",
+      "PrimaryCategory": 0,
       "Address1": null,
       "Address2": null,
       "Address3": null,
@@ -2161,5 +2281,5 @@
       ]
     }
   ],
-  "Expiration": "2025-02-18T14:36:53.4473354Z"
+  "Expiration": "2025-03-06T11:00:06.3256169Z"
 }

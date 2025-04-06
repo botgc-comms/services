@@ -1,0 +1,2942 @@
+{
+  "Value": [
+    {
+      "Date": "2024-06-08T00:00:00",
+      "TeeTimes": [
+        {
+          "Players": [],
+          "Time": "2025-03-03T06:00:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T06:10:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T06:20:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T06:30:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T06:40:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T06:50:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:00:00"
+                }
+              ],
+              "FullName": "Jonathan Babb"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:00:00"
+                }
+              ],
+              "FullName": "Charlie Kendrick"
+            }
+          ],
+          "Time": "2025-03-03T07:00:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:08:00"
+                }
+              ],
+              "FullName": "Stephen Bruce"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:08:00"
+                }
+              ],
+              "FullName": "Christopher Knowles"
+            }
+          ],
+          "Time": "2025-03-03T07:08:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:16:00"
+                }
+              ],
+              "FullName": "Roy Sherratt"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:16:00"
+                }
+              ],
+              "FullName": "William Sherratt"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:16:00"
+                }
+              ],
+              "FullName": "Andrew Kendrick"
+            }
+          ],
+          "Time": "2025-03-03T07:16:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:24:00"
+                }
+              ],
+              "FullName": "Leon Pittom"
+            }
+          ],
+          "Time": "2025-03-03T07:24:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T07:32:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:40:00"
+                }
+              ],
+              "FullName": "John Knight"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:40:00"
+                }
+              ],
+              "FullName": "Jeff Adkin"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:40:00"
+                }
+              ],
+              "FullName": "Tim Mortlock"
+            }
+          ],
+          "Time": "2025-03-03T07:40:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:48:00"
+                }
+              ],
+              "FullName": "Jono Marklew"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:48:00"
+                }
+              ],
+              "FullName": "Andrew Riches"
+            }
+          ],
+          "Time": "2025-03-03T07:48:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:56:00"
+                }
+              ],
+              "FullName": "Neil Elliot"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T07:56:00"
+                }
+              ],
+              "FullName": "Mark Bale"
+            }
+          ],
+          "Time": "2025-03-03T07:56:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:04:00"
+                }
+              ],
+              "FullName": "Scott Maylard"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:04:00"
+                }
+              ],
+              "FullName": "Carl Withnall"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:04:00"
+                }
+              ],
+              "FullName": "Paul Elson"
+            }
+          ],
+          "Time": "2025-03-03T08:04:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:12:00"
+                }
+              ],
+              "FullName": "Trevor Newton"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:12:00"
+                }
+              ],
+              "FullName": "Paul Clarke"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:12:00"
+                }
+              ],
+              "FullName": "Adam Knights"
+            }
+          ],
+          "Time": "2025-03-03T08:12:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:20:00"
+                }
+              ],
+              "FullName": "Sam Steele"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:20:00"
+                }
+              ],
+              "FullName": "David Brightman"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:20:00"
+                }
+              ],
+              "FullName": "Michael Scott"
+            }
+          ],
+          "Time": "2025-03-03T08:20:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:28:00"
+                }
+              ],
+              "FullName": "Andrew Edwards"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:28:00"
+                }
+              ],
+              "FullName": "David Brittain"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:28:00"
+                }
+              ],
+              "FullName": "David Rose"
+            }
+          ],
+          "Time": "2025-03-03T08:28:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:36:00"
+                }
+              ],
+              "FullName": "Todd Foster"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:36:00"
+                }
+              ],
+              "FullName": "Neil Hoogendyk"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:36:00"
+                }
+              ],
+              "FullName": "Ashley Mansfield"
+            }
+          ],
+          "Time": "2025-03-03T08:36:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:44:00"
+                }
+              ],
+              "FullName": "Roger Lloyd"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:44:00"
+                }
+              ],
+              "FullName": "Paul Fox"
+            }
+          ],
+          "Time": "2025-03-03T08:44:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:52:00"
+                }
+              ],
+              "FullName": "Neil Shore"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:52:00"
+                }
+              ],
+              "FullName": "Andrew Wilson"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T08:52:00"
+                }
+              ],
+              "FullName": "Mark Waddell"
+            }
+          ],
+          "Time": "2025-03-03T08:52:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:00:00"
+                }
+              ],
+              "FullName": "Raymond Ebberley"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:00:00"
+                }
+              ],
+              "FullName": "Stacey Ash"
+            }
+          ],
+          "Time": "2025-03-03T09:00:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:08:00"
+                }
+              ],
+              "FullName": "Dan Palk"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:08:00"
+                }
+              ],
+              "FullName": "Peter Bodie"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:08:00"
+                }
+              ],
+              "FullName": "Tony Davey"
+            }
+          ],
+          "Time": "2025-03-03T09:08:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:16:00"
+                }
+              ],
+              "FullName": "Ian King"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:16:00"
+                }
+              ],
+              "FullName": "Ian Williams"
+            }
+          ],
+          "Time": "2025-03-03T09:16:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:24:00"
+                }
+              ],
+              "FullName": "Paul Fryatt"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:24:00"
+                }
+              ],
+              "FullName": "Frank Freeman"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:24:00"
+                }
+              ],
+              "FullName": "Alan Dutton"
+            }
+          ],
+          "Time": "2025-03-03T09:24:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:32:00"
+                }
+              ],
+              "FullName": "Simon Woolley"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:32:00"
+                }
+              ],
+              "FullName": "Paul Lester"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:32:00"
+                }
+              ],
+              "FullName": "Alexander Walton"
+            }
+          ],
+          "Time": "2025-03-03T09:32:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:40:00"
+                }
+              ],
+              "FullName": "Stephen Turner"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:40:00"
+                }
+              ],
+              "FullName": "Adrian Harper"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:40:00"
+                }
+              ],
+              "FullName": "David Edwards"
+            }
+          ],
+          "Time": "2025-03-03T09:40:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:48:00"
+                }
+              ],
+              "FullName": "David Woodburn"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:48:00"
+                }
+              ],
+              "FullName": "Simon Nadin"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:48:00"
+                }
+              ],
+              "FullName": "Rob Elson"
+            }
+          ],
+          "Time": "2025-03-03T09:48:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:56:00"
+                }
+              ],
+              "FullName": "Kieran Smith"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T09:56:00"
+                }
+              ],
+              "FullName": "Matthew Lisle"
+            }
+          ],
+          "Time": "2025-03-03T09:56:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:04:00"
+                }
+              ],
+              "FullName": "Haydon Shorthouse"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:04:00"
+                }
+              ],
+              "FullName": "Adam Toone"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:04:00"
+                }
+              ],
+              "FullName": "Simon Boulter"
+            }
+          ],
+          "Time": "2025-03-03T10:04:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:12:00"
+                }
+              ],
+              "FullName": "David A Jones"
+            }
+          ],
+          "Time": "2025-03-03T10:12:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:20:00"
+                }
+              ],
+              "FullName": "Carl Foster"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:20:00"
+                }
+              ],
+              "FullName": "Garry Harding"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:20:00"
+                }
+              ],
+              "FullName": "James Elrick"
+            }
+          ],
+          "Time": "2025-03-03T10:20:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:28:00"
+                }
+              ],
+              "FullName": "Graham Lewin"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:28:00"
+                }
+              ],
+              "FullName": "Ray Greaves"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:28:00"
+                }
+              ],
+              "FullName": "Karl Jeffrey"
+            }
+          ],
+          "Time": "2025-03-03T10:28:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:36:00"
+                }
+              ],
+              "FullName": "Matthew Bevington"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:36:00"
+                }
+              ],
+              "FullName": "Adam Barclay"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:36:00"
+                }
+              ],
+              "FullName": "Joseph Barclay"
+            }
+          ],
+          "Time": "2025-03-03T10:36:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:44:00"
+                }
+              ],
+              "FullName": "Pat Walsh"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:44:00"
+                }
+              ],
+              "FullName": "Duncan White"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T10:44:00"
+                }
+              ],
+              "FullName": "Eric Winson"
+            }
+          ],
+          "Time": "2025-03-03T10:44:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T10:52:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T11:00:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T11:08:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T11:16:00"
+                }
+              ],
+              "FullName": "Steven Eaglefield"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T11:16:00"
+                }
+              ],
+              "FullName": "Timothy Deakin"
+            }
+          ],
+          "Time": "2025-03-03T11:16:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T11:24:00"
+                }
+              ],
+              "FullName": "Timothy Douthwaite"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T11:24:00"
+                }
+              ],
+              "FullName": "Anthony Toon"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T11:24:00"
+                }
+              ],
+              "FullName": "Toby D'angibau"
+            }
+          ],
+          "Time": "2025-03-03T11:24:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T11:32:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T11:40:00"
+                }
+              ],
+              "FullName": "Jonathan Locke"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T11:40:00"
+                }
+              ],
+              "FullName": "Simon Jacks"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T11:40:00"
+                }
+              ],
+              "FullName": "Richard Payne"
+            }
+          ],
+          "Time": "2025-03-03T11:40:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T11:48:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T11:56:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:04:00"
+                }
+              ],
+              "FullName": "Sean Jenney"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:04:00"
+                }
+              ],
+              "FullName": "Philip Croft"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:04:00"
+                }
+              ],
+              "FullName": "Wayne Taylor"
+            }
+          ],
+          "Time": "2025-03-03T12:04:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:12:00"
+                }
+              ],
+              "FullName": "Wayne Tandy"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:12:00"
+                }
+              ],
+              "FullName": "Keith Francis"
+            }
+          ],
+          "Time": "2025-03-03T12:12:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:20:00"
+                }
+              ],
+              "FullName": "Ian Nicol"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:20:00"
+                }
+              ],
+              "FullName": "Jeff Ellis"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:20:00"
+                }
+              ],
+              "FullName": "Victor Prince"
+            }
+          ],
+          "Time": "2025-03-03T12:20:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:28:00"
+                }
+              ],
+              "FullName": "David Kerr-Delworth"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:28:00"
+                }
+              ],
+              "FullName": "Robert Overton"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:28:00"
+                }
+              ],
+              "FullName": "David Low"
+            }
+          ],
+          "Time": "2025-03-03T12:28:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:36:00"
+                }
+              ],
+              "FullName": "Ian Graves"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:36:00"
+                }
+              ],
+              "FullName": "Julian Humpidge"
+            }
+          ],
+          "Time": "2025-03-03T12:36:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T12:44:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:52:00"
+                }
+              ],
+              "FullName": "Jonathan King"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T12:52:00"
+                }
+              ],
+              "FullName": "Tony Roe"
+            }
+          ],
+          "Time": "2025-03-03T12:52:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T13:00:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:08:00"
+                }
+              ],
+              "FullName": "Colin Rigby"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:08:00"
+                }
+              ],
+              "FullName": "Ralph Mason"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:08:00"
+                }
+              ],
+              "FullName": "Brendan Forster"
+            }
+          ],
+          "Time": "2025-03-03T13:08:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:16:00"
+                }
+              ],
+              "FullName": "Shaun Clarke"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:16:00"
+                }
+              ],
+              "FullName": "Paul Foster"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:16:00"
+                }
+              ],
+              "FullName": "David Grundy"
+            }
+          ],
+          "Time": "2025-03-03T13:16:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:24:00"
+                }
+              ],
+              "FullName": "Peter Sumner"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:24:00"
+                }
+              ],
+              "FullName": "Michael Clamp"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:24:00"
+                }
+              ],
+              "FullName": "Joe Clarke"
+            }
+          ],
+          "Time": "2025-03-03T13:24:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:32:00"
+                }
+              ],
+              "FullName": "Stephen Mole"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:32:00"
+                }
+              ],
+              "FullName": "Daniel Clarke"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:32:00"
+                }
+              ],
+              "FullName": "Brian Bambrick-Sattar"
+            }
+          ],
+          "Time": "2025-03-03T13:32:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:40:00"
+                }
+              ],
+              "FullName": "Mitch Poulton"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:40:00"
+                }
+              ],
+              "FullName": "Paul Skeet"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:40:00"
+                }
+              ],
+              "FullName": "Philip Gill"
+            }
+          ],
+          "Time": "2025-03-03T13:40:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:48:00"
+                }
+              ],
+              "FullName": "Kristian Hansen"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:48:00"
+                }
+              ],
+              "FullName": "Andrew Lyons"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": true,
+                  "Time": "2025-03-03T13:48:00"
+                }
+              ],
+              "FullName": "Sam Taylor"
+            }
+          ],
+          "Time": "2025-03-03T13:48:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T13:56:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T14:04:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T14:12:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T14:20:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T14:28:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T14:36:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T14:44:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T14:52:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T15:00:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T15:10:00"
+                }
+              ],
+              "FullName": "Doreen Francis"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T15:10:00"
+                }
+              ],
+              "FullName": "Ceri Rigby"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T15:10:00"
+                }
+              ],
+              "FullName": "Peter Barber"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T15:10:00"
+                }
+              ],
+              "FullName": "Trudie Bullick"
+            }
+          ],
+          "Time": "2025-03-03T15:10:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T15:20:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T15:30:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T15:40:00"
+                }
+              ],
+              "FullName": "Tracey Kirkham"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T15:40:00"
+                }
+              ],
+              "FullName": "David Beckett"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T15:40:00"
+                }
+              ],
+              "FullName": "Rita Beckett"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T15:40:00"
+                }
+              ],
+              "FullName": "Mark Parker"
+            }
+          ],
+          "Time": "2025-03-03T15:40:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T15:50:00"
+                }
+              ],
+              "FullName": "Azhar Manzoor"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T15:50:00"
+                }
+              ],
+              "FullName": "Robert Callagher"
+            }
+          ],
+          "Time": "2025-03-03T15:50:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:00:00"
+                }
+              ],
+              "FullName": "Adam Clamp"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:00:00"
+                }
+              ],
+              "FullName": "Marc Wood"
+            }
+          ],
+          "Time": "2025-03-03T16:00:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:10:00"
+                }
+              ],
+              "FullName": "Andrew Lakin"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:10:00"
+                }
+              ],
+              "FullName": "Michael Jollands"
+            }
+          ],
+          "Time": "2025-03-03T16:10:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T16:20:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:30:00"
+                }
+              ],
+              "FullName": "Nathan Moore"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:30:00"
+                }
+              ],
+              "FullName": "Ryan Worker"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:30:00"
+                }
+              ],
+              "FullName": "David Dow"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:30:00"
+                }
+              ],
+              "FullName": "James Frost"
+            }
+          ],
+          "Time": "2025-03-03T16:30:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:40:00"
+                }
+              ],
+              "FullName": "Thomas Dawborn"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:40:00"
+                }
+              ],
+              "FullName": "Andrew Gee"
+            }
+          ],
+          "Time": "2025-03-03T16:40:00"
+        },
+        {
+          "Players": [
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:50:00"
+                }
+              ],
+              "FullName": "Andrew Ward"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:50:00"
+                }
+              ],
+              "FullName": "Samuel Ward"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:50:00"
+                }
+              ],
+              "FullName": "Tom Ward"
+            },
+            {
+              "TeeTimes": [
+                {
+                  "IsCompetitionBooking": false,
+                  "Time": "2025-03-03T16:50:00"
+                }
+              ],
+              "FullName": "Nathan Slinn"
+            }
+          ],
+          "Time": "2025-03-03T16:50:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T17:00:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T17:10:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T17:20:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T17:30:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T17:40:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T17:50:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T18:00:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T18:10:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T18:20:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T18:30:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T18:40:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T18:50:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T19:00:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T19:10:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T19:20:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T19:30:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T19:40:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T19:50:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T20:00:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T20:10:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T20:20:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T20:30:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T20:40:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T20:50:00"
+        },
+        {
+          "Players": [],
+          "Time": "2025-03-03T21:00:00"
+        }
+      ],
+      "Players": [
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:00:00"
+            }
+          ],
+          "FullName": "Jonathan Babb"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:00:00"
+            }
+          ],
+          "FullName": "Charlie Kendrick"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:08:00"
+            }
+          ],
+          "FullName": "Stephen Bruce"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:08:00"
+            }
+          ],
+          "FullName": "Christopher Knowles"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:16:00"
+            }
+          ],
+          "FullName": "Roy Sherratt"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:16:00"
+            }
+          ],
+          "FullName": "William Sherratt"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:16:00"
+            }
+          ],
+          "FullName": "Andrew Kendrick"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:24:00"
+            }
+          ],
+          "FullName": "Leon Pittom"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:40:00"
+            }
+          ],
+          "FullName": "John Knight"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:40:00"
+            }
+          ],
+          "FullName": "Jeff Adkin"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:40:00"
+            }
+          ],
+          "FullName": "Tim Mortlock"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:48:00"
+            }
+          ],
+          "FullName": "Jono Marklew"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:48:00"
+            }
+          ],
+          "FullName": "Andrew Riches"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:56:00"
+            }
+          ],
+          "FullName": "Neil Elliot"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T07:56:00"
+            }
+          ],
+          "FullName": "Mark Bale"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:04:00"
+            }
+          ],
+          "FullName": "Scott Maylard"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:04:00"
+            }
+          ],
+          "FullName": "Carl Withnall"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:04:00"
+            }
+          ],
+          "FullName": "Paul Elson"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:12:00"
+            }
+          ],
+          "FullName": "Trevor Newton"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:12:00"
+            }
+          ],
+          "FullName": "Paul Clarke"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:12:00"
+            }
+          ],
+          "FullName": "Adam Knights"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:20:00"
+            }
+          ],
+          "FullName": "Sam Steele"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:20:00"
+            }
+          ],
+          "FullName": "David Brightman"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:20:00"
+            }
+          ],
+          "FullName": "Michael Scott"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:28:00"
+            }
+          ],
+          "FullName": "Andrew Edwards"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:28:00"
+            }
+          ],
+          "FullName": "David Brittain"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:28:00"
+            }
+          ],
+          "FullName": "David Rose"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:36:00"
+            }
+          ],
+          "FullName": "Todd Foster"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:36:00"
+            }
+          ],
+          "FullName": "Neil Hoogendyk"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:36:00"
+            }
+          ],
+          "FullName": "Ashley Mansfield"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:44:00"
+            }
+          ],
+          "FullName": "Roger Lloyd"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:44:00"
+            }
+          ],
+          "FullName": "Paul Fox"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:52:00"
+            }
+          ],
+          "FullName": "Neil Shore"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:52:00"
+            }
+          ],
+          "FullName": "Andrew Wilson"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T08:52:00"
+            }
+          ],
+          "FullName": "Mark Waddell"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:00:00"
+            }
+          ],
+          "FullName": "Raymond Ebberley"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:00:00"
+            }
+          ],
+          "FullName": "Stacey Ash"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:08:00"
+            }
+          ],
+          "FullName": "Dan Palk"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:08:00"
+            }
+          ],
+          "FullName": "Peter Bodie"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:08:00"
+            }
+          ],
+          "FullName": "Tony Davey"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:16:00"
+            }
+          ],
+          "FullName": "Ian King"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:16:00"
+            }
+          ],
+          "FullName": "Ian Williams"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:24:00"
+            }
+          ],
+          "FullName": "Paul Fryatt"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:24:00"
+            }
+          ],
+          "FullName": "Frank Freeman"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:24:00"
+            }
+          ],
+          "FullName": "Alan Dutton"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:32:00"
+            }
+          ],
+          "FullName": "Simon Woolley"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:32:00"
+            }
+          ],
+          "FullName": "Paul Lester"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:32:00"
+            }
+          ],
+          "FullName": "Alexander Walton"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:40:00"
+            }
+          ],
+          "FullName": "Stephen Turner"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:40:00"
+            }
+          ],
+          "FullName": "Adrian Harper"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:40:00"
+            }
+          ],
+          "FullName": "David Edwards"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:48:00"
+            }
+          ],
+          "FullName": "David Woodburn"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:48:00"
+            }
+          ],
+          "FullName": "Simon Nadin"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:48:00"
+            }
+          ],
+          "FullName": "Rob Elson"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:56:00"
+            }
+          ],
+          "FullName": "Kieran Smith"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T09:56:00"
+            }
+          ],
+          "FullName": "Matthew Lisle"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:04:00"
+            }
+          ],
+          "FullName": "Haydon Shorthouse"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:04:00"
+            }
+          ],
+          "FullName": "Adam Toone"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:04:00"
+            }
+          ],
+          "FullName": "Simon Boulter"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:12:00"
+            }
+          ],
+          "FullName": "David A Jones"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:20:00"
+            }
+          ],
+          "FullName": "Carl Foster"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:20:00"
+            }
+          ],
+          "FullName": "Garry Harding"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:20:00"
+            }
+          ],
+          "FullName": "James Elrick"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:28:00"
+            }
+          ],
+          "FullName": "Graham Lewin"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:28:00"
+            }
+          ],
+          "FullName": "Ray Greaves"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:28:00"
+            }
+          ],
+          "FullName": "Karl Jeffrey"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:36:00"
+            }
+          ],
+          "FullName": "Matthew Bevington"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:36:00"
+            }
+          ],
+          "FullName": "Adam Barclay"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:36:00"
+            }
+          ],
+          "FullName": "Joseph Barclay"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:44:00"
+            }
+          ],
+          "FullName": "Pat Walsh"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:44:00"
+            }
+          ],
+          "FullName": "Duncan White"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T10:44:00"
+            }
+          ],
+          "FullName": "Eric Winson"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T11:16:00"
+            }
+          ],
+          "FullName": "Steven Eaglefield"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T11:16:00"
+            }
+          ],
+          "FullName": "Timothy Deakin"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T11:24:00"
+            }
+          ],
+          "FullName": "Timothy Douthwaite"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T11:24:00"
+            }
+          ],
+          "FullName": "Anthony Toon"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T11:24:00"
+            }
+          ],
+          "FullName": "Toby D'angibau"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T11:40:00"
+            }
+          ],
+          "FullName": "Jonathan Locke"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T11:40:00"
+            }
+          ],
+          "FullName": "Simon Jacks"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T11:40:00"
+            }
+          ],
+          "FullName": "Richard Payne"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:04:00"
+            }
+          ],
+          "FullName": "Sean Jenney"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:04:00"
+            }
+          ],
+          "FullName": "Philip Croft"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:04:00"
+            }
+          ],
+          "FullName": "Wayne Taylor"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:12:00"
+            }
+          ],
+          "FullName": "Wayne Tandy"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:12:00"
+            }
+          ],
+          "FullName": "Keith Francis"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:20:00"
+            }
+          ],
+          "FullName": "Ian Nicol"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:20:00"
+            }
+          ],
+          "FullName": "Jeff Ellis"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:20:00"
+            }
+          ],
+          "FullName": "Victor Prince"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:28:00"
+            }
+          ],
+          "FullName": "David Kerr-Delworth"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:28:00"
+            }
+          ],
+          "FullName": "Robert Overton"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:28:00"
+            }
+          ],
+          "FullName": "David Low"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:36:00"
+            }
+          ],
+          "FullName": "Ian Graves"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:36:00"
+            }
+          ],
+          "FullName": "Julian Humpidge"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:52:00"
+            }
+          ],
+          "FullName": "Jonathan King"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T12:52:00"
+            }
+          ],
+          "FullName": "Tony Roe"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:08:00"
+            }
+          ],
+          "FullName": "Colin Rigby"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:08:00"
+            }
+          ],
+          "FullName": "Ralph Mason"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:08:00"
+            }
+          ],
+          "FullName": "Brendan Forster"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:16:00"
+            }
+          ],
+          "FullName": "Shaun Clarke"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:16:00"
+            }
+          ],
+          "FullName": "Paul Foster"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:16:00"
+            }
+          ],
+          "FullName": "David Grundy"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:24:00"
+            }
+          ],
+          "FullName": "Peter Sumner"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:24:00"
+            }
+          ],
+          "FullName": "Michael Clamp"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:24:00"
+            }
+          ],
+          "FullName": "Joe Clarke"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:32:00"
+            }
+          ],
+          "FullName": "Stephen Mole"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:32:00"
+            }
+          ],
+          "FullName": "Daniel Clarke"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:32:00"
+            }
+          ],
+          "FullName": "Brian Bambrick-Sattar"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:40:00"
+            }
+          ],
+          "FullName": "Mitch Poulton"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:40:00"
+            }
+          ],
+          "FullName": "Paul Skeet"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:40:00"
+            }
+          ],
+          "FullName": "Philip Gill"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:48:00"
+            }
+          ],
+          "FullName": "Kristian Hansen"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:48:00"
+            }
+          ],
+          "FullName": "Andrew Lyons"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": true,
+              "Time": "2025-03-03T13:48:00"
+            }
+          ],
+          "FullName": "Sam Taylor"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T15:10:00"
+            }
+          ],
+          "FullName": "Doreen Francis"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T15:10:00"
+            }
+          ],
+          "FullName": "Ceri Rigby"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T15:10:00"
+            }
+          ],
+          "FullName": "Peter Barber"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T15:10:00"
+            }
+          ],
+          "FullName": "Trudie Bullick"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T15:40:00"
+            }
+          ],
+          "FullName": "Tracey Kirkham"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T15:40:00"
+            }
+          ],
+          "FullName": "David Beckett"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T15:40:00"
+            }
+          ],
+          "FullName": "Rita Beckett"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T15:40:00"
+            }
+          ],
+          "FullName": "Mark Parker"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T15:50:00"
+            }
+          ],
+          "FullName": "Azhar Manzoor"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T15:50:00"
+            }
+          ],
+          "FullName": "Robert Callagher"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:00:00"
+            }
+          ],
+          "FullName": "Adam Clamp"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:00:00"
+            }
+          ],
+          "FullName": "Marc Wood"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:10:00"
+            }
+          ],
+          "FullName": "Andrew Lakin"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:10:00"
+            }
+          ],
+          "FullName": "Michael Jollands"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:30:00"
+            }
+          ],
+          "FullName": "Nathan Moore"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:30:00"
+            }
+          ],
+          "FullName": "Ryan Worker"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:30:00"
+            }
+          ],
+          "FullName": "David Dow"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:30:00"
+            }
+          ],
+          "FullName": "James Frost"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:40:00"
+            }
+          ],
+          "FullName": "Thomas Dawborn"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:40:00"
+            }
+          ],
+          "FullName": "Andrew Gee"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:50:00"
+            }
+          ],
+          "FullName": "Andrew Ward"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:50:00"
+            }
+          ],
+          "FullName": "Samuel Ward"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:50:00"
+            }
+          ],
+          "FullName": "Tom Ward"
+        },
+        {
+          "TeeTimes": [
+            {
+              "IsCompetitionBooking": false,
+              "Time": "2025-03-03T16:50:00"
+            }
+          ],
+          "FullName": "Nathan Slinn"
+        }
+      ],
+      "Links": []
+    }
+  ],
+  "Expiration": "6108-03-26T19:26:45.4345681Z"
+}

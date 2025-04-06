@@ -1,0 +1,110 @@
+{
+  "Value": [
+    {
+      "RoundId": 96623,
+      "PlayerName": "Jack Heath",
+      "ShotsReceived": 21,
+      "IsGeneralPlay": false,
+      "HandicapAllowance": "N/A",
+      "CompetitionName": "General Play Score Card",
+      "TeeColour": "Yellow",
+      "DatePlayed": "2023-06-16T00:00:00",
+      "TotalStrokes": 52,
+      "TotalStablefordScore": 22,
+      "Holes": [
+        {
+          "HoleNumber": 1,
+          "Yardage": 331,
+          "StrokeIndex": 5,
+          "ShotsReceived": 2,
+          "Par": 4,
+          "Gross": "5",
+          "Net": "3",
+          "StablefordScore": 3
+        },
+        {
+          "HoleNumber": 2,
+          "Yardage": 132,
+          "StrokeIndex": 9,
+          "ShotsReceived": 2,
+          "Par": 3,
+          "Gross": "5",
+          "Net": "3",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 3,
+          "Yardage": 544,
+          "StrokeIndex": 2,
+          "ShotsReceived": 3,
+          "Par": 5,
+          "Gross": "7",
+          "Net": "4",
+          "StablefordScore": 3
+        },
+        {
+          "HoleNumber": 4,
+          "Yardage": 375,
+          "StrokeIndex": 7,
+          "ShotsReceived": 2,
+          "Par": 4,
+          "Gross": "5",
+          "Net": "3",
+          "StablefordScore": 3
+        },
+        {
+          "HoleNumber": 5,
+          "Yardage": 423,
+          "StrokeIndex": 1,
+          "ShotsReceived": 3,
+          "Par": 4,
+          "Gross": "6",
+          "Net": "3",
+          "StablefordScore": 3
+        },
+        {
+          "HoleNumber": 6,
+          "Yardage": 156,
+          "StrokeIndex": 8,
+          "ShotsReceived": 2,
+          "Par": 3,
+          "Gross": "6",
+          "Net": "4",
+          "StablefordScore": 1
+        },
+        {
+          "HoleNumber": 7,
+          "Yardage": 369,
+          "StrokeIndex": 3,
+          "ShotsReceived": 3,
+          "Par": 4,
+          "Gross": "6",
+          "Net": "3",
+          "StablefordScore": 3
+        },
+        {
+          "HoleNumber": 8,
+          "Yardage": 343,
+          "StrokeIndex": 4,
+          "ShotsReceived": 2,
+          "Par": 4,
+          "Gross": "6",
+          "Net": "4",
+          "StablefordScore": 2
+        },
+        {
+          "HoleNumber": 9,
+          "Yardage": 359,
+          "StrokeIndex": 6,
+          "ShotsReceived": 2,
+          "Par": 4,
+          "Gross": "6",
+          "Net": "4",
+          "StablefordScore": 2
+        }
+      ],
+      "Links": []
+    }
+  ],
+  "Expiration": "2025-03-06T11:03:38.4294052Z"
+}

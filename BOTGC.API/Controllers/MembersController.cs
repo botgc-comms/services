@@ -1,4 +1,5 @@
-﻿using BOTGC.API.Interfaces;
+﻿using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -43,7 +44,7 @@ namespace Services.Controllers
         /// <response code="204">No members found.</response>
         /// <response code="500">An internal server error occurred.</response>
         [HttpGet("report")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<MemberDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<MembershipReportDto>))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MembershipReportDto>> GetMembershipReport()
@@ -106,6 +107,41 @@ namespace Services.Controllers
         }
 
         /// <summary>
+        /// Retrieves a list of all current members.
+        /// </summary>
+        /// <returns>A list of current members with their details.</returns>
+        /// <response code="200">Returns the list of current members.</response>
+        /// <response code="204">No current members found.</response>
+        /// <response code="500">An internal server error occurred.</response>
+        [HttpGet("current")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<MemberDto>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IReadOnlyCollection<MemberDto>>> GetCurrentMembers()
+        {
+            _logger.LogInformation("Fetching current members...");
+
+            try
+            {
+                var juniorMembers = await _reportService.GetCurrentMembersAsync();
+
+                if (juniorMembers == null || juniorMembers.Count == 0)
+                {
+                    _logger.LogWarning("No current members found.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation("Successfully retrieved {Count} current members.", juniorMembers.Count);
+                return Ok(juniorMembers);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving current members.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving current members.");
+            }
+        }
+
+        /// <summary>
         /// Retrieves a list of all junior members.
         /// </summary>
         /// <returns>A list of junior members with their details.</returns>
@@ -113,10 +149,10 @@ namespace Services.Controllers
         /// <response code="204">No junior members found.</response>
         /// <response code="500">An internal server error occurred.</response>
         [HttpGet("{memberId}/rounds")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<MemberDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<RoundDto>))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IReadOnlyCollection<MemberDto>>> GetRoundsByMember(string memberId)
+        public async Task<ActionResult<IReadOnlyCollection<RoundDto>>> GetRoundsByMember(string memberId)
         {
             _logger.LogInformation($"Fetching rounds for member {memberId}...");
 
@@ -142,6 +178,31 @@ namespace Services.Controllers
             {
                 _logger.LogError(ex, $"Error retrieving rounds for member members {memberId}.");
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving rounds for member {memberId}.");
+            }
+        }
+
+        [HttpPost("application")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddNewMember([FromBody] NewMemberApplicationDto newMember)
+        {
+            _logger.LogInformation("Attempting to add a new member.");
+            if (newMember == null)
+            {
+                _logger.LogWarning("New member application data is null.");
+                return BadRequest("Invalid member application data.");
+            }
+            try
+            {
+                var createdMemberId = await _reportService.SubmitNewMemberApplicationAsync(newMember);
+                _logger.LogInformation("Successfully added new member with ID {MemberId}.", createdMemberId);
+                return CreatedAtAction(nameof(GetRoundsByMember), new { memberId = createdMemberId }, newMember);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding new member.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding the new member.");
             }
         }
     }

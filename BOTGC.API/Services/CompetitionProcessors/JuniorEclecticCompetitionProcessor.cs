@@ -65,7 +65,7 @@ namespace Services.Services.CompetitionProcessors
                     return null;
                 }
 
-                var rounds = await _reportService.GetRoundsByMemberIdAsync(juniorMember.MemberId.ToString());
+                var rounds = await _reportService.GetRoundsByMemberIdAsync(juniorMember.MemberNumber.ToString());
 
                 #endregion
 
@@ -94,7 +94,7 @@ namespace Services.Services.CompetitionProcessors
                         .Select(gpr => new EclecticRoundExclusionReasonDto()
                         {
                             Type = "WholeRound",
-                            MemberId = juniorMember.MemberId.ToString(),
+                            MemberId = juniorMember.MemberNumber.ToString(),
                             RoundId = gpr.RoundId.ToString(),
                             DatePlayed = gpr.DatePlayed,
                             ExclusionReason = $"General play round on {gpr.DatePlayed.ToOrdinalDateString()} was not played within 6 weeks of any competition round."
@@ -254,7 +254,7 @@ namespace Services.Services.CompetitionProcessors
                        .Except(bestFNineGeneral)
                        .Select(gpr => new EclecticRoundExclusionReasonDto()
                        {
-                           MemberId = juniorMember.MemberId.ToString(),
+                           MemberId = juniorMember.MemberNumber.ToString(),
                            RoundId = gpr.RoundId.ToString(),
                            Type = "FrontNine",
                            DatePlayed = gpr.DatePlayed,
@@ -268,7 +268,7 @@ namespace Services.Services.CompetitionProcessors
                         .Except(bestFrontNineCards)
                         .Select(gpr => new EclecticRoundExclusionReasonDto()
                         {
-                            MemberId = juniorMember.MemberId.ToString(),
+                            MemberId = juniorMember.MemberNumber.ToString(),
                             RoundId = gpr.RoundId.ToString(),
                             Type = "FrontNine",
                             DatePlayed = gpr.DatePlayed,
@@ -289,7 +289,7 @@ namespace Services.Services.CompetitionProcessors
                       .Except(bestBNineGeneral)
                       .Select(gpr => new EclecticRoundExclusionReasonDto()
                       {
-                          MemberId = juniorMember.MemberId.ToString(),
+                          MemberId = juniorMember.MemberNumber.ToString(),
                           RoundId = gpr.RoundId.ToString(),
                           Type = "BackNine",
                           DatePlayed = gpr.DatePlayed,
@@ -303,7 +303,7 @@ namespace Services.Services.CompetitionProcessors
                         .Except(bestBackNineCards)
                         .Select(gpr => new EclecticRoundExclusionReasonDto()
                         {
-                            MemberId = juniorMember.MemberId.ToString(),
+                            MemberId = juniorMember.MemberNumber.ToString(),
                             RoundId = gpr.RoundId.ToString(),
                             Type = "BackNine",
                             DatePlayed = gpr.DatePlayed,
@@ -367,7 +367,7 @@ namespace Services.Services.CompetitionProcessors
                       .Except(finalBestFrontNineCombination ?? [])
                       .Select(gpr => new EclecticRoundExclusionReasonDto()
                       {
-                          MemberId = juniorMember.MemberId.ToString(),
+                          MemberId = juniorMember.MemberNumber.ToString(),
                           RoundId = gpr.RoundId.ToString(),
                           Type = "FrontNine",
                           DatePlayed = gpr.DatePlayed,
@@ -381,7 +381,7 @@ namespace Services.Services.CompetitionProcessors
                       .Except(finalBestBackNineCombination ?? [])
                       .Select(gpr => new EclecticRoundExclusionReasonDto()
                       {
-                          MemberId = juniorMember.MemberId.ToString(),
+                          MemberId = juniorMember.MemberNumber.ToString(),
                           RoundId = gpr.RoundId.ToString(),
                           Type = "BackNine",
                           DatePlayed = gpr.DatePlayed,
@@ -479,7 +479,7 @@ namespace Services.Services.CompetitionProcessors
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to calculate competition results for member {juniorMember.MemberId}.");
+                _logger.LogError(ex, $"Failed to calculate competition results for member {juniorMember.MemberNumber}.");
             }
 
             return null;

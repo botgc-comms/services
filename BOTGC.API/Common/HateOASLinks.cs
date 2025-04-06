@@ -12,13 +12,32 @@ namespace Services.Common
                 new HateoasLink
                 {
                     Rel = "self",
-                    Href = $"/api/members/{member.MemberId}",
+                    Href = $"/api/members/{member.MemberNumber}",
                     Method = "GET"
                 },
                 new HateoasLink
                 {
                     Rel = "rounds",
-                    Href = $"/api/members/{member.MemberId}/rounds",
+                    Href = $"/api/members/{member.MemberNumber}/rounds",
+                    Method = "GET"
+                }
+            };
+        }
+
+        public static List<HateoasLink> GetCompetitionLinks(CompetitionDto competition)
+        {
+            return new List<HateoasLink>
+            {
+                new HateoasLink
+                {
+                    Rel = "settings",
+                    Href = $"/api/competitions/{competition.Id}",
+                    Method = "GET"
+                },
+                new HateoasLink
+                {
+                    Rel = "leaderboard",
+                    Href = $"/api/competitions/{competition.Id}/leaderboard",
                     Method = "GET"
                 }
             };

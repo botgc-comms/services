@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Services.Services.BackgroundServices
 {
@@ -15,6 +16,7 @@ namespace Services.Services.BackgroundServices
     {
         private readonly ICompetitionTaskQueue _taskQueue;
         private readonly ICompetitionProcessorResolver _processorResolver;
+
         private readonly ILogger<CompetitionBackgroundService> _logger;
 
         /// <summary>
@@ -22,7 +24,9 @@ namespace Services.Services.BackgroundServices
         /// </summary>
         /// <param name="logger">Logger instance.</param>
         /// <param name="trophyDataStore">Data store for retrieving trophies.</param>
-        public CompetitionBackgroundService(ILogger<CompetitionBackgroundService> logger, ICompetitionTaskQueue taskQueue, ICompetitionProcessorResolver processorResolver)
+        public CompetitionBackgroundService(ILogger<CompetitionBackgroundService> logger,
+                                            ICompetitionTaskQueue taskQueue,
+                                            ICompetitionProcessorResolver processorResolver)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));

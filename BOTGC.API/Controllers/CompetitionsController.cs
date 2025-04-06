@@ -71,5 +71,80 @@ namespace Services.Controllers
                 return NotFound();
             }
         }
+
+        [HttpGet("")]
+        public async Task<IActionResult> GetCurrentAndFutureCompetitions()
+        {
+            _logger.LogInformation($"Fetching current and future competitions...");
+
+            try
+            {
+                var competitions = await _reportService.GetActiveAndFutureCompetitionsAsync();
+
+                if (competitions == null || competitions.Count == 0)
+                {
+                    _logger.LogWarning($"No competitions found.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved {competitions.Count} competitions.");
+                return Ok(competitions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving competitions.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving current and future competitions.");
+            }
+        }
+
+        [HttpGet("/{competitionId}")]
+        public async Task<IActionResult> GetCompetitionDetails(string competitionId)
+        {
+            _logger.LogInformation($"Fetching competition {competitionId}...");
+
+            try
+            {
+                var settings = await _reportService.GetCompetitionSettingsAsync(competitionId);
+
+                if (settings == null)
+                {
+                    _logger.LogWarning($"No competitions found.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved settings for competition {competitionId}.");
+                return Ok(settings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving competition settings for competition id {competitionId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving settings for compeition {competitionId}.");
+            }
+        }
+
+        [HttpGet("/{competitionId}/leaderboard")]
+        public async Task<IActionResult> GetCompetitionLeaderboard(string competitionId)
+        {
+            _logger.LogInformation($"Fetching leaderboard for competition {competitionId}...");
+
+            try
+            {
+                var settings = await _reportService.GetCompetitionLeaderboardAsync(competitionId);
+
+                if (settings == null)
+                {
+                    _logger.LogWarning($"No leaderboard found for competition {competitionId}.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved leaderboard for competition {competitionId}.");
+                return Ok(settings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving leaderboard for competition id {competitionId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while leaderboard for compeition {competitionId}.");
+            }
+        }
     }
 }

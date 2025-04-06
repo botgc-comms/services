@@ -1,6 +1,48 @@
 [
   {
     "ContainingType": "Services.Controllers.CompetitionsController",
+    "Method": "GetCompetitionDetails",
+    "RelativePath": "{competitionId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "competitionId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Services.Controllers.CompetitionsController",
+    "Method": "GetCompetitionLeaderboard",
+    "RelativePath": "{competitionId}/leaderboard",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "competitionId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Services.Controllers.CompetitionsController",
+    "Method": "GetCurrentAndFutureCompetitions",
+    "RelativePath": "api/competitions",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Services.Controllers.CompetitionsController",
     "Method": "PrepareJuniorEclecticResults",
     "RelativePath": "api/competitions/juniorEclectic/prepare",
     "HttpMethod": "POST",
@@ -86,6 +128,68 @@
     ],
     "ReturnTypes": [
       {
+        "Type": "System.Collections.Generic.IReadOnlyCollection\u00601[[Services.Dto.RoundDto, BOTGC.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 204
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 500
+      }
+    ]
+  },
+  {
+    "ContainingType": "Services.Controllers.MembersController",
+    "Method": "AddNewMember",
+    "RelativePath": "api/members/application",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "newMember",
+        "Type": "BOTGC.API.Dto.NewMemberApplicationDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 201
+      },
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 400
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 500
+      }
+    ]
+  },
+  {
+    "ContainingType": "Services.Controllers.MembersController",
+    "Method": "GetCurrentMembers",
+    "RelativePath": "api/members/current",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
         "Type": "System.Collections.Generic.IReadOnlyCollection\u00601[[Services.Dto.MemberDto, BOTGC.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
@@ -142,7 +246,7 @@
     "Parameters": [],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IReadOnlyCollection\u00601[[Services.Dto.MemberDto, BOTGC.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IReadOnlyCollection\u00601[[Services.Dto.MembershipReportDto, BOTGC.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -193,6 +297,56 @@
         "StatusCode": 500
       }
     ]
+  },
+  {
+    "ContainingType": "Services.Controllers.TeesheetController",
+    "Method": "GetTeeSheetByDate",
+    "RelativePath": "api/teesheets/{date}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "date",
+        "Type": "System.DateTime",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Services.Dto.ScorecardDto",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 204
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 500
+      }
+    ]
+  },
+  {
+    "ContainingType": "Services.Controllers.TeesheetController",
+    "Method": "PrepareTeetimeUsage",
+    "RelativePath": "api/teesheets/teeUsage/prepare",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dateRange",
+        "Type": "Services.Models.DateRange",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "Servicesx.Controllers.TrophiesController",

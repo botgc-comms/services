@@ -1,0 +1,3663 @@
+{
+  "Value": {
+    "Scores": [
+      {
+        "Scorecard": {
+          "PlayerName": "Samuel Ward",
+          "TotalStablefordScore": 55,
+          "Holes": [
+            {
+              "HoleNumber": 1,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93635,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96441,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94985,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 2,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93635,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96441,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94985,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 3,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94985,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96441,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93635,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 4,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94985,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96441,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93635,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 5,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94985,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96441,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93635,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 6,
+              "RoundDate": "2023-06-10T00:00:00",
+              "RoundId": 96441,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94985,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93635,
+                  "StablefordScore": 3
+                }
+              ]
+            },
+            {
+              "HoleNumber": 7,
+              "RoundDate": "2023-06-10T00:00:00",
+              "RoundId": 96441,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94985,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93635,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 8,
+              "RoundDate": "2023-06-10T00:00:00",
+              "RoundId": 96441,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94985,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93635,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 9,
+              "RoundDate": "0001-01-01T00:00:00",
+              "RoundId": 94884,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96441,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94985,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93635,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 10,
+              "RoundDate": "2023-04-15T00:00:00",
+              "RoundId": 94158,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97918,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-05-17T00:00:00",
+                  "RoundId": 95285,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 11,
+              "RoundDate": "0001-01-01T00:00:00",
+              "RoundId": 94884,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97918,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94158,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-05-17T00:00:00",
+                  "RoundId": 95285,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 12,
+              "RoundDate": "2023-05-17T00:00:00",
+              "RoundId": 95285,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97918,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94158,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 13,
+              "RoundDate": "2023-07-09T00:00:00",
+              "RoundId": 97918,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94158,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-17T00:00:00",
+                  "RoundId": 95285,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 14,
+              "RoundDate": "2023-05-17T00:00:00",
+              "RoundId": 95285,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97918,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94158,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 15,
+              "RoundDate": "2023-07-09T00:00:00",
+              "RoundId": 97918,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94158,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-05-17T00:00:00",
+                  "RoundId": 95285,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 16,
+              "RoundDate": "2023-07-30T00:00:00",
+              "RoundId": 98741,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97918,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94158,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-17T00:00:00",
+                  "RoundId": 95285,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 17,
+              "RoundDate": "2023-05-17T00:00:00",
+              "RoundId": 95285,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97918,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94158,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 18,
+              "RoundDate": "2023-07-09T00:00:00",
+              "RoundId": 97918,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98741,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94158,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 94884,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-05-17T00:00:00",
+                  "RoundId": 95285,
+                  "StablefordScore": 1
+                }
+              ]
+            }
+          ],
+          "Links": []
+        },
+        "ExcludedRounds": [
+          {
+            "MemberId": "3285",
+            "RoundId": "94985",
+            "Type": "BackNine",
+            "DatePlayed": "2023-05-07T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "3285",
+            "RoundId": "93635",
+            "Type": "BackNine",
+            "DatePlayed": "2023-02-21T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "3285",
+            "RoundId": "97918",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-07-09T00:00:00",
+            "ExclusionReason": "This front nine scorecard did not result in the best eclectic score."
+          },
+          {
+            "MemberId": "3285",
+            "RoundId": "94158",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-04-15T00:00:00",
+            "ExclusionReason": "This front nine scorecard did not result in the best eclectic score."
+          },
+          {
+            "MemberId": "3285",
+            "RoundId": "95285",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-05-17T00:00:00",
+            "ExclusionReason": "This front nine scorecard did not result in the best eclectic score."
+          },
+          {
+            "MemberId": "3285",
+            "RoundId": "96441",
+            "Type": "BackNine",
+            "DatePlayed": "2023-06-10T00:00:00",
+            "ExclusionReason": "This back nine scorecard did not result in the best eclectic score."
+          }
+        ]
+      },
+      {
+        "Scorecard": {
+          "PlayerName": "Seth Parsons",
+          "TotalStablefordScore": 53,
+          "Holes": [
+            {
+              "HoleNumber": 1,
+              "RoundDate": "2023-10-18T00:00:00",
+              "RoundId": 101289,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 2,
+              "RoundDate": "2023-10-18T00:00:00",
+              "RoundId": 101289,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 3,
+              "RoundDate": "2023-10-18T00:00:00",
+              "RoundId": 101289,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 3
+                }
+              ]
+            },
+            {
+              "HoleNumber": 4,
+              "RoundDate": "2023-09-06T00:00:00",
+              "RoundId": 99952,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-10-18T00:00:00",
+                  "RoundId": 101289,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 5,
+              "RoundDate": "2023-10-18T00:00:00",
+              "RoundId": 101289,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 3
+                }
+              ]
+            },
+            {
+              "HoleNumber": 6,
+              "RoundDate": "2023-10-18T00:00:00",
+              "RoundId": 101289,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 7,
+              "RoundDate": "2023-10-18T00:00:00",
+              "RoundId": 101289,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 8,
+              "RoundDate": "2023-10-18T00:00:00",
+              "RoundId": 101289,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 9,
+              "RoundDate": "2023-09-06T00:00:00",
+              "RoundId": 99952,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-10-18T00:00:00",
+                  "RoundId": 101289,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 10,
+              "RoundDate": "2023-07-09T00:00:00",
+              "RoundId": 97889,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 4
+                }
+              ]
+            },
+            {
+              "HoleNumber": 11,
+              "RoundDate": "2023-07-09T00:00:00",
+              "RoundId": 97889,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 12,
+              "RoundDate": "2023-09-06T00:00:00",
+              "RoundId": 99952,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 13,
+              "RoundDate": "2023-07-09T00:00:00",
+              "RoundId": 97889,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 14,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93632,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 15,
+              "RoundDate": "2023-09-06T00:00:00",
+              "RoundId": 99952,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 16,
+              "RoundDate": "2023-09-06T00:00:00",
+              "RoundId": 99952,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93632,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 17,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93632,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 18,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93632,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94988,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 99952,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97889,
+                  "StablefordScore": 0
+                }
+              ]
+            }
+          ],
+          "Links": []
+        },
+        "ExcludedRounds": []
+      },
+      {
+        "Scorecard": {
+          "PlayerName": "Jack Heath",
+          "TotalStablefordScore": 46,
+          "Holes": [
+            {
+              "HoleNumber": 1,
+              "RoundDate": "2023-06-16T00:00:00",
+              "RoundId": 96623,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94987,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 2,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93631,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94987,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-16T00:00:00",
+                  "RoundId": 96623,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 3,
+              "RoundDate": "2023-06-16T00:00:00",
+              "RoundId": 96623,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94987,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 3
+                }
+              ]
+            },
+            {
+              "HoleNumber": 4,
+              "RoundDate": "2023-06-16T00:00:00",
+              "RoundId": 96623,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94987,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 5,
+              "RoundDate": "2023-06-16T00:00:00",
+              "RoundId": 96623,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94987,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 3
+                }
+              ]
+            },
+            {
+              "HoleNumber": 6,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93631,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94987,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-06-16T00:00:00",
+                  "RoundId": 96623,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 7,
+              "RoundDate": "2023-06-16T00:00:00",
+              "RoundId": 96623,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94987,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 8,
+              "RoundDate": "2023-06-16T00:00:00",
+              "RoundId": 96623,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94987,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 9,
+              "RoundDate": "2023-06-16T00:00:00",
+              "RoundId": 96623,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94987,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 10,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94987,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 11,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94987,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 12,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94987,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 13,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94987,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 14,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94987,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 15,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94987,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 16,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94987,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 17,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94987,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 18,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94987,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93631,
+                  "StablefordScore": 0
+                }
+              ]
+            }
+          ],
+          "Links": []
+        },
+        "ExcludedRounds": [
+          {
+            "MemberId": "3172",
+            "RoundId": "101290",
+            "Type": "WholeRound",
+            "DatePlayed": "2023-10-18T00:00:00",
+            "ExclusionReason": "General play round on Wednesday 18th October 2023 was not played within 6 weeks of any competition round."
+          },
+          {
+            "MemberId": "3172",
+            "RoundId": "99238",
+            "Type": "WholeRound",
+            "DatePlayed": "2023-08-22T00:00:00",
+            "ExclusionReason": "General play round on Tuesday 22nd August 2023 was not played within 6 weeks of any competition round."
+          },
+          {
+            "MemberId": "3172",
+            "RoundId": "96755",
+            "Type": "WholeRound",
+            "DatePlayed": "2023-06-20T00:00:00",
+            "ExclusionReason": "General play round on Tuesday 20th June 2023 was not played within 6 weeks of any competition round."
+          },
+          {
+            "MemberId": "3172",
+            "RoundId": "96753",
+            "Type": "WholeRound",
+            "DatePlayed": "2023-06-19T00:00:00",
+            "ExclusionReason": "General play round on Monday 19th June 2023 was not played within 6 weeks of any competition round."
+          }
+        ]
+      },
+      {
+        "Scorecard": {
+          "PlayerName": "Jake Chatfield",
+          "TotalStablefordScore": 44,
+          "Holes": [
+            {
+              "HoleNumber": 1,
+              "RoundDate": "2023-07-19T00:00:00",
+              "RoundId": 98235,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98565,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 2,
+              "RoundDate": "0001-01-01T00:00:00",
+              "RoundId": 99324,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98565,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 3,
+              "RoundDate": "2023-07-19T00:00:00",
+              "RoundId": 98235,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98565,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 4,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98565,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 5,
+              "RoundDate": "2023-07-19T00:00:00",
+              "RoundId": 98235,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98565,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 6,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98565,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 7,
+              "RoundDate": "2023-07-19T00:00:00",
+              "RoundId": 98235,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98565,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 3
+                }
+              ]
+            },
+            {
+              "HoleNumber": 8,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98565,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 9,
+              "RoundDate": "0001-01-01T00:00:00",
+              "RoundId": 99324,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98565,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 10,
+              "RoundDate": "2023-07-19T00:00:00",
+              "RoundId": 98235,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98565,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 11,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98565,
+              "StablefordScore": 0,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 12,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98565,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 13,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98565,
+              "StablefordScore": 1,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 14,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98565,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 15,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98565,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 16,
+              "RoundDate": "0001-01-01T00:00:00",
+              "RoundId": 99324,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98565,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 17,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98565,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "0001-01-01T00:00:00",
+                  "RoundId": 99324,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 18,
+              "RoundDate": "0001-01-01T00:00:00",
+              "RoundId": 99324,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98235,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98565,
+                  "StablefordScore": 0
+                }
+              ]
+            }
+          ],
+          "Links": []
+        },
+        "ExcludedRounds": []
+      },
+      {
+        "Scorecard": {
+          "PlayerName": "Jamey Griffith",
+          "TotalStablefordScore": 43,
+          "Holes": [
+            {
+              "HoleNumber": 1,
+              "RoundDate": "2023-07-30T00:00:00",
+              "RoundId": 98745,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93629,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 2,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93629,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 3,
+              "RoundDate": "2023-06-10T00:00:00",
+              "RoundId": 96440,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93629,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 4,
+              "RoundDate": "2023-07-30T00:00:00",
+              "RoundId": 98745,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93629,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 5,
+              "RoundDate": "2023-07-30T00:00:00",
+              "RoundId": 98745,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93629,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 6,
+              "RoundDate": "2023-04-22T00:00:00",
+              "RoundId": 94373,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93629,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 7,
+              "RoundDate": "2023-06-10T00:00:00",
+              "RoundId": 96440,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93629,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 8,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93629,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 9,
+              "RoundDate": "2023-06-10T00:00:00",
+              "RoundId": 96440,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93629,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 10,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94984,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 11,
+              "RoundDate": "2023-07-30T00:00:00",
+              "RoundId": 98745,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94984,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 12,
+              "RoundDate": "2023-07-30T00:00:00",
+              "RoundId": 98745,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94984,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 13,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94984,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 14,
+              "RoundDate": "2023-07-30T00:00:00",
+              "RoundId": 98745,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94984,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 15,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94984,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 16,
+              "RoundDate": "2023-06-10T00:00:00",
+              "RoundId": 96440,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94984,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 17,
+              "RoundDate": "2023-06-10T00:00:00",
+              "RoundId": 96440,
+              "StablefordScore": 1,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94984,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 18,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94984,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97913,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98745,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-22T00:00:00",
+                  "RoundId": 94373,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-06-10T00:00:00",
+                  "RoundId": 96440,
+                  "StablefordScore": 2
+                }
+              ]
+            }
+          ],
+          "Links": []
+        },
+        "ExcludedRounds": [
+          {
+            "MemberId": "3249",
+            "RoundId": "94984",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-05-07T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "3249",
+            "RoundId": "93629",
+            "Type": "BackNine",
+            "DatePlayed": "2023-02-21T00:00:00",
+            "ExclusionReason": "This back nine scorecard did not result in the best eclectic score."
+          }
+        ]
+      },
+      {
+        "Scorecard": {
+          "PlayerName": "Kian Moran",
+          "TotalStablefordScore": 42,
+          "Holes": [
+            {
+              "HoleNumber": 1,
+              "RoundDate": "2023-04-15T00:00:00",
+              "RoundId": 94131,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-09-16T00:00:00",
+                  "RoundId": 100415,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 100002,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 2,
+              "RoundDate": "2023-09-30T00:00:00",
+              "RoundId": 100824,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-09-16T00:00:00",
+                  "RoundId": 100415,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94131,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 100002,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 3,
+              "RoundDate": "2023-09-30T00:00:00",
+              "RoundId": 100824,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-09-16T00:00:00",
+                  "RoundId": 100415,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94131,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 100002,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 4,
+              "RoundDate": "2023-09-30T00:00:00",
+              "RoundId": 100824,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-09-16T00:00:00",
+                  "RoundId": 100415,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94131,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 100002,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 5,
+              "RoundDate": "2023-09-06T00:00:00",
+              "RoundId": 100002,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-09-16T00:00:00",
+                  "RoundId": 100415,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94131,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 6,
+              "RoundDate": "2023-09-06T00:00:00",
+              "RoundId": 100002,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-09-16T00:00:00",
+                  "RoundId": 100415,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94131,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 7,
+              "RoundDate": "2023-09-06T00:00:00",
+              "RoundId": 100002,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-09-16T00:00:00",
+                  "RoundId": 100415,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94131,
+                  "StablefordScore": 3
+                },
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 8,
+              "RoundDate": "2023-05-14T00:00:00",
+              "RoundId": 95143,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-09-16T00:00:00",
+                  "RoundId": 100415,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94131,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 100002,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 9,
+              "RoundDate": "2023-09-30T00:00:00",
+              "RoundId": 100824,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-09-16T00:00:00",
+                  "RoundId": 100415,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-04-15T00:00:00",
+                  "RoundId": 94131,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-09-06T00:00:00",
+                  "RoundId": 100002,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 10,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98537,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-07T00:00:00",
+                  "RoundId": 96305,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-30T00:00:00",
+                  "RoundId": 94733,
+                  "StablefordScore": 3
+                }
+              ]
+            },
+            {
+              "HoleNumber": 11,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98537,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-06-07T00:00:00",
+                  "RoundId": 96305,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-04-30T00:00:00",
+                  "RoundId": 94733,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 12,
+              "RoundDate": "2023-06-07T00:00:00",
+              "RoundId": 96305,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-30T00:00:00",
+                  "RoundId": 94733,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98537,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 13,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98537,
+              "StablefordScore": 1,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-06-07T00:00:00",
+                  "RoundId": 96305,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-30T00:00:00",
+                  "RoundId": 94733,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 14,
+              "RoundDate": "2023-05-14T00:00:00",
+              "RoundId": 95143,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-07T00:00:00",
+                  "RoundId": 96305,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-04-30T00:00:00",
+                  "RoundId": 94733,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98537,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 15,
+              "RoundDate": "2023-06-07T00:00:00",
+              "RoundId": 96305,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-04-30T00:00:00",
+                  "RoundId": 94733,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98537,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 16,
+              "RoundDate": "2023-09-30T00:00:00",
+              "RoundId": 100824,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-06-07T00:00:00",
+                  "RoundId": 96305,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-30T00:00:00",
+                  "RoundId": 94733,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98537,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 17,
+              "RoundDate": "2023-04-30T00:00:00",
+              "RoundId": 94733,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-06-07T00:00:00",
+                  "RoundId": 96305,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-26T00:00:00",
+                  "RoundId": 98537,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 18,
+              "RoundDate": "2023-07-26T00:00:00",
+              "RoundId": 98537,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-09-30T00:00:00",
+                  "RoundId": 100824,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-06-07T00:00:00",
+                  "RoundId": 96305,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-14T00:00:00",
+                  "RoundId": 95143,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-04-30T00:00:00",
+                  "RoundId": 94733,
+                  "StablefordScore": 0
+                }
+              ]
+            }
+          ],
+          "Links": []
+        },
+        "ExcludedRounds": [
+          {
+            "MemberId": "1749",
+            "RoundId": "101252",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-10-14T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "98746",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-07-30T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "97976",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-07-12T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "97895",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-07-09T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "97503",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-07-05T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "97421",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-07-02T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "97150",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-06-28T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "96630",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-06-17T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "96415",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-06-10T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "96305",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-06-07T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "96004",
+            "Type": "FrontNine",
+            "DatePlayed": "0001-01-01T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "95921",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-05-31T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "94733",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-04-30T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "93939",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-04-05T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "93633",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-02-21T00:00:00",
+            "ExclusionReason": "This front nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "101252",
+            "Type": "BackNine",
+            "DatePlayed": "2023-10-14T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "100415",
+            "Type": "BackNine",
+            "DatePlayed": "2023-09-16T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "100014",
+            "Type": "BackNine",
+            "DatePlayed": "2023-09-09T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "100002",
+            "Type": "BackNine",
+            "DatePlayed": "2023-09-06T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "98827",
+            "Type": "BackNine",
+            "DatePlayed": "2023-08-02T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "98746",
+            "Type": "BackNine",
+            "DatePlayed": "2023-07-30T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "97976",
+            "Type": "BackNine",
+            "DatePlayed": "2023-07-12T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "97895",
+            "Type": "BackNine",
+            "DatePlayed": "2023-07-09T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "97503",
+            "Type": "BackNine",
+            "DatePlayed": "2023-07-05T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "97421",
+            "Type": "BackNine",
+            "DatePlayed": "2023-07-02T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "97150",
+            "Type": "BackNine",
+            "DatePlayed": "2023-06-28T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "96768",
+            "Type": "BackNine",
+            "DatePlayed": "2023-06-21T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "96630",
+            "Type": "BackNine",
+            "DatePlayed": "2023-06-17T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "96415",
+            "Type": "BackNine",
+            "DatePlayed": "2023-06-10T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "96004",
+            "Type": "BackNine",
+            "DatePlayed": "0001-01-01T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "95921",
+            "Type": "BackNine",
+            "DatePlayed": "2023-05-31T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "93939",
+            "Type": "BackNine",
+            "DatePlayed": "2023-04-05T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "93633",
+            "Type": "BackNine",
+            "DatePlayed": "2023-02-21T00:00:00",
+            "ExclusionReason": "This back nine score was not one of your 5 best overall."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "98827",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-08-02T00:00:00",
+            "ExclusionReason": "This front nine scorecard did not result in the best eclectic score."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "96768",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-06-21T00:00:00",
+            "ExclusionReason": "This front nine scorecard did not result in the best eclectic score."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "100014",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-09-09T00:00:00",
+            "ExclusionReason": "This front nine scorecard did not result in the best eclectic score."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "98537",
+            "Type": "FrontNine",
+            "DatePlayed": "2023-07-26T00:00:00",
+            "ExclusionReason": "This front nine scorecard did not result in the best eclectic score."
+          },
+          {
+            "MemberId": "1749",
+            "RoundId": "94131",
+            "Type": "BackNine",
+            "DatePlayed": "2023-04-15T00:00:00",
+            "ExclusionReason": "This back nine scorecard did not result in the best eclectic score."
+          }
+        ]
+      },
+      {
+        "Scorecard": {
+          "PlayerName": "Leo Windsor",
+          "TotalStablefordScore": 42,
+          "Holes": [
+            {
+              "HoleNumber": 1,
+              "RoundDate": "2023-07-30T00:00:00",
+              "RoundId": 98742,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93634,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 2,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93634,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 3,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94986,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93634,
+                  "StablefordScore": 3
+                }
+              ]
+            },
+            {
+              "HoleNumber": 4,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93634,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 5,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93634,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 6,
+              "RoundDate": "2023-07-30T00:00:00",
+              "RoundId": 98742,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93634,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 7,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94986,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93634,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 8,
+              "RoundDate": "2023-07-09T00:00:00",
+              "RoundId": 97890,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93634,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 9,
+              "RoundDate": "2023-07-09T00:00:00",
+              "RoundId": 97890,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93634,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 10,
+              "RoundDate": "2023-07-09T00:00:00",
+              "RoundId": 97890,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93634,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 11,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94986,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93634,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 12,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93634,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 13,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94986,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93634,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 14,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93634,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 15,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94986,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93634,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 16,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93634,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 1
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 17,
+              "RoundDate": "2023-05-07T00:00:00",
+              "RoundId": 94986,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 2
+                },
+                {
+                  "RoundDate": "2023-02-21T00:00:00",
+                  "RoundId": 93634,
+                  "StablefordScore": 2
+                }
+              ]
+            },
+            {
+              "HoleNumber": 18,
+              "RoundDate": "2023-02-21T00:00:00",
+              "RoundId": 93634,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-09T00:00:00",
+                  "RoundId": 97890,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-07-30T00:00:00",
+                  "RoundId": 98742,
+                  "StablefordScore": 0
+                },
+                {
+                  "RoundDate": "2023-05-07T00:00:00",
+                  "RoundId": 94986,
+                  "StablefordScore": 1
+                }
+              ]
+            }
+          ],
+          "Links": []
+        },
+        "ExcludedRounds": []
+      },
+      {
+        "Scorecard": {
+          "PlayerName": "Finlay Wadsley",
+          "TotalStablefordScore": 35,
+          "Holes": [
+            {
+              "HoleNumber": 1,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 2,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 3,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 0,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 4,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 5,
+              "RoundDate": "2023-07-19T00:00:00",
+              "RoundId": 98226,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-09-13T00:00:00",
+                  "RoundId": 100347,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 6,
+              "RoundDate": "2023-07-19T00:00:00",
+              "RoundId": 98226,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-09-13T00:00:00",
+                  "RoundId": 100347,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 7,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 8,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 1
+                }
+              ]
+            },
+            {
+              "HoleNumber": 9,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 1,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 10,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 11,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 4,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 12,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 13,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 1,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 14,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 0,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 15,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 3,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 16,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 17,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            },
+            {
+              "HoleNumber": 18,
+              "RoundDate": "2023-09-13T00:00:00",
+              "RoundId": 100347,
+              "StablefordScore": 2,
+              "UncountedScores": [
+                {
+                  "RoundDate": "2023-07-19T00:00:00",
+                  "RoundId": 98226,
+                  "StablefordScore": 0
+                }
+              ]
+            }
+          ],
+          "Links": []
+        },
+        "ExcludedRounds": []
+      }
+    ]
+  },
+  "Expiration": "2025-03-06T11:04:00.4188781Z"
+}

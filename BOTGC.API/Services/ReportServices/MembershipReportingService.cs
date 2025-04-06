@@ -4,6 +4,7 @@ using Services.Common;
 using Services.Dto;
 using Services.Interfaces;
 using Services.Services;
+using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 
 namespace BOTGC.API.Services.ReportServices
@@ -26,12 +27,16 @@ namespace BOTGC.API.Services.ReportServices
 
         public async Task<MembershipReportDto> GetManagementReport()
         {
-            var members = (await _dataService.GetMembershipReportAsync()).Where(m => m.MemberId != 0).ToList();
-            
+            var members = (await _dataService.GetMembershipReportAsync()).Where(m => m.MemberNumber != 0).ToList();
+
             var counts = members.GroupBy(m => m.MembershipCategory).Select(g => g.Count()).ToList();
 
             var report = new MembershipReportDto();
             var today = DateTime.UtcNow;
+
+            var dataPoints = new List<MembershipReportEntryDto>();
+
+            report.Anomalies = IdentifyAnomalies(members);
 
             // Determine the current and previous financial years
             int currentFinancialYearStart = today.Month >= 4 ? today.Year : today.Year - 1;
@@ -41,14 +46,16 @@ namespace BOTGC.API.Services.ReportServices
             DateTime endOfCurrentFinancialYear = new DateTime(currentFinancialYearStart + 1, 3, 31);
 
             // Get all of the events that have taken place up to the start of the last financial year
-            var memberEvents = await _dataService.GetMembershipEvents(startOfPreviousFinancialYear, today);
+            var memberEvents = await _dataService.GetMembershipEvents(startOfPreviousFinancialYear.AddDays(-1), today);
 
             // Start with todays results
             var todaysResults = GetReportEntry(today, members);
-            report.DataPoints.Add(todaysResults);
+            dataPoints.Add(todaysResults);
+
+            var monthlySnapshots = new Dictionary<DateTime, MembershipSnapshotDto>();
 
             // Process each day backwards from yesterday to the start of the previous financial year
-            for (var currentDate = today.AddDays(-1); currentDate >= startOfPreviousFinancialYear; currentDate = currentDate.AddDays(-1))
+            for (var currentDate = today.AddDays(-1); currentDate >= startOfPreviousFinancialYear.AddDays(-1); currentDate = currentDate.AddDays(-1))
             {
                 // Get events that occurred on this date
                 var eventsOnThisDay = memberEvents.Where(e => e.DateOfChange.HasValue && e.DateOfChange.Value.Date == currentDate.Date).ToList();
@@ -56,7 +63,7 @@ namespace BOTGC.API.Services.ReportServices
                 // Reverse each event to rewind the member data
                 foreach (var memberEvent in eventsOnThisDay.OrderByDescending(me => me.ChangeIndex))
                 {
-                    var member = members.Find(m => m.MemberId == memberEvent.MemberId);
+                    var member = members.Find(m => m.MemberNumber == memberEvent.MemberId);
 
                     if (member != null)
                     {
@@ -68,7 +75,7 @@ namespace BOTGC.API.Services.ReportServices
                         }
                         else
                         {
-                            _logger.LogWarning($"Expected current category to be {memberEvent.ToCategory} but found {member.MembershipCategory} for member id {member.MemberId} on {currentDate.ToString("yyyy-MM-dd")}");
+                            _logger.LogWarning($"Expected current category to be {memberEvent.ToCategory} but found {member.MembershipCategory} for member id {member.MemberNumber} on {currentDate.ToString("yyyy-MM-dd")}");
                         }
 
                         // If there was a status change, reverse that too
@@ -78,7 +85,7 @@ namespace BOTGC.API.Services.ReportServices
                         }
                         else
                         {
-                            _logger.LogWarning($"Expected current stauts to be {memberEvent.ToStatus} but found {member.MembershipStatus} for member id {member.MemberId} on {currentDate.ToString("yyyy-MM-dd")}");
+                            _logger.LogWarning($"Expected current stauts to be {memberEvent.ToStatus} but found {member.MembershipStatus} for member id {member.MemberNumber} on {currentDate.ToString("yyyy-MM-dd")}");
                         }
                     }
                     else
@@ -88,45 +95,165 @@ namespace BOTGC.API.Services.ReportServices
                 }
 
                 // Update the playing status of all members
-                foreach(var member in members)
+                foreach (var member in members)
                     MembershipHelper.SetPrimaryCategory(member, currentDate);
 
                 // Compute and store the statistics for this day after applying reversals
                 var dailyReportEntry = GetReportEntry(currentDate, members);
-                report.DataPoints.Insert(0, dailyReportEntry); // Insert at the beginning to keep chronological order
+                dataPoints.Insert(0, dailyReportEntry);
+
+                if (IsMonthEnd(currentDate))
+                {
+                    monthlySnapshots[currentDate] = CreateSnapshot(members, currentDate);
+                }
             }
 
-            EnsureFullYearData(report.DataPoints, endOfCurrentFinancialYear);
-            ApplyGrowthTargets(report.DataPoints, startOfPreviousFinancialYear, endOfPreviousFinancialYear);
-            ApplyGrowthTargets(report.DataPoints, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
+            EnsureMonthlyAndQuarterlyStats(report, monthlySnapshots);
+            EnsureFullYearData(dataPoints, endOfCurrentFinancialYear);
+            ApplyGrowthTargets(dataPoints, startOfPreviousFinancialYear, endOfPreviousFinancialYear);
+            ApplyGrowthTargets(dataPoints, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
 
+            report.DataPoints = dataPoints.Where(dp => dp.Date >= startOfPreviousFinancialYear && dp.Date <= endOfCurrentFinancialYear).ToList();
             report.DataPointsCsv = ConvertToCsv(report.DataPoints);
 
             return report;
         }
 
-        public string ConvertToCsv(IEnumerable<MembershipReportEntryDto> entries, string delimiter = ",")
+        private MembershipSnapshotDto CreateSnapshot(List<MemberDto> members, DateTime date)
+        {
+            return new MembershipSnapshotDto
+            {
+                SnapshotDate = date,
+                Members = members.Select(m => new MemberDto(m)).ToList()
+            };
+        }
+
+        private string ConvertToCsv(IEnumerable<MembershipReportEntryDto> entries, string delimiter = ",")
         {
             var csvLines = new List<string>
             {
-                "Date,PlayingMembers,NonPlayingMembers,TargetPlayingMembers" 
+                "Date,PlayingMembers,NonPlayingMembers,TargetPlayingMembers,AveragePlayingMemberAge"
             };
 
-            csvLines.AddRange(entries.Select(e => $"{e.Date:yyyy-MM-dd}{delimiter}{e.PlayingMembers}{delimiter}{e.NonPlayingMembers},{delimiter}{e.TargetPlayingMembers}"));
+            csvLines.AddRange(entries.Select(e =>
+                $"{e.Date:yyyy-MM-dd}{delimiter}{e.PlayingMembers}{delimiter}{e.NonPlayingMembers}{delimiter}{e.TargetPlayingMembers}{delimiter}{e.AveragePlayingMembersAge:F2}"
+            ));
 
             return string.Join("\n", csvLines);
         }
 
+        private bool IsMonthEnd(DateTime date)
+        {
+            return date.Day == DateTime.DaysInMonth(date.Year, date.Month);
+        }
+
+        private bool IsQuarterEnd(DateTime date)
+        {
+            return (date.Month == 3 && date.Day == 31) ||  // Q1 End (Mar 31)
+                   (date.Month == 6 && date.Day == 30) ||  // Q2 End (Jun 30)
+                   (date.Month == 9 && date.Day == 30) ||  // Q3 End (Sep 30)
+                   (date.Month == 12 && date.Day == 31);   // Q4 End (Dec 31)
+        }
+
+        private int GetQuarterNumber(DateTime date)
+        {
+            return (date.Month - 1) / 3 + 1;
+        }
+
+        private List<MembershipAnomalyDto> IdentifyAnomalies(List<MemberDto> members)
+        {
+            var anomalies = new List<MembershipAnomalyDto>();
+            var detectedDate = DateTime.UtcNow;
+
+            var statusRWithPastLeaveDate = new MembershipAnomalyDto
+            {
+                DetectedDate = detectedDate,
+                Type = MembershipAnomalyType.StatusRWithPastLeaveDate,
+                Description = "Members have a status of 'R' but also have a leave date that is in the past",
+                Members = new List<MemberSummmaryDto>()
+            };
+
+            var statusLWithoutLeaveDate = new MembershipAnomalyDto
+            {
+                DetectedDate = detectedDate,
+                Type = MembershipAnomalyType.StatusLWithoutLeaveDate,
+                Description = "Members have a status of 'L' but do not have a leave date",
+                Members = new List<MemberSummmaryDto>()
+            };
+
+            var statusSWithPastLeaveDate = new MembershipAnomalyDto
+            {
+                DetectedDate = detectedDate,
+                Type = MembershipAnomalyType.StatusSWithPastLeaveDate,
+                Description = "Members have a status of 'S' but also have a leave date that is in the past",
+                Members = new List<MemberSummmaryDto>()
+            };
+
+            var statusWithoutJoinDate = new MembershipAnomalyDto
+            {
+                DetectedDate = detectedDate,
+                Type = MembershipAnomalyType.StatusWithoutJoinDate,
+                Description = "Members have status other than 'W' but do not have a join date.",
+                Members = new List<MemberSummmaryDto>()
+            };
+
+            anomalies.Add(statusRWithPastLeaveDate);
+            anomalies.Add(statusLWithoutLeaveDate);
+            anomalies.Add(statusSWithPastLeaveDate);
+            anomalies.Add(statusWithoutJoinDate);
+
+            foreach (var member in members)
+            {
+                if ((member.MembershipStatus == "R") && member.LeaveDate.HasValue && member.LeaveDate.Value < detectedDate)
+                {
+                    statusRWithPastLeaveDate.Members.Add(new MemberSummmaryDto(member));
+                }
+                if ((member.MembershipStatus == "S") && member.LeaveDate.HasValue && member.LeaveDate.Value < detectedDate)
+                {
+                    statusSWithPastLeaveDate.Members.Add(new MemberSummmaryDto(member));
+                }
+                if (member.MembershipStatus == "L" && !member.LeaveDate.HasValue)
+                {
+                    statusLWithoutLeaveDate.Members.Add(new MemberSummmaryDto(member));
+                }
+                if (member.MembershipStatus != "W" && !member.JoinDate.HasValue)
+                {
+                    statusWithoutJoinDate.Members.Add(new MemberSummmaryDto(member));
+                }
+            }
+            return anomalies;
+        }
+
         private MembershipReportEntryDto GetReportEntry(DateTime date, List<MemberDto> members)
         {
-            var playingMembers = members.Where(m => m.PrimaryCategory == MembershipPrimaryCategories.PlayingMember).ToList();
-            var nonPlayingMembers = members.Where(m => m.PrimaryCategory == MembershipPrimaryCategories.NonPlayingMember).ToList();
+            var playingMembers = members.Where(m => m.PrimaryCategory == MembershipPrimaryCategories.PlayingMember && m.IsActive!.Value).ToList();
+            var nonPlayingMembers = members.Where(m => m.PrimaryCategory == MembershipPrimaryCategories.NonPlayingMember && m.IsActive!.Value).ToList();
+
+            double averageAge = playingMembers
+               .Where(m => m.DateOfBirth.HasValue)
+               .Select(m => (date - m.DateOfBirth.Value).TotalDays / 365.25) // Convert days to years
+               .DefaultIfEmpty(0)
+               .Average();
+
+            // Populate category breakdown
+            var playingCategoryBreakdown = members
+                .Where(m => m.PrimaryCategory == MembershipPrimaryCategories.PlayingMember && m.IsActive!.Value)
+                .GroupBy(m => m.MembershipCategory)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var nonPlayingCategoryBreakdown = members
+                .Where(m => m.PrimaryCategory == MembershipPrimaryCategories.NonPlayingMember && m.IsActive!.Value)
+                .GroupBy(m => m.MembershipCategory)
+                .ToDictionary(g => g.Key, g => g.Count());
 
             return new MembershipReportEntryDto
             {
                 Date = date,
                 PlayingMembers = playingMembers.Count,
                 NonPlayingMembers = nonPlayingMembers.Count,
+                AveragePlayingMembersAge = averageAge,
+                PlayingCategoryBreakdown = playingCategoryBreakdown,
+                NonPlayingCategoryBreakdown = nonPlayingCategoryBreakdown
             };
         }
 
@@ -145,22 +272,115 @@ namespace BOTGC.API.Services.ReportServices
             }
         }
 
+        private void EnsureMonthlyAndQuarterlyStats(MembershipReportDto report, Dictionary<DateTime, MembershipSnapshotDto> monthlySnapshots)
+        {
+            report.MonthlyStats = new List<MembershipDeltaDto>();
+
+            // **Ensure chronological order**
+            var monthEndDates = monthlySnapshots.Keys.OrderBy(d => d).ToList();
+
+            for (int i = 1; i < monthEndDates.Count; i++)
+            {
+                var fromSnapshot = monthlySnapshots[monthEndDates[i - 1]];
+                var toSnapshot = monthlySnapshots[monthEndDates[i]];
+
+                if (fromSnapshot.SnapshotDate >= toSnapshot.SnapshotDate)
+                    throw new InvalidOperationException($"Snapshots are out of order! {fromSnapshot.SnapshotDate} is not before {toSnapshot.SnapshotDate}");
+
+                report.MonthlyStats.Add(ComputeMembershipDelta(fromSnapshot, toSnapshot, $"{toSnapshot.SnapshotDate:yyyy-MM}"));
+            }
+
+            report.QuarterlyStats = new List<MembershipDeltaDto>();
+
+            // **Ensure quarter-end dates are extracted in correct order**
+            var quarterEndDates = monthEndDates.Where(IsQuarterEnd).OrderBy(d => d).ToList();
+
+            for (int i = 1; i < quarterEndDates.Count; i++)
+            {
+                var fromSnapshot = monthlySnapshots[quarterEndDates[i - 1]];
+                var toSnapshot = monthlySnapshots[quarterEndDates[i]];
+
+                if (fromSnapshot.SnapshotDate >= toSnapshot.SnapshotDate)
+                    throw new InvalidOperationException($"Quarterly snapshots are out of order! {fromSnapshot.SnapshotDate} is not before {toSnapshot.SnapshotDate}");
+
+                report.QuarterlyStats.Add(ComputeMembershipDelta(fromSnapshot, toSnapshot, $"Q{GetQuarterNumber(toSnapshot.SnapshotDate)} {toSnapshot.SnapshotDate.Year}"));
+            }
+        }
+
         private void ApplyGrowthTargets(List<MembershipReportEntryDto> dataPoints, DateTime start, DateTime end)
         {
-            var startEntry = dataPoints.FirstOrDefault(dp => dp.Date.Date == start.Date);
-            double startValue = startEntry?.PlayingMembers ?? 0;
-            double targetValue = startValue * 1.05;
+            // Find the last actual recorded playing members count before the start date
+            var lastActualEntry = dataPoints.LastOrDefault(dp => dp.Date.Date < start.Date);
+            double startValue = lastActualEntry?.PlayingMembers ?? 0; // ✅ Start from the last actual count
+            double targetValue = startValue * 1.05; // 5% growth target
             int totalDays = (end - start).Days;
 
             for (var i = 0; i <= totalDays; i++)
             {
                 var currentDate = start.AddDays(i);
                 var entry = dataPoints.FirstOrDefault(dp => dp.Date.Date == currentDate.Date);
+
                 if (entry != null)
                 {
                     entry.TargetPlayingMembers = startValue + (targetValue - startValue) * (i / (double)totalDays);
                 }
             }
+        }
+
+        private MembershipDeltaDto ComputeMembershipDelta(MembershipSnapshotDto fromSnapshot, MembershipSnapshotDto toSnapshot, string periodDescription)
+        {
+            // ✅ **Filter out future joiners from both snapshots**
+            var filteredFromMembers = fromSnapshot.Members
+                .Where(m => !m.JoinDate.HasValue || m.JoinDate!.Value <= fromSnapshot.SnapshotDate)
+                .ToDictionary(m => m.MemberNumber!.Value);
+
+            var filteredToMembers = toSnapshot.Members
+                .Where(m => !m.JoinDate.HasValue || m.JoinDate!.Value <= toSnapshot.SnapshotDate)
+                .ToDictionary(m => m.MemberNumber!.Value);
+
+            // ✅ **Identify new members: They exist in `toSnapshot` but NOT in `fromSnapshot`**
+            var newMembers = filteredToMembers.Keys.Except(filteredFromMembers.Keys).ToList();
+
+            // ✅ **Identify leavers: They now have status "L" but did NOT in `fromSnapshot`**
+            var leavers = filteredToMembers.Values
+                .Where(m => m.MembershipStatus == "L"
+                            && filteredFromMembers.TryGetValue(m.MemberNumber!.Value, out var prevMember)
+                            && prevMember.MembershipStatus != "L")
+                .ToList();
+
+            // ✅ **Identify deaths: They now have status "D" but did NOT in `fromSnapshot`**
+            var deaths = filteredToMembers.Values
+                .Where(m => m.MembershipStatus == "D"
+                            && filteredFromMembers.TryGetValue(m.MemberNumber!.Value, out var prevMember)
+                            && prevMember.MembershipStatus != "D")
+                .ToList();
+
+            // ✅ **Category Changes: Members who exist in both but changed category**
+            var categoryChanges = new Dictionary<string, int>();
+
+            foreach (var member in filteredToMembers.Values)
+            {
+                if (filteredFromMembers.TryGetValue(member.MemberNumber!.Value, out var prevMember) &&
+                    member.MembershipCategory != prevMember.MembershipCategory)
+                {
+                    string transitionKey = $"{prevMember.MembershipCategory} → {member.MembershipCategory}";
+                    if (categoryChanges.ContainsKey(transitionKey))
+                        categoryChanges[transitionKey]++;
+                    else
+                        categoryChanges[transitionKey] = 1;
+                }
+            }
+
+            return new MembershipDeltaDto
+            {
+                FromDate = fromSnapshot.SnapshotDate.AddDays(1),
+                ToDate = toSnapshot.SnapshotDate,
+                PeriodDescription = periodDescription,
+                NewMembers = newMembers.Count,
+                Leavers = leavers.Count,
+                Deaths = deaths.Count,
+                CategoryChanges = categoryChanges
+            };
         }
     }
 }

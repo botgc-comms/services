@@ -1,0 +1,532 @@
+{
+  "Value": [
+    {
+      "Players": [
+        {
+          "Position": 1,
+          "PlayerName": "Jason North",
+          "PlayingHandicap": null,
+          "PlayerId": 87563,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 19, Back 6 - 14, Back 3 - 6, Back 1 - 3",
+          "Thru": "18"
+        },
+        {
+          "Position": 2,
+          "PlayerName": "Kevin Boyes",
+          "PlayingHandicap": null,
+          "PlayerId": 196,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 18, Back 6 - 13, Back 3 - 6, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 3,
+          "PlayerName": "Leslie Ferris",
+          "PlayingHandicap": null,
+          "PlayerId": 926,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 15, Back 6 - 10, Back 3 - 3, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 4,
+          "PlayerName": "David Brightman",
+          "PlayingHandicap": "",
+          "PlayerId": 516,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 21, Back 6 - 15, Back 3 - 8, Back 1 - 3",
+          "Thru": "18"
+        },
+        {
+          "Position": 5,
+          "PlayerName": "Paul Nelson",
+          "PlayingHandicap": null,
+          "PlayerId": 837,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 20, Back 6 - 14, Back 3 - 7, Back 1 - 3",
+          "Thru": "18"
+        },
+        {
+          "Position": 6,
+          "PlayerName": "Craig Histed",
+          "PlayingHandicap": null,
+          "PlayerId": 710,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 20, Back 6 - 13, Back 3 - 7, Back 1 - 3",
+          "Thru": "18"
+        },
+        {
+          "Position": 7,
+          "PlayerName": "John Drake",
+          "PlayingHandicap": null,
+          "PlayerId": 217,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 17, Back 6 - 11, Back 3 - 8, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 8,
+          "PlayerName": "Jack Weaver",
+          "PlayingHandicap": null,
+          "PlayerId": 94738,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 15, Back 6 - 9, Back 3 - 6, Back 1 - 3",
+          "Thru": "18"
+        },
+        {
+          "Position": 9,
+          "PlayerName": "Matthew Taylor",
+          "PlayingHandicap": null,
+          "PlayerId": 97267,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 15, Back 6 - 6, Back 3 - 3, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 10,
+          "PlayerName": "Lewis Horlick",
+          "PlayingHandicap": null,
+          "PlayerId": 82010,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 19, Back 6 - 11, Back 3 - 4, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 11,
+          "PlayerName": "Russell Davis",
+          "PlayingHandicap": null,
+          "PlayerId": 865,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 18, Back 6 - 12, Back 3 - 6, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 12,
+          "PlayerName": "Robert Carson",
+          "PlayingHandicap": null,
+          "PlayerId": 88,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 18, Back 6 - 10, Back 3 - 3, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 13,
+          "PlayerName": "James Elrick",
+          "PlayingHandicap": null,
+          "PlayerId": 153,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 17, Back 6 - 9, Back 3 - 5, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 14,
+          "PlayerName": "Kian Moran",
+          "PlayingHandicap": "",
+          "PlayerId": 939,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 15, Back 6 - 11, Back 3 - 7, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 15,
+          "PlayerName": "Adam Stone",
+          "PlayingHandicap": null,
+          "PlayerId": 85602,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 15, Back 6 - 7, Back 3 - 5, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 16,
+          "PlayerName": "Leon Pittom",
+          "PlayingHandicap": null,
+          "PlayerId": 78875,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 19, Back 6 - 13, Back 3 - 5, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 17,
+          "PlayerName": "Michael Edwards",
+          "PlayingHandicap": null,
+          "PlayerId": 90,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 18, Back 6 - 11, Back 3 - 5, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 18,
+          "PlayerName": "Michael Clamp",
+          "PlayingHandicap": "",
+          "PlayerId": 79157,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 17, Back 6 - 11, Back 3 - 7, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 19,
+          "PlayerName": "Stephen Mole",
+          "PlayingHandicap": null,
+          "PlayerId": 645,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 17, Back 6 - 10, Back 3 - 4, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 20,
+          "PlayerName": "Adam Toone",
+          "PlayingHandicap": null,
+          "PlayerId": 709,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 18, Back 6 - 13, Back 3 - 7, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 21,
+          "PlayerName": "Todd Foster",
+          "PlayingHandicap": "",
+          "PlayerId": 883,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 16, Back 6 - 10, Back 3 - 6, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 22,
+          "PlayerName": "David Grundy",
+          "PlayingHandicap": "",
+          "PlayerId": 266,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 13, Back 6 - 8, Back 3 - 3, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 23,
+          "PlayerName": "Thomas Dawborn",
+          "PlayingHandicap": null,
+          "PlayerId": 88997,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 18, Back 6 - 12, Back 3 - 7, Back 1 - 3",
+          "Thru": "18"
+        },
+        {
+          "Position": 24,
+          "PlayerName": "Ralph Mason",
+          "PlayingHandicap": null,
+          "PlayerId": 842,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 17, Back 6 - 10, Back 3 - 5, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 25,
+          "PlayerName": "Colin Eley",
+          "PlayingHandicap": null,
+          "PlayerId": 87242,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 17, Back 6 - 9, Back 3 - 5, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 26,
+          "PlayerName": "Philip Kavanagh",
+          "PlayingHandicap": null,
+          "PlayerId": 76540,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 16, Back 6 - 10, Back 3 - 5, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 27,
+          "PlayerName": "Ceri Rigby",
+          "PlayingHandicap": null,
+          "PlayerId": 93283,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 16, Back 6 - 10, Back 3 - 3, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 28,
+          "PlayerName": "David Pickering",
+          "PlayingHandicap": null,
+          "PlayerId": 178,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 16, Back 6 - 9, Back 3 - 4, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 29,
+          "PlayerName": "Adam Barclay",
+          "PlayingHandicap": "",
+          "PlayerId": 134,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 15, Back 6 - 11, Back 3 - 5, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 30,
+          "PlayerName": "Ian Wooldridge",
+          "PlayingHandicap": null,
+          "PlayerId": 93151,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 13, Back 6 - 7, Back 3 - 3, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 31,
+          "PlayerName": "Matthew Lisle",
+          "PlayingHandicap": "",
+          "PlayerId": 94739,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 17, Back 6 - 12, Back 3 - 7, Back 1 - 3",
+          "Thru": "18"
+        },
+        {
+          "Position": 32,
+          "PlayerName": "David Cooke",
+          "PlayingHandicap": "",
+          "PlayerId": 91,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 14, Back 6 - 11, Back 3 - 6, Back 1 - 3",
+          "Thru": "18"
+        },
+        {
+          "Position": 33,
+          "PlayerName": "Stephen Gower",
+          "PlayingHandicap": null,
+          "PlayerId": 274,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 14, Back 6 - 8, Back 3 - 5, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 34,
+          "PlayerName": "Kieran Smith",
+          "PlayingHandicap": "",
+          "PlayerId": 94732,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 16, Back 6 - 11, Back 3 - 5, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 35,
+          "PlayerName": "Charmaine Morton",
+          "PlayingHandicap": null,
+          "PlayerId": 94742,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 16, Back 6 - 10, Back 3 - 6, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 36,
+          "PlayerName": "Ian Moran",
+          "PlayingHandicap": null,
+          "PlayerId": 637,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 14, Back 6 - 9, Back 3 - 4, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 37,
+          "PlayerName": "Paul Foster",
+          "PlayingHandicap": "",
+          "PlayerId": 693,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 13, Back 6 - 10, Back 3 - 6, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 38,
+          "PlayerName": "Christopher Edwards",
+          "PlayingHandicap": "",
+          "PlayerId": 437,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 11, Back 6 - 7, Back 3 - 3, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 39,
+          "PlayerName": "Brian Bambrick-Sattar",
+          "PlayingHandicap": null,
+          "PlayerId": 578,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 14, Back 6 - 9, Back 3 - 4, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 40,
+          "PlayerName": "Ian Rayworth",
+          "PlayingHandicap": null,
+          "PlayerId": 89,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 13, Back 6 - 9, Back 3 - 3, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 41,
+          "PlayerName": "Philip Gill",
+          "PlayingHandicap": null,
+          "PlayerId": 80486,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 14, Back 6 - 11, Back 3 - 6, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 42,
+          "PlayerName": "Neil Carter",
+          "PlayingHandicap": "",
+          "PlayerId": 929,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 12, Back 6 - 9, Back 3 - 5, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 43,
+          "PlayerName": "Liam Westwood",
+          "PlayingHandicap": null,
+          "PlayerId": 97493,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 12, Back 6 - 9, Back 3 - 4, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 44,
+          "PlayerName": "Arron Gaskell",
+          "PlayingHandicap": null,
+          "PlayerId": 695,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 10, Back 6 - 6, Back 3 - 3, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 45,
+          "PlayerName": "Simon Auger",
+          "PlayingHandicap": null,
+          "PlayerId": 836,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 14, Back 6 - 8, Back 3 - 4, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 46,
+          "PlayerName": "Simon Boulter",
+          "PlayingHandicap": "",
+          "PlayerId": 269,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 14, Back 6 - 7, Back 3 - 5, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 47,
+          "PlayerName": "Jono Marklew",
+          "PlayingHandicap": null,
+          "PlayerId": 88498,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 11, Back 6 - 5, Back 3 - 4, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 48,
+          "PlayerName": "Gerry Morton",
+          "PlayingHandicap": null,
+          "PlayerId": 94741,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 12, Back 6 - 10, Back 3 - 5, Back 1 - 3",
+          "Thru": "18"
+        },
+        {
+          "Position": 49,
+          "PlayerName": "Tim Mortlock",
+          "PlayingHandicap": null,
+          "PlayerId": 95,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 12, Back 6 - 8, Back 3 - 4, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 50,
+          "PlayerName": "Peter Sumner",
+          "PlayingHandicap": null,
+          "PlayerId": 866,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 7, Back 6 - 5, Back 3 - 1, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 51,
+          "PlayerName": "Mitch Poulton",
+          "PlayingHandicap": "",
+          "PlayerId": 844,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 13, Back 6 - 9, Back 3 - 5, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 52,
+          "PlayerName": "Colin Rigby",
+          "PlayingHandicap": null,
+          "PlayerId": 164,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 10, Back 6 - 6, Back 3 - 3, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": 53,
+          "PlayerName": "Dennis O'Neill",
+          "PlayingHandicap": null,
+          "PlayerId": 706,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 7, Back 6 - 5, Back 3 - 3, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 54,
+          "PlayerName": "Paul Clarke",
+          "PlayingHandicap": null,
+          "PlayerId": 787,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 8, Back 6 - 5, Back 3 - 1, Back 1 - 0",
+          "Thru": "18"
+        },
+        {
+          "Position": 55,
+          "PlayerName": "James Fletcher",
+          "PlayingHandicap": null,
+          "PlayerId": 94740,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 14, Back 6 - 11, Back 3 - 5, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": 56,
+          "PlayerName": "Nathan Sturgess",
+          "PlayingHandicap": null,
+          "PlayerId": 82261,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 6, Back 6 - 4, Back 3 - 1, Back 1 - 1",
+          "Thru": "18"
+        },
+        {
+          "Position": null,
+          "PlayerName": "Sam Ayre",
+          "PlayingHandicap": "",
+          "PlayerId": 82575,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 13, Back 6 - 8, Back 3 - 3, Back 1 - 2",
+          "Thru": "18"
+        },
+        {
+          "Position": null,
+          "PlayerName": "Neil Shore",
+          "PlayingHandicap": null,
+          "PlayerId": 83048,
+          "StablefordScore": null,
+          "Countback": "\n Back 9 - 16, Back 6 - 13, Back 3 - 6, Back 1 - 2",
+          "Thru": "18"
+        }
+      ],
+      "Links": []
+    }
+  ],
+  "Expiration": "2025-04-03T20:02:02.9820981Z"
+}

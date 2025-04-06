@@ -1,0 +1,385 @@
+{
+  "Value": [
+    {
+      "Id": 7419,
+      "Name": "Spring Stableford #4",
+      "Date": "2025-04-02T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7419",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7419/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7407,
+      "Name": "Winter Series - Week 17",
+      "Date": "2025-03-01T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7407",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7407/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7494,
+      "Name": "Winter Series - Week 16",
+      "Date": "2025-02-22T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7494",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7494/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7404,
+      "Name": "Winter Series - Week 15",
+      "Date": "2025-02-16T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7404",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7404/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7416,
+      "Name": "Winter Series - Week 15",
+      "Date": "2025-02-15T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7416",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7416/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7491,
+      "Name": "Winter Series -  Week 12",
+      "Date": "2025-01-25T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7491",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7491/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7398,
+      "Name": "Winter Series - Week 11",
+      "Date": "2025-01-18T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7398",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7398/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7485,
+      "Name": "Winter Series - Week 10",
+      "Date": "2025-01-11T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7485",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7485/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7592,
+      "Name": "Chairman's Texas Scramble 2024 Live",
+      "Date": "2024-12-27T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7592",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7592/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7479,
+      "Name": "Winter Series  - Week 6",
+      "Date": "2024-12-07T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7479",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7479/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 6989,
+      "Name": "Junior 9 Hole Stableford",
+      "Date": "2024-12-01T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/6989",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/6989/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7473,
+      "Name": "Winter Series - Week 4",
+      "Date": "2024-11-23T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7473",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7473/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 6986,
+      "Name": "Junior 9 Hole Stableford",
+      "Date": "2024-11-03T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/6986",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/6986/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7172,
+      "Name": "England vs Celts (England Team)",
+      "Date": "2024-10-20T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7172",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7172/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 6852,
+      "Name": "Ladies Tom Richards 2",
+      "Date": "2024-10-15T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/6852",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/6852/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7074,
+      "Name": "Tom Richards",
+      "Date": null,
+      "Gender": 1,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7074",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7074/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 6854,
+      "Name": "Ladies Tom Richards 1",
+      "Date": "2024-10-13T00:00:00",
+      "Gender": 1,
+      "AvailableForHandicaping": true,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/6854",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/6854/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 6830,
+      "Name": "Oct",
+      "Date": "2024-10-12T00:00:00",
+      "Gender": 3,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/6830",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/6830/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 6983,
+      "Name": "Junior 9 Hole Stableford",
+      "Date": "2024-10-06T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/6983",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/6983/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    },
+    {
+      "Id": 7372,
+      "Name": "Midweek Texas Scramble",
+      "Date": "2024-08-21T00:00:00",
+      "Gender": 4,
+      "AvailableForHandicaping": false,
+      "Links": [
+        {
+          "Rel": "settings",
+          "Href": "/api/competitions/7372",
+          "Method": "GET"
+        },
+        {
+          "Rel": "leaderboard",
+          "Href": "/api/competitions/7372/leaderboard",
+          "Method": "GET"
+        }
+      ]
+    }
+  ],
+  "Expiration": "2025-04-03T19:45:32.6578632Z"
+}
