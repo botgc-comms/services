@@ -5,7 +5,7 @@ param
     [Parameter(Mandatory = $true,
                ValueFromPipeline = $true,
                HelpMessage = 'Valid environments are test, integration, preprod and production')]
-    [ValidateSet('test', 'int', 'qa', 'production', 'sandbox', 'preprod')]
+    [ValidateSet('production')]
     [string]$env,
 
     [Parameter(Mandatory = $false,

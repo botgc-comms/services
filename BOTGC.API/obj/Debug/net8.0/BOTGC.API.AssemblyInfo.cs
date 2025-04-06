@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BOTGC.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6b30732ae53077466091df9ec851a6bb5302cb03")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+48ffba1fc3c9953a18b0affdd9d4c9250872d026")]
 [assembly: System.Reflection.AssemblyProductAttribute("BOTGC.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BOTGC.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
