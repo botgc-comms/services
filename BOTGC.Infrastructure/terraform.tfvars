@@ -1,4 +1,4 @@
-project_name     = "botgcsvc"
+project_name     = "botgcapps"
 environment      = "prd"
 # member_id        = "your_member_id"
 # member_pin       = "your_member_pin"
