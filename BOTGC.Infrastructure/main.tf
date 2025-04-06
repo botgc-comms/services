@@ -24,8 +24,8 @@ data "azurerm_storage_account" "services_api_sa" {
 }
 
 data "azurerm_storage_container" "data" {
-  name                  = "data"
-  storage_account_name  = data.azurerm_storage_account.services_api_sa.name
+  name                 = "data"
+  storage_account_name = data.azurerm_storage_account.services_api_sa.name
 }
 
 resource "azurerm_service_plan" "services_api_asp" {
@@ -49,14 +49,42 @@ resource "azurerm_linux_web_app" "services_api_app" {
   }
 
   app_settings = {
-    "APPINSIGHTS_INSTRUMENTATIONKEY"        = azurerm_application_insights.app_insights.instrumentation_key
-    "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
-    "SCM_DO_BUILD_DURING_DEPLOYMENT"        = true
-    "WEBSITE_RUN_FROM_PACKAGE"              = "1"
-    "MEMBER_ID"                             = var.member_id
-    "MEMBER_PIN"                            = var.member_pin
-    "ADMIN_PASSWORD"                        = var.admin_password
-    "DATA_CONTAINER_CONNECTION_STRING"      = data.azurerm_storage_account.services_api_sa.primary_connection_string
+    "APPINSIGHTS_INSTRUMENTATIONKEY"                         = azurerm_application_insights.app_insights.instrumentation_key
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"                  = azurerm_application_insights.app_insights.connection_string
+    "SCM_DO_BUILD_DURING_DEPLOYMENT"                         = true
+    "WEBSITE_RUN_FROM_PACKAGE"                               = "1"
+    "MEMBER_ID"                                              = var.member_id
+    "MEMBER_PIN"                                             = var.member_pin
+    "ADMIN_PASSWORD"                                         = var.admin_password
+    "DATA_CONTAINER_CONNECTION_STRING"                       = data.azurerm_storage_account.services_api_sa.primary_connection_string
+
+    "AppSettings__TrophyFilePath"                             = "/data/trophies"
+
+    "AppSettings__AzureFaceApi__EndPoint"                    = "https://face-botgc-shared.cognitiveservices.azure.com/"
+    "AppSettings__AzureFaceApi__SubscriptionKey"             = var.azure_face_api_key
+
+    "AppSettings__Cache__ShortTerm_TTL_mins"                 = "10080"
+    "AppSettings__Cache__LongTerm_TTL_mins"                  = "10080"
+    "AppSettings__Cache__RedisCache__ConnectionString"       = var.redis_connection_string
+
+    "AppSettings__IG__LoginEveryNMinutes"                    = "30"
+    "AppSettings__IG__BaseUrl"                               = "https://www.botgc.co.uk"
+    "AppSettings__IG__MemberId"                              = var.member_id
+    "AppSettings__IG__MemberPassword"                        = var.member_id
+    "AppSettings__IG__AdminPassword"                         = var.admin_password
+
+    "AppSettings__IG__Urls__JuniorMembershipReportUrl"       = "/membership_reports.php?tab=report&section=viewreport&md=b52f6bd4cf74cc5dbfd84dec616ceb42"
+    "AppSettings__IG__Urls__AllCurrentMembersReportUrl"      = "/membership_reports.php?tab=report&section=viewreport&md=5d71e7119d780dba4850506f622c1cfb"
+    "AppSettings__IG__Urls__MemberRoundsReportUrl"          = "/roundmgmt.php?playerid={playerId}"
+    "AppSettings__IG__Urls__PlayerIdLookupReportUrl"        = "/membership_reports.php?tab=status"
+    "AppSettings__IG__Urls__RoundReportUrl"                  = "/viewround.php?roundid={roundId}"
+    "AppSettings__IG__Urls__MembershipReportingUrl"          = "/membership_reports.php?tab=report&section=viewreport&md=9be9f71c8988351887840f3826a552da"
+    "AppSettings__IG__Urls__NewMembershipApplicationUrl"     = "/membership_addmember.php?&requestType=ajax&ajaxaction=confirmadd"
+    "AppSettings__IG__Urls__TeeBookingsUrl"                  = "/teetimes.php?date={date}"
+    "AppSettings__IG__Urls__UpcomingCompetitionsUrl"         = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=upcoming&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20"
+    "AppSettings__IG__Urls__ActiveCompetitionsUrl"           = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=active&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20"
+    "AppSettings__IG__Urls__CompetitionSettingsUrl"          = "/compadmin3.php?compid={compid}&tab=settings"
+    "AppSettings__IG__Urls__LeaderBoardUrl"                  = "/competition.php?compid={compid}&preview=1"
   }
 
   identity {
