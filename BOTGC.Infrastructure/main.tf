@@ -2,8 +2,8 @@ terraform {
   backend "azurerm" {
     resource_group_name  = "rg-botgc-shared"
     storage_account_name = "sabotgcmain"
-    container_name       = "tfstatesvc"
-    key                  = "terraform.tfstate"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstat.svc"
   }
 }
 
