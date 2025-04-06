@@ -3,7 +3,7 @@ name: Deploy Infrastructure and API
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - 'BOTGC.API/**'
       - 'BOTGC.API.Tests.V2/**'
