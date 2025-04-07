@@ -482,3 +482,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+BOTGC.API/appsettings.Development.json
+BOTGC.API/bin/
+BOTGC.API/obj/

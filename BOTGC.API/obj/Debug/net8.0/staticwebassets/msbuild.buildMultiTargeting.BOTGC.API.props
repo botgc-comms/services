@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\BOTGC.API.props" />
-</Project>

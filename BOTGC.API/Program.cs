@@ -46,14 +46,23 @@ builder.Services.AddSingleton<IMembershipReportingService, MembershipReportingSe
 
 builder.Services.AddHttpContextAccessor();
 
-//builder.Services.AddMemoryCache();
-//builder.Services.AddScoped<ICacheService, MemoryCacheService>();
-
 var cacheServiceType = appSettings.Cache.Type;
 
 if (string.Equals(cacheServiceType, "Redis", StringComparison.OrdinalIgnoreCase))
 {
+    // Register Redis distributed cache provider so IDistributedCache is available.
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = appSettings.Cache.RedisCache.ConnectionString;
+        options.InstanceName = $"{appSettings.Cache.RedisCache.InstanceName}:";
+    });
+
     builder.Services.AddScoped<ICacheService, RedisCacheService>();
+}
+else if (string.Equals(cacheServiceType, "Memory", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddMemoryCache();
+    builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 }
 else
 {

@@ -1,0 +1,221 @@
+[33mcommit 3fa52d4df73665d6baffafaa7b3181a2e90b9c70[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 14:15:49 2025 +0100
+
+    update
+
+[33mcommit a1c3e189c493fe8434aabde610a7b69a965aeff2[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 14:12:32 2025 +0100
+
+    Remove bin folder from tracking
+
+[33mcommit e3c5d7ba356375ce78df7ee42e7b62cf064c7f11[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 14:08:50 2025 +0100
+
+    add appsettings to gitignore
+
+[33mcommit 803793dfee8de076240b91a5c4300c195180e281[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 14:06:23 2025 +0100
+
+    update
+
+[33mcommit 0322fc27dbd908e7d0ef90d4c7fccb41ba12faf5[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 12:51:26 2025 +0100
+
+    use redis in azure
+
+[33mcommit 2f53318dc77943a635abf5a88165f9a9d5c0324f[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 12:30:07 2025 +0100
+
+    update
+
+[33mcommit 7a395ede8f04bccd3ca0e97b0ecd980f6e8d0ee2[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 11:32:30 2025 +0100
+
+    update deployment script
+
+[33mcommit 793a70dbf7fc251d5c6874df6f1d173b6e0b4d8c[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 10:12:10 2025 +0100
+
+    update deployment script
+
+[33mcommit 671a4ba583f045536ce5f296f2bbe9ab9c4503df[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 09:50:03 2025 +0100
+
+    update service plan to basic
+
+[33mcommit f1aa2d43e8e227ec79580bfbc6315c4d1deeeca5[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 08:27:42 2025 +0100
+
+    update face api key
+
+[33mcommit 77e85279482ddffa3f0b40702851979b926b0418[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 08:26:27 2025 +0100
+
+    fix redis cache configuraation
+
+[33mcommit d9540fcc1cbbb7dd939ae35bd3d49891feb048ff[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 08:22:12 2025 +0100
+
+    fix redis cache configuraation
+
+[33mcommit 444554c6f8cfaee069b475d4f92799874ceb38c3[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 08:18:34 2025 +0100
+
+    fix redis cache configuraation
+
+[33mcommit 668196979e93c05aac76b4b79356fff543f68a4c[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Apr 7 08:16:31 2025 +0100
+
+    update face api key
+
+[33mcommit 7601f50ee74af6821ab391132592eb478471445a[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Sun Apr 6 12:55:18 2025 +0100
+
+    add redis cache
+
+[33mcommit 37596b11b0a4843e4ce45cd97e72dc0d07d9edee[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Sun Apr 6 12:44:11 2025 +0100
+
+    change resource gorup name
+
+[33mcommit bbafe1b7ad98adbb811dd30429277acc51c6415b[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Sun Apr 6 12:38:02 2025 +0100
+
+    consume rather than create data
+
+[33mcommit 1dacfdf72d8aa29652fc05e9bab1c63074039472[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Sun Apr 6 12:36:52 2025 +0100
+
+    add refis cache client
+
+[33mcommit 48ffba1fc3c9953a18b0affdd9d4c9250872d026[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Sun Apr 6 12:23:30 2025 +0100
+
+    update
+
+[33mcommit 2389e9eab9ac215c1f96ade465c828ba1dac835a[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Sun Apr 6 12:21:02 2025 +0100
+
+    update state folder for infra
+
+[33mcommit b0325f29c6233795c1edbaadcf4e773d0b7f9e78[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Sun Apr 6 12:18:39 2025 +0100
+
+    fix working folder for infra scrtipt
+
+[33mcommit cf21b83e43109c3cde5eb1b571b4f2e74a55fd13[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Sun Apr 6 12:03:07 2025 +0100
+
+    change deployment branch
+
+[33mcommit 69c218cc32d980a7adc241aa528a155fa902d1a6[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Sun Apr 6 12:00:30 2025 +0100
+
+    add deploymentt pipeline
+
+[33mcommit 6b30732ae53077466091df9ec851a6bb5302cb03[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Thu Feb 20 16:00:56 2025 +0000
+
+    added membership reporting endpoint
+
+[33mcommit b923bf3559263c495178650ab6cfabdab873292f[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Tue Feb 11 15:27:38 2025 +0000
+
+    update
+
+[33mcommit 0598dcb6959a77317f6200b641f1fb864418baac[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Tue Feb 11 14:46:17 2025 +0000
+
+    update
+
+[33mcommit 25f9ae6847e1c29dfc7242f53b8705f7310cdcd1[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Feb 10 16:29:15 2025 +0000
+
+    more testing of eclectic competition
+
+[33mcommit b8f5a896932cef0def75995a5052d919233e9fde[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Feb 10 13:47:35 2025 +0000
+
+    upgrade to XUnit V3
+
+[33mcommit 412542e8d784327bf35ad46559f2bfe76cbaaa92[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Feb 10 09:52:44 2025 +0000
+
+    update
+
+[33mcommit 6e8959bd86b511db22b5fa8d1107bb6aa3e39633[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Feb 10 09:51:16 2025 +0000
+
+    update test data
+
+[33mcommit 78c985ebc077e60d1b359e523e7a736dd8ead17c[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Mon Feb 10 09:01:56 2025 +0000
+
+    add test files
+
+[33mcommit 227a09efafc3d4bfbbf8835181955d8c034edf96[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Sat Feb 8 10:18:32 2025 +0000
+
+    move service to child folder
+
+[33mcommit 923644256ed7730a8dba687cf41fd8aca2088c56[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Thu Feb 6 16:38:51 2025 +0000
+
+    added scorecards
+
+[33mcommit 4733c1f9c17d606cff042f24d0b155a374a4a949[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Thu Feb 6 11:52:13 2025 +0000
+
+    add rounds
+
+[33mcommit e0bc0df6f2bd21662ebbc09016d86fa5ca33f88d[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Wed Feb 5 13:38:34 2025 +0000
+
+    Add Membership report endpoint
+
+[33mcommit b5381bf1cc4b2fef61f77f2188170d7f12e50091[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Wed Feb 5 11:06:25 2025 +0000
+
+    working service
+
+[33mcommit 985faa299f0d5aaaaee1ef5ea02b68c373175e6a[m
+Author: Simon Parsons <simon@mmaraboustork.co.uk>
+Date:   Tue Feb 4 20:02:30 2025 +0000
+
+    initial commit
