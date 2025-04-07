@@ -1,42 +1,43 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Services.Interfaces;
 using Services.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Services.Services;
 
-/// <summary>
-/// Handles reading trophy metadata from a GitHub repository.
-/// </summary>
-public class TrophyFilesGitHub
+public class TrophyFilesGitHub : ITrophyFiles
 {
     private readonly AppSettings _settings;
     private readonly ILogger<TrophyFilesGitHub> _logger;
     private readonly HttpClient _httpClient;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TrophyFilesDiskStorage"/> class.
-    /// </summary>
-    /// <param name="settings">Application settings.</param>
-    /// <param name="logger">Logger instance.</param>
-    /// <param name="httpClient">HTTP client for GitHub API requests.</param>
     public TrophyFilesGitHub(IOptions<AppSettings> settings, ILogger<TrophyFilesGitHub> logger, HttpClient httpClient)
     {
         _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+
+        // Ensure GitHub API requests are authenticated.
+        if (!string.IsNullOrEmpty(_settings.GitHub.Token))
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", _settings.GitHub.Token);
+        }
+
+        // GitHub requires a User-Agent header.
+        if (!_httpClient.DefaultRequestHeaders.UserAgent.Any())
+        {
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("BOTGC.API");
+        }
     }
 
-    /// <summary>
-    /// Retrieves a list of all trophies by reading metadata from a GitHub repository.
-    /// </summary>
-    /// <returns>A collection of <see cref="TrophyMetadata"/>.</returns>
     public async Task<IReadOnlyCollection<TrophyMetadata>> ListTrophiesAsync()
     {
         if (string.IsNullOrWhiteSpace(_settings.GitHub.RepoUrl))
@@ -76,11 +77,6 @@ public class TrophyFilesGitHub
         }
     }
 
-    /// <summary>
-    /// Retrieves trophy metadata by its unique ID.
-    /// </summary>
-    /// <param name="id">The unique trophy slug.</param>
-    /// <returns>The <see cref="TrophyMetadata"/> if found; otherwise, null.</returns>
     public async Task<TrophyMetadata?> GetTrophyByIdAsync(string id)
     {
         if (string.IsNullOrWhiteSpace(id))
@@ -100,9 +96,6 @@ public class TrophyFilesGitHub
         return trophy;
     }
 
-    /// <summary>
-    /// Fetches the list of trophy directories from the GitHub repository.
-    /// </summary>
     private async Task<List<string>> GetTrophyDirectoriesAsync()
     {
         var apiUrl = $"{_settings.GitHub.ApiUrl}/contents/{_settings.GitHub.TrophyDirectory}";
@@ -128,9 +121,6 @@ public class TrophyFilesGitHub
         }
     }
 
-    /// <summary>
-    /// Retrieves and parses trophy metadata from GitHub.
-    /// </summary>
     private async Task<TrophyMetadata?> GetTrophyMetadataAsync(string directoryName)
     {
         var metadataUrl = $"{_settings.GitHub.RawUrl}/{_settings.GitHub.TrophyDirectory}/{directoryName}/metadata.json";
@@ -165,15 +155,45 @@ public class TrophyFilesGitHub
             return null;
         }
     }
+
+    public async Task<Stream?> GetWinnerImageByTrophyIdAsync(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            _logger.LogWarning("Attempted to retrieve winner image with an empty trophy ID.");
+            return null;
+        }
+
+        var trophy = await GetTrophyByIdAsync(id);
+        if (trophy == null)
+        {
+            _logger.LogWarning("Trophy with ID {Id} not found.", id);
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(trophy.WinnerImage))
+        {
+            _logger.LogWarning("Trophy with ID {Id} has no winner image specified.", id);
+            return null;
+        }
+
+        try
+        {
+            _logger.LogInformation("Downloading winner image for trophy ID: {Id}", id);
+            var response = await _httpClient.GetAsync(trophy.WinnerImage);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStreamAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to download winner image for trophy ID: {Id}", id);
+            return null;
+        }
+    }
 }
 
-/// <summary>
-/// Represents a GitHub API directory or file response.
-/// </summary>
 public class GitHubContent
 {
     public string Name { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty; // "file" or "dir"
 }
-
-

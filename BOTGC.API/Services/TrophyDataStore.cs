@@ -14,7 +14,7 @@ namespace Services.Services
     /// </summary>
     public class TrophyDataStore : ITrophyDataStore
     {
-        private readonly TrophyFilesDiskStorage _trophyFiles;
+        private readonly ITrophyFiles _trophyFiles;
         private readonly ILogger<TrophyDataStore> _logger;
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace Services.Services
         /// </summary>
         /// <param name="logger">Logger instance.</param>
         /// <param name="trophyFiles">File-based storage for trophy metadata.</param>
-        public TrophyDataStore(ILogger<TrophyDataStore> logger, TrophyFilesDiskStorage trophyFiles)
+        public TrophyDataStore(ILogger<TrophyDataStore> logger, ITrophyFiles trophyFiles)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _trophyFiles = trophyFiles ?? throw new ArgumentNullException(nameof(trophyFiles));

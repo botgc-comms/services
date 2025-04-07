@@ -99,6 +99,11 @@ resource "azurerm_linux_web_app" "services_api_app" {
     "AppSettings__Cache__LongTerm_TTL_mins"                  = "10080"
     "AppSettings__Cache__RedisCache__ConnectionString"       = data.azurerm_redis_cache.redis.primary_connection_string
 
+    "AppSettings__GitHub__Token"                             = var.github_token
+    "AppSettings__GitHub__RepoUrl"                           = "https://github.com/botgc-comms/data"
+    "AppSettings__GitHub__ApiUrl"                            = "https://api.github.com/repos/botgc-comms/data"
+    "AppSettings__GitHub__RawUrl"                            = "https://raw.githubusercontent.com/botgc-comms/data/master"
+
     "AppSettings__IG__LoginEveryNMinutes"                    = "30"
     "AppSettings__IG__BaseUrl"                               = "https://www.botgc.co.uk"
     "AppSettings__IG__MemberId"                              = var.member_id

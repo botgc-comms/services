@@ -2,17 +2,17 @@
 {
     public class AppSettings
     {
-        public AuthSettings Auth { get; set; }
+        public AuthSettings Auth { get; set; } = new AuthSettings();
 
         public string TrophyFilePath { get; set; }
 
-        public AzureFaceApi AzureFaceApi { get; set; }
+        public AzureFaceApi AzureFaceApi { get; set; } = new AzureFaceApi();
 
-        public GitHub GitHub { get; set; }
+        public GitHub GitHub { get; set; } = new GitHub();
 
-        public Cache Cache { get; set; }
+        public Cache Cache { get; set; } = new Cache();
 
-        public IG IG { get; set; }
+        public IG IG { get; set; } = new IG();
 
         public string PlayingMemberExpression { get; set; } = "^(?:5|6|7|Intermediate).*?$";
         public string NonPlayingMemberExpression { get; set; } = "^(?!5|6|7|Intermediate|1894|Corporate|Staff|Professional).+$";
@@ -42,9 +42,10 @@
         public string EndPoint { get; set; } = string.Empty;
         public string SubscriptionKey { get; set; } = string.Empty;
     }
-
+    
     public class GitHub
     {
+        public string Token { get; set; } = "";
         public string RepoUrl { get; set; } = "https://github.com/botgc-comms/data";
         public string ApiUrl { get; set; } = "https://api.github.com";
         public string RawUrl { get; set; } = "https://raw.githubusercontent.com/botgc-comms/data/master";
@@ -54,11 +55,11 @@
     public class IG
     {
         public string BaseUrl { get; set; } = "https://www.botgc.co.uk";
-        public required string MemberId { get; set; } 
-        public required string MemberPassword { get; set; } 
-        public required string AdminPassword { get; set; }
+        public string MemberId { get; set; } 
+        public string MemberPassword { get; set; } 
+        public string AdminPassword { get; set; }
 
-        public required IGEndpoints Urls { get; set; } = new IGEndpoints();
+        public IGEndpoints Urls { get; set; } = new IGEndpoints();
 
         public int LoginEveryNMinutes { get; set; } = 30;
 

@@ -59,7 +59,8 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration.GetSection("
 var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
 MembershipHelper.Configure(appSettings);
 
-builder.Services.AddSingleton<TrophyFilesDiskStorage>();
+//builder.Services.AddSingleton<TrophyFilesDiskStorage>();
+builder.Services.AddSingleton<ITrophyFiles, TrophyFilesGitHub>();
 builder.Services.AddSingleton<ITrophyDataStore, TrophyDataStore>();
 builder.Services.AddSingleton<ITrophyService, TrophyService>();
 
