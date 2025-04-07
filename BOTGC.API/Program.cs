@@ -25,6 +25,30 @@ builder.Services.AddSwaggerGen(options =>
         Description = "API for membership, competition and player data"
     });
 
+    options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Description = "API Key needed to access the Swagger UI. Enter your API key in the textbox below.",
+        In = ParameterLocation.Header,
+        Name = "X-API-KEY",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "ApiKeyScheme"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "ApiKey"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
     options.OperationFilter<CacheControlHeaderFilter>(); 
 });
 
@@ -74,7 +98,11 @@ builder.Services.AddIGSupport();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseWhen(context => !context.Request.Path.StartsWithSegments("/swagger"), appBuilder =>
+{
+    appBuilder.UseMiddleware<AuthKeyMiddleware>();
+});
+
 app.UseSwagger();
 app.UseSwaggerUI();
 

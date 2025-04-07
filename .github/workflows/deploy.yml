@@ -51,6 +51,7 @@ jobs:
         TF_VAR_member_pin: ${{ secrets.MEMBER_PIN }}
         TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
         TF_VAR_azure_face_api_key: ${{ secrets.AZURE_FACE_API_KEY }}
+        TF_VAR_x_api_key: ${{ secrets.X_API_KEY }}
 
     - name: Get Web App Name
       id: get_app_name

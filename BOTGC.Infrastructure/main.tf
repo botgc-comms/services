@@ -87,7 +87,9 @@ resource "azurerm_linux_web_app" "services_api_app" {
     "ADMIN_PASSWORD"                                         = var.admin_password
     "DATA_CONTAINER_CONNECTION_STRING"                       = data.azurerm_storage_account.services_api_sa.primary_connection_string
 
-    "AppSettings__TrophyFilePath"                             = "/data/trophies"
+    "AppSettings__TrophyFilePath"                            = "/data/trophies"
+
+    "AppSettings__Auth__XApiKey"                             = var.x_api_key
 
     "AppSettings__AzureFaceApi__EndPoint"                    = "https://face-botgc-shared.cognitiveservices.azure.com/"
     "AppSettings__AzureFaceApi__SubscriptionKey"             = var.azure_face_api_key

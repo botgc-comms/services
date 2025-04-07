@@ -28,3 +28,8 @@ variable "azure_face_api_key" {
   type    = string
   default = ""
 }
+
+variable "x_api_key" {
+  type    = string
+  default = ""
+}
