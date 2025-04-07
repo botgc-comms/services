@@ -36,6 +36,21 @@ resource "azurerm_service_plan" "services_api_asp" {
   sku_name            = "Y1"
 }
 
+resource "azurerm_redis_cache" "redis" {
+  name                = "redis-${var.project_name}-${var.environment}"
+  location            = azurerm_resource_group.services_api_rg.location
+  resource_group_name = azurerm_resource_group.services_api_rg.name
+  capacity            = 1
+  family              = "C"
+  sku_name            = "Basic"
+  enable_non_ssl_port = false
+}
+
+data "azurerm_redis_cache" "redis" {
+  name                = azurerm_redis_cache.redis.name
+  resource_group_name = azurerm_resource_group.services_api_rg.name
+}
+
 resource "azurerm_linux_web_app" "services_api_app" {
   name                = "api-${var.project_name}-${var.environment}"
   location            = azurerm_resource_group.services_api_rg.location
@@ -65,7 +80,7 @@ resource "azurerm_linux_web_app" "services_api_app" {
 
     "AppSettings__Cache__ShortTerm_TTL_mins"                 = "10080"
     "AppSettings__Cache__LongTerm_TTL_mins"                  = "10080"
-    "AppSettings__Cache__RedisCache__ConnectionString"       = var.redis_connection_string
+    "AppSettings__Cache__RedisCache__ConnectionString"       = data.azurerm_redis_cache.redis.primary_connection_string
 
     "AppSettings__IG__LoginEveryNMinutes"                    = "30"
     "AppSettings__IG__BaseUrl"                               = "https://www.botgc.co.uk"
@@ -75,8 +90,8 @@ resource "azurerm_linux_web_app" "services_api_app" {
 
     "AppSettings__IG__Urls__JuniorMembershipReportUrl"       = "/membership_reports.php?tab=report&section=viewreport&md=b52f6bd4cf74cc5dbfd84dec616ceb42"
     "AppSettings__IG__Urls__AllCurrentMembersReportUrl"      = "/membership_reports.php?tab=report&section=viewreport&md=5d71e7119d780dba4850506f622c1cfb"
-    "AppSettings__IG__Urls__MemberRoundsReportUrl"          = "/roundmgmt.php?playerid={playerId}"
-    "AppSettings__IG__Urls__PlayerIdLookupReportUrl"        = "/membership_reports.php?tab=status"
+    "AppSettings__IG__Urls__MemberRoundsReportUrl"           = "/roundmgmt.php?playerid={playerId}"
+    "AppSettings__IG__Urls__PlayerIdLookupReportUrl"         = "/membership_reports.php?tab=status"
     "AppSettings__IG__Urls__RoundReportUrl"                  = "/viewround.php?roundid={roundId}"
     "AppSettings__IG__Urls__MembershipReportingUrl"          = "/membership_reports.php?tab=report&section=viewreport&md=9be9f71c8988351887840f3826a552da"
     "AppSettings__IG__Urls__NewMembershipApplicationUrl"     = "/membership_addmember.php?&requestType=ajax&ajaxaction=confirmadd"

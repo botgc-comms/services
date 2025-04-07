@@ -23,3 +23,8 @@ variable "admin_password" {
   type    = string
   default = ""
 }
+
+variable "azure_face_api_key" {
+  type    = string
+  default = ""
+}
