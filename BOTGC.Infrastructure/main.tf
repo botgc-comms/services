@@ -92,6 +92,7 @@ resource "azurerm_linux_web_app" "services_api_app" {
     "AppSettings__AzureFaceApi__EndPoint"                    = "https://face-botgc-shared.cognitiveservices.azure.com/"
     "AppSettings__AzureFaceApi__SubscriptionKey"             = var.azure_face_api_key
 
+    "AppSettings__Cache__Type"                               = "Redis"
     "AppSettings__Cache__ShortTerm_TTL_mins"                 = "10080"
     "AppSettings__Cache__LongTerm_TTL_mins"                  = "10080"
     "AppSettings__Cache__RedisCache__ConnectionString"       = data.azurerm_redis_cache.redis.primary_connection_string

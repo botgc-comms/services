@@ -49,7 +49,16 @@ builder.Services.AddHttpContextAccessor();
 //builder.Services.AddMemoryCache();
 //builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 
-builder.Services.AddScoped<ICacheService, FileCacheService>();
+var cacheServiceType = appSettings.Cache.Type;
+
+if (string.Equals(cacheServiceType, "Redis", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddScoped<ICacheService, RedisCacheService>();
+}
+else
+{
+    builder.Services.AddScoped<ICacheService, FileCacheService>();
+}
 
 // Add support for interacting with IG
 builder.Services.AddIGSupport();

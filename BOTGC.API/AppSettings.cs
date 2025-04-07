@@ -19,6 +19,7 @@
 
     public class Cache
     {
+        public string Type { get; set; } = "File";
         public int Default_TTL_Mins { get; set; } = 12 * 60;
         public int ShortTerm_TTL_mins { get; set; } = 30;
         public int MediumTerm_TTL_mins { get; set; } = 12*60;
@@ -26,6 +27,7 @@
         public int Forever_TTL_Mins { get; set; } = int.MaxValue;
 
         public FileCacheStorage FileCacheStorage { get; set; }
+        public RedisCacheStorage RedisCache { get; set; }
     }
 
     public class AzureFaceApi
@@ -75,5 +77,10 @@
     public class FileCacheStorage
     {
         public string Path { get; set; }
+    }
+
+    public class RedisCacheStorage
+    {
+        public string ConnectionString { get; set; }
     }
 }
