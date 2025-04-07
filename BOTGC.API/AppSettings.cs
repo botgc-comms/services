@@ -38,10 +38,10 @@
 
     public class GitHub
     {
-        public string RepoUrl { get; set; } = string.Empty; // e.g., "https://github.com/user/repo"
-        public string ApiUrl { get; set; } = string.Empty; // e.g., "https://api.github.com/repos/user/repo"
-        public string RawUrl { get; set; } = string.Empty; // e.g., "https://raw.githubusercontent.com/user/repo/main"
-        public string TrophyDirectory { get; set; } = "trophies"; // Directory inside repo
+        public string RepoUrl { get; set; } = "https://github.com/botgc-comms/data";
+        public string ApiUrl { get; set; } = "https://api.github.com";
+        public string RawUrl { get; set; } = "https://raw.githubusercontent.com/botgc-comms/data/master";
+        public string TrophyDirectory { get; set; } = "Trophies"; 
     }
 
     public class IG

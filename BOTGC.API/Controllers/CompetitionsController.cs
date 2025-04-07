@@ -97,7 +97,7 @@ namespace Services.Controllers
             }
         }
 
-        [HttpGet("/{competitionId}")]
+        [HttpGet("{competitionId}")]
         public async Task<IActionResult> GetCompetitionDetails(string competitionId)
         {
             _logger.LogInformation($"Fetching competition {competitionId}...");
