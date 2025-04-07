@@ -16,6 +16,10 @@ terraform {
   }
 }
 
+provider "azurerm" {
+  features {}
+}
+
 data "azurerm_client_config" "example" {}
 
 resource "azurerm_resource_group" "services_api_rg" {
