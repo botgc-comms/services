@@ -43,8 +43,14 @@ resource "azurerm_redis_cache" "redis" {
   capacity            = 1
   family              = "C"
   sku_name            = "Basic"
-  enable_tls          = true
+
+  # Specify the minimum TLS version
+  minimum_tls_version = "1.2"
+
+  # Enable the non-SSL port if needed (optional)
+  enable_non_ssl_port = false
 }
+
 
 data "azurerm_redis_cache" "redis" {
   name                = azurerm_redis_cache.redis.name
