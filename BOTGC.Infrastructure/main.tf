@@ -1,14 +1,19 @@
 terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 3.30.0"
+    }
+  }
+
   backend "azurerm" {
     resource_group_name  = "rg-botgc-shared"
     storage_account_name = "sabotgcmain"
     container_name       = "tfstate"
     key                  = "terraform.tfstat.svc"
   }
-}
-
-provider "azurerm" {
-  features {}
 }
 
 data "azurerm_client_config" "example" {}
@@ -44,13 +49,12 @@ resource "azurerm_redis_cache" "redis" {
   family              = "C"
   sku_name            = "Basic"
 
+  # Use the updated argument name
+  non_ssl_port_enabled = false
+
   # Specify the minimum TLS version
   minimum_tls_version = "1.2"
-
-  # Enable the non-SSL port if needed (optional)
-  enable_non_ssl_port = false
 }
-
 
 data "azurerm_redis_cache" "redis" {
   name                = azurerm_redis_cache.redis.name
