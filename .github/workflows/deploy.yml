@@ -82,6 +82,8 @@ jobs:
       run: |
         dotnet publish BOTGC.API/BOTGC.API.csproj \
           -c Release \
+          -r linux-x64 \
+          --self-contained false \
           -o published
 
     - name: Zip API for Deployment
