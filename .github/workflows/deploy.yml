@@ -90,6 +90,9 @@ jobs:
       run: zip -r api.zip . -x '*.git*'
       working-directory: published
 
+    - name: List zip contents
+      run: unzip -l published/api.zip
+
     - name: Install Azure CLI
       run: |
         curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
