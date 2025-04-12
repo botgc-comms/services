@@ -1,3 +1,7 @@
+using BOTGC.Leaderboards;
+using BOTGC.Leaderboards.Interfaces;
+using BOTGC.Leaderboards.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +9,8 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration.GetSection("AppSettings"));
+
+builder.Services.AddHttpClient<IJuniorEclecticService, JuniorEclecticService>();
 
 var app = builder.Build();
 

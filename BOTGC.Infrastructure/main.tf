@@ -149,7 +149,8 @@ resource "azurerm_linux_web_app" "services_leaderboards_app" {
     "WEBSITE_RUN_FROM_PACKAGE"                               = "1"
     "DATA_CONTAINER_CONNECTION_STRING"                       = data.azurerm_storage_account.services_api_sa.primary_connection_string
 
-    "AppSettings__TrophyFilePath"                            = "/data/trophies"
+    "AppSettings__API__XApiKey"                              = var.x_api_key
+    "AppSettings__API__Url"                                  = "https://${azurerm_linux_web_app.services_api_app.default_hostname}"
   }
 
   identity {

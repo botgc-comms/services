@@ -1,4 +1,4 @@
-﻿namespace Leaderboards.Models
+﻿namespace BOTGC.Leaderboards.Models.EclecticScorecard
 {
     public class EclecticPlayerViewModel
     {
@@ -20,11 +20,11 @@
     public class ScoreCardViewModel
     {
         public DateTime PlayedOn { get; set; }
-        public Boolean IsIncluded { get; set; }
+        public bool IsIncluded { get; set; }
         public List<HoleViewModel> Holes { get; set; }
         public List<string> ExclusionReasons { get; set; }
     }
-    
+
     public class HoleViewModel
     {
         public int HoleNumber { get; set; }

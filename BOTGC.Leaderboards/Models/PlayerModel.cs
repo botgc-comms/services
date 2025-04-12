@@ -1,4 +1,4 @@
-﻿namespace Leaderboards.Models
+﻿namespace BOTGC.Leaderboards.Models
 {
     public class Player
     {

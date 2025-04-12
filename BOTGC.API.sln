@@ -11,8 +11,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BOTGC.Infrastructure", "BOT
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A59428FF-05B3-452E-827D-03EDCFBEE332}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		.github\workflows\deploy.yml = .github\workflows\deploy.yml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BOTGC.Leaderboards", "BOTGC.Leaderboards\BOTGC.Leaderboards.csproj", "{3B3B4C1C-E841-4F4C-88E7-3077B94E222A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +35,10 @@ Global
 		{62B9FBBE-B8B2-4FB4-9ADA-F4AFADBCD2A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62B9FBBE-B8B2-4FB4-9ADA-F4AFADBCD2A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62B9FBBE-B8B2-4FB4-9ADA-F4AFADBCD2A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B3B4C1C-E841-4F4C-88E7-3077B94E222A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B3B4C1C-E841-4F4C-88E7-3077B94E222A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B3B4C1C-E841-4F4C-88E7-3077B94E222A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B3B4C1C-E841-4F4C-88E7-3077B94E222A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

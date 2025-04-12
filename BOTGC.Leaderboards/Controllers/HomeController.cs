@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Leaderboards.Models;
+using BOTGC.Leaderboards.Models;
+using BOTGC.Leaderboards.Models.EclecticScorecard;
 
-namespace Leaderboards.Controllers;
+namespace BOTGC.Leaderboards.Controllers;
 
 public class HomeController : Controller
 {
