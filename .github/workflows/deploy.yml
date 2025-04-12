@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      web_app_name: ${{ steps.get_app_name.outputs.web_app_name }}
+      api_app_name: ${{ steps.get_api_app_name.outputs.api_app_name }}
+      leaderboards_app_name: ${{ steps.get_leaderboards_app_name.outputs.api_app_name }}
 
     steps:
     - name: Checkout code
@@ -54,12 +55,12 @@ jobs:
         TF_VAR_x_api_key: ${{ secrets.X_API_KEY }}
         TF_VAR_github_token: ${{ secrets.PAT_GITHUB }}
 
-    - name: Get Web App Name
-      id: get_app_name
+    - name: Get Api App Name
+      id: get_api_app_name
       run: |
-        web_app_name=$(terraform output -raw web_app_name)
-        echo "web_app_name=${web_app_name}"
-        echo "web_app_name=${web_app_name}" >> "$GITHUB_OUTPUT"
+        api_app_name=$(terraform output -raw api_app_name)
+        echo "api_app_name=${api_app_name}"
+        echo "api_app_name=${api_app_name}" >> "$GITHUB_OUTPUT"
       working-directory: BOTGC.Infrastructure
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -67,7 +68,21 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-  deploy-api:
+    - name: Get Leaderboards App Name
+      id: get_leaderboards_app_name
+      run: |
+        leaderboards_app_name=$(terraform output -raw leaderboards_app_name)
+        echo "leaderboards_app_name=${leaderboards_app_name}"
+        echo "leaderboards_app_name=${leaderboards_app_name}" >> "$GITHUB_OUTPUT"
+      working-directory: BOTGC.Infrastructure
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+
+  build-solution:
     runs-on: ubuntu-latest
     needs: terraform
 
@@ -80,6 +95,11 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+  deploy-api:
+    runs-on: ubuntu-latest
+    needs: build-solution
+
+    steps:
     - name: Publish API
       run: |
         dotnet publish BOTGC.API/BOTGC.API.csproj \
@@ -91,9 +111,6 @@ jobs:
     - name: Zip API for Deployment
       run: zip -r api.zip . -x '*.git*'
       working-directory: published
-
-    - name: List zip contents
-      run: unzip -l published/api.zip
 
     - name: Install Azure CLI
       run: |
@@ -109,6 +126,41 @@ jobs:
     - name: Deploy to App Service
       run: |
         az webapp deploy --resource-group rg-botgcapps-prd \
-          --name ${{ needs.terraform.outputs.web_app_name }} \
+          --name ${{ needs.terraform.outputs.api_app_name }} \
           --src-path published/api.zip \
+          --type zip
+
+  deploy-leaderboards:
+    runs-on: ubuntu-latest
+    needs: build-solution
+
+    steps:
+    - name: Publish API
+      run: |
+        dotnet publish BOTGC.Leaderboards/BOTGC.Leaderboards.csproj \
+          -c Release \
+          -r linux-x64 \
+          --self-contained false \
+          -o published
+
+    - name: Zip API for Deployment
+      run: zip -r leaderboards.zip . -x '*.git*'
+      working-directory: published
+
+    - name: Install Azure CLI
+      run: |
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+    - name: Azure CLI Login
+      run: |
+        az login --service-principal \
+          -u ${{ secrets.AZURE_CLIENT_ID }} \
+          -p ${{ secrets.AZURE_CLIENT_SECRET }} \
+          --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+    - name: Deploy to App Service
+      run: |
+        az webapp deploy --resource-group rg-botgcapps-prd \
+          --name ${{ needs.terraform.outputs.leaderboards_app_name }} \
+          --src-path published/leaderboards.zip \
           --type zip

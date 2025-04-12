@@ -1,0 +1,123 @@
+﻿@model IEnumerable<Leaderboards.Models.EclecticPlayerViewModel>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K.S. Wright Cup Leaderboard</title>
+    <link rel="stylesheet" href="~/css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="leaderboard">
+        <div class="flash"></div>
+        <img src="~/img/club-logo.png" alt="Logo" class="logo">
+        <div class="header">
+            <div class="trophy-wrapper">
+                <img class="trophy" src="~/assets/trophy.png" alt="Trophy">
+            </div>
+            <div class="text">
+                <div id="competition-title">The K.S.Wright<br />Cup 2024</div>
+            </div>
+        </div>
+        <div class="content">
+            <div class="left"></div>
+            <div class="central">
+                <div class="table-container">
+                    <div class="orange-bg"></div>
+                    <table id="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th style="width:calc(40%);">Player</th>
+                                <th class="score-cell">Best Front Nine</th>
+                                <th class="score-cell">Best Back Nine</th>
+                                <th class="score-cell">Total Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var player in Model.OrderByDescending(p => p.TotalScore))
+                                {
+                                    <tr class="player-row" data-player-id="@player.PlayerName.Replace(" ", "-")">
+                                        <td class="name-cell toggle-details">@player.PlayerName</td>
+                                        <td class="score-cell">@player.BestFrontNine (@player.FrontNineCards)</td>
+                                        <td class="score-cell">@player.BestBackNine (@player.BackNineCards)</td>
+                                        <td class="score-cell">@player.TotalScore</td>
+                                    </tr>
+
+                                    <tr class="details-row" id="details-@player.PlayerName.Replace(" ", "-")" style="display: none;">
+                                        <td colspan="4">
+                                            <table class="score-details">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Round Date</th>
+                                                        @for (int i = 1; i <= 18; i++)
+                                                        {
+                                                            <th>@i</th>
+                                                        }
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var scorecard in player.Scores.ScoreCards)
+                                                    {
+                                                        <tr>
+                                                            <td>@scorecard.PlayedOn.ToShortDateString()</td>
+                                                            @for (int i = 1; i <= 18; i++)
+                                                            {
+                                                                var hole = scorecard.Holes.FirstOrDefault(h => h.HoleNumber == i);
+                                                                var cssClass = hole != null && hole.IsSelected ? "counted-score" : "";
+                                                                <td class="@cssClass">
+                                                                    @(hole?.HoleScore ?? null)
+                                                                </td>
+                                                            }
+                                                        </tr>
+                                                    }
+                                                    <tr class="final-eclectic">
+                                                        <td>Final Eclectic</td>
+                                                        @for (int i = 1; i <= 18; i++)
+                                                        {
+                                                            var bestHoleScore = player.Scores.ScoreCards
+                                                            .SelectMany(sc => sc.Holes)
+                                                            .Where(h => h.HoleNumber == i)
+                                                            .OrderByDescending(h => h.HoleScore)
+                                                            .FirstOrDefault();
+
+                                                            var cssClass = bestHoleScore != null ? "final-score" : "";
+                                                            <td class="@cssClass">
+                                                                @(bestHoleScore?.HoleScore ?? null)
+                                                            </td>
+                                                        }
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" style="text-align: center; font-size: 1.2em;">No data available</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="right"></div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $(".toggle-details").click(function () {
+                var playerId = $(this).closest("tr").data("player-id");
+                $("#details-" + playerId).toggle();
+            });
+        });
+    </script>
+
+</body>
+</html>

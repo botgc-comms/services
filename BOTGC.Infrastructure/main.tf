@@ -130,6 +130,33 @@ resource "azurerm_linux_web_app" "services_api_app" {
   }
 }
 
+resource "azurerm_linux_web_app" "services_leaderboards_app" {
+  name                = "leaderboards-${var.project_name}-${var.environment}"
+  location            = azurerm_resource_group.services_api_rg.location
+  resource_group_name = azurerm_resource_group.services_api_rg.name
+  service_plan_id     = azurerm_service_plan.services_api_asp.id
+
+  site_config {
+    application_stack {
+      dotnet_version = "8.0"
+    }
+  }
+
+  app_settings = {
+    "APPINSIGHTS_INSTRUMENTATIONKEY"                         = azurerm_application_insights.app_insights.instrumentation_key
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"                  = azurerm_application_insights.app_insights.connection_string
+    "SCM_DO_BUILD_DURING_DEPLOYMENT"                         = true
+    "WEBSITE_RUN_FROM_PACKAGE"                               = "1"
+    "DATA_CONTAINER_CONNECTION_STRING"                       = data.azurerm_storage_account.services_api_sa.primary_connection_string
+
+    "AppSettings__TrophyFilePath"                            = "/data/trophies"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
 resource "azurerm_key_vault" "services_api_kv" {
   name                = "kv-${var.project_name}-${var.environment}"
   location            = azurerm_resource_group.services_api_rg.location
@@ -187,6 +214,10 @@ resource "azurerm_application_insights" "app_insights" {
   application_type    = "web"
 }
 
-output "web_app_name" {
+output "api_app_name" {
   value = azurerm_linux_web_app.services_api_app.name
+}
+
+output "leaderboards_app_name" {
+  value = azurerm_linux_web_app.services_leaderboards_app.name
 }

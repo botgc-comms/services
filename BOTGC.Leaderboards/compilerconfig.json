@@ -1,0 +1,10 @@
+[
+  {
+    "inputFile": "wwwroot/scss/index.scss",
+    "outputFile": "wwwroot/css/styles.css",
+    "options": {
+      "outputStyle": "compressed",
+      "sourceMap": true
+    }
+  }
+]
