@@ -81,8 +81,7 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-
-  build-solution:
+  deploy-api:
     runs-on: ubuntu-latest
     needs: terraform
 
@@ -95,11 +94,6 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-  deploy-api:
-    runs-on: ubuntu-latest
-    needs: build-solution
-
-    steps:
     - name: Publish API
       run: |
         dotnet publish BOTGC.API/BOTGC.API.csproj \
@@ -135,6 +129,14 @@ jobs:
     needs: build-solution
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
     - name: Publish API
       run: |
         dotnet publish BOTGC.Leaderboards/BOTGC.Leaderboards.csproj \
