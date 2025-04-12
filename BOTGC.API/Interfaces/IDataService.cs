@@ -20,6 +20,8 @@ namespace Services.Interfaces
         Task<LeaderBoardDto> GetCompetitionLeaderboardAsync(string competitionId);
 
         Task<NewMemberApplicationResultDto?> SubmitNewMemberApplicationAsync(NewMemberApplicationDto newMember);
+
+        Task<List<SecurityLogEntryDto>> GetMobileOrders(DateTime? forDate = null);
     }
 
 }

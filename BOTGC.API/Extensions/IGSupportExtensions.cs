@@ -40,6 +40,7 @@ namespace Services.Extensions
             services.AddSingleton<IReportParser<CompetitionDto>, IGCompetitionReportParser>();
             services.AddSingleton<IReportParser<LeaderBoardDto>, IGLeaderboardReportParser>();
             services.AddSingleton<IReportParser<CompetitionSettingsDto>, IGCompetitionSettingsReportParser>();
+            services.AddSingleton<IReportParser<SecurityLogEntryDto>, IGSecurityLogReportParser>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 

@@ -50,6 +50,7 @@ namespace Services.Services
         private readonly IReportParser<MemberEventDto> _memberEventReportParser;
         private readonly IReportParser<CompetitionSettingsDto> _competitionSettingsReportParser;
         private readonly IReportParser<LeaderBoardDto> _leaderboardReportParser;
+        private readonly IReportParser<SecurityLogEntryDto> _securityLogEntryParser;
 
         public IGDataService(IOptions<AppSettings> settings,
                                 ILogger<IGDataService> logger,
@@ -62,6 +63,7 @@ namespace Services.Services
                                 IReportParser<CompetitionDto> competitionReportParser,
                                 IReportParser<CompetitionSettingsDto> competitionSettingsReportParser,
                                 IReportParser<LeaderBoardDto> leaderBoardReportParser,
+                                IReportParser<SecurityLogEntryDto> securityLogEntryParser, 
                                 IGSessionService igSessionManagementService,                
                                 IServiceScopeFactory serviceScopeFactory)
         {
@@ -79,6 +81,7 @@ namespace Services.Services
             _competitionReportParser = competitionReportParser ?? throw new ArgumentNullException(nameof(competitionReportParser));
             _competitionSettingsReportParser = competitionSettingsReportParser ?? throw new ArgumentNullException(nameof(competitionSettingsReportParser));
             _leaderboardReportParser = leaderBoardReportParser ?? throw new ArgumentNullException(nameof(leaderBoardReportParser));
+            _securityLogEntryParser = securityLogEntryParser ?? throw new ArgumentNullException(nameof(securityLogEntryParser));
         }
         
         public async Task<List<MemberDto>> GetJuniorMembersAsync()
@@ -282,6 +285,35 @@ namespace Services.Services
             return null;
         }
 
+        public async Task<List<SecurityLogEntryDto>?> GetMobileOrders(DateTime? forDate = null)
+        {
+            forDate = forDate ?? DateTime.Now.Date;
+
+            var securityLogUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.SecurityLogMobileOrders}".Replace("{today}", forDate?.ToString("dd-MM-yyyy"));
+            var securityLog = await GetData<SecurityLogEntryDto>(securityLogUrl, _securityLogEntryParser);
+
+            if (securityLog != null && securityLog.Any())
+            {
+                var deduplicated = new List<SecurityLogEntryDto>();
+
+                SecurityLogEntryDto previous = null;
+                foreach (var current in securityLog)
+                {
+                    if (previous == null || current.Event != previous.Event)
+                    {
+                        deduplicated.Add(current);
+                    }
+                    previous = current;
+                }
+
+                _logger.LogInformation($"Successfully retrieved {deduplicated.Count} mobile orders.");
+
+                return deduplicated;
+            }
+
+            return null;
+        }
+
         public async Task<NewMemberApplicationResultDto?> SubmitNewMemberApplicationAsync(NewMemberApplicationDto newMember)
         {
             var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.NewMembershipApplicationUrl}";
@@ -431,7 +463,10 @@ namespace Services.Services
                 }
             }
 
-            await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(cacheKey) && cacheTTL != null)
+            {
+                await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
+            }
 
             return items;
         }
