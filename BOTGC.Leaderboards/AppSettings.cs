@@ -1,6 +1,6 @@
-﻿namespace Services
-{
-    public class AppSettings
+﻿namespace Leaderboards;
+
+public class AppSettings
     {
         public string APIUrlrophyFilePath { get; set; }
 
