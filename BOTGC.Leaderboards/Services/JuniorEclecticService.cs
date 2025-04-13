@@ -32,7 +32,7 @@ public class JuniorEclecticService : IJuniorEclecticService
             var serviceUrl = $"{_settings.API.Url}/api/competitions/juniorEclectic/results?fromDate={fromDate}&toDate={toDate}";
 
             var request = new HttpRequestMessage(HttpMethod.Get, serviceUrl);
-            request.Headers.Add("x-api-key", _settings.API.XApiKey);
+            request.Headers.Add("X-API-KEY", _settings.API.XApiKey);
 
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
@@ -44,10 +44,10 @@ public class JuniorEclecticService : IJuniorEclecticService
                 PropertyNameCaseInsensitive = true
             });
 
-            if (parsedData?.Value?.Scores == null)
+            if (parsedData?.Scores == null)
                 return new List<EclecticPlayerViewModel>();
 
-            return parsedData.Value.Scores.Select(score => new EclecticPlayerViewModel
+            return parsedData.Scores.Select(score => new EclecticPlayerViewModel
             {
                 PlayerName = score.Scorecard.PlayerName,
                 BestFrontNine = GetBestNine(score.Scorecard.Holes, 1, 9),

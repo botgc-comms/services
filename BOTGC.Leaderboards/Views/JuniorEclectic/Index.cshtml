@@ -17,10 +17,10 @@
         <img src="~/img/club-logo.png" alt="Logo" class="logo">
         <div class="header">
             <div class="trophy-wrapper">
-                <img class="trophy" src="~/assets/trophy.png" alt="Trophy">
+                <img class="trophy" src="/img/junioreclectic.png" alt="Trophy">
             </div>
             <div class="text">
-                <div id="competition-title">The K.S.Wright<br />Cup 2024</div>
+                <div id="competition-title">Junior Eclectic 2025</div>
             </div>
         </div>
         <div class="content">
@@ -30,11 +30,11 @@
                     <div class="orange-bg"></div>
                     <table id="leaderboard-table">
                         <thead>
-                            <tr>
+                            <tr class="score-header">
                                 <th style="width:calc(40%);">Player</th>
-                                <th class="score-cell">Best Front Nine</th>
-                                <th class="score-cell">Best Back Nine</th>
-                                <th class="score-cell">Total Score</th>
+                                <th class="score-cell">Front</th>
+                                <th class="score-cell">Back</th>
+                                <th class="score-cell">Score</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -46,7 +46,7 @@
                                         <td class="name-cell toggle-details">@player.PlayerName</td>
                                         <td class="score-cell">@player.BestFrontNine (@player.FrontNineCards)</td>
                                         <td class="score-cell">@player.BestBackNine (@player.BackNineCards)</td>
-                                        <td class="score-cell">@player.TotalScore</td>
+                                        <td class="score-cell overall-score-cell">@player.TotalScore</td>
                                     </tr>
 
                                     <tr class="details-row" id="details-@player.PlayerName.Replace(" ", "-")" style="display: none;">

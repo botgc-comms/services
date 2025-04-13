@@ -3,6 +3,7 @@
     // Root JSON Structure
     public class EclecticResultsRoot
     {
-        public ValueWrapper Value { get; set; }
+        public List<ScoreEntry> Scores { get; set; }
+        //public ValueWrapper Value { get; set; }
     }
 }

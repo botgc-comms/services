@@ -102,7 +102,7 @@ body {
         top: 0;
         right: 0;
         bottom: 0;
-        width: 40%;
+        width: 20%;
         background-color: $orange-highlight;
         z-index: 0;
     }
@@ -202,9 +202,18 @@ tr {
     width: 100%;
 }
 
+.score-header {
+    color: black;
+}
+
 .handicap-cell, .score-cell, .par-cell, .thru-cell {
     padding: 0.5rem;
     text-align: center;
+    color: white;
+
+    .overall-score-cell {
+        color: black;
+    }
 }
 
 /* Additional Styles for Collapsible Score Table */

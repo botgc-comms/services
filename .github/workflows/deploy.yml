@@ -142,7 +142,7 @@ jobs:
         dotnet publish BOTGC.Leaderboards/BOTGC.Leaderboards.csproj \
           -c Release \
           -r linux-x64 \
-          --self-contained false \
+          --self-contained true \
           -o published
 
     - name: Zip API for Deployment
