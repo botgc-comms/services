@@ -140,10 +140,10 @@ jobs:
     - name: Publish API
       run: dotnet publish BOTGC.Leaderboards/BOTGC.Leaderboards.csproj -c Release -r linux-x64 --self-contained true -o published
 
-
     - name: Zip API for Deployment
-      run: zip -r leaderboards.zip . -x '*.git*'
+      run: Compress-Archive -Path * -DestinationPath leaderboards.zip
       working-directory: published
+      shell: pwsh
 
     - name: Install Azure CLI
       run: |
