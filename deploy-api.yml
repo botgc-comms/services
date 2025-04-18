@@ -1,0 +1,55 @@
+name: Deploy API
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'BOTGC.API/**'
+      - 'BOTGC.API.Tests.V2/**'
+      - '.github/workflows/deploy-api.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Publish API
+      run: |
+        dotnet publish BOTGC.API/BOTGC.API.csproj \
+          -c Release \
+          -r linux-x64 \
+          --self-contained false \
+          -o published
+
+    - name: Zip API
+      run: zip -r api.zip . -x '*.git*'
+      working-directory: published
+
+    - name: Install Azure CLI
+      run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+    - name: Azure Login
+      run: |
+        az login --service-principal \
+          -u ${{ secrets.AZURE_CLIENT_ID }} \
+          -p ${{ secrets.AZURE_CLIENT_SECRET }} \
+          --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+    - name: Get API App Name
+      run: echo "API_APP_NAME=$(terraform -chdir=BOTGC.Infrastructure output -raw api_app_name)" >> $GITHUB_ENV
+
+    - name: Deploy API
+      run: |
+        az webapp deploy --resource-group rg-botgcapps-prd \
+          --name $API_APP_NAME \
+          --src-path published/api.zip \
+          --type zip
