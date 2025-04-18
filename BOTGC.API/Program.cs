@@ -1,14 +1,10 @@
+using BOTGC.API;
 using BOTGC.API.Common;
+using BOTGC.API.Extensions;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services;
 using BOTGC.API.Services.ReportServices;
-using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
-using Services;
-using Services.Common;
-using Services.Extensions;
-using Services.Interfaces;
-using Services.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

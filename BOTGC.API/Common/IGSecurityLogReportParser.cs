@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using BOTGC.API.Common;
-using global::Services.Dto;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
-using Services.Interfaces;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Dto;
 
-namespace Services.Common
+namespace BOTGC.API.Common
 {
     public class IGSecurityLogReportParser: IReportParser<SecurityLogEntryDto>
     {

@@ -1,6 +1,6 @@
-﻿using Services.Dto;
+﻿using BOTGC.API.Dto;
 
-namespace Services.Dtos
+namespace BOTGC.API.Dto
 {
     public class TrophyDto: HateoasResource
     {

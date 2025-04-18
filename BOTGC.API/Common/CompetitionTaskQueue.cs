@@ -1,8 +1,8 @@
-﻿using Services.Interfaces;
-using Services.Models;
+﻿using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
 using System.Threading.Channels;
 
-namespace Services.Common
+namespace BOTGC.API.Common
 {
     public class CompetitionTaskQueue : ICompetitionTaskQueue
     {

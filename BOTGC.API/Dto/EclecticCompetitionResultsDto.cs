@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Services.Dto
+namespace BOTGC.API.Dto
 {
     public class EclecticCompetitionResultsDto
     {

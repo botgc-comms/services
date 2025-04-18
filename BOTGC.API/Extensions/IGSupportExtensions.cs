@@ -1,14 +1,12 @@
 ﻿using BOTGC.API.Services;
-using Services.Common;
-using Services.Dto;
-using Services.Dtos;
-using Services.Interfaces;
-using Services.Services;
-using Services.Services.BackgroundServices;
-using Services.Services.CompetitionProcessors;
+using BOTGC.API.Common;
+using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Services.BackgroundServices;
+using BOTGC.API.Services.CompetitionProcessors;
 using System.Net;
 
-namespace Services.Extensions
+namespace BOTGC.API.Extensions
 {
     public static class IGSupportExtensions
     {

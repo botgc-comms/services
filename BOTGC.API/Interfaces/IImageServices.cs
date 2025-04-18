@@ -1,4 +1,4 @@
-﻿namespace Services.Interfaces
+﻿namespace BOTGC.API.Interfaces
 {
     public interface IImageServices
     {

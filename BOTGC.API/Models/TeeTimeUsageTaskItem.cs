@@ -1,4 +1,4 @@
-﻿namespace Services.Models
+﻿namespace BOTGC.API.Models
 {
     public class TeeTimeUsageTaskItem
     {

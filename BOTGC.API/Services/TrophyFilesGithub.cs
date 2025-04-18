@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Services.Interfaces;
-using Services.Models;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Services.Services;
+namespace BOTGC.API.Services;
 
 public class TrophyFilesGitHub : ITrophyFiles
 {

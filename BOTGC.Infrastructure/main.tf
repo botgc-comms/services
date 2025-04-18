@@ -37,6 +37,11 @@ data "azurerm_storage_container" "data" {
   storage_account_name = data.azurerm_storage_account.services_api_sa.name
 }
 
+resource "azurerm_storage_queue" "membership_applications_queue" {
+  name                 = "membershipapplications"
+  storage_account_name = data.azurerm_storage_account.services_api_sa.name
+}
+
 resource "azurerm_service_plan" "services_api_asp" {
   name                = "asp-${var.project_name}-${var.environment}"
   location            = azurerm_resource_group.services_api_rg.location
@@ -123,6 +128,10 @@ resource "azurerm_linux_web_app" "services_api_app" {
     "AppSettings__IG__Urls__CompetitionSettingsUrl"          = "/compadmin3.php?compid={compid}&tab=settings"
     "AppSettings__IG__Urls__LeaderBoardUrl"                  = "/competition.php?compid={compid}&preview=1"
     "AppSettings__IG__URLS__SecurityLogMobileOrders"         = "/log.php?search=Mobile+order&person=&start={today}&starttime=&end={today}&endtime="
+
+    "AppSettings__Queue__ConnectionString" = data.azurerm_storage_account.services_api_sa.primary_connection_string
+    "AppSettings__Queue__Name"             = azurerm_storage_queue.membership_applications_queue.name
+
   }
 
   identity {
@@ -148,6 +157,7 @@ resource "azurerm_linux_web_app" "services_leaderboards_app" {
     "SCM_DO_BUILD_DURING_DEPLOYMENT"                         = true
     "WEBSITE_RUN_FROM_PACKAGE"                               = "1"
     "DATA_CONTAINER_CONNECTION_STRING"                       = data.azurerm_storage_account.services_api_sa.primary_connection_string
+    "ASPNETCORE_ENVIRONMENT"                                 = "Production"
 
     "AppSettings__API__XApiKey"                              = var.x_api_key
     "AppSettings__API__Url"                                  = "https://${azurerm_linux_web_app.services_api_app.default_hostname}"

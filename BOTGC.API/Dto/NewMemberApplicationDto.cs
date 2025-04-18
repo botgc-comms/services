@@ -3,34 +3,36 @@
     public class NewMemberApplicationDto
     {
         public int Gender { get; set; }
-        public string Title { get; set; }
-        public string Forename { get; set; }
-        public string Surname { get; set; }
-        public string AltForename { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Forename { get; set; } = string.Empty;
+        public string Surname { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
-        public string Telephone1 { get; set; }
-        public string Telephone2 { get; set; }
-        public string Telephone3 { get; set; }
-        public string Email { get; set; }
-        public string AddressLine1 { get; set; }
-        public string AddressLine2 { get; set; }
-        public string AddressLine3 { get; set; }
-        public string Town { get; set; }
-        public string County { get; set; }
-        public string Country { get; set; }
-        public string Postcode { get; set; }
+
+        public string Telephone { get; set; } = string.Empty;
+        public string? AlternativeTelephone { get; set; }
+        public string Email { get; set; } = string.Empty;
+
+        public string AddressLine1 { get; set; } = string.Empty;
+        public string AddressLine2 { get; set; } = string.Empty;
+        public string Town { get; set; } = string.Empty;
+        public string County { get; set; } = string.Empty;
+        public string Postcode { get; set; } = string.Empty;
+
         public bool HasCdhId { get; set; }
-        public string CdhIdLookup { get; set; }
-        public int MemberCategory { get; set; }
-        public int PaymentType { get; set; }
-        public string MemberStatus { get; set; }
-        public int NewMemberId { get; set; }
-        public string NewCardSwipe { get; set; }
-        public DateTime JoinDate { get; set; }
-        public DateTime ApplicationDate { get; set; }
-        public Dictionary<int, bool> ContactPreferences { get; set; } = new();
-        public int TillDiscountGroupId { get; set; }
+        public string? CdhId { get; set; }
+
+        public string MembershipCategory { get; set; } = string.Empty;
+        public string PaymentType { get; set; } = string.Empty;
+
+        public Dictionary<string, bool> ContactPreferences { get; set; } = new();
+
+        public bool AgreeToClubRules { get; set; }
+
+        // Internal fields
+        public string MemberStatus { get; set; } = "Pending";
+        public DateTime ApplicationDate { get; set; } = DateTime.UtcNow;
     }
+
 
     public class NewMemberApplicationResultDto
     {

@@ -1,6 +1,6 @@
 ﻿using HtmlAgilityPack;
 
-namespace Services.Interfaces
+namespace BOTGC.API.Interfaces
 {
     public interface IReportParser<T>
     {

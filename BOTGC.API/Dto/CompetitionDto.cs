@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.ObjectPool;
-using Services.Dto;
+using BOTGC.API.Dto;
 
-namespace Services.Dtos
+namespace BOTGC.API.Dto
 {
     public class CompetitionDto: HateoasResource
     {

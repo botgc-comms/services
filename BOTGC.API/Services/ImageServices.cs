@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using Services.Interfaces;
-using Services.Models;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Resources;
 using System.Threading.Tasks;
 
-namespace Services.Services
+namespace BOTGC.API.Services
 {
     /// <summary>
     /// Service for processing images, including cropping and centering faces.

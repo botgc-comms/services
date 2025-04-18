@@ -1,9 +1,9 @@
-﻿using Services.Interfaces;
-using Services.Models;
-using Services.Services.CompetitionProcessors;
+﻿using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
+using BOTGC.API.Services.CompetitionProcessors;
 using System.Threading.Channels;
 
-namespace Services.Common
+namespace BOTGC.API.Common
 {
     public class CompetitionProcessorResolver : ICompetitionProcessorResolver
     {

@@ -2,14 +2,14 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Services.Dto;
-using Services.Interfaces;
-using Services.Models;
-using Services.Services;
+using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
+using BOTGC.API.Services;
 using System.Runtime;
 using System.Threading;
 
-namespace Services.Controllers
+namespace BOTGC.API.Controllers
 {
     [ApiController]
     [Route("api/eventLog")]

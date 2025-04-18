@@ -1,4 +1,4 @@
-﻿using Services.Dto;
+﻿using BOTGC.API.Dto;
 
 namespace BOTGC.API.Interfaces
 {

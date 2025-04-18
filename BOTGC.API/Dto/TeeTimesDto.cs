@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Services.Dto
+namespace BOTGC.API.Dto
 {
     public class TeeSheetDto: TeeTimesDto
     {

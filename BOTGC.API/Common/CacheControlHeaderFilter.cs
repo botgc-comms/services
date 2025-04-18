@@ -1,7 +1,7 @@
 ﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Services.Common
+namespace BOTGC.API.Common
 {
 
     public class CacheControlHeaderFilter : IOperationFilter

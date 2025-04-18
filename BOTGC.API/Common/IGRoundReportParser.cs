@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
 using HtmlAgilityPack;
-using Microsoft.Extensions.Logging;
-using Services.Dto;
-using Services.Dtos;
-using Services.Interfaces;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
-namespace Services.Common
+namespace BOTGC.API.Common
 {
     public class IGRoundReportParser: IReportParser<RoundDto>
     {

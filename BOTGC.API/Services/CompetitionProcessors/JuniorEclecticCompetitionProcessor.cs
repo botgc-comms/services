@@ -2,15 +2,15 @@
 using BOTGC.API.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Services.Controllers;
-using Services.Dto;
-using Services.Interfaces;
-using Services.Models;
+using BOTGC.API.Controllers;
+using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
 using System.Diagnostics;
 using System.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace Services.Services.CompetitionProcessors
+namespace BOTGC.API.Services.CompetitionProcessors
 {
     public class JuniorEclecticCompetitionProcessor : ICompetitionProcessor
     {

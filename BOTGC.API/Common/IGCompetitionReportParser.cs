@@ -6,11 +6,10 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
-using Services.Dto;
-using Services.Dtos;
-using Services.Interfaces;
+using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
 
-namespace Services.Common
+namespace BOTGC.API.Common
 {
     public class IGCompetitionReportParser: IReportParser<CompetitionDto>
     {

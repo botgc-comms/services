@@ -1,7 +1,6 @@
-﻿using Services.Dto;
-using Services.Dtos;
+﻿using BOTGC.API.Dto;
 
-namespace Services.Common
+namespace BOTGC.API.Common
 {
     public static class HateOASLinks
     {

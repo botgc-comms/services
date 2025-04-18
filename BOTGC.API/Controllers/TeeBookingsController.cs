@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Services.Dto;
-using Services.Interfaces;
-using Services.Models;
+using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Services.Controllers
+namespace BOTGC.API.Controllers
 {
     /// <summary>
     /// Controller for handling golf round-related operations.

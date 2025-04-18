@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
-using global::Services.Interfaces;
+﻿using BOTGC.API.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 
-namespace Services.Services
+namespace BOTGC.API.Services
 {
     public class MemoryCacheService : ICacheService
     {

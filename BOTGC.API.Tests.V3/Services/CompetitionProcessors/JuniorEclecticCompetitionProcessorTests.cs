@@ -1,17 +1,11 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Services.CompetitionProcessors;
 using FakeItEasy;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Services;
-using Services.Dto;
-using Services.Interfaces;
-using Services.Services.CompetitionProcessors;
-using Xunit;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace BOTGC.API.Tests.Services.CompetitionProcessors
 {

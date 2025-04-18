@@ -1,4 +1,4 @@
-﻿namespace Services.Dto
+﻿namespace BOTGC.API.Dto
 {
    
     public class HateoasResource

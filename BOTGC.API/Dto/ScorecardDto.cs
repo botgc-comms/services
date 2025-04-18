@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Services.Dto
+namespace BOTGC.API.Dto
 {
     /// <summary>
     /// Represents the details of a golf scorecard.

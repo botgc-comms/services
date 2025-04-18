@@ -1,8 +1,6 @@
 ﻿using BOTGC.API.Dto;
-using Services.Dto;
-using Services.Dtos;
 
-namespace Services.Interfaces
+namespace BOTGC.API.Interfaces
 {
     public interface IDataService
     {

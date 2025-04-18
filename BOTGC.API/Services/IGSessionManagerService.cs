@@ -8,8 +8,8 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Services;
-using Services.Services;
+
+using BOTGC.API.Services;
 
 namespace BOTGC.API.Services
 {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Services.Services
+namespace BOTGC.API.Services
 {
     public class IGLoginService
     {

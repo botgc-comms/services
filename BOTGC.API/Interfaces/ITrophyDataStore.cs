@@ -1,6 +1,6 @@
-﻿using Services.Models;
+﻿using BOTGC.API.Models;
 
-namespace Services.Interfaces
+namespace BOTGC.API.Interfaces
 {
     public interface ITrophyDataStore
     {

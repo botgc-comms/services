@@ -1,7 +1,7 @@
-﻿using Services.Models;
+﻿using BOTGC.API.Models;
 using System.Drawing;
 
-namespace Services.Interfaces
+namespace BOTGC.API.Interfaces
 {
     public interface ICognitiveServices
     {

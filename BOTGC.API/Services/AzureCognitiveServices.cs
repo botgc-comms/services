@@ -7,11 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Services.Interfaces;
+using BOTGC.API.Interfaces;
 
-using Rectangle = Services.Models.FaceRectangle;
+using Rectangle = BOTGC.API.Models.FaceRectangle;
 
-namespace Services.Services
+namespace BOTGC.API.Services
 {
     public class AzureCognitiveServices : ICognitiveServices
     {

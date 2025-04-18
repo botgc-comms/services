@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
 using HtmlAgilityPack;
-using Microsoft.Extensions.Logging;
-using Services.Dto;
-using Services.Dtos;
-using Services.Interfaces;
+using System.Globalization;
 
-namespace Services.Common
+namespace BOTGC.API.Common
 {
     public class IGTeeSheetReportParser : IReportParser<TeeSheetDto>
     {

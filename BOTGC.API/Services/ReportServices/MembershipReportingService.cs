@@ -1,9 +1,9 @@
 ﻿using BOTGC.API.Common;
 using BOTGC.API.Interfaces;
-using Services.Common;
-using Services.Dto;
-using Services.Interfaces;
-using Services.Services;
+using BOTGC.API.Common;
+using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Services;
 using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Services.Interfaces;
+using BOTGC.API.Interfaces;
 using System;
 using System.Threading.Tasks;
 

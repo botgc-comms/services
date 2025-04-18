@@ -1,25 +1,9 @@
-﻿using System.Globalization;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using HtmlAgilityPack;
-using Services.Interfaces;
-using Services.Dto;
-using Microsoft.Extensions.Options;
-using System.Runtime;
-using Services.Common;
-using System.Runtime.CompilerServices;
-using Microsoft.AspNetCore.Html;
-using Microsoft.Extensions.DependencyInjection;
-using System.Runtime.InteropServices;
-using BOTGC.API.Services;
+﻿using BOTGC.API.Common;
 using BOTGC.API.Dto;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System;
-using Services.Dtos;
-using System.Formats.Asn1;
+using BOTGC.API.Interfaces;
+using Microsoft.Extensions.Options;
 
-namespace Services.Services
+namespace BOTGC.API.Services
 {
     public class IGDataService : IDataService
     {
@@ -318,36 +302,7 @@ namespace Services.Services
         {
             var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.NewMembershipApplicationUrl}";
 
-            var data = new Dictionary<string, string>
-            {
-                { "gender", newMember.Gender.ToString() },
-                { "title", newMember.Title },
-                { "forename", newMember.Forename },
-                { "surname", newMember.Surname },
-                { "altforename", newMember.AltForename ?? "" },
-                { "dob", newMember.DateOfBirth.ToString("dd/MM/yyyy") },
-                { "tel1", newMember.Telephone1 },
-                { "tel2", newMember.Telephone2 },
-                { "tel3", newMember.Telephone3 },
-                { "email", newMember.Email },
-                { "address1", newMember.AddressLine1 },
-                { "address2", newMember.AddressLine2 },
-                { "address3", newMember.AddressLine3 },
-                { "town", newMember.Town },
-                { "county", newMember.County },
-                { "country", newMember.Country },
-                { "postcode", newMember.Postcode },
-                { "cdh_id_option", newMember.HasCdhId ? "yes" : "no" },
-                { "cdh_id_lookup", newMember.CdhIdLookup ?? "" },
-                { "membercategory", newMember.MemberCategory.ToString() },
-                { "paymenttype", newMember.PaymentType.ToString() },
-                { "memberstatus", newMember.MemberStatus },
-                { "new_memberid", newMember.NewMemberId.ToString() },
-                { "new_cardswipe", newMember.NewCardSwipe ?? "" },
-                { "joindate", newMember.JoinDate.ToString("dd/MM/yyyy") },
-                { "applicationdate", newMember.ApplicationDate.ToString("dd/MM/yyyy") },
-                { "till_discount_group_id", newMember.TillDiscountGroupId.ToString() }
-            };
+            var data = IGMembershipApplicationMapper.MapToFormData(newMember);
 
             var result = await this.PostData(url, data);
 

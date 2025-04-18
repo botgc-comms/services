@@ -1,12 +1,12 @@
-﻿using Services.Interfaces;
-using Services.Models;
+﻿using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Services.Services
+namespace BOTGC.API.Services
 {
     /// <summary>
     /// Service for handling trophy data retrieval and processing.

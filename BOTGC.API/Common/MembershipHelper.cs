@@ -1,5 +1,5 @@
-﻿using Services;
-using Services.Dto;
+﻿
+using BOTGC.API.Dto;
 using System.Text.RegularExpressions;
 
 namespace BOTGC.API.Common

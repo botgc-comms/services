@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Services.Services.CompetitionProcessors;
-using Services;
+using BOTGC.API.Services.CompetitionProcessors;
+
 using System;
 using System.IO;
 using System.Runtime;
 using System.Threading.Tasks;
-using Services.Interfaces;
+using BOTGC.API.Interfaces;
 
 namespace BOTGC.API.Services
 {

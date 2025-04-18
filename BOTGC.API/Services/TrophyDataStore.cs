@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
-using Services.Interfaces;
-using Services.Models;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Services.Services
+namespace BOTGC.API.Services
 {
     /// <summary>
     /// Data store for managing trophy data.

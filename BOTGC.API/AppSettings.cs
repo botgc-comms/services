@@ -1,24 +1,31 @@
-﻿namespace Services
+﻿namespace BOTGC.API
 {
     public class AppSettings
     {
-        public AuthSettings Auth { get; set; } = new AuthSettings();
+        public AuthSettings Auth { get; set; } = new();
 
         public string TrophyFilePath { get; set; }
 
-        public AzureFaceApi AzureFaceApi { get; set; } = new AzureFaceApi();
+        public AzureFaceApi AzureFaceApi { get; set; } = new();
 
-        public GitHub GitHub { get; set; } = new GitHub();
+        public GitHub GitHub { get; set; } = new();
 
-        public Cache Cache { get; set; } = new Cache();
+        public Cache Cache { get; set; } = new();
 
-        public IG IG { get; set; } = new IG();
+        public IG IG { get; set; } = new();
+
+        public QueueSettings Queue { get; set; } = new();
 
         public string PlayingMemberExpression { get; set; } = "^(?:5|6|7|Intermediate).*?$";
         public string NonPlayingMemberExpression { get; set; } = "^(?!5|6|7|Intermediate|1894|Corporate|Staff|Professional).+$";
 
     }
 
+    public class QueueSettings
+    {
+        public string ConnectionString { get; set; }
+        public string Name { get; set; }
+    }
     public class AuthSettings
     {
         public string XApiKey { get; set; } = "";

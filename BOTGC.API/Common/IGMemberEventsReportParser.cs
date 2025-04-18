@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using BOTGC.API.Common;
-using global::Services.Dto;
+﻿using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
 using HtmlAgilityPack;
-using Microsoft.Extensions.Logging;
-using Services.Interfaces;
+using System.Text.RegularExpressions;
 
-namespace Services.Common
+namespace BOTGC.API.Common
 {
     public class IGMemberEventsReportParser: IReportParser<MemberEventDto>
     {

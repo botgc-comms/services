@@ -1,7 +1,7 @@
 ﻿@using BOTGC.Leaderboards.Models.EclecticScorecard;
 
 @model IEnumerable<EclecticPlayerViewModel>
-
+@* 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,8 +11,9 @@
     <link rel="stylesheet" href="~/css/styles.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<body>
+<body> *@
     <div class="leaderboard">
+
         <div class="flash"></div>
         <img src="~/img/club-logo.png" alt="Logo" class="logo">
         <div class="header">
@@ -31,8 +32,9 @@
                     <table id="leaderboard-table">
                         <thead>
                             <tr class="score-header">
-                                <th style="width:calc(40%);">Player</th>
-                                <th class="score-cell">Front</th>
+                                <th style="width:calc(5%);"></th>
+                                <th style="width:calc(35%);">Player</th>
+                                <th class="">Front</th>
                                 <th class="score-cell">Back</th>
                                 <th class="score-cell">Score</th>
                             </tr>
@@ -43,6 +45,7 @@
                                 foreach (var player in Model.OrderByDescending(p => p.TotalScore))
                                 {
                                     <tr class="player-row" data-player-id="@player.PlayerName.Replace(" ", "-")">
+                                        <td class ="score-cell">1</td>
                                         <td class="name-cell toggle-details">@player.PlayerName</td>
                                         <td class="score-cell">@player.BestFrontNine (@player.FrontNineCards)</td>
                                         <td class="score-cell">@player.BestBackNine (@player.BackNineCards)</td>
@@ -50,7 +53,7 @@
                                     </tr>
 
                                     <tr class="details-row" id="details-@player.PlayerName.Replace(" ", "-")" style="display: none;">
-                                        <td colspan="4">
+                                        <td colspan="5">
                                             <table class="score-details">
                                                 <thead>
                                                     <tr>
@@ -121,5 +124,5 @@
         });
     </script>
 
-</body>
-</html>
+@* </body>
+</html> *@

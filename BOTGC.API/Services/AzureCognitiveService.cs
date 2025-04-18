@@ -1,4 +1,4 @@
-﻿namespace Services.Services
+﻿namespace BOTGC.API.Services
 {
     public class CognitiveServices
     {

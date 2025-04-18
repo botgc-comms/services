@@ -3,12 +3,12 @@ using BOTGC.API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Services.Dto;
-using Services.Interfaces;
-using Services.Services;
+using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Services;
 using System.Runtime;
 
-namespace Services.Controllers
+namespace BOTGC.API.Controllers
 {
     [ApiController]
     [Route("api/members")]
@@ -18,6 +18,7 @@ namespace Services.Controllers
         private readonly AppSettings _settings;
         private readonly IMembershipReportingService _membershipReporting;
         private readonly IDataService _reportService;
+        private readonly IQueueService<NewMemberApplicationDto> _memberApplicationQueueService;
         private readonly ILogger<MembersController> _logger;
 
         /// <summary>
@@ -28,12 +29,15 @@ namespace Services.Controllers
         public MembersController(IOptions<AppSettings> settings,
                                  ILogger<MembersController> logger,
                                  IDataService reportService,
-                                 IMembershipReportingService membershipReporting)
+                                 IMembershipReportingService membershipReporting, 
+                                 IQueueService<NewMemberApplicationDto> memberApplicationQueueService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
             _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
             _membershipReporting = membershipReporting ?? throw new ArgumentNullException(nameof(membershipReporting));
+            _memberApplicationQueueService = memberApplicationQueueService ?? throw new ArgumentNullException(nameof(memberApplicationQueueService));
+
         }
 
         /// <summary>
@@ -185,25 +189,11 @@ namespace Services.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> AddNewMember([FromBody] NewMemberApplicationDto newMember)
+        public async Task<IActionResult> MemberApplication([FromBody] NewMemberApplicationDto newMember)
         {
-            _logger.LogInformation("Attempting to add a new member.");
-            if (newMember == null)
-            {
-                _logger.LogWarning("New member application data is null.");
-                return BadRequest("Invalid member application data.");
-            }
-            try
-            {
-                var createdMemberId = await _reportService.SubmitNewMemberApplicationAsync(newMember);
-                _logger.LogInformation("Successfully added new member with ID {MemberId}.", createdMemberId);
-                return CreatedAtAction(nameof(GetRoundsByMember), new { memberId = createdMemberId }, newMember);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error adding new member.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding the new member.");
-            }
+            await _memberApplicationQueueService.EnqueueAsync(newMember);
+
+            return Ok(newMember);
         }
     }
 }

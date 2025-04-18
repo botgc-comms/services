@@ -4,8 +4,14 @@ using BOTGC.Leaderboards.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+var environment = builder.Environment;
+
+var mvcBuilder = builder.Services.AddControllersWithViews();
+
+if (environment.IsDevelopment())
+{
+    mvcBuilder.AddRazorRuntimeCompilation();
+}
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration.GetSection("AppSettings"));

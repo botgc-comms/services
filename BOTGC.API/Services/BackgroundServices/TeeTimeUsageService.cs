@@ -5,11 +5,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Services.Dto;
-using Services.Interfaces;
-using Services.Models;
+using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
 
-namespace Services.Services.BackgroundServices
+namespace BOTGC.API.Services.BackgroundServices
 {
     public class TeeTimeUsageBackgroundService : BackgroundService
     {
