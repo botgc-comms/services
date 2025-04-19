@@ -5,24 +5,27 @@ using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace BOTGC.API.Services.BackgroundServices
 {
     public class MembershipApplicationQueueProcessor : BackgroundService
     {
+        private readonly AppSettings _settings;
         private readonly QueueClient _queueClient;
         private readonly ILogger<MembershipApplicationQueueProcessor> _logger;
         private readonly IDataService _reportService;
 
-        public MembershipApplicationQueueProcessor(AppSettings appSettings,
+        public MembershipApplicationQueueProcessor(IOptions<AppSettings> settings,
                                                    ILogger<MembershipApplicationQueueProcessor> logger,
                                                    IDataService reportService)
         {
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
             _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
 
-            var connectionString = appSettings.Queue?.ConnectionString;
+            var connectionString = _settings.Queue?.ConnectionString;
             var queueName = AppConstants.MembershipApplicationQueueName;
 
             _queueClient = new QueueClient(connectionString, queueName);

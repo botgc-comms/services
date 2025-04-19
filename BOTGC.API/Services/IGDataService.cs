@@ -25,6 +25,7 @@ namespace BOTGC.API.Services
         private const string __CACHE_COMPETITIONSETTINGS = "Competition_Settings";
         private const string __CACHE_LEADERBOARD = "Leaderboard_Settings";
         private const string __CACHE_NEWMEMBERAPPLICATION = "NewMemberApplication_{applicationId}";
+        private const string __CACHE_MEMBERCDHLOOKUP = "MemberCDHLookup_{cdhid}";
 
         private readonly AppSettings _settings;
         private readonly ILogger<IGDataService> _logger;
@@ -310,13 +311,14 @@ namespace BOTGC.API.Services
         public async Task<MemberCDHLookupDto?> LookupMemberCDHIdDetails(string cdhId)
         {
             var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.MemberCDHLookupUrl}";
+            var cacheKey = __CACHE_MEMBERCDHLOOKUP.Replace("{cdhid}", cdhId);
 
             var data = new Dictionary<string, string>(
             [
                 new KeyValuePair<string, string>("cdh_id_lookup", cdhId)
             ]);
 
-            var result = await this.PostData(url, data, _memberCDHLookupReportParser);
+            var result = await this.PostData(url, data, _memberCDHLookupReportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins));
 
             if (result != null && result.Any())
             {
@@ -407,7 +409,10 @@ namespace BOTGC.API.Services
                 }
             }
 
-            await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(cacheKey))
+            {
+                await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
+            }
 
             return items;
         }
