@@ -2,6 +2,6 @@
 {
     public static class AppConstants
     {
-        public const string MembershipApplicationQueueName = "membership-applications";
+        public const string MembershipApplicationQueueName = "membershipapplications";
     }
 }

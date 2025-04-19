@@ -2,21 +2,25 @@
 using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace BOTGC.API.Services
 {
     public class MembershipApplicationQueueService : IQueueService<NewMemberApplicationDto>
     {
+        private readonly AppSettings _settings;
         private readonly QueueClient _queueClient;
         private readonly ILogger<MembershipApplicationQueueService> _logger;
 
         public MembershipApplicationQueueService(
-            AppSettings settings,
+            IOptions<AppSettings> settings,
             ILogger<MembershipApplicationQueueService> logger)
         {
-            _logger = logger;
-            var connectionString = settings.Queue.ConnectionString;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+
+            var connectionString = _settings.Queue.ConnectionString;
             var queueName = AppConstants.MembershipApplicationQueueName;
 
             _queueClient = new QueueClient(connectionString, queueName);

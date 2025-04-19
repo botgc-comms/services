@@ -24,6 +24,7 @@ namespace BOTGC.API.Services
         private const string __CACHE_FUTURECOMPETITIONS = "Future_Competitions";
         private const string __CACHE_COMPETITIONSETTINGS = "Competition_Settings";
         private const string __CACHE_LEADERBOARD = "Leaderboard_Settings";
+        private const string __CACHE_NEWMEMBERAPPLICATION = "NewMemberApplication_{applicationId}";
 
         private readonly AppSettings _settings;
         private readonly ILogger<IGDataService> _logger;
@@ -328,6 +329,7 @@ namespace BOTGC.API.Services
         public async Task<NewMemberApplicationResultDto?> SubmitNewMemberApplicationAsync(NewMemberApplicationDto newMember)
         {
             var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.NewMembershipApplicationUrl}";
+            var cacheKey = __CACHE_NEWMEMBERAPPLICATION.Replace("{applicationId}", newMember.ApplicationId);
 
             MemberCDHLookupDto? cdhLookup = null;
 
@@ -336,9 +338,9 @@ namespace BOTGC.API.Services
                 cdhLookup = await LookupMemberCDHIdDetails(newMember.CdhId);
             }
 
-            //var data = IGMembershipApplicationMapper.MapToFormData(newMember, cdhLookup);
+            var data = IGMembershipApplicationMapper.MapToFormData(newMember, cdhLookup);
 
-            //var result = await this.PostData(url, data);
+            //var result = await this.PostData(url, data, _NewMemberApplicationReportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.LongTerm_TTL_mins));
 
             //if (result != null)
             //{

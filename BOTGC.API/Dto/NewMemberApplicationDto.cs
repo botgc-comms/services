@@ -2,6 +2,7 @@
 {
     public class NewMemberApplicationDto
     {
+        public string ApplicationId { get; set; } = Guid.NewGuid().ToString();
         public int Gender { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Forename { get; set; } = string.Empty;
@@ -35,6 +36,7 @@
 
     public class NewMemberApplicationResultDto
     {
+        public string ApplicationId { get; set; }
         public int MemberId { get; set; }
     }
 }
