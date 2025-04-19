@@ -39,6 +39,9 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IReportParser<LeaderBoardDto>, IGLeaderboardReportParser>();
             services.AddSingleton<IReportParser<CompetitionSettingsDto>, IGCompetitionSettingsReportParser>();
             services.AddSingleton<IReportParser<SecurityLogEntryDto>, IGSecurityLogReportParser>();
+            services.AddSingleton<IReportParser<MemberCDHLookupDto>, IGCDHLookupReportParser>();
+
+            services.AddSingleton<IQueueService<NewMemberApplicationDto>, MembershipApplicationQueueService>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 
@@ -49,6 +52,7 @@ namespace BOTGC.API.Extensions
             
             services.AddHostedService<CompetitionBackgroundService>();
             services.AddHostedService<TeeTimeUsageBackgroundService>();
+            services.AddHostedService<MembershipApplicationQueueProcessor>();
 
             services.AddSingleton<IDataService, IGDataService>();
 

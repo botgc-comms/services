@@ -33,7 +33,6 @@
         public DateTime ApplicationDate { get; set; } = DateTime.UtcNow;
     }
 
-
     public class NewMemberApplicationResultDto
     {
         public int MemberId { get; set; }

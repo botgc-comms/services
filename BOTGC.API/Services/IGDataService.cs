@@ -1,7 +1,12 @@
 ﻿using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
+using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
+using System.Collections.Specialized;
+using System.Net.Http;
+using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BOTGC.API.Services
 {
@@ -35,6 +40,7 @@ namespace BOTGC.API.Services
         private readonly IReportParser<CompetitionSettingsDto> _competitionSettingsReportParser;
         private readonly IReportParser<LeaderBoardDto> _leaderboardReportParser;
         private readonly IReportParser<SecurityLogEntryDto> _securityLogEntryParser;
+        private readonly IReportParser<MemberCDHLookupDto> _memberCDHLookupReportParser;
 
         public IGDataService(IOptions<AppSettings> settings,
                                 ILogger<IGDataService> logger,
@@ -47,7 +53,8 @@ namespace BOTGC.API.Services
                                 IReportParser<CompetitionDto> competitionReportParser,
                                 IReportParser<CompetitionSettingsDto> competitionSettingsReportParser,
                                 IReportParser<LeaderBoardDto> leaderBoardReportParser,
-                                IReportParser<SecurityLogEntryDto> securityLogEntryParser, 
+                                IReportParser<SecurityLogEntryDto> securityLogEntryParser,
+                                IReportParser<MemberCDHLookupDto> memberCDHLookupReportParser,
                                 IGSessionService igSessionManagementService,                
                                 IServiceScopeFactory serviceScopeFactory)
         {
@@ -66,6 +73,7 @@ namespace BOTGC.API.Services
             _competitionSettingsReportParser = competitionSettingsReportParser ?? throw new ArgumentNullException(nameof(competitionSettingsReportParser));
             _leaderboardReportParser = leaderBoardReportParser ?? throw new ArgumentNullException(nameof(leaderBoardReportParser));
             _securityLogEntryParser = securityLogEntryParser ?? throw new ArgumentNullException(nameof(securityLogEntryParser));
+            _memberCDHLookupReportParser = memberCDHLookupReportParser ?? throw new ArgumentNullException(nameof(memberCDHLookupReportParser));
         }
         
         public async Task<List<MemberDto>> GetJuniorMembersAsync()
@@ -298,16 +306,43 @@ namespace BOTGC.API.Services
             return null;
         }
 
+        public async Task<MemberCDHLookupDto?> LookupMemberCDHIdDetails(string cdhId)
+        {
+            var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.MemberCDHLookupUrl}";
+
+            var data = new Dictionary<string, string>(
+            [
+                new KeyValuePair<string, string>("cdh_id_lookup", cdhId)
+            ]);
+
+            var result = await this.PostData(url, data, _memberCDHLookupReportParser);
+
+            if (result != null && result.Any())
+            {
+                return result.FirstOrDefault();
+            }
+
+            return null;
+        }
+
         public async Task<NewMemberApplicationResultDto?> SubmitNewMemberApplicationAsync(NewMemberApplicationDto newMember)
         {
             var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.NewMembershipApplicationUrl}";
 
-            var data = IGMembershipApplicationMapper.MapToFormData(newMember);
+            MemberCDHLookupDto? cdhLookup = null;
+
+            if (!string.IsNullOrEmpty(newMember.CdhId))
+            {
+                cdhLookup = await LookupMemberCDHIdDetails(newMember.CdhId);
+            }
+
+            var data = IGMembershipApplicationMapper.MapToFormData(newMember, cdhLookup);
 
             var result = await this.PostData(url, data);
 
             if (result != null)
             {
+
 
 
             }

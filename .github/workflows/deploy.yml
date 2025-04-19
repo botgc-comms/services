@@ -17,7 +17,7 @@ jobs:
 
     outputs:
       api_app_name: ${{ steps.get_api_app_name.outputs.api_app_name }}
-      leaderboards_app_name: ${{ steps.get_leaderboards_app_name.outputs.api_app_name }}
+      leaderboards_app_name: ${{ steps.get_leaderboards_app_name.outputs.leaderboards_app_name }}
 
     steps:
     - name: Checkout code

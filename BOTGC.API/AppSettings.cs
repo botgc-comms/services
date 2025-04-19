@@ -82,6 +82,7 @@
         public string MembershipReportingUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=9be9f71c8988351887840f3826a552da";
         public string MembershipEventHistoryReportUrl { get; set; } = "/membership_reports.php?tab=categorychanges&requestType=ajax&ajaxaction=getreport";
         public string NewMembershipApplicationUrl { get; set; } = "/membership_addmember.php?&requestType=ajax&ajaxaction=confirmadd";
+        public string MemberCDHLookupUrl { get; set; } = "/membership_addmember.php?&requestType=ajax&ajaxaction=cdhidlookup";
         public string TeeBookingsUrl { get; set; } = "/teetimes.php?date={date}";
         public string UpcomingCompetitionsUrl { get; set; } = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=upcoming&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20";
         public string ActiveCompetitionsUrl { get; set; } = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=active&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20";
