@@ -38,3 +38,8 @@ variable "github_token" {
   type    = string
   default = ""
 }
+
+variable "get_address_io_apikey" {
+  type    = string
+  default = ""
+}

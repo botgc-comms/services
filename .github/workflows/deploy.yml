@@ -18,6 +18,7 @@ jobs:
     outputs:
       api_app_name: ${{ steps.get_api_app_name.outputs.api_app_name }}
       leaderboards_app_name: ${{ steps.get_leaderboards_app_name.outputs.leaderboards_app_name }}
+      applicationform_app_name: ${{ steps.get_applicationform_app_name.outputs.applicationform_app_name }}
 
     steps:
     - name: Checkout code
@@ -50,6 +51,7 @@ jobs:
         TF_VAR_environment: "prd"
         TF_VAR_member_id: ${{ secrets.MEMBER_ID }}
         TF_VAR_member_pin: ${{ secrets.MEMBER_PIN }}
+        TF_VAR_get_address_io_apikey: ${{ secrets.GETADDR_IO_APIKEY }}
         TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
         TF_VAR_azure_face_api_key: ${{ secrets.AZURE_FACE_API_KEY }}
         TF_VAR_x_api_key: ${{ secrets.X_API_KEY }}
@@ -74,6 +76,19 @@ jobs:
         leaderboards_app_name=$(terraform output -raw leaderboards_app_name)
         echo "leaderboards_app_name=${leaderboards_app_name}"
         echo "leaderboards_app_name=${leaderboards_app_name}" >> "$GITHUB_OUTPUT"
+      working-directory: BOTGC.Infrastructure
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+    - name: Get Application Form App Name
+      id: get_applicationform_app_name
+      run: |
+        applicationform_app_name=$(terraform output -raw applicationform_app_name)
+        echo "applicationform_app_name=${applicationform_app_name}"
+        echo "applicationform_app_name=${applicationform_app_name}" >> "$GITHUB_OUTPUT"
       working-directory: BOTGC.Infrastructure
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -164,5 +179,48 @@ jobs:
         az webapp deploy --resource-group rg-botgcapps-prd `
           --name ${{ needs.terraform.outputs.leaderboards_app_name }} `
           --src-path published/leaderboards.zip `
+          --type zip
+      shell: powershell
+
+  deploy-applicationform:
+    runs-on: windows-latest
+    needs: terraform
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Publish API
+      run: dotnet publish BOTGC.MembershipApplication/BOTGC.MembershipApplication.csproj -c Release -r linux-x64 --self-contained true -o published
+
+    - name: Zip API for Deployment
+      run: Compress-Archive -Path * -DestinationPath membershipapplication.zip
+      working-directory: published
+      shell: pwsh
+
+    - name: Install Azure CLI
+      run: |
+        Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
+        Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+      shell: powershell
+
+    - name: Azure CLI Login
+      run: |
+        az login --service-principal `
+          -u ${{ secrets.AZURE_CLIENT_ID }} `
+          -p ${{ secrets.AZURE_CLIENT_SECRET }} `
+          --tenant ${{ secrets.AZURE_TENANT_ID }}
+      shell: powershell
+
+    - name: Deploy to App Service
+      run: |
+        az webapp deploy --resource-group rg-botgcapps-prd `
+          --name ${{ needs.terraform.outputs.applicationform_app_name }} `
+          --src-path published/membershipapplication.zip `
           --type zip
       shell: powershell
