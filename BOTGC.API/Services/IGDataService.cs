@@ -336,16 +336,16 @@ namespace BOTGC.API.Services
                 cdhLookup = await LookupMemberCDHIdDetails(newMember.CdhId);
             }
 
-            var data = IGMembershipApplicationMapper.MapToFormData(newMember, cdhLookup);
+            //var data = IGMembershipApplicationMapper.MapToFormData(newMember, cdhLookup);
 
-            var result = await this.PostData(url, data);
+            //var result = await this.PostData(url, data);
 
-            if (result != null)
-            {
+            //if (result != null)
+            //{
 
 
 
-            }
+            //}
 
             return null;
         }
