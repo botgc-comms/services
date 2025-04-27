@@ -196,7 +196,7 @@ jobs:
         dotnet-version: '9.0.x'
 
     - name: Publish API
-      run: dotnet publish BOTGC.MembershipApplication/BOTGC.MembershipApplication.csproj -c Release -r linux-x64 --self-contained true -o published
+      run: dotnet publish BOTGC.MembershipApplication/BOTGC.MembershipApplication.csproj -c Release -r win-x64 --self-contained true -o published
 
     - name: Zip API for Deployment
       run: Compress-Archive -Path * -DestinationPath membershipapplication.zip
