@@ -7,10 +7,11 @@ using System.Text.Json;
 
 namespace BOTGC.API.Services
 {
-    public class MembershipApplicationQueueService : IQueueService<NewMemberApplicationDto>
+    public class MembershipApplicationQueueService : IQueueService<NewMemberApplicationDto>, IQueueService<NewMemberApplicationResultDto>
     {
         private readonly AppSettings _settings;
-        private readonly QueueClient _queueClient;
+        private readonly QueueClient _newApplicationQueueClient;
+        private readonly QueueClient _newMemberAddedQueueClient;
         private readonly ILogger<MembershipApplicationQueueService> _logger;
 
         public MembershipApplicationQueueService(
@@ -21,10 +22,12 @@ namespace BOTGC.API.Services
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
 
             var connectionString = _settings.Queue.ConnectionString;
-            var queueName = AppConstants.MembershipApplicationQueueName;
 
-            _queueClient = new QueueClient(connectionString, queueName);
-            _queueClient.CreateIfNotExists();
+            _newApplicationQueueClient = new QueueClient(connectionString, AppConstants.MembershipApplicationQueueName);
+            _newApplicationQueueClient.CreateIfNotExists();
+
+            _newMemberAddedQueueClient = new QueueClient(connectionString, AppConstants.NewMemberAddedQueueName);
+            _newMemberAddedQueueClient.CreateIfNotExists();
         }
 
         public async Task EnqueueAsync(NewMemberApplicationDto item, CancellationToken cancellationToken = default)
@@ -32,12 +35,27 @@ namespace BOTGC.API.Services
             try
             {
                 var payload = JsonSerializer.Serialize(item);
-                await _queueClient.SendMessageAsync(payload);
-                _logger.LogInformation("Queued new membership application.");
+                await _newApplicationQueueClient.SendMessageAsync(payload);
+                _logger.LogInformation("Queued new membership application event.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to enqueue membership application.");
+                _logger.LogError(ex, "Failed to enqueue membership application event.");
+                throw;
+            }
+        }
+
+        public async Task EnqueueAsync(NewMemberApplicationResultDto item, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var payload = JsonSerializer.Serialize(item);
+                await _newMemberAddedQueueClient.SendMessageAsync(payload);
+                _logger.LogInformation("Queued new member added event.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to enqueue new member added event.");
                 throw;
             }
         }

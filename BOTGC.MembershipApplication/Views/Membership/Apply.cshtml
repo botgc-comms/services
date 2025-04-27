@@ -1,14 +1,24 @@
 ﻿@model BOTGC.MembershipApplication.Models.MembershipApplication
 
 @{
-    ViewData["Title"] = "Membership Application";
+    ViewData["Title"] = "Application Form";
 }
 
-<h1 id="membership-form-heading">Membership Application</h1>
+<h1 id="membership-form-heading">Application Form</h1>
+
+<section class="membership-intro">
+    <p>We’re currently welcoming new membership applications with <strong>no joining fee</strong> and <strong>no waiting list</strong>. Whether you’re an experienced golfer, completely new to the game, or simply looking to enjoy the social side of the club, we’d love to hear from you. There’s no need for a proposer or seconder — just complete the form below to get started.</p>
+
+    <p>Once we’ve received your application, we’ll invite you to visit the club and meet with a member of our membership committee. It’s a relaxed opportunity to explore the facilities, ask any questions, and help us get to know you.</p>
+
+    <p>If your application is successful, we’ll send you joining instructions along with details on how to pay — and that’s it, you’ll be part of the club.</p>
+
+    <p>Not sure which membership is right for you? <a href="#" target="_blank">See our full list of membership options</a> to find the one that suits you best.</p>
+</section>
 
 <div id="error-summary" tabindex="-1" class="sr-only" aria-hidden="true">There are validation errors on the form</div>
 
-<form asp-action="Apply" method="post" novalidate aria-labelledby="membership-form-heading">
+<form class="membership-form" asp-action="Apply" method="post" novalidate aria-labelledby="membership-form-heading">
     @Html.AntiForgeryToken()
 
     <div asp-validation-summary="All" role="alert" aria-live="assertive"></div>
@@ -17,29 +27,41 @@
         <legend class="sr-only">Membership Application Details</legend>
 
         <div class="form-group">
-            <label asp-for="MembershipCategory">Membership Category<span aria-hidden="true">*</span></label>
-            <select asp-for="MembershipCategory" required aria-required="true">
-                <option disabled selected value="">Please select</option>
-                <option>Full playing</option>
-                <option>Youth</option>
-                <option>Junior</option>
-                <option>2nd Club</option>
-                <option>Overseas</option>
-                <option>New2Golf</option>
-                <option>House</option>
+            <label asp-for="MembershipCategory">Type of Membership<span aria-hidden="true">*</span></label>
+
+            <select asp-for="MembershipCategory" class="form-control" aria-required="true">
+                <option value="">Please select a membership type</option>
+                <optgroup label="Full Playing Memberships">
+                    <option value="7Day">Full Membership</option>
+                    <option value="6Day">6 Day Membership – Excludes Saturdays</option>
+                    <option value="5Day">5 Day Membership – Weekdays Only</option>
+                    <option value="Intermediate">Affordable Membership – Age Restricted</option>
+                    <option value="Flexi">Off Peak Playing Membership</option>
+                </optgroup>
+                <optgroup label="Special Categories">
+                    <option value="Junior">Junior Membership</option>
+                    <option value="Student">Student Membership</option>
+                    <option value="Social">Social Membership – Includes Limited Golf</option>
+                    <option value="Clubhouse">Clubhouse Only – No Golf</option>
+                    <option value="Family">Family – Relative of Full or Junior Member</option>
+                </optgroup>
             </select>
-            <span asp-validation-for="MembershipCategory"></span>
+
+            <span asp-validation-for="MembershipCategory" class="text-danger"></span>
+
+            <div id="membership-description" class="mt-2 text-muted" aria-live="polite"></div>
         </div>
 
         <div class="form-group">
-            <label asp-for="Gender">Gender<span aria-hidden="true">*</span></label>
-            <select asp-for="Gender" required aria-required="true">
+            <label for="Gender">Gender<span aria-hidden="true">*</span></label>
+            <select asp-for="Gender" class="form-control" required aria-required="true">
                 <option disabled selected value="">Please select</option>
-                <option value="1">Male</option>
-                <option value="2">Female</option>
-                <option value="3">Other</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
             </select>
-            <span asp-validation-for="Gender"></span>
+            <span class="text-muted" id="genderNote" style="display:none;">
+                Please note: To comply with <a href="https://www.randa.org/en/articles/the-r-a-introduces-fair-competition-policy-for-its-professional-and-elite-amateur-championships" target="_blank" rel="noopener noreferrer">R&amp;A guidance on fair competition</a>, we may need to know the gender assigned at birth if you intend to compete in club or county-level events. This information will be handled sensitively and in confidence.
+            </span>
         </div>
 
         <div class="form-group">
@@ -95,9 +117,7 @@
         <div class="form-group">
             <label asp-for="AddressLine1">First Address Line<span aria-hidden="true">*</span></label>
             <input asp-for="AddressLine1" id="AddressLine1" required aria-required="true" autocomplete="address-line1" />
-            <small id="address-help" class="form-text text-muted">
-                Start typing your address and select it from the list, or complete the fields manually.
-            </small>
+            <small id="address-help" class="form-text text-muted">Start typing your address and select it from the list, or complete the fields manually.</small>
             <span asp-validation-for="AddressLine1"></span>
         </div>
 
@@ -125,35 +145,33 @@
             <span asp-validation-for="Postcode"></span>
         </div>
 
-        <div class="form-check mb-3">
-            <input class="form-check-input" asp-for="HasCdhId" type="checkbox" />
-            <label class="form-check-label" asp-for="HasCdhId">I have a CDH ID</label>
+        <div class="form-check flex mb-3">
+            <input class="form-check-input" asp-for="HasCdhId" type="checkbox" id="HasCdhId" />
+            <label class="form-check-label" for="HasCdhId">
+                If you are a golfer with a handicap, you’ll likely have a CDH number. Tick this box to enter it.
+            </label>
         </div>
 
-        <div class="form-group">
-            <label asp-for="CdhId">CDH ID (if applicable)</label>
+        <div class="form-group" id="cdh-section" style="display:none;">
+            <label asp-for="CdhId">CDH ID</label>
             <input asp-for="CdhId" autocomplete="off" />
             <span asp-validation-for="CdhId"></span>
         </div>
 
-        <div class="form-group">
-            <label asp-for="PaymentType">Payment Type<span aria-hidden="true">*</span></label>
-            <select asp-for="PaymentType" required aria-required="true">
-                <option disabled selected value="">Please select</option>
-                <option>Annual</option>
-                <option>Monthly</option>
-            </select>
-            <span asp-validation-for="PaymentType"></span>
+        <div class="form-check flex mb-3" id="finance-section" style="display:none;">
+            <input class="form-check-input" type="checkbox" id="ArrangeFinance" name="ArrangeFinance" />
+            <label class="form-check-label" for="ArrangeFinance">
+                Are you looking to arrange finance to pay your subs?
+            </label>
         </div>
 
         <div class="form-check mb-3">
-            <input class="form-check-input" asp-for="AgreeToClubRules" type="checkbox" required aria-required="true" aria-describedby="rulesHelp" />
-            <label class="form-check-label" asp-for="AgreeToClubRules">
-                I agree to the club rules<span aria-hidden="true">*</span>
+            <input asp-for="AgreeToClubRules" class="form-check-input" type="checkbox" />
+            <label class="form-check-label" for="AgreeToClubRules">
+                @Html.DisplayNameFor(m => m.AgreeToClubRules)<span aria-hidden="true">*</span>
             </label>
-            <small id="rulesHelp" class="form-text text-muted">You must agree before submitting.</small>
-            <span asp-validation-for="AgreeToClubRules"></span>
         </div>
+        <span asp-validation-for="AgreeToClubRules" class="text-danger"></span>
 
         <p class="text-muted mt-4">
             By submitting this application, you consent to the processing of your personal data in accordance with our
@@ -170,53 +188,85 @@
 
     <script src="https://cdn.getaddress.io/scripts/getaddress-autocomplete-3.0.9.js"></script>
 
-    <script defer>
-        const enableAutocomplete = async () => {
-            await getAddress.autocomplete('AddressLine1', '@ViewData["GetAddressApiKey"]', {
-                selected: (address) => {
-                    const line1 = address.formatted_address[0] || ''
-                    const line2 = address.formatted_address[1] || ''
-                    const townRaw = address.formatted_address[3] || ''
-                    const county = address.formatted_address[4] || ''
-                    const postcode = address.postcode || ''
-
-                    // Clean and assign line1
-                    document.getElementById('AddressLine1').value = line1
-
-                    // Conditional adjustment for line2 and town
-                    if (townRaw.includes(',') && !line2) {
-                        const [before, after] = townRaw.split(',').map(s => s.trim())
-                        document.getElementById('AddressLine2').value = before
-                        document.getElementById('Town').value = after
-                    } else {
-                        document.getElementById('AddressLine2').value = line2
-                        document.getElementById('Town').value = townRaw
-                    }
-
-                    document.getElementById('County').value = county
-                    document.getElementById('Postcode').value = postcode
-                }
-            })
-        }
-
-        enableAutocomplete()
-    </script>
-
     <script>
         $(function () {
-            const errorSummary = $('[data-valmsg-summary="true"]');
-            if (errorSummary.length && errorSummary.text().trim().length) {
-                $('#error-summary').removeAttr('aria-hidden').focus();
+            const descriptions = {
+                "7Day": "Our Full Membership gives you unrestricted access to the course and all club facilities, seven days a week. You’ll also be eligible to play in all club competitions and enjoy full voting rights as a member.",
+                "6Day": "Six Day Membership allows you to play and use the facilities from Sunday to Friday. You can still take part in many competitions and events — just note that play on Saturdays is not included.",
+                "5Day": "With a Five Day Membership, you can enjoy access to the course and facilities Monday to Friday. This is ideal for those who prefer to play during quieter weekday periods. Weekend access is not included.",
+                "Intermediate": "Our Intermediate (Affordable) Membership is designed to help younger golfers or those new to the game progress toward full membership. It's age-restricted and offers a great value route into the club with increasing access over time.",
+                "Flexi": "A flexible membership for occasional golfers who prefer to play at quieter times. Access to the course is limited to off-peak hours and you won’t be eligible for competitions, but it’s a great option for more casual play.",
+                "Junior": "Junior Membership is open to younger golfers and includes full access to the course and practice facilities. Juniors are encouraged to get involved with coaching, competitions, and club events to develop their game.",
+                "Student": "This membership is for those in full-time education and provides access to the course with some restrictions. It’s a great option for students who want to stay active and play regularly while studying.",
+                "Social": "Social Membership gives you access to the clubhouse, social events, and a limited number of golf opportunities. You’ll also benefit from discounted food and drink in the clubhouse and reduced entry fees to club events.",
+                "Clubhouse": "Our Clubhouse Membership is for those who want to enjoy the social side of the club — including access to the bar, restaurant, and club events — without using the golf course. Clubhouse members receive discounts on food, drink, and event entry.",
+                "Family": "Family Membership provides access to the clubhouse facilities and events for relatives of Full or Junior Members. It’s ideal for those who want to be involved in the club socially and support family members who play. Family members also enjoy discounted food, drink, and entry to club events."
+            };
+
+            function updateMembershipDescription() {
+                const selectedValue = $('#MembershipCategory').val();
+                const $desc = $('#membership-description');
+                $desc.text(descriptions[selectedValue] || '').toggle(!!selectedValue);
+
+                const financeEligible = ['7Day', '6Day', '5Day', 'Intermediate'].includes(selectedValue);
+                $('#finance-section').toggle(financeEligible);
             }
 
-            $('form').on('submit', function () {
+            const enableAutocomplete = async () => {
+                await getAddress.autocomplete('AddressLine1', '@ViewData["GetAddressApiKey"]', {
+                    selected: (address) => {
+                        const line1 = address.formatted_address[0] || ''
+                        const line2 = address.formatted_address[1] || ''
+                        const townRaw = address.formatted_address[3] || ''
+                        const county = address.formatted_address[4] || ''
+                        const postcode = address.postcode || ''
+
+                        // Clean and assign line1
+                        document.getElementById('AddressLine1').value = line1
+
+                        // Conditional adjustment for line2 and town
+                        if (townRaw.includes(',') && !line2) {
+                            const [before, after] = townRaw.split(',').map(s => s.trim())
+                            document.getElementById('AddressLine2').value = before
+                            document.getElementById('Town').value = after
+                        } else {
+                            document.getElementById('AddressLine2').value = line2
+                            document.getElementById('Town').value = townRaw
+                        }
+
+                        document.getElementById('County').value = county
+                        document.getElementById('Postcode').value = postcode
+                    }
+                })
+            }
+
+            $('#MembershipCategory').on('change', updateMembershipDescription);
+            $('#HasCdhId').on('change', function () {
+                $('#cdh-section').toggle(this.checked);
+            });
+
+            $('form').on('submit', function (e) {
+                if (!$(this).valid()) {
+                    return false; 
+                }
+
+                // If we got here, the form is valid — continue
                 $('#submit-button')
                     .attr('disabled', true)
                     .attr('aria-busy', 'true');
                 $('#form-loading')
                     .removeClass('sr-only')
                     .attr('aria-hidden', 'false');
+
+                return true;
             });
+
+            // Initialise
+            updateMembershipDescription();
+            enableAutocomplete();
+            $('#genderNote').toggle($('#Gender').val() === 'Other');
+            $('#cdh-section').toggle($('#HasCdhId').is(':checked'));
         });
     </script>
 }
+

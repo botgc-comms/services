@@ -24,7 +24,6 @@ namespace BOTGC.API.Services
         private const string __CACHE_FUTURECOMPETITIONS = "Future_Competitions";
         private const string __CACHE_COMPETITIONSETTINGS = "Competition_Settings";
         private const string __CACHE_LEADERBOARD = "Leaderboard_Settings";
-        private const string __CACHE_NEWMEMBERAPPLICATION = "NewMemberApplication_{applicationId}";
         private const string __CACHE_MEMBERCDHLOOKUP = "MemberCDHLookup_{cdhid}";
 
         private readonly AppSettings _settings;
@@ -331,8 +330,7 @@ namespace BOTGC.API.Services
         public async Task<NewMemberApplicationResultDto?> SubmitNewMemberApplicationAsync(NewMemberApplicationDto newMember)
         {
             var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.NewMembershipApplicationUrl}";
-            var cacheKey = __CACHE_NEWMEMBERAPPLICATION.Replace("{applicationId}", newMember.ApplicationId);
-
+            
             MemberCDHLookupDto? cdhLookup = null;
 
             if (!string.IsNullOrEmpty(newMember.CdhId))

@@ -24,6 +24,7 @@
 
         public string MembershipCategory { get; set; } = string.Empty;
         public string PaymentType { get; set; } = string.Empty;
+        public string MemberId { get; set; } = string.Empty;
 
         public Dictionary<string, bool> ContactPreferences { get; set; } = new();
 
@@ -37,6 +38,7 @@
     public class NewMemberApplicationResultDto
     {
         public string ApplicationId { get; set; }
-        public int MemberId { get; set; }
+        public int? MemberId { get; set; }
+        public NewMemberApplicationDto Application { get; set; }
     }
 }

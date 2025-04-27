@@ -42,6 +42,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IReportParser<MemberCDHLookupDto>, IGCDHLookupReportParser>();
 
             services.AddSingleton<IQueueService<NewMemberApplicationDto>, MembershipApplicationQueueService>();
+            services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, MembershipApplicationQueueService>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 
