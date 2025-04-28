@@ -4,8 +4,13 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <PublishTrimmed>false</PublishTrimmed>
+    <SelfContained>true</SelfContained>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <PublishSingleFile>false</PublishSingleFile>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="BuildWebCompiler" Version="1.12.405" />
     <Content Remove="wwwroot\scss\index.scss" />
@@ -21,5 +26,4 @@
     <Folder Include="wwwroot\fonts\DM_Sans\" />
   </ItemGroup>
 
-  
 </Project>
