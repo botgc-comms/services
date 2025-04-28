@@ -7,7 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 var environment = builder.Environment;
 
-// Bind AppSettings from configuration
+var mvcBuilder = builder.Services.AddControllersWithViews();
+
+if (environment.IsDevelopment())
+{
+    mvcBuilder.AddRazorRuntimeCompilation();
+}
+
+// Bind AppSettings
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddSingleton(sp =>
     sp.GetRequiredService<IOptions<AppSettings>>().Value);
@@ -36,12 +43,11 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod());
 });
 
-builder.Services.AddControllersWithViews();
-
 var app = builder.Build();
 
 if (!environment.IsDevelopment())
 {
+    app.UseExceptionHandler("/Home/Error");
     app.UseHttpsRedirection();
     app.UseHsts();
 }
@@ -106,13 +112,10 @@ app.Use(async (context, next) =>
     await next();
 });
 
-
 app.UseCors("AllowedOriginsPolicy");
 app.UseStaticFiles();
 app.UseRouting();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Membership}/{action=Apply}/{id?}");
+app.MapDefaultControllerRoute();
 
 app.Run();
