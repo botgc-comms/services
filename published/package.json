@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "sass": "^1.87.0"
+  },
+  "scripts": {
+    "sass:watch": "sass --watch wwwroot/scss/index.scss:wwwroot/css/styles.css",
+    "start": "concurrently \"npm run sass:watch\" \"dotnet watch run\""
+  },
+  "dependencies": {
+    "@getaddress/autocomplete": "^3.0.9"
+  }
+}

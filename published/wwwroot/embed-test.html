@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Embedded Membership Application Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f3f3;
+            margin: 0;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: #003a23;
+            margin-bottom: 2rem;
+        }
+
+        .iframe-container {
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        iframe {
+            width: 100%;
+            min-height: 1500px;
+            border: none;
+        }
+
+        @media (max-width: 600px) {
+            iframe {
+                min-height: 1800px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Embedded Membership Form</h1>
+
+    <div class="iframe-container">
+        <iframe src="/Membership/Apply" title="Membership Application Form">
+            Your browser does not support iframes.
+        </iframe>
+    </div>
+</body>
+</html>
