@@ -30,7 +30,7 @@
         public bool AgreeToClubRules { get; set; }
 
         // Internal fields
-        public DateTime? ApplicationDate { get; set; } = DateTime.UtcNow;
+        public DateTime ApplicationDate { get; set; } = DateTime.UtcNow;
     }
 
     public class NewMemberApplicationResultDto

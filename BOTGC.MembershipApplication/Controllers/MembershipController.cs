@@ -25,7 +25,7 @@ public class MembershipController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Apply(BOTGC.MembershipApplication.Models.MembershipApplication  application)
+    public async Task<IActionResult> Apply(BOTGC.MembershipApplication.Models.MembershipApplication application)
     {
         if (!ModelState.IsValid)
             return View(application);

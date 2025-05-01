@@ -12,6 +12,8 @@ namespace BOTGC.MembershipApplication.Models
 
     public class MembershipApplication : IValidatableObject
     {
+        public string ApplicationId { get; set; } = Guid.NewGuid().ToString();
+        
         [Required(ErrorMessage = "Please select your gender that you were born with.")]
         public string Gender { get; set; }
 

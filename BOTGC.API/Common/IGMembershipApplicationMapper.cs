@@ -36,9 +36,9 @@ namespace BOTGC.API.Common
                 { "cdh_id_lookup", newMember.CdhId ?? "" },
 
                 { "membercategory", newMember.MembershipCategory },
-                { "paymenttype", newMember.PaymentType },
+                { "paymenttype", null }, // Need to work out what we do here
 
-                { "memberstatus", newMember.MemberStatus },
+                { "memberstatus", "Pending" },
                 { "new_memberid", "0" },
                 { "new_cardswipe", "" },
 
