@@ -31,9 +31,8 @@ public class MembershipController : Controller
             return View(application);
 
         var client = _httpClientFactory.CreateClient("MembershipApi");
-
-        var response = await client.PostAsJsonAsync("application", application);
-
+        var response = await client.PostAsJsonAsync("api/members/application", application);
+        
         if (response.IsSuccessStatusCode)
             return RedirectToAction("Thanks");
 

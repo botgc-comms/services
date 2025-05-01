@@ -2,6 +2,7 @@ using BOTGC.MembershipApplication;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,13 @@ builder.Services.AddHttpClient("MembershipApi", (sp, client) =>
 {
     var settings = sp.GetRequiredService<AppSettings>();
     client.BaseAddress = new Uri(settings.API.Url);
+
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+    if (!string.IsNullOrWhiteSpace(settings.API.XApiKey))
+    {
+        client.DefaultRequestHeaders.Add("X-API-KEY", settings.API.XApiKey);
+    }
 })
 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
 .AddPolicyHandler(HttpPolicyExtensions
@@ -115,6 +123,18 @@ app.Use(async (context, next) =>
 app.UseCors("AllowedOriginsPolicy");
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "/",
+        defaults: new { controller = "Membership", action = "Apply" });
+
+    endpoints.MapControllerRoute(
+        name: "fallback",
+        pattern: "{controller=Membership}/{action=Apply}/{id?}");
+});
 
 app.MapDefaultControllerRoute();
 

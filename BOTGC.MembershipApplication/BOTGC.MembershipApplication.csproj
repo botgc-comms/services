@@ -4,16 +4,10 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
-    <PublishTrimmed>false</PublishTrimmed>
-    <SelfContained>true</SelfContained>
-    <InvariantGlobalization>false</InvariantGlobalization>
-    <PublishSingleFile>false</PublishSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BuildWebCompiler" Version="1.12.405" />
-    <Content Remove="wwwroot\scss\index.scss" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.2" />
   </ItemGroup>

@@ -3,7 +3,7 @@
     public class NewMemberApplicationDto
     {
         public string ApplicationId { get; set; } = Guid.NewGuid().ToString();
-        public int Gender { get; set; }
+        public string Gender { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Forename { get; set; } = string.Empty;
         public string Surname { get; set; } = string.Empty;
@@ -23,7 +23,6 @@
         public string? CdhId { get; set; }
 
         public string MembershipCategory { get; set; } = string.Empty;
-        public string PaymentType { get; set; } = string.Empty;
         public string MemberId { get; set; } = string.Empty;
 
         public Dictionary<string, bool> ContactPreferences { get; set; } = new();
@@ -31,8 +30,7 @@
         public bool AgreeToClubRules { get; set; }
 
         // Internal fields
-        public string MemberStatus { get; set; } = "Pending";
-        public DateTime ApplicationDate { get; set; } = DateTime.UtcNow;
+        public DateTime? ApplicationDate { get; set; } = DateTime.UtcNow;
     }
 
     public class NewMemberApplicationResultDto
