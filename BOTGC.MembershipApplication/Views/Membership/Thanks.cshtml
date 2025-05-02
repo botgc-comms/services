@@ -1,23 +1,11 @@
-﻿
-@section Head {
-    <script type="text/javascript">
-        (function(g,r,s,f){g.grsfSettings={campaignId:"wgllwy",version:"2.0.0"};s=r.getElementsByTagName("head")[0];f=r.createElement("script");f.async=1;f.src="https://app.growsurf.com/growsurf.js"+"?v="+g.grsfSettings.version;f.setAttribute("grsf-campaign", g.grsfSettings.campaignId);!g.grsfInit?s.appendChild(f):"";})(window,document);
-    </script>
+﻿@section Head {
+    @await Html.PartialAsync("_GrowSurfScript")
 }
 
 <h2>Thank you!</h2>
 <p>Your membership application has been successfully submitted. We will contact you soon.</p>
 
 <div data-grsf-block-form
- data-grsf-email="gavin@hooli.com"
- data-grsf-button-style="{'background-color': '#5890E7', 'color': '#fcfcfc', 'font-family': 'Sans', 'font-size': '12px'}"
- data-grsf-email-button-style="{'background-color': '#5890E7', 'color': '#fcfcfc', 'font-family': 'Arial', 'font-size': '12px'}"
- data-grsf-email-button-text="Share"
- data-grsf-twitter-button-style="{'background-color': '#5890E7', 'font-family': 'Arial', 'font-size': '12px'}"
- data-grsf-twitter-button-text="Share"
- data-grsf-facebook-button-style="{'background-color': '#5890E7', 'font-family': 'Courier New', 'font-size': '12px'}"
- data-grsf-facebook-button-text="Share"
- data-grsf-pinterest-button-style="{'background-color': '#5890E7', 'letter-spacing': '1.2', 'font-size': '12px'}"
- data-grsf-pinterest-button-text="Pin It"
- data-grsf-share-instructions="Share this unique link with your friends">
-</div>
+     data-grsf-email="@ViewData["Participant.Email"]"
+     data-grsf-first-name="@ViewData["Participant.FirstName"]"
+     data-grsf-last-name="@ViewData["Participant.LastName"]"></div>

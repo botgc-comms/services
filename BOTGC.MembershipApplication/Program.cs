@@ -1,4 +1,5 @@
 using BOTGC.MembershipApplication;
+using BOTGC.MembershipApplication.Services;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
@@ -17,8 +18,11 @@ if (environment.IsDevelopment())
 
 // Bind AppSettings
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
-builder.Services.AddSingleton(sp =>
-    sp.GetRequiredService<IOptions<AppSettings>>().Value);
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<AppSettings>>().Value);
+
+// Configure Dependency Injection
+builder.Services.AddHttpClient<IReferralService, GrowSurfService>();
+builder.Services.AddHttpContextAccessor();
 
 // Setup HTTP client with retry policy
 builder.Services.AddHttpClient("MembershipApi", (sp, client) =>
@@ -60,65 +64,10 @@ if (!environment.IsDevelopment())
     app.UseHsts();
 }
 
-// CSP Middleware
-app.Use(async (context, next) =>
-{
-    var env = context.RequestServices.GetRequiredService<IWebHostEnvironment>();
-    var settings = context.RequestServices.GetRequiredService<AppSettings>();
-    var apiUrl = settings.API.Url;
-
-    var scriptSrc = new List<string>
-    {
-        "'self'",
-        "https://cdn.jsdelivr.net",
-        "https://www.google.com",
-        "https://www.gstatic.com",
-        "https://cdn.getaddress.io"
-    };
-
-    var connectSrc = new List<string>
-    {
-        "'self'",
-        apiUrl,
-        "https://www.google.com",
-        "https://www.gstatic.com",
-        "https://api.getaddress.io"
-    };
-
-    if (env.IsDevelopment())
-    {
-        scriptSrc.Add("'unsafe-inline'");
-        connectSrc.Add("http://localhost:*");
-        connectSrc.Add("https://localhost:*");
-        connectSrc.Add("ws://localhost:*");
-        connectSrc.Add("wss://localhost:*");
-    }
-
-    var frameSrc = new List<string>
-    {
-        "'self'",
-        "https://www.google.com",
-        "https://localhost:5001"
-    };
-
-    var csp = string.Join(" ", new[]
-    {
-        "default-src 'self';",
-        $"script-src {string.Join(" ", scriptSrc)};",
-        "style-src 'self' 'unsafe-inline';",
-        "img-src 'self' data:;",
-        "font-src 'self' data:;",
-        $"connect-src {string.Join(" ", connectSrc)};",
-        $"frame-src {string.Join(" ", frameSrc)}",
-        $"form-action 'self' {apiUrl};",
-        "base-uri 'self';",
-        "object-src 'none';"
-    });
-
-    context.Response.Headers["Content-Security-Policy"] = csp;
-
-    await next();
-});
+app.UseContentSecurityPolicy()
+   .WithGrowSurf()
+   .ExcludePaths("/embed-test/index.html")
+   .Build();
 
 app.UseCors("AllowedOriginsPolicy");
 app.UseStaticFiles();
@@ -137,5 +86,6 @@ app.UseEndpoints(endpoints =>
 });
 
 app.MapDefaultControllerRoute();
+
 
 app.Run();

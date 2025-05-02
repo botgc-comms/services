@@ -5,27 +5,45 @@
 }
 
 @section Head {
-    <script type="text/javascript">
-      (function(g,r,s,f){g.grsfSettings={campaignId:"wgllwy",version:"2.0.0"};s=r.getElementsByTagName("head")[0];f=r.createElement("script");f.async=1;f.src="https://app.growsurf.com/growsurf.js"+"?v="+g.grsfSettings.version;f.setAttribute("grsf-campaign", g.grsfSettings.campaignId);!g.grsfInit?s.appendChild(f):"";})(window,document);
-    </script>
+    @await Html.PartialAsync("_GrowSurfScript")
 }
 
 <h1 id="membership-form-heading">Application Form</h1>
 
 <section class="membership-intro">
-    <p>We’re currently welcoming new membership applications with <strong>no joining fee</strong> and <strong>no waiting list</strong>. Whether you’re an experienced golfer, completely new to the game, or simply looking to enjoy the social side of the club, we’d love to hear from you. There’s no need for a proposer or seconder — just complete the form below to get started.</p>
+    @if (!String.IsNullOrEmpty(Model.ReferrerId) && !String.IsNullOrEmpty(Model.ReferrerName))
+    {
+            <div class="referral-banner">
+                <h2>
+                    Great news – your friend @Model.ReferrerName has recommended you to join us!
+                </h2>
+                <p>
+                    When you become a playing member, both you and @Model.ReferrerName will each receive <strong>£50 credit</strong> in your clubhouse accounts as a thank-you. 
+                </p>
+                <p class="small text-muted">
+                    *Referral reward applies to full, 5-day, 6-day, intermediate, and flexi memberships only.
+                </p>
+            </div>
+    }
 
-    <p>Once we’ve received your application, we’ll invite you to visit the club and meet with a member of our membership committee. It’s a relaxed opportunity to explore the facilities, ask any questions, and help us get to know you.</p>
+    <p>We’re currently welcoming new membership applications with <strong>no joining fee</strong> and <strong>no waiting list</strong>. Whether you’re an experienced golfer, new to the game, or just keen to enjoy the social side of the club, we’d love to hear from you. There’s no need for a proposer or seconder — simply complete the form below to apply.</p>
 
-    <p>If your application is successful, we’ll send you joining instructions along with details on how to pay — and that’s it, you’ll be part of the club.</p>
+    <p>Once we receive your application, we’ll invite you to visit the club and meet a member of our membership committee. It’s a relaxed opportunity to explore the facilities, ask questions, and get to know us.</p>
+
+    <p>If your application is successful, we’ll send you your joining instructions and payment details — and that’s it, you’ll be part of the club!</p>
 
     <p>Not sure which membership is right for you? <a href="#" target="_blank">See our full list of membership options</a> to find the one that suits you best.</p>
 </section>
+
 
 <div id="error-summary" tabindex="-1" class="sr-only" aria-hidden="true">There are validation errors on the form</div>
 
 <form class="membership-form" asp-action="Apply" method="post" novalidate aria-labelledby="membership-form-heading">
     @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(m => m.ReferrerId)
+    @Html.HiddenFor(m => m.ReferrerName)
+    @Html.HiddenFor(m => m.Fingerprint)
 
     <div asp-validation-summary="All" role="alert" aria-live="assertive"></div>
 
@@ -212,10 +230,25 @@
             function updateMembershipDescription() {
                 const selectedValue = $('#MembershipCategory').val();
                 const $desc = $('#membership-description');
-                $desc.text(descriptions[selectedValue] || '').toggle(!!selectedValue);
+                let description = descriptions[selectedValue] || '';
 
                 const financeEligible = ['7Day', '6Day', '5Day', 'Intermediate'].includes(selectedValue);
                 $('#finance-section').toggle(financeEligible);
+
+                // Check if there's a referrer present on the page (hidden field or model)
+                const referralEligibleCategories = ['7Day', '6Day', '5Day', 'Intermediate', 'Flexi'];
+                const hasReferrer = $('#ReferrerId').val() || false;
+
+                // Append referral reward message if applicable
+                if (hasReferrer) {
+                    if (referralEligibleCategories.includes(selectedValue)) {
+                        description += " <strong>Great news – this category qualifies for our referral reward scheme.</strong>";
+                    } else {
+                        description += " <strong>Note: This category is not eligible for the referral reward scheme.</strong>";
+                    }
+                }
+
+                $desc.html(description).toggle(!!selectedValue);
             }
 
             const enableAutocomplete = async () => {
@@ -273,6 +306,39 @@
             $('#genderNote').toggle($('#Gender').val() === 'Other');
             $('#cdh-section').toggle($('#HasCdhId').is(':checked'));
         });
+
+        // Determine client fingerprint.
+        const fpPromise = FingerprintJS.load();
+
+        fpPromise.then(fp => fp.get()).then(result => {
+            const fingerprint = result.visitorId;
+            console.log('Fingerprint:', fingerprint);
+
+            // Set the value of the existing hidden field
+            const fingerprintInput = document.getElementById('Fingerprint');
+            if (fingerprintInput) {
+                fingerprintInput.value = fingerprint;
+            } else {
+                console.warn('Fingerprint hidden field not found.');
+            }
+        });
+
+        // Frame height
+        let lastHeight = 0;
+
+        function sendHeight() {
+          const newHeight = document.body.scrollHeight;
+          if (newHeight !== lastHeight) {
+            window.parent.postMessage({ frameHeight: newHeight }, '*');
+            lastHeight = newHeight;
+          }
+        }
+
+        window.addEventListener('load', sendHeight);
+
+        // Use MutationObserver for better dynamic watching
+        const observer = new MutationObserver(sendHeight);
+        observer.observe(document.body, { attributes: true, childList: true, subtree: true });
     </script>
 }
 

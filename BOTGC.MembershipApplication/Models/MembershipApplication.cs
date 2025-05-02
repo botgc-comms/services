@@ -13,7 +13,11 @@ namespace BOTGC.MembershipApplication.Models
     public class MembershipApplication : IValidatableObject
     {
         public string ApplicationId { get; set; } = Guid.NewGuid().ToString();
-        
+
+        public string? ReferrerId { get; set; } = string.Empty;
+        public string? ReferrerName { get; set; } = string.Empty;
+        public string? Fingerprint { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "Please select your gender that you were born with.")]
         public string Gender { get; set; }
 
@@ -28,7 +32,7 @@ namespace BOTGC.MembershipApplication.Models
 
         [Required(ErrorMessage = "Please enter your date of birth.")]
         [DataType(DataType.Date)]
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         [Required(ErrorMessage = "Please provide your telephone number.")]
         [Phone(ErrorMessage = "Please enter a valid telephone number.")]
@@ -91,7 +95,7 @@ namespace BOTGC.MembershipApplication.Models
                     new[] { nameof(CdhId) });
             }
 
-            var age = CalculateAge(DateOfBirth);
+            var age = CalculateAge(DateOfBirth!.Value);
 
             switch (MembershipCategory)
             {
