@@ -1,0 +1,33 @@
+﻿@{
+    var campaignId = ViewData["GrowSurfCampaignId"]?.ToString();
+    
+    var participantEmail = ViewData["Participant.Email"]?.ToString();
+    var participantHash = ViewData["Participant.Hash"]?.ToString();
+}
+
+<script type="text/javascript">
+    @if (!string.IsNullOrEmpty(participantEmail) && !string.IsNullOrEmpty(participantHash))
+    {
+        <text>
+            window.grsfConfig = {
+                email: "@participantEmail",
+                hash: "@participantHash"
+            };
+        </text>
+    }
+
+        (function (g, r, s, f) {
+            g.grsfSettings = {
+                campaignId: '@campaignId',
+                version: "2.0.0"
+            };
+            s = r.getElementsByTagName("head")[0];
+            f = r.createElement("script");
+            f.async = true;
+            f.src = "https://app.growsurf.com/growsurf.js?v=" + g.grsfSettings.version;
+            f.setAttribute("grsf-campaign", g.grsfSettings.campaignId);
+            if (!g.grsfInit) {
+                s.appendChild(f);
+            }
+        })(window, document);
+</script>
