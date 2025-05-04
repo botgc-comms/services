@@ -14,6 +14,9 @@ const paths = {
         './wwwroot/js/getaddress-autocomplete.js',
         './wwwroot/js/fingerprintjs.js',
         './wwwroot/js/membership-form.js'
+    ],
+    dist: [
+        './wwwroot/js/membership-form-init.js'
     ]
 };
 
@@ -42,6 +45,15 @@ function appScripts() {
         .pipe(gulp.dest(outputPath));
 }
 
-const build = gulp.series(clean, gulp.parallel(vendorScripts, appScripts));
+function distScripts() {
+    return gulp.src(paths.dist)
+        .pipe(concat('membership-form-embed.js'))
+        .pipe(gulp.dest(outputPath))
+        .pipe(uglify({ mangle: { toplevel: true } }))
+        .pipe(rename({ suffix: '.min' }))
+        .pipe(gulp.dest(outputPath));
+}
+
+const build = gulp.series(clean, gulp.parallel(vendorScripts, appScripts, distScripts));
 
 exports.default = build;

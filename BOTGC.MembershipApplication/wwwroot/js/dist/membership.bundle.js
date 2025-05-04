@@ -9893,6 +9893,39 @@ $(function () {
     
     $('#genderNote').toggle($('#Gender').val() === 'Other');
     $('#cdh-section').toggle($('#HasCdhId').is(':checked'));
+
+    // Mutual messaging for form size
+    let lastHeight = 0;
+
+    function debounce(func, wait = 100) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+    function sendHeight() {
+        const formContainer = document.querySelector('main') || document.body;
+        const newHeight = formContainer.scrollHeight;
+        if (Math.abs(newHeight - lastHeight) > 5) {  
+            console.log('📏 Sending height:', newHeight);
+            window.parent.postMessage({ frameHeight: newHeight }, window.location.origin);
+            lastHeight = newHeight;
+        }
+    }
+
+    // 👇 Wrap the sendHeight
+    const debouncedSendHeight = debounce(sendHeight, 100);
+
+    // 👇 MutationObserver using debouncedSendHeight
+    const observer = new MutationObserver(debouncedSendHeight);
+    observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+
+    // 👇 Resize listener using debouncedSendHeight
+    window.addEventListener('resize', debouncedSendHeight);
+
+    // 👇 Trigger once on load to set initial size
+    sendHeight();
 });
 
 // FingerprintJS init
@@ -9904,19 +9937,4 @@ FingerprintJS.load().then(fp => fp.get()).then(result => {
     }
 });
 
-//// Frame height
-//let lastHeight = 0;
 
-//function sendHeight() {
-//    const newHeight = document.body.scrollHeight;
-//    if (newHeight !== lastHeight) {
-//        window.parent.postMessage({ frameHeight: newHeight }, '*');
-//        lastHeight = newHeight;
-//    }
-//}
-
-//window.addEventListener('load', sendHeight);
-
-//// Use MutationObserver for better dynamic watching
-//const observer = new MutationObserver(sendHeight);
-//observer.observe(document.body, { attributes: true, childList: true, subtree: true });

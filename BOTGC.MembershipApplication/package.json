@@ -10,8 +10,7 @@
   },
   "scripts": {
     "sass:watch": "sass --watch wwwroot/scss/index.scss:wwwroot/css/styles.css",
-    "start": "concurrently \"npm run sass:watch\" \"dotnet watch run\"",
-    "bundle": "npx esbuild wwwroot/js/*.js wwwroot/lib/jquery/dist/jquery.min.js wwwroot/lib/jquery-validation/dist/jquery.validate.min.js wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js --bundle --minify --outfile=wwwroot/js/membership-form.bundle.min.js"
+    "start": "concurrently \"npm run sass:watch\" \"dotnet watch run\""
   },
   "dependencies": {
     "@getaddress/autocomplete": "^3.0.9"
