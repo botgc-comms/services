@@ -1,11 +1,17 @@
 {
   "devDependencies": {
     "concurrently": "^9.1.2",
+    "del": "^8.0.0",
+    "gulp": "^5.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-rename": "^2.0.0",
+    "gulp-uglify": "^3.0.2",
     "sass": "^1.87.0"
   },
   "scripts": {
     "sass:watch": "sass --watch wwwroot/scss/index.scss:wwwroot/css/styles.css",
-    "start": "concurrently \"npm run sass:watch\" \"dotnet watch run\""
+    "start": "concurrently \"npm run sass:watch\" \"dotnet watch run\"",
+    "bundle": "npx esbuild wwwroot/js/*.js wwwroot/lib/jquery/dist/jquery.min.js wwwroot/lib/jquery-validation/dist/jquery.validate.min.js wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js --bundle --minify --outfile=wwwroot/js/membership-form.bundle.min.js"
   },
   "dependencies": {
     "@getaddress/autocomplete": "^3.0.9"

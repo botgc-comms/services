@@ -21,18 +21,21 @@ namespace BOTGC.API.Services.BackgroundServices
         private readonly IDataService _reportService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IQueueService<NewMemberApplicationResultDto> _membershipApplicationQueueService;
+        private readonly IQueueService<NewMemberPropertyUpdateDto> _memberPropertyUpdateQueueService;
 
         public MembershipApplicationQueueProcessor(IOptions<AppSettings> settings,
                                                    ILogger<MembershipApplicationQueueProcessor> logger,
                                                    IDataService reportService,
                                                    IServiceScopeFactory serviceScopeFactory,
-                                                   IQueueService<NewMemberApplicationResultDto> membershipApplicationQueueService)
+                                                   IQueueService<NewMemberApplicationResultDto> membershipApplicationQueueService,
+                                                   IQueueService<NewMemberPropertyUpdateDto> memberPropertyUpdateQueueService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
             _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
             _membershipApplicationQueueService = membershipApplicationQueueService ?? throw new ArgumentNullException(nameof(membershipApplicationQueueService));
+            _memberPropertyUpdateQueueService = memberPropertyUpdateQueueService ?? throw new ArgumentNullException(nameof(memberPropertyUpdateQueueService));
 
             var connectionString = _settings.Queue?.ConnectionString;
             var queueName = AppConstants.MembershipApplicationQueueName;
@@ -108,6 +111,30 @@ namespace BOTGC.API.Services.BackgroundServices
                                     finally
                                     {
                                         await _membershipApplicationQueueService.EnqueueAsync(memberCreated);
+
+                                        // Update the application id property
+                                        if (!string.IsNullOrEmpty(memberCreated.Application?.ApplicationId) && memberCreated.MemberId.HasValue)
+                                        {
+                                            await _memberPropertyUpdateQueueService.EnqueueAsync(new NewMemberPropertyUpdateDto
+                                            {
+                                                Property = MemberProperties.APPLICATIONID,
+                                                MemberId = memberCreated.MemberId.Value,
+                                                Value = memberCreated.Application?.ApplicationId!
+                                            });
+                                        }                                               
+
+                                        // Update the application id property
+                                        if (!string.IsNullOrEmpty(memberCreated.Application?.ReferrerId) && memberCreated.MemberId.HasValue)
+                                        {
+                                            await _memberPropertyUpdateQueueService.EnqueueAsync(new NewMemberPropertyUpdateDto
+                                            {
+                                                Property = MemberProperties.REFERRERIF,
+                                                MemberId = memberCreated.MemberId.Value,
+                                                Value = memberCreated.Application?.ReferrerId!
+                                            });
+                                        }
+
+                                        // Remove the original message
                                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                                     }
 

@@ -43,6 +43,7 @@ namespace BOTGC.API.Extensions
 
             services.AddSingleton<IQueueService<NewMemberApplicationDto>, MembershipApplicationQueueService>();
             services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, MembershipApplicationQueueService>();
+            services.AddSingleton<IQueueService<NewMemberPropertyUpdateDto>, MembershipApplicationQueueService>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 

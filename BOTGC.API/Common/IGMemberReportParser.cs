@@ -64,7 +64,9 @@ namespace BOTGC.API.Common
                 { "^Leave\\s*Date$", nameof(MemberDto.LeaveDate) },
                 { "^Handicap$", nameof(MemberDto.Handicap) },
                 { "^Disabled\\s*Golfer$", nameof(MemberDto.IsDisabledGolfer) },
-                { "^Unpaid\\s*Total$", nameof(MemberDto.UnpaidTotal) }
+                { "^Unpaid\\s*Total$", nameof(MemberDto.UnpaidTotal) },
+                { "^ApplicationID$", nameof(MemberDto.ApplicationId) },
+                { "^ReferrerId$", nameof(MemberDto.ReferrerId) },
             };
 
             // Build a dictionary to track the index of each column
@@ -138,6 +140,12 @@ namespace BOTGC.API.Common
 
                     if (headerIndexMap.TryGetValue(nameof(MemberDto.UnpaidTotal), out var unpaidIndex) && unpaidIndex < columns.Length)
                         member.UnpaidTotal = decimal.TryParse(columns[unpaidIndex], out var unpaid) ? unpaid : 0;
+
+                    if (headerIndexMap.TryGetValue(nameof(MemberDto.ApplicationId), out var applicationIdIndex) && applicationIdIndex < columns.Length)
+                        member.ApplicationId = columns[applicationIdIndex];
+
+                    if (headerIndexMap.TryGetValue(nameof(MemberDto.ReferrerId), out var referrerIdIndex) && referrerIdIndex < columns.Length)
+                        member.ReferrerId = columns[referrerIdIndex];
 
                     // "R" means Active
                     member.IsActive = member.MembershipStatus.Equals("R", StringComparison.OrdinalIgnoreCase);

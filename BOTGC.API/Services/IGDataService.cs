@@ -352,6 +352,31 @@ namespace BOTGC.API.Services
             return null;
         }
 
+        public async Task<bool> SetMemberProperty(MemberProperties property, string memberId, string value)
+        {
+            try
+            {
+                var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.NewMembershipApplicationUrl}".Replace("{memberid}", memberId);
+
+                var content = new StringContent($"paramid={property.ToString()}&user_id={memberId}&param_value={value}");
+
+                var data = new Dictionary<string, string>
+                {
+                    { "paramid", property.ToString() },
+                    { "user_id", memberId },
+                    { "param_value", value }
+                };
+
+                var result = await this.PostData(url, data);
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private async Task<string?> PostData(string reportUrl,
                                              Dictionary<string, string> data) 
         {

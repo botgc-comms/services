@@ -1,4 +1,6 @@
-﻿namespace BOTGC.API.Dto
+﻿using BOTGC.API.Common;
+
+namespace BOTGC.API.Dto
 {
     public class NewMemberApplicationDto
     {
@@ -28,6 +30,7 @@
         public Dictionary<string, bool> ContactPreferences { get; set; } = new();
 
         public bool AgreeToClubRules { get; set; }
+        public string? ReferrerId { get; set; }
 
         // Internal fields
         public DateTime ApplicationDate { get; set; } = DateTime.UtcNow;
@@ -38,5 +41,12 @@
         public string ApplicationId { get; set; }
         public int? MemberId { get; set; }
         public NewMemberApplicationDto Application { get; set; }
+    }
+
+    public class NewMemberPropertyUpdateDto
+    {
+        public MemberProperties Property { get; set; }
+        public int MemberId { get; set; }
+        public string Value { get; set; }
     }
 }

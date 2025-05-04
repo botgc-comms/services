@@ -2,6 +2,7 @@
 
 namespace BOTGC.API.Dto
 {
+
     /// <summary>
     /// Represents a summary of a golf round, including competition details, score, and metadata.
     /// </summary>

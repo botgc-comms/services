@@ -33,6 +33,8 @@
         public bool? IsDisabledGolfer { get; set; }
         public decimal? UnpaidTotal { get; set; }
         public bool? IsActive { get; set; }
+        public string ApplicationId { get; set; }
+        public string ReferrerId { get; set; }
 
         public MemberDto() { }
 
@@ -64,6 +66,8 @@
             IsDisabledGolfer = source.IsDisabledGolfer;
             UnpaidTotal = source.UnpaidTotal;
             IsActive = source.IsActive;
+            ApplicationId = source.ApplicationId;
+            ReferrerId = source.ReferrerId;
         }
     }
 

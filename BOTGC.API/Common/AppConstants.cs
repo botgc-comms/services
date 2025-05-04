@@ -4,5 +4,6 @@
     {
         public const string MembershipApplicationQueueName = "membershipapplications";
         public const string NewMemberAddedQueueName = "newmemberadded";
+        public const string MemberPropertyUpdateQueueName = "memberpropupdate";
     }
 }
