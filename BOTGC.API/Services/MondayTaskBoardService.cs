@@ -103,8 +103,11 @@ namespace BOTGC.API.Services
             return categoryName;
         }
 
-        public async Task<string> CreateMemberApplicationAsync(NewMemberApplicationDto dto)
+        public async Task<string> CreateMemberApplicationAsync(NewMemberApplicationResultDto applicationResult)
         {
+            var memberId = applicationResult.MemberId;
+            var dto = applicationResult.Application;
+
             _logger.LogInformation("Creating Monday task for membership application: {Forename} {Surname} (ApplicationId: {ApplicationId})",
                 dto.Forename, dto.Surname, dto.ApplicationId);
 
@@ -123,10 +126,10 @@ namespace BOTGC.API.Services
                 ["text_mkq639pw"] = $"{dto.Forename} {dto.Surname}",
                 ["text_mkq6xbq4"] = dto.Telephone,
                 ["text_mkq6vbtw"] = dto.Email,
-                ["link_mkq67bhc"] = string.IsNullOrWhiteSpace(dto.MemberId) ? null : new
+                ["link_mkq67bhc"] = memberId == null ? null : new
                 {
-                    url = $"https://www.botgc.co.uk/member.php?memberid={dto.MemberId}",
-                    text = dto.MemberId
+                    url = $"https://www.botgc.co.uk/member.php?memberid={memberId}",
+                    text = memberId
                 },
                 ["date_mkq7q88n"] = new { date = dto.ApplicationDate.AddDays(3).ToString("yyyy-MM-dd") },
                 ["date_mkq7j3ma"] = new { date = dto.ApplicationDate.AddDays(5).ToString("yyyy-MM-dd") },

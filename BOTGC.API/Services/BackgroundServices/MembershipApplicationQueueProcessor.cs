@@ -119,17 +119,17 @@ namespace BOTGC.API.Services.BackgroundServices
                             {
                                 await _membershipApplicationQueueService.EnqueueAsync(memberCreated, stoppingToken);
 
-                                if (!string.IsNullOrEmpty(memberCreated.Application?.ApplicationId) && memberCreated.MemberId.HasValue)
+                                if (!string.IsNullOrEmpty(memberCreated.ApplicationId) && memberCreated.MemberId.HasValue)
                                 {
                                     await _memberPropertyUpdateQueueService.EnqueueAsync(new NewMemberPropertyUpdateDto
                                     {
                                         Property = MemberProperties.APPLICATIONID,
                                         MemberId = memberCreated.MemberId.Value,
-                                        Value = memberCreated.Application.ApplicationId
+                                        Value = memberCreated.ApplicationId
                                     }, stoppingToken);
                                 }
 
-                                if (!string.IsNullOrEmpty(memberCreated.Application?.ReferrerId) && memberCreated.MemberId.HasValue)
+                                if (!string.IsNullOrEmpty(memberCreated.ApplicationId) && memberCreated.MemberId.HasValue && memberCreated.Application != null && memberCreated.Application?.ReferrerId != null)
                                 {
                                     await _memberPropertyUpdateQueueService.EnqueueAsync(new NewMemberPropertyUpdateDto
                                     {

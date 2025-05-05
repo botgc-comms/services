@@ -89,12 +89,12 @@ namespace BOTGC.API.Services.BackgroundServices
                             var pdfBytes = _pdfGeneratorService.GeneratePdf(resultDto.Application);
 
                             // Check for existing ticket
-                            var taskItemId = await _taskBoardService.FindExistingApplicationItemIdAsync(resultDto.Application.ApplicationId);
+                            var taskItemId = await _taskBoardService.FindExistingApplicationItemIdAsync(resultDto.ApplicationId);
 
                             if (taskItemId == null)
                             {
                                 // Create the task item
-                                taskItemId = await _taskBoardService.CreateMemberApplicationAsync(resultDto.Application);
+                                taskItemId = await _taskBoardService.CreateMemberApplicationAsync(resultDto);
                             }
 
                             if (taskItemId != null)
