@@ -196,6 +196,10 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '9.0.x'
+
+    - name: Install Node Modules
+      run: npm install
+      working-directory: BOTGC.MembershipApplication
   
     - name: Publish API
       run: dotnet publish BOTGC.MembershipApplication/BOTGC.MembershipApplication.csproj -c Release -r linux-x64 --self-contained true -o published

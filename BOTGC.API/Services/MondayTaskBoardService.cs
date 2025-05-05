@@ -133,7 +133,9 @@ namespace BOTGC.API.Services
                 },
                 ["date_mkq7q88n"] = new { date = dto.ApplicationDate.AddDays(3).ToString("yyyy-MM-dd") },
                 ["date_mkq7j3ma"] = new { date = dto.ApplicationDate.AddDays(5).ToString("yyyy-MM-dd") },
-                ["text_mkq7w63d"] = dto.ApplicationId
+                ["text_mkq7w63d"] = dto.ApplicationId,
+                ["boolean_mkqnq3va"] = new { @checked = dto.ArrangeFinance == true },
+                ["text_mkqn9qqm"] = dto.ReferrerId
             };
 
             if (!string.IsNullOrWhiteSpace(userId))
