@@ -3,6 +3,6 @@
     public enum MemberProperties
     {
         APPLICATIONID = 18,
-        REFERRERIF = 19
+        REFERRERID = 19
     }
 }

@@ -6,5 +6,6 @@ namespace BOTGC.API.Interfaces
     {
         Task<string> AttachFile(string itemId, byte[] fileBytes, string fileName);
         Task<string> CreateMemberApplicationAsync(NewMemberApplicationDto dto);
+        Task<string?> FindExistingApplicationItemIdAsync(string applicationId);
     }
 }

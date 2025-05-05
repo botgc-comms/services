@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using BOTGC.MembershipApplication.Models;
 using Microsoft.Extensions.Logging;
@@ -129,12 +130,29 @@ namespace BOTGC.MembershipApplication.Services
 
         public string GetReferrerId()
         {
+            Console.WriteLine("1");
             var query = _httpContextAccessor.HttpContext?.Request?.Query;
             if (query != null && query.ContainsKey("grsf"))
-            { 
+            {
+                Console.WriteLine("2");
                 return query["grsf"].ToString();
             }
+
+            Console.WriteLine("3");
+            var cookies = _httpContextAccessor.HttpContext?.Request?.Cookies;
+            if (cookies != null && cookies.ContainsKey($"{_settings.GrowSurfSettings.CampaignId}.ref"))
+            {
+                Console.WriteLine("4");
+                return cookies[$"{_settings.GrowSurfSettings.CampaignId}.ref"];
+            }
+            Console.WriteLine("5");
             return null;
         }
+    }
+
+    public class GrowSurfCookie
+    {
+        [JsonPropertyName("participantReferralCode")]
+        public string ParticipantReferralCode { get; set; }
     }
 }

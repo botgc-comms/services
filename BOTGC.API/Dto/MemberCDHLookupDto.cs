@@ -1,6 +1,6 @@
 ﻿namespace BOTGC.API.Dto
 {
-    public class MemberCDHLookupDto: HateoasResource
+    public class MemberCDHLookupDto : HateoasResource
     {
         public string? CdhId { get; set; }
         public string? HandicapIndex { get; set; }

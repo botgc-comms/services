@@ -3,6 +3,7 @@ using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Extensions;
 using System.Collections.Specialized;
 using System.Net.Http;
 using System.Text.Json;
@@ -42,6 +43,7 @@ namespace BOTGC.API.Services
         private readonly IReportParser<LeaderBoardDto> _leaderboardReportParser;
         private readonly IReportParser<SecurityLogEntryDto> _securityLogEntryParser;
         private readonly IReportParser<MemberCDHLookupDto> _memberCDHLookupReportParser;
+        private readonly IReportParser<NewMemberResponseDto> _newMemberResponseReportParser;
 
         public IGDataService(IOptions<AppSettings> settings,
                                 ILogger<IGDataService> logger,
@@ -56,6 +58,7 @@ namespace BOTGC.API.Services
                                 IReportParser<LeaderBoardDto> leaderBoardReportParser,
                                 IReportParser<SecurityLogEntryDto> securityLogEntryParser,
                                 IReportParser<MemberCDHLookupDto> memberCDHLookupReportParser,
+                                IReportParser<NewMemberResponseDto> newMemberResponseReportParser,
                                 IGSessionService igSessionManagementService,                
                                 IServiceScopeFactory serviceScopeFactory)
         {
@@ -75,6 +78,7 @@ namespace BOTGC.API.Services
             _leaderboardReportParser = leaderBoardReportParser ?? throw new ArgumentNullException(nameof(leaderBoardReportParser));
             _securityLogEntryParser = securityLogEntryParser ?? throw new ArgumentNullException(nameof(securityLogEntryParser));
             _memberCDHLookupReportParser = memberCDHLookupReportParser ?? throw new ArgumentNullException(nameof(memberCDHLookupReportParser));
+            _newMemberResponseReportParser = newMemberResponseReportParser ?? throw new ArgumentNullException(nameof(newMemberResponseReportParser));
         }
         
         public async Task<List<MemberDto>> GetJuniorMembersAsync()
@@ -327,43 +331,46 @@ namespace BOTGC.API.Services
             return null;
         }
 
-        public async Task<NewMemberApplicationResultDto?> SubmitNewMemberApplicationAsync(NewMemberApplicationDto newMember)
+        public async Task<NewMemberApplicationResultDto?> SubmitNewMemberApplicationAsync(NewMemberApplicationDto application)
         {
             var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.NewMembershipApplicationUrl}";
             
             MemberCDHLookupDto? cdhLookup = null;
 
-            if (!string.IsNullOrEmpty(newMember.CdhId))
+            if (!string.IsNullOrEmpty(application.CdhId))
             {
-                cdhLookup = await LookupMemberCDHIdDetails(newMember.CdhId);
+                cdhLookup = await LookupMemberCDHIdDetails(application.CdhId);
             }
 
-            var data = IGMembershipApplicationMapper.MapToFormData(newMember, cdhLookup);
+            var data = IGMembershipApplicationMapper.MapToFormData(application, cdhLookup);
 
-            //var result = await this.PostData(url, data, _NewMemberApplicationReportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.LongTerm_TTL_mins));
+            var result = await this.PostData(url, data, _newMemberResponseReportParser);
 
-            //if (result != null)
-            //{
-
-
-
-            //}
+            if (result != null && result.Any())
+            {
+                return new NewMemberApplicationResultDto
+                {
+                    Application = application,
+                    ApplicationId = application.ApplicationId,
+                    MemberId = result[0].MemberId
+                };
+            }
 
             return null;
         }
 
-        public async Task<bool> SetMemberProperty(MemberProperties property, string memberId, string value)
+        public async Task<bool> SetMemberProperty(MemberProperties property, int memberId, string value)
         {
             try
             {
-                var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.NewMembershipApplicationUrl}".Replace("{memberid}", memberId);
+                var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.NewMembershipApplicationUrl}".Replace("{memberid}", memberId.ToString());
 
                 var content = new StringContent($"paramid={property.ToString()}&user_id={memberId}&param_value={value}");
 
                 var data = new Dictionary<string, string>
                 {
                     { "paramid", property.ToString() },
-                    { "user_id", memberId },
+                    { "user_id", memberId.ToString() },
                     { "param_value", value }
                 };
 
@@ -371,6 +378,7 @@ namespace BOTGC.API.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Failed to update property {property.GetDisplayName()} for member {memberId}", ex.Message);
                 return false;
             }
 

@@ -1,82 +1,147 @@
 ﻿using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace BOTGC.API.Services
 {
-    public class MembershipApplicationQueueService : IQueueService<NewMemberApplicationDto>, IQueueService<NewMemberApplicationResultDto>, IQueueService<NewMemberPropertyUpdateDto>
+    public abstract class BaseQueueService<T> : IQueueService<T>
     {
-        private readonly AppSettings _settings;
-        private readonly QueueClient _newApplicationQueueClient;
-        private readonly QueueClient _newMemberAddedQueueClient;
-        private readonly QueueClient _memberPropertyUpdateQueueClient;
-        private readonly ILogger<MembershipApplicationQueueService> _logger;
+        private readonly QueueClient _queueClient;
+        private readonly QueueClient _deadLetterQueueClient;
+        private readonly ILogger _logger;
 
-        public MembershipApplicationQueueService(
-            IOptions<AppSettings> settings,
-            ILogger<MembershipApplicationQueueService> logger)
+        protected BaseQueueService(QueueClient queueClient, QueueClient deadLetterQueueClient, ILogger logger)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+            _queueClient = queueClient;
+            _deadLetterQueueClient = deadLetterQueueClient;
+            _logger = logger;
 
-            var connectionString = _settings.Queue.ConnectionString;
-
-            _newApplicationQueueClient = new QueueClient(connectionString, AppConstants.MembershipApplicationQueueName);
-            _newApplicationQueueClient.CreateIfNotExists();
-
-            _newMemberAddedQueueClient = new QueueClient(connectionString, AppConstants.NewMemberAddedQueueName);
-            _newMemberAddedQueueClient.CreateIfNotExists();
-
-            _memberPropertyUpdateQueueClient = new QueueClient(connectionString, AppConstants.MemberPropertyUpdateQueueName);
-            _memberPropertyUpdateQueueClient.CreateIfNotExists();
+            Task.Run(() => EnsureQueuesExistAsync());
         }
 
-        public async Task EnqueueAsync(NewMemberApplicationDto item, CancellationToken cancellationToken = default)
+        public async Task EnqueueAsync(T item, CancellationToken cancellationToken = default)
         {
             try
             {
                 var payload = JsonSerializer.Serialize(item);
-                await _newApplicationQueueClient.SendMessageAsync(payload);
-                _logger.LogInformation("Queued new membership application event.");
+                await _queueClient.SendMessageAsync(payload, cancellationToken);
+                _logger.LogInformation("Queued message of type {Type}.", typeof(T).Name);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to enqueue membership application event.");
+                _logger.LogError(ex, "Failed to enqueue message of type {Type}.", typeof(T).Name);
                 throw;
             }
         }
 
-        public async Task EnqueueAsync(NewMemberApplicationResultDto item, CancellationToken cancellationToken = default)
+        public async Task DeadLetterEnqueueAsync(T item, long dequeueCount, DateTime? errorAt = null, CancellationToken cancellationToken = default)
         {
             try
             {
-                var payload = JsonSerializer.Serialize(item);
-                await _newMemberAddedQueueClient.SendMessageAsync(payload);
-                _logger.LogInformation("Queued new member added event.");
+                var deadLetterPayload = new
+                {
+                    OriginalMessage = item,
+                    DequeueCount = dequeueCount,
+                    FailedAt = errorAt ?? DateTime.UtcNow
+                };
+
+                var deadLetterJson = JsonSerializer.Serialize(deadLetterPayload);
+
+                await _deadLetterQueueClient.SendMessageAsync(deadLetterJson, cancellationToken);
+                _logger.LogInformation("Queued dead-letter message of type {Type}.", typeof(T).Name);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to enqueue new member added event.");
+                _logger.LogError(ex, "Failed to enqueue dead-letter message of type {Type}.", typeof(T).Name);
                 throw;
             }
         }
 
-        public async Task EnqueueAsync(NewMemberPropertyUpdateDto item, CancellationToken cancellationToken = default)
+        public async Task<IQueueMessage<T>[]> ReceiveMessagesAsync(int maxMessages, TimeSpan? visibilityTimeout, CancellationToken cancellationToken = default)
+        {
+            var messages = await ReceiveMessageAsync(_queueClient, maxMessages, visibilityTimeout ?? TimeSpan.FromMinutes(AppConstants.QueueVisibilityTimeoutMinutes), cancellationToken);
+
+            return messages.Select(m =>
+            {
+                T? payload = default;
+                try
+                {
+                    payload = JsonSerializer.Deserialize<T>(m.MessageText);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to deserialize message of type {Type}.", typeof(T).Name);
+                }
+
+                return new QueueMessageWrapper<T>(m, payload);
+            }).ToArray();
+        }
+
+        public async Task DeleteMessageAsync(string messageId, string popReceipt, CancellationToken cancellationToken = default)
         {
             try
             {
-                var payload = JsonSerializer.Serialize(item);
-                await _newMemberAddedQueueClient.SendMessageAsync(payload);
-                _logger.LogInformation("Queued new member property update event.");
+                await _queueClient.DeleteMessageAsync(messageId, popReceipt, cancellationToken);
+                _logger.LogInformation("Deleted message {MessageId} of type {Type}.", messageId, typeof(T).Name);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to enqueue new member property update event.");
+                _logger.LogError(ex, "Failed to delete message {MessageId} of type {Type}.", messageId, typeof(T).Name);
                 throw;
             }
+        }
+
+        private async Task EnsureQueuesExistAsync(CancellationToken cancellationToken = default)
+        {
+            await _queueClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+            await _deadLetterQueueClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+
+            _logger.LogInformation("Ensured queue '{QueueName}' and dead-letter queue '{DeadLetterQueueName}' exist.",
+                _queueClient.Name, _deadLetterQueueClient.Name);
+        }
+
+        private static async Task<QueueMessage[]> ReceiveMessageAsync(QueueClient client, int maxMessages, TimeSpan visibilityTimeout, CancellationToken cancellationToken)
+        {
+            return await client.ReceiveMessagesAsync(maxMessages, visibilityTimeout, cancellationToken);
+        }
+    }
+
+    public class MembershipApplicationQueueService : BaseQueueService<NewMemberApplicationDto>
+    {
+        public MembershipApplicationQueueService(IOptions<AppSettings> settings, ILogger<MembershipApplicationQueueService> logger)
+            : base(
+                new QueueClient(settings.Value.Queue.ConnectionString, AppConstants.MembershipApplicationQueueName),
+                new QueueClient(settings.Value.Queue.ConnectionString, $"{AppConstants.MembershipApplicationQueueName}-dql"),
+                logger)
+        {
+        }
+    }
+
+    public class NewMemberAddedQueueService : BaseQueueService<NewMemberApplicationResultDto>
+    {
+        public NewMemberAddedQueueService(IOptions<AppSettings> settings, ILogger<NewMemberAddedQueueService> logger)
+            : base(
+                new QueueClient(settings.Value.Queue.ConnectionString, AppConstants.NewMemberAddedQueueName),
+                new QueueClient(settings.Value.Queue.ConnectionString, $"{AppConstants.NewMemberAddedQueueName}-dql"),
+                logger)
+        {
+        }
+    }
+
+    public class MemberPropertyUpdateQueueService : BaseQueueService<NewMemberPropertyUpdateDto>
+    {
+        public MemberPropertyUpdateQueueService(IOptions<AppSettings> settings, ILogger<MemberPropertyUpdateQueueService> logger)
+            : base(
+                new QueueClient(settings.Value.Queue.ConnectionString, AppConstants.MemberPropertyUpdateQueueName),
+                new QueueClient(settings.Value.Queue.ConnectionString, $"{AppConstants.MemberPropertyUpdateQueueName}-dql"),
+                logger)
+        {
         }
     }
 }

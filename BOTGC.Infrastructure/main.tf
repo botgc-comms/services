@@ -192,6 +192,8 @@ resource "azurerm_linux_web_app" "services_application_form" {
     "AppSettings__API__Url"                                  = "https://${azurerm_linux_web_app.services_api_app.default_hostname}"
 
     "AppSettings__GetAddressIOSettings__ApiKey"              = var.get_address_io_apikey
+
+    "AppSettings__Monday__APIKey"                            = var.monday_com_apikey
     
     "AppSettings__AllowedCorsOrigins"                        = "https://externaldomain1.com,https://externaldomain2.com"
   }

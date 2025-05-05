@@ -1,13 +1,7 @@
-﻿using Azure.Storage.Queues;
-using Azure.Storage.Queues.Models;
-using BOTGC.API.Common;
+﻿using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 
 namespace BOTGC.API.Services.BackgroundServices
 {
@@ -16,32 +10,31 @@ namespace BOTGC.API.Services.BackgroundServices
         private const string __CACHE_NEWMEMBERAPPLICATION = "NewMemberApplication_{applicationId}";
 
         private readonly AppSettings _settings;
-        private readonly QueueClient _queueClient;
         private readonly ILogger<MembershipApplicationQueueProcessor> _logger;
-        private readonly IDataService _reportService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IQueueService<NewMemberApplicationResultDto> _membershipApplicationQueueService;
         private readonly IQueueService<NewMemberPropertyUpdateDto> _memberPropertyUpdateQueueService;
+        private readonly IQueueService<NewMemberApplicationDto> _newMemberApplicationQueueService;
 
-        public MembershipApplicationQueueProcessor(IOptions<AppSettings> settings,
-                                                   ILogger<MembershipApplicationQueueProcessor> logger,
-                                                   IDataService reportService,
-                                                   IServiceScopeFactory serviceScopeFactory,
-                                                   IQueueService<NewMemberApplicationResultDto> membershipApplicationQueueService,
-                                                   IQueueService<NewMemberPropertyUpdateDto> memberPropertyUpdateQueueService)
+        private readonly IDistributedLockManager _distributedLockManager;
+
+        public MembershipApplicationQueueProcessor(
+            IOptions<AppSettings> settings,
+            ILogger<MembershipApplicationQueueProcessor> logger,
+            IServiceScopeFactory serviceScopeFactory,
+            IDistributedLockManager distributedLockManager,
+            IQueueService<NewMemberApplicationDto> newMemberApplicationQueueService,
+            IQueueService<NewMemberApplicationResultDto> membershipApplicationQueueService,
+            IQueueService<NewMemberPropertyUpdateDto> memberPropertyUpdateQueueService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-            _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+            _distributedLockManager = distributedLockManager ?? throw new ArgumentNullException(nameof(distributedLockManager));
+
+            _newMemberApplicationQueueService = newMemberApplicationQueueService ?? throw new ArgumentNullException(nameof(newMemberApplicationQueueService));
             _membershipApplicationQueueService = membershipApplicationQueueService ?? throw new ArgumentNullException(nameof(membershipApplicationQueueService));
             _memberPropertyUpdateQueueService = memberPropertyUpdateQueueService ?? throw new ArgumentNullException(nameof(memberPropertyUpdateQueueService));
-
-            var connectionString = _settings.Queue?.ConnectionString;
-            var queueName = AppConstants.MembershipApplicationQueueName;
-
-            _queueClient = new QueueClient(connectionString, queueName);
-            _queueClient.CreateIfNotExists();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -50,110 +43,111 @@ namespace BOTGC.API.Services.BackgroundServices
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                QueueMessage[] messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 5, visibilityTimeout: TimeSpan.FromSeconds(30), stoppingToken);
+                var messages = await _newMemberApplicationQueueService.ReceiveMessagesAsync(maxMessages: 5, cancellationToken: stoppingToken);
 
                 foreach (var message in messages)
                 {
+                    var newMember = message.Payload;
+
+                    if (newMember == null)
+                    {
+                        _logger.LogWarning("Failed to deserialize new member application for message {MessageId}.", message.Message.MessageId);
+                        await _newMemberApplicationQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
+                        continue;
+                    }
+
+                    await using var distributedLock = await _distributedLockManager.AcquireLockAsync($"Lock:Application:{newMember.ApplicationId}", cancellationToken: stoppingToken);
+
+                    if (!distributedLock.IsAcquired)
+                    {
+                        _logger.LogInformation(
+                            "Lock not acquired for ApplicationId {ApplicationId}, skipping processing.",
+                            newMember.ApplicationId);
+
+                        continue;
+                    }
+
                     try
                     {
-                        var newMember = JsonSerializer.Deserialize<NewMemberApplicationDto>(message.MessageText);
+                        var cacheKey = __CACHE_NEWMEMBERAPPLICATION.Replace("{applicationId}", newMember.ApplicationId);
 
-                        if (newMember != null)
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+                        var reportService = scope.ServiceProvider.GetRequiredService<IDataService>();
+
+                        var cachedResult = await cacheService.GetAsync<NewMemberApplicationResultDto>(cacheKey);
+                        if (cachedResult != null)
+                        {
+                            _logger.LogInformation("Duplicate application detected for ApplicationId {ApplicationId}, skipping.", newMember.ApplicationId);
+                            await _newMemberApplicationQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
+                            continue;
+                        }
+
+                        if (message.Message.DequeueCount > maxAttempts)
+                        {
+                            var failureResult = new NewMemberApplicationResultDto
+                            {
+                                ApplicationId = newMember.ApplicationId,
+                                Application = newMember
+                            };
+
+                            await _membershipApplicationQueueService.EnqueueAsync(failureResult, stoppingToken);
+                            await _newMemberApplicationQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
+                            continue;
+                        }
+
+                        NewMemberApplicationResultDto? memberCreated = null;
+
+                        try
+                        {
+                            memberCreated = await reportService.SubmitNewMemberApplicationAsync(newMember);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error submitting new member application for ApplicationId {ApplicationId}.", newMember.ApplicationId);
+                            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, message.Message.DequeueCount)), stoppingToken);
+                            continue;
+                        }
+
+                        if (memberCreated != null)
                         {
                             try
                             {
-                                var cacheKey = __CACHE_NEWMEMBERAPPLICATION.Replace("{applicationId}", newMember.ApplicationId);
-
-                                using var scope = _serviceScopeFactory.CreateScope();
-                                var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
-                                var reportService = scope.ServiceProvider.GetRequiredService<IDataService>();
-
-                                var cachedResult = await cacheService.GetAsync<NewMemberApplicationResultDto>(cacheKey);
-                                if (cachedResult != null)
-                                {
-                                    _logger.LogInformation("Duplicate application detected for ApplicationId {ApplicationId}, skipping.", newMember.ApplicationId);
-                                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
-                                    continue;
-                                }
-
-                                if (message.DequeueCount > maxAttempts)
-                                {
-                                    var failureResult = new NewMemberApplicationResultDto
-                                    {
-                                        ApplicationId = newMember.ApplicationId,
-                                        Application = newMember
-                                    };
-
-                                    await _membershipApplicationQueueService.EnqueueAsync(failureResult);
-                                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
-                                    continue;
-                                }
-
-                                NewMemberApplicationResultDto? memberCreated = null;
-
-                                try
-                                {
-                                    memberCreated = await reportService.SubmitNewMemberApplicationAsync(newMember);
-                                }
-                                catch (Exception ex)
-                                {
-                                    _logger.LogError(ex, "Error submitting new member application for ApplicationId {ApplicationId}.", newMember.ApplicationId);
-                                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, message.DequeueCount)), stoppingToken);
-                                    continue;
-                                }
-
-                                if (memberCreated != null)
-                                {
-                                    try
-                                    {
-                                        await cacheService.SetAsync(cacheKey, memberCreated, TimeSpan.FromMinutes(_settings.Cache.Forever_TTL_Mins));
-                                    }
-                                    finally
-                                    {
-                                        await _membershipApplicationQueueService.EnqueueAsync(memberCreated);
-
-                                        // Update the application id property
-                                        if (!string.IsNullOrEmpty(memberCreated.Application?.ApplicationId) && memberCreated.MemberId.HasValue)
-                                        {
-                                            await _memberPropertyUpdateQueueService.EnqueueAsync(new NewMemberPropertyUpdateDto
-                                            {
-                                                Property = MemberProperties.APPLICATIONID,
-                                                MemberId = memberCreated.MemberId.Value,
-                                                Value = memberCreated.Application?.ApplicationId!
-                                            });
-                                        }                                               
-
-                                        // Update the application id property
-                                        if (!string.IsNullOrEmpty(memberCreated.Application?.ReferrerId) && memberCreated.MemberId.HasValue)
-                                        {
-                                            await _memberPropertyUpdateQueueService.EnqueueAsync(new NewMemberPropertyUpdateDto
-                                            {
-                                                Property = MemberProperties.REFERRERIF,
-                                                MemberId = memberCreated.MemberId.Value,
-                                                Value = memberCreated.Application?.ReferrerId!
-                                            });
-                                        }
-
-                                        // Remove the original message
-                                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
-                                    }
-
-                                    _logger.LogInformation("Successfully added new member with ID {MemberId}.", memberCreated.MemberId);
-                                }
+                                await cacheService.SetAsync(cacheKey, memberCreated, TimeSpan.FromMinutes(_settings.Cache.Forever_TTL_Mins));
                             }
-                            catch (Exception ex)
+                            finally
                             {
-                                _logger.LogError(ex, "Error adding new member.");
+                                await _membershipApplicationQueueService.EnqueueAsync(memberCreated, stoppingToken);
+
+                                if (!string.IsNullOrEmpty(memberCreated.Application?.ApplicationId) && memberCreated.MemberId.HasValue)
+                                {
+                                    await _memberPropertyUpdateQueueService.EnqueueAsync(new NewMemberPropertyUpdateDto
+                                    {
+                                        Property = MemberProperties.APPLICATIONID,
+                                        MemberId = memberCreated.MemberId.Value,
+                                        Value = memberCreated.Application.ApplicationId
+                                    }, stoppingToken);
+                                }
+
+                                if (!string.IsNullOrEmpty(memberCreated.Application?.ReferrerId) && memberCreated.MemberId.HasValue)
+                                {
+                                    await _memberPropertyUpdateQueueService.EnqueueAsync(new NewMemberPropertyUpdateDto
+                                    {
+                                        Property = MemberProperties.REFERRERID,
+                                        MemberId = memberCreated.MemberId.Value,
+                                        Value = memberCreated.Application.ReferrerId
+                                    }, stoppingToken);
+                                }
+
+                                await _newMemberApplicationQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
                             }
-                        }
-                        else
-                        {
-                            _logger.LogWarning("New member application data is null.");
+
+                            _logger.LogInformation("Successfully added new member with ID {MemberId}.", memberCreated.MemberId);
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error processing membership application message.");
+                        _logger.LogError(ex, "Error adding new member.");
                     }
                 }
 

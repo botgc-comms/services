@@ -16,9 +16,16 @@
 
         public QueueSettings Queue { get; set; } = new();
 
+        public MondaySettings Monday { get; set; } = new();
+
         public string PlayingMemberExpression { get; set; } = "^(?:5|6|7|Intermediate).*?$";
         public string NonPlayingMemberExpression { get; set; } = "^(?!5|6|7|Intermediate|1894|Corporate|Staff|Professional).+$";
 
+    }
+
+    public class MondaySettings
+    {
+        public string APIKey { get; set; }
     }
 
     public class QueueSettings

@@ -32,6 +32,8 @@ namespace BOTGC.API.Dto
         public bool AgreeToClubRules { get; set; }
         public string? ReferrerId { get; set; }
 
+        public bool ArrangeFinance { get; set; }
+
         // Internal fields
         public DateTime ApplicationDate { get; set; } = DateTime.UtcNow;
     }

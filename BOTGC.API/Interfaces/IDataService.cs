@@ -1,4 +1,5 @@
-﻿using BOTGC.API.Dto;
+﻿using BOTGC.API.Common;
+using BOTGC.API.Dto;
 
 namespace BOTGC.API.Interfaces
 {
@@ -20,6 +21,7 @@ namespace BOTGC.API.Interfaces
         Task<NewMemberApplicationResultDto?> SubmitNewMemberApplicationAsync(NewMemberApplicationDto newMember);
 
         Task<List<SecurityLogEntryDto>> GetMobileOrders(DateTime? forDate = null);
+        Task<bool> SetMemberProperty(MemberProperties property, int memberId, string value);
     }
 
 }

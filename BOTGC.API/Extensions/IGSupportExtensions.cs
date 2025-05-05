@@ -5,6 +5,9 @@ using BOTGC.API.Interfaces;
 using BOTGC.API.Services.BackgroundServices;
 using BOTGC.API.Services.CompetitionProcessors;
 using System.Net;
+using RedLockNet.SERedis.Configuration;
+using RedLockNet.SERedis;
+using StackExchange.Redis;
 
 namespace BOTGC.API.Extensions
 {
@@ -26,7 +29,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton(cookieContainer);
             services.AddSingleton(httpClient);
             services.AddSingleton<IGSessionService>(); 
-            services.AddHostedService(provider => provider.GetRequiredService<IGSessionService>()); 
+            services.AddHostedService(provider => provider.GetRequiredService<IGSessionService>());
 
             services.AddSingleton<IGLoginService>();
             services.AddSingleton<IReportParser<MemberDto>, IGMemberReportParser>();
@@ -40,10 +43,11 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IReportParser<CompetitionSettingsDto>, IGCompetitionSettingsReportParser>();
             services.AddSingleton<IReportParser<SecurityLogEntryDto>, IGSecurityLogReportParser>();
             services.AddSingleton<IReportParser<MemberCDHLookupDto>, IGCDHLookupReportParser>();
+            services.AddSingleton<IReportParser<NewMemberResponseDto>, IGNewMemberResponseReportParser>();
 
             services.AddSingleton<IQueueService<NewMemberApplicationDto>, MembershipApplicationQueueService>();
-            services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, MembershipApplicationQueueService>();
-            services.AddSingleton<IQueueService<NewMemberPropertyUpdateDto>, MembershipApplicationQueueService>();
+            services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, NewMemberAddedQueueService>();
+            services.AddSingleton<IQueueService<NewMemberPropertyUpdateDto>, MemberPropertyUpdateQueueService>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 
@@ -51,10 +55,16 @@ namespace BOTGC.API.Extensions
 
             services.AddSingleton<ICompetitionTaskQueue, CompetitionTaskQueue>();
             services.AddSingleton<ICompetitionProcessorResolver, CompetitionProcessorResolver>();
-            
+
+            services.AddSingleton<IMemberApplicationFormPdfGeneratorService, QuestPDFMemberApplicationFormGenerator>();
+
+            services.AddSingleton<ITaskBoardService, MondayTaskBoardService>();
+
             services.AddHostedService<CompetitionBackgroundService>();
             services.AddHostedService<TeeTimeUsageBackgroundService>();
             services.AddHostedService<MembershipApplicationQueueProcessor>();
+            services.AddHostedService<MemberPropertyUpdatesQueueProcessor>();
+            services.AddHostedService<NewMemberAddedQueueProcessor>();
 
             services.AddSingleton<IDataService, IGDataService>();
 

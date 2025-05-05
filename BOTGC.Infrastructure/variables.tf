@@ -43,3 +43,9 @@ variable "get_address_io_apikey" {
   type    = string
   default = ""
 }
+
+variable "monday_com_apikey" {
+  type    = string
+  default = ""
+}
+

@@ -2,8 +2,10 @@
 {
     public static class AppConstants
     {
-        public const string MembershipApplicationQueueName = "membershipapplications";
-        public const string NewMemberAddedQueueName = "newmemberadded";
-        public const string MemberPropertyUpdateQueueName = "memberpropupdate";
+        public const string MembershipApplicationQueueName = "new-membership-applications";
+        public const string NewMemberAddedQueueName = "member-application-added";
+        public const string MemberPropertyUpdateQueueName = "update-member-record";
+        public const int QueueVisibilityTimeoutMinutes = 3;
+        public const int QueueLockExpiryBufferSeconds = 30;
     }
 }

@@ -5,6 +5,9 @@ using BOTGC.API.Interfaces;
 using BOTGC.API.Services;
 using BOTGC.API.Services.ReportServices;
 using Microsoft.OpenApi.Models;
+using RedLockNet.SERedis.Configuration;
+using RedLockNet.SERedis;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,15 +82,25 @@ if (string.Equals(cacheServiceType, "Redis", StringComparison.OrdinalIgnoreCase)
     });
 
     builder.Services.AddScoped<ICacheService, RedisCacheService>();
+
+    var redisConnection = ConnectionMultiplexer.Connect(appSettings.Cache.RedisCache.ConnectionString);
+    var redLockFactory = RedLockFactory.Create(new List<RedLockMultiplexer> { redisConnection });
+
+    builder.Services.AddSingleton(redLockFactory);
+    builder.Services.AddSingleton<IDistributedLockManager, RedLockDistributedLockManager>();
 }
 else if (string.Equals(cacheServiceType, "Memory", StringComparison.OrdinalIgnoreCase))
 {
     builder.Services.AddMemoryCache();
     builder.Services.AddScoped<ICacheService, MemoryCacheService>();
+
+    builder.Services.AddSingleton<IDistributedLockManager, NoOpDistributedLockManager>();
 }
 else
 {
     builder.Services.AddScoped<ICacheService, FileCacheService>();
+
+    builder.Services.AddSingleton<IDistributedLockManager, NoOpDistributedLockManager>();
 }
 
 // Add support for interacting with IG
