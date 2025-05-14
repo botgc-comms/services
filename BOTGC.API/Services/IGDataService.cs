@@ -26,12 +26,15 @@ namespace BOTGC.API.Services
         private const string __CACHE_COMPETITIONSETTINGS = "Competition_Settings";
         private const string __CACHE_LEADERBOARD = "Leaderboard_Settings";
         private const string __CACHE_MEMBERCDHLOOKUP = "MemberCDHLookup_{cdhid}";
+        private const string __CACHE_MEMBERSHIPCATEGORIES = "Member_Categories";
 
         private readonly AppSettings _settings;
         private readonly ILogger<IGDataService> _logger;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IGSessionService _igSessionManagementService;
-        
+        private readonly ITaskBoardService _taskBoardService;
+
+
         private readonly IReportParser<MemberDto> _memberReportParser;
         private readonly IReportParser<RoundDto> _roundReportParser;
         private readonly IReportParser<PlayerIdLookupDto> _playerIdLookupParser;
@@ -59,6 +62,7 @@ namespace BOTGC.API.Services
                                 IReportParser<SecurityLogEntryDto> securityLogEntryParser,
                                 IReportParser<MemberCDHLookupDto> memberCDHLookupReportParser,
                                 IReportParser<NewMemberResponseDto> newMemberResponseReportParser,
+                                ITaskBoardService taskBoardService,
                                 IGSessionService igSessionManagementService,                
                                 IServiceScopeFactory serviceScopeFactory)
         {
@@ -79,6 +83,8 @@ namespace BOTGC.API.Services
             _securityLogEntryParser = securityLogEntryParser ?? throw new ArgumentNullException(nameof(securityLogEntryParser));
             _memberCDHLookupReportParser = memberCDHLookupReportParser ?? throw new ArgumentNullException(nameof(memberCDHLookupReportParser));
             _newMemberResponseReportParser = newMemberResponseReportParser ?? throw new ArgumentNullException(nameof(newMemberResponseReportParser));
+
+            _taskBoardService = taskBoardService ?? throw new ArgumentNullException(nameof(taskBoardService));
         }
         
         public async Task<List<MemberDto>> GetJuniorMembersAsync()
@@ -329,6 +335,29 @@ namespace BOTGC.API.Services
             }
 
             return null;
+        }
+
+        public async Task<List<MembershipCategoryGroupDto>> GetMembershipCategories()
+        {
+            ICacheService? cacheService = null;
+
+            var cacheKey = __CACHE_MEMBERSHIPCATEGORIES;
+
+            using var scope = _serviceScopeFactory.CreateScope();
+            cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+
+            var cachedResults = await cacheService!.GetAsync<List<MembershipCategoryGroupDto>>(cacheKey).ConfigureAwait(false);
+            if (cachedResults != null && cachedResults.Any())
+            {
+                _logger.LogInformation("Retrieving results from cache for Membership Categories...");
+                return cachedResults;
+            }
+
+            var result = await this._taskBoardService.GetMembershipCategories();
+
+            await cacheService.SetAsync(cacheKey!, result, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins)).ConfigureAwait(false);
+
+            return result;
         }
 
         public async Task<NewMemberApplicationResultDto?> SubmitNewMemberApplicationAsync(NewMemberApplicationDto application)

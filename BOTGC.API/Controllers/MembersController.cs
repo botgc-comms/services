@@ -111,6 +111,42 @@ namespace BOTGC.API.Controllers
         }
 
         /// <summary>
+        /// Retrieves a list current membership categories
+        /// </summary>
+        /// <returns>A list of current membership categories.</returns>
+        /// <response code="200">Returns the list of current membership categories.</response>
+        /// <response code="204">No membership categories found.</response>
+        /// <response code="500">An internal server error occurred.</response>
+        [HttpGet("categories")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<MembershipCategoryGroupDto>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IReadOnlyCollection<MembershipCategoryGroupDto>>> GetMembershipCategories()
+        {
+            _logger.LogInformation("Fetching current membership categories...");
+
+            try
+            {
+                var memberhipCategories = await _reportService.GetMembershipCategories();
+
+                if (memberhipCategories == null || memberhipCategories.Count == 0)
+                {
+                    _logger.LogWarning("No current membersship categories found.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation("Successfully retrieved {Count} current membership categories.", memberhipCategories.Count);
+                return Ok(memberhipCategories);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving current members.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving current members.");
+            }
+        }
+
+
+        /// <summary>
         /// Retrieves a list of all current members.
         /// </summary>
         /// <returns>A list of current members with their details.</returns>

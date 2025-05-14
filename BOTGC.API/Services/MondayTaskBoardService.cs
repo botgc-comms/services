@@ -262,5 +262,167 @@ namespace BOTGC.API.Services
 
             return responseBody;
         }
+
+        public async Task<List<MembershipCategoryGroupDto>> GetMembershipCategories()
+        {
+            _logger.LogInformation("Fetching membership categories from Monday.com");
+
+            var boardId = await GetBoardIdByNameAsync("Membership Categories")
+                         ?? throw new InvalidOperationException("Board not found.");
+
+            var query = @"
+                query GetBoardItems($boardId: [ID!]) {
+                    boards(ids: $boardId) {
+                      columns {
+                        id
+                        title
+                        settings_str
+                      }
+                      items_page(limit: 100) {
+                        items {
+                          name
+                          column_values {
+                            id
+                            text
+                            value
+                          }
+                        }
+                      }
+                    }
+                }";
+
+            var payload = new
+            {
+                query,
+                variables = new { boardId = new[] { boardId } }
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync(string.Empty, content);
+            response.EnsureSuccessStatusCode();
+
+            var json = JsonNode.Parse(await response.Content.ReadAsStringAsync());
+            var board = json?["data"]?["boards"]?[0];
+            var items = board?["items_page"]?["items"]?.AsArray();
+            var columns = board?["columns"]?.AsArray();
+
+            if (items == null || columns == null)
+            {
+                _logger.LogWarning("No items or column metadata found on board ID {BoardId}", boardId);
+                return new List<MembershipCategoryGroupDto>();
+            }
+
+            var labelOrder = new Dictionary<string, int>();
+
+            var columnMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var col in columns.Where(c => c?["title"] is not null && c?["id"] is not null))
+            {
+                var title = col["title"]!.ToString();
+                var id = col["id"]!.ToString();
+
+                if (!columnMap.ContainsKey(title))
+                {
+                    columnMap[title] = id;
+                }
+                else
+                {
+                    _logger.LogWarning("Duplicate column title detected: {Title}, keeping first instance with ID {Id}", title, columnMap[title]);
+                }
+            }
+
+            var statusColumn = columns
+                .FirstOrDefault(c => c?["id"]?.ToString() == columnMap["Type"]);
+
+            if (statusColumn is not null)
+            {
+                var settingsStr = statusColumn["settings_str"]?.ToString();
+                if (!string.IsNullOrEmpty(settingsStr))
+                {
+                    using var doc = JsonDocument.Parse(settingsStr);
+                    if (doc.RootElement.TryGetProperty("labels", out var labelsElement))
+                    {
+                        int order = 0;
+                        foreach (var label in labelsElement.EnumerateObject())
+                        {
+                            var labelName = label.Value.GetString();
+                            if (!string.IsNullOrEmpty(labelName))
+                            {
+                                labelOrder[labelName] = order++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            var groupings = new Dictionary<int, (string name, List<MembershipCategoryDto> categories)>();
+
+            foreach (var item in items)
+            {
+                var name = item?["name"]?.ToString() ?? "";
+                var columnValues = item?["column_values"]?.AsArray();
+
+                string GetColumnValue(string id)
+                {
+                    return columnValues?
+                        .FirstOrDefault(c => c?["id"]?.ToString() == id)?["value"]?.ToString() ?? "";
+                }
+
+                string GetColumnText(string id)
+                {
+                    return columnValues?
+                        .FirstOrDefault(c => c?["id"]?.ToString() == id)?["text"]?.ToString() ?? "";
+                }
+
+                bool IsChecked(string jsonValue)
+                {
+                    return !string.IsNullOrEmpty(jsonValue) && jsonValue.Contains("\"checked\":true");
+                }
+
+                string GetText(string jsonValue)
+                {
+                    return string.IsNullOrEmpty(jsonValue)
+                        ? ""
+                        : JsonDocument.Parse(jsonValue).RootElement.GetProperty("text").GetString() ?? "";
+                }
+
+                // Extract group name and order from "type" column (color_mkqynm1f)
+                string groupName = columnValues?
+                    .FirstOrDefault(c => c?["id"]?.ToString() == columnMap["Type"])?
+                    ["text"]?.ToString() ?? "Uncategorised";
+
+                int groupIndex = labelOrder.TryGetValue(groupName, out var idx) ? idx : 999;
+
+                var dto = new MembershipCategoryDto
+                {
+                    Name = name,
+                    Title = GetColumnText(columnMap["Description"]),
+                    Description = GetText(GetColumnValue(columnMap["Information"])),
+                    FinanceAvailable = IsChecked(GetColumnValue(columnMap["Finance Eligible"])),
+                    ReferrerEligable = IsChecked(GetColumnValue(columnMap["Referrer Eligible"])),
+                    IsOnWaitingList = IsChecked(GetColumnValue(columnMap["Waiting List"])),
+                    Display = IsChecked(GetColumnValue(columnMap["Advertise"]))
+                };
+
+                if (!groupings.ContainsKey(groupIndex))
+                {
+                    groupings[groupIndex] = (groupName, new List<MembershipCategoryDto>());
+                }
+
+                groupings[groupIndex].categories.Add(dto);
+            }
+
+            var retVal = groupings
+                .OrderBy(g => g.Key)
+                .Select(g => new MembershipCategoryGroupDto
+                {
+                    Name = g.Value.name,
+                    Order = g.Key,
+                    Categories = g.Value.categories.OrderBy(c => c.Name).ToList()
+                })
+                .ToList();
+
+            return retVal;
+        }
     }
 }

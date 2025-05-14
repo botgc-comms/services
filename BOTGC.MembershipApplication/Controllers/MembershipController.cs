@@ -1,10 +1,12 @@
 using BOTGC.MembershipApplication;
 using BOTGC.MembershipApplication.Common;
+using BOTGC.MembershipApplication.Interfaces;
 using BOTGC.MembershipApplication.Models;
 using BOTGC.MembershipApplication.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
+using System.Text.Json;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace BOTGC.MembershipApplication;
@@ -13,20 +15,29 @@ public class MembershipController : Controller
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IReferralService _referrerService;
+    private readonly IMembershipCategoryCache _categoryCache;
     private readonly AppSettings _settings;
-
-    public MembershipController(IReferralService referrerService, IHttpClientFactory httpClientFactory, IOptions<AppSettings> settings)
+    
+    public MembershipController(
+        IReferralService referrerService,
+        IHttpClientFactory httpClientFactory,
+        IOptions<AppSettings> settings,
+        IMembershipCategoryCache categoryCache)
     {
         _httpClientFactory = httpClientFactory;
         _referrerService = referrerService;
         _settings = settings.Value;
+        _categoryCache = categoryCache;
     }
 
     [HttpGet]
     public async Task<IActionResult> Apply()
     {
         var newApplication = new MembershipApplication.Models.MembershipApplication();
+        var categories = await _categoryCache.GetAll();
 
+        // This is the only line you need to pass to JS
+        ViewData["MembershipCategories"] = categories;
         ViewData["GrowSurfCampaignId"] = _settings.GrowSurfSettings.CampaignId;
         ViewData["GetAddressApiKey"] = _settings.GetAddressIOSettings.ApiKey;
 

@@ -22,6 +22,7 @@ namespace BOTGC.API.Interfaces
 
         Task<List<SecurityLogEntryDto>> GetMobileOrders(DateTime? forDate = null);
         Task<bool> SetMemberProperty(MemberProperties property, int memberId, string value);
+        Task<List<MembershipCategoryGroupDto>> GetMembershipCategories();
     }
 
 }

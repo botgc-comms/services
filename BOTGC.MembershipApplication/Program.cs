@@ -1,5 +1,7 @@
 using BOTGC.MembershipApplication;
+using BOTGC.MembershipApplication.Interfaces;
 using BOTGC.MembershipApplication.Services;
+using BOTGC.MembershipApplication.Services.Background;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
@@ -23,6 +25,9 @@ builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<AppSettings>>
 // Configure Dependency Injection
 builder.Services.AddHttpClient<IReferralService, GrowSurfService>();
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddSingleton<IMembershipCategoryCache, MembershipCategoryCache>();
+builder.Services.AddHostedService<MembershipCategoryPollingService>();
 
 // Setup HTTP client with retry policy
 builder.Services.AddHttpClient("MembershipApi", (sp, client) =>

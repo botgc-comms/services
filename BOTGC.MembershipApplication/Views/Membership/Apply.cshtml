@@ -1,11 +1,24 @@
-﻿@model BOTGC.MembershipApplication.Models.MembershipApplication
+﻿@using System.Text.Json
+@model BOTGC.MembershipApplication.Models.MembershipApplication
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
 
 @{
     ViewData["Title"] = "Application Form";
+
+  var categoryGroups = ViewData["MembershipCategories"] as List<MembershipCategoryGroup> ?? new();
+    var categories = categoryGroups.SelectMany(g => g.Categories).ToList();
+
+    var categoriesJson = JsonSerializer.Serialize(
+        categories,
+        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+    );
 }
 
 @section Head {
+    <script>
+        const membershipCategories = @Html.Raw(categoriesJson);
+    </script>
+
     @if (Env.IsDevelopment())
     {
         <script src="~/js/dist/membership.bundle.js"></script>
@@ -65,24 +78,23 @@
 
             <select asp-for="MembershipCategory" class="form-control" aria-required="true">
                 <option value="">Please select a membership type</option>
-                <optgroup label="Full Playing Memberships">
-                    <option value="7Day">Full Membership</option>
-                    <option value="6Day">6 Day Membership – Excludes Saturdays</option>
-                    <option value="5Day">5 Day Membership – Weekdays Only</option>
-                    <option value="Intermediate">Affordable Membership – Age Restricted</option>
-                    <option value="Flexi">Off Peak Playing Membership</option>
-                </optgroup>
-                <optgroup label="Special Categories">
-                    <option value="Junior">Junior Membership</option>
-                    <option value="Student">Student Membership</option>
-                    <option value="Social">Social Membership – Includes Limited Golf</option>
-                    <option value="Clubhouse">Clubhouse Only – No Golf</option>
-                    <option value="Family">Family – Relative of Full or Junior Member</option>
-                </optgroup>
+
+                @foreach (var group in categoryGroups.OrderBy(g => g.Order))
+                {
+                    <optgroup label="@group.Name">
+                        @foreach (var category in group.Categories.Where(c => c.Display))
+                        {
+                            <option value="@category.Name"
+                                    data-description="@category.Description"
+                                    data-finance="@category.FinanceAvailable.ToString().ToLowerInvariant()">
+                                @category.Title
+                            </option>
+                        }
+                    </optgroup>
+                }
             </select>
 
             <span asp-validation-for="MembershipCategory" class="text-danger"></span>
-
             <div id="membership-description" class="mt-2 text-muted" aria-live="polite"></div>
         </div>
 
@@ -192,17 +204,26 @@
             <span asp-validation-for="CdhId"></span>
         </div>
 
-        <div class="form-check flex mb-3" id="finance-section" style="display:none;">
-            <input class="form-check-input" type="checkbox" id="ArrangeFinance" name="ArrangeFinance" />
-            <label class="form-check-label" for="ArrangeFinance">
-                Are you looking to arrange finance to pay your subs?
-            </label>
+        <div class="form-group mb-3" id="finance-section" style="display: none;" data-if-finance-available="true">
+            <label class="form-label d-block">Are you looking to arrange finance to pay your membership fees?</label>
+
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="ArrangeFinance" id="ArrangeFinanceYes" value="true">
+                <label class="form-check-label" for="ArrangeFinanceYes">Yes</label>
+            </div>
+
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="ArrangeFinance" id="ArrangeFinanceNo" value="false" checked>
+                <label class="form-check-label" for="ArrangeFinanceNo">No</label>
+            </div>
         </div>
 
         <div class="form-check mb-3">
             <input asp-for="AgreeToClubRules" class="form-check-input" type="checkbox" />
             <label class="form-check-label" for="AgreeToClubRules">
-                @Html.DisplayNameFor(m => m.AgreeToClubRules)<span aria-hidden="true">*</span>
+                I confirm that I have read and agree to the
+                <a href="/documents/club-rules.pdf" target="_blank" rel="noopener noreferrer">Club Rules</a>
+                <span aria-hidden="true">*</span>
             </label>
         </div>
         <span asp-validation-for="AgreeToClubRules" class="text-danger"></span>

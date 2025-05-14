@@ -7,5 +7,6 @@ namespace BOTGC.API.Interfaces
         Task<string> AttachFile(string itemId, byte[] fileBytes, string fileName);
         Task<string> CreateMemberApplicationAsync(NewMemberApplicationResultDto dto);
         Task<string?> FindExistingApplicationItemIdAsync(string applicationId);
+        Task<List<MembershipCategoryGroupDto>> GetMembershipCategories();
     }
 }
