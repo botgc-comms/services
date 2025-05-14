@@ -381,9 +381,20 @@ namespace BOTGC.API.Services
 
                 string GetText(string jsonValue)
                 {
-                    return string.IsNullOrEmpty(jsonValue)
-                        ? ""
-                        : JsonDocument.Parse(jsonValue).RootElement.GetProperty("text").GetString() ?? "";
+                    if (string.IsNullOrEmpty(jsonValue))
+                        return "";
+
+                    var text = JsonDocument.Parse(jsonValue).RootElement.GetProperty("text").GetString() ?? "";
+
+                    // Fix common mojibake from misencoded apostrophes
+                    return text
+                        .Replace("â", "’")
+                        .Replace("â", "–")
+                        .Replace("â", "—")
+                        .Replace("â¦", "…")
+                        .Replace("â", "“")
+                        .Replace("â", "”")
+                        .Replace("â˜", "‘");
                 }
 
                 // Extract group name and order from "type" column (color_mkqynm1f)
@@ -418,7 +429,7 @@ namespace BOTGC.API.Services
                 {
                     Name = g.Value.name,
                     Order = g.Key,
-                    Categories = g.Value.categories.OrderBy(c => c.Name).ToList()
+                    Categories = g.Value.categories.ToList()
                 })
                 .ToList();
 

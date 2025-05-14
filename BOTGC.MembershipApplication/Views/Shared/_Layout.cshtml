@@ -1,28 +1,31 @@
 ﻿@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Membership Application</title>
 
-    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>@ViewData["Title"] - Membership Application</title>
 
-    @if (Env.IsDevelopment())
-    {
-        <script src="~/js/dist/vendor.bundle.js"></script>
-    }
-    else
-    {
-        <script src="~/js/dist/vendor.bundle.min.js"></script>
-    }
+        <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
 
-    @RenderSection("Head", required: false)
-</head>
+        @if (Env.IsDevelopment())
+        {
+            <script src="~/js/dist/vendor.bundle.js"></script>
+        }
+        else
+        {
+            <script src="~/js/dist/vendor.bundle.min.js"></script>
+        }
 
-<body>
-    @RenderBody()
+        @RenderSection("Head", required: false)
+    </head>
 
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+    <body>
+        @RenderBody()
+
+        @await RenderSectionAsync("Scripts", required: false)
+    </body>
 </html>
