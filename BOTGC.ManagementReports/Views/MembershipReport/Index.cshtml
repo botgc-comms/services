@@ -1,0 +1,242 @@
+﻿@using BOTGC.ManagementReports.Models
+@model MembershipReportDto
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership Report</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+</head>
+<body>
+    <h1>Membership Report</h1>
+
+    <canvas id="membershipChart"></canvas>
+    <canvas id="categoryBreakdownChart"></canvas>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataPoints = @Html.Raw(Json.Serialize(Model.DataPoints));
+
+            console.log("Raw DataPoints:", dataPoints);
+
+            const labels = dataPoints.map(dp => new Date(dp.date).toLocaleDateString());
+            const playingMembers = dataPoints.map(dp => dp.playingMembers || 0);
+            const nonPlayingMembers = dataPoints.map(dp => dp.nonPlayingMembers || 0);
+            const targetPlayingMembers = dataPoints.map(dp => dp.targetPlayingMembers || 0);
+
+            // Restore key dates (e.g., start of financial year)
+            const keyDates = [
+                { label: "Start of Financial Year", date: "2024-04-01", color: "black" }
+            ];
+
+            const annotations = keyDates
+                .map(keyDate => {
+                    const index = labels.indexOf(new Date(keyDate.date).toLocaleDateString());
+                    return index !== -1 ? {
+                        type: "line",
+                        mode: "vertical",
+                        scaleID: "x",
+                        value: index,
+                        borderColor: keyDate.color,
+                        borderWidth: 1,
+                        label: {
+                            content: keyDate.label,
+                            enabled: true,
+                            position: "top"
+                        }
+                    } : null;
+                })
+                .filter(Boolean);
+
+            // Prepare datasets for the first chart
+            prepareMembershipChart(labels, playingMembers, nonPlayingMembers, targetPlayingMembers, annotations);
+
+            // Prepare and sort playing categories for the second chart
+            const sortedCategories = sortPlayingCategories(dataPoints);
+            const stackedData = prepareStackedData(dataPoints, sortedCategories);
+            const categoryColors = assignCategoryColors(sortedCategories);
+
+            // Prepare datasets for the second chart
+            prepareCategoryBreakdownChart(labels, sortedCategories, stackedData, categoryColors);
+        });
+
+        /**
+         * Prepare and render the Membership Chart (Playing vs Non-Playing Members)
+         * 🚨 NOT STACKED (as per your shared code)
+         */
+        function prepareMembershipChart(labels, playingMembers, nonPlayingMembers, targetPlayingMembers, annotations) {
+            new Chart(document.getElementById('membershipChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Non-Playing Members',
+                            data: nonPlayingMembers,
+                            borderColor: 'red',
+                            backgroundColor: 'rgba(255, 0, 0, 0.3)',
+                            borderWidth: 1,
+                            pointRadius: 0,
+                            fill: true
+                        },
+                        {
+                            label: 'Playing Members',
+                            data: playingMembers,
+                            borderColor: 'blue',
+                            backgroundColor: 'rgba(0, 0, 255, 0.3)',
+                            borderWidth: 1,
+                            pointRadius: 0,
+                            fill: true
+                        },
+                        {
+                            label: 'Target Playing Members (5% Growth)',
+                            data: targetPlayingMembers,
+                            borderColor: 'green',
+                            borderDash: [5, 5],
+                            borderWidth: 1,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        annotation: { annotations: annotations } // ✅ Restored financial year vertical line
+                    },
+                    scales: {
+                        x: { title: { display: true, text: "Date" } },
+                        y: {
+                            stacked: false, // 🚨 Ensuring it is NOT stacked
+                            beginAtZero: true,
+                            title: { display: true, text: "Members" }
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sort playing categories by:
+         *  1. Ascending average value (smallest at the bottom)
+         *  2. Alphabetically as a secondary sort
+         */
+        function sortPlayingCategories(dataPoints) {
+            let categoryAverages = {};
+            const playingCategories = [...new Set(dataPoints.flatMap(dp => dp.playingCategoryBreakdown ? Object.keys(dp.playingCategoryBreakdown) : []))];
+
+            playingCategories.forEach(category => {
+                const total = dataPoints.reduce((sum, dp) => sum + (dp.playingCategoryBreakdown[category] || 0), 0);
+                const average = total / dataPoints.length;
+                categoryAverages[category] = average;
+            });
+
+            return playingCategories.sort((a, b) => categoryAverages[a] - categoryAverages[b] || a.localeCompare(b));
+        }
+
+        /**
+         * Prepares stacked data for the second graph
+         * Ensures last known values are carried forward to prevent drop-off
+         */
+        function prepareStackedData(dataPoints, sortedCategories) {
+            let stackedData = {};
+            sortedCategories.forEach(category => stackedData[category] = []);
+
+            dataPoints.forEach((dp, index) => {
+                sortedCategories.forEach(category => {
+                    let value = dp.playingCategoryBreakdown[category] || null;
+                    if (value === null && index > 0) {
+                        value = stackedData[category][index - 1]; // Carry forward last value
+                    }
+                    stackedData[category].push(value);
+                });
+            });
+
+            return stackedData;
+        }
+
+        /**
+         * Assign distinct colors to each category
+         */
+        function assignCategoryColors(sortedCategories) {
+            return sortedCategories.reduce((acc, category, index) => {
+                const color = getDistinctColor(index);
+                acc[category] = color;
+                return acc;
+            }, {});
+        }
+
+        /**
+         * Prepare and render the Category Breakdown Chart (Stacked Membership Categories)
+         */
+        function prepareCategoryBreakdownChart(labels, sortedCategories, stackedData, categoryColors) {
+            const categoryDatasets = sortedCategories.map(category => ({
+                label: category,
+                data: stackedData[category],
+                borderColor: categoryColors[category],
+                backgroundColor: `${categoryColors[category]}55`, // Lighter fill color
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: '-1'
+            }));
+
+            new Chart(document.getElementById('categoryBreakdownChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: categoryDatasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        datalabels: {
+                            align: "center",
+                            anchor: "center",
+                            color: "white",
+                            font: {
+                                weight: "bold",
+                                size: 12
+                            },
+                            formatter: function (value, context) {
+                                const dataset = context.dataset.data;
+                                const index = context.dataIndex;
+                                const midpoint = Math.floor(dataset.length / 2);
+                                return index === midpoint ? context.dataset.label : "";
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: "Date" } },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: { display: true, text: "Members" }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        /**
+         * Generate distinct colors per category
+         */
+        function getDistinctColor(index) {
+            const colors = [
+                '#FF5733', '#33FF57', '#3357FF', '#F39C12', '#9B59B6',
+                '#E74C3C', '#2ECC71', '#3498DB', '#1ABC9C', '#E67E22'
+            ];
+            return colors[index % colors.length];
+        }
+    </script>
+
+</body>
+</html>
