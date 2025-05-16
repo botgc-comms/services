@@ -70,6 +70,13 @@ builder.Services.AddSingleton<IMembershipReportingService, MembershipReportingSe
 
 builder.Services.AddHttpContextAccessor();
 
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = null; // Unlimited
+    serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5);
+    serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(2);
+});
+
 var cacheServiceType = appSettings.Cache.Type;
 
 if (string.Equals(cacheServiceType, "Redis", StringComparison.OrdinalIgnoreCase))

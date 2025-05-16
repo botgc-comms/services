@@ -96,7 +96,7 @@ namespace BOTGC.API.Services.ReportServices
 
                 // Update the playing status of all members
                 foreach (var member in members)
-                    MembershipHelper.SetPrimaryCategory(member, currentDate);
+                    member.SetPrimaryCategory(currentDate).SetCategoryGroup();
 
                 // Compute and store the statistics for this day after applying reversals
                 var dailyReportEntry = GetReportEntry(currentDate, members);
@@ -246,6 +246,11 @@ namespace BOTGC.API.Services.ReportServices
                 .GroupBy(m => m.MembershipCategory)
                 .ToDictionary(g => g.Key, g => g.Count());
 
+            var categoryGroupBreakdown = members
+                .Where(m => m.IsActive!.Value)
+                .GroupBy(m => m.MembershipCategoryGroup)
+                .ToDictionary(g => g.Key, g => g.Count());
+
             return new MembershipReportEntryDto
             {
                 Date = date,
@@ -253,7 +258,8 @@ namespace BOTGC.API.Services.ReportServices
                 NonPlayingMembers = nonPlayingMembers.Count,
                 AveragePlayingMembersAge = averageAge,
                 PlayingCategoryBreakdown = playingCategoryBreakdown,
-                NonPlayingCategoryBreakdown = nonPlayingCategoryBreakdown
+                NonPlayingCategoryBreakdown = nonPlayingCategoryBreakdown, 
+                CategoryGroupBreakdown = categoryGroupBreakdown
             };
         }
 

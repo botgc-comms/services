@@ -21,6 +21,10 @@ namespace BOTGC.API.Common
 
             var checkDate = date ?? DateTime.UtcNow.Date;
 
+            // Suspended members are excluded from all categories
+            if (member.MembershipStatus.Equals("S", StringComparison.OrdinalIgnoreCase))
+                return MembershipPrimaryCategories.None;
+
             // Determine if LeaveDate should be considered
             var leaveDate = (member.LeaveDate.HasValue && member.LeaveDate.Value >= member.JoinDate)
                 ? member.LeaveDate.Value
@@ -41,10 +45,36 @@ namespace BOTGC.API.Common
 
         }
 
-        public static void SetPrimaryCategory(MemberDto member, DateTime? date = null)
+        public static MemberDto SetPrimaryCategory(this MemberDto member, DateTime? date = null)
         {
-            if (member == null) return;
+            if (member == null) return member;
             member.PrimaryCategory = GetPrimaryCategory(member, date);
+
+            return member;
+        }
+
+        public static MemberDto SetCategoryGroup(this MemberDto member)
+        {
+            var categoryCode = member.MembershipCategory;
+
+            if (string.IsNullOrWhiteSpace(categoryCode))
+                member.MembershipCategoryGroup = "Unknown";
+
+            var code = categoryCode.Trim().ToUpperInvariant();
+
+            if (code.StartsWith("7")) member.MembershipCategoryGroup = "Full Membership";
+            if (code.StartsWith("6")) member.MembershipCategoryGroup = "6 Day Membership";
+            if (code.StartsWith("5")) member.MembershipCategoryGroup = "5 Day Membership";
+            if (code.Contains("INTERMEDIATE")) member.MembershipCategoryGroup = "Affordable Membership";
+            if (code.Contains("STUDENT")) member.MembershipCategoryGroup = "Student Membership";
+            if (code.Contains("FLEXI")) member.MembershipCategoryGroup = "Off Peak Playing Membership";
+            if (code.Contains("JUNIOR")) member.MembershipCategoryGroup = "Junior Membership";
+            if (code.Contains("SOCIAL")) member.MembershipCategoryGroup = "Social Membership";
+            if (code.Contains("CLUBHOUSE")) member.MembershipCategoryGroup = "Clubhouse Only";
+            if (code.Contains("FAMILY")) member.MembershipCategoryGroup = "Family";
+            if (code.Contains("CORP") || code.Contains("CORPORATE")) member.MembershipCategoryGroup = "Corporate";
+
+            return member;
         }
     }
 }

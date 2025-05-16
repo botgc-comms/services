@@ -31,6 +31,7 @@
         public int JuniorMembers { get; set; }
         public Dictionary<string, int> PlayingCategoryBreakdown { get; set; } = new();
         public Dictionary<string, int> NonPlayingCategoryBreakdown { get; set; } = new();
+        public Dictionary<string, int> CategoryGroupBreakdown { get; set; } = new();
         public decimal TrendPercentage { get; set; }
     }
 
