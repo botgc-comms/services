@@ -52,11 +52,6 @@ resource "azurerm_cdn_endpoint" "js_delivery" {
   origin_host_header  = data.azurerm_storage_account.services_api_sa.primary_web_host
   is_http_allowed     = false
   is_https_allowed    = true
-  origin_path         = ""
-  content_types_to_compress = [
-    "application/javascript"
-  ]
-  is_compression_enabled = true
 
   origin {
     name      = "blobstorageorigin"
@@ -300,9 +295,10 @@ output "applicationform_app_name" {
 }
 
 output "cdn_base_url" {
-  value = "https://${azurerm_cdn_endpoint.js_delivery.host_name}"
+  value = "https://${azurerm_cdn_endpoint.js_delivery.endpoint_host_name}"
 }
 
 output "membership_embed_js_url" {
-  value = "https://${azurerm_cdn_endpoint.js_delivery.host_name}/js/membership-form-embed.js"
+  value = "https://${azurerm_cdn_endpoint.js_delivery.endpoint_host_name}/js/membership-form-embed.js"
 }
+
