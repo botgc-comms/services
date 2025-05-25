@@ -1,11 +1,6 @@
 ﻿using BOTGC.API.Common;
-using BOTGC.API.Interfaces;
-using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
-using BOTGC.API.Services;
-using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
 
 namespace BOTGC.API.Services.ReportServices
 {
@@ -39,14 +34,20 @@ namespace BOTGC.API.Services.ReportServices
             report.Anomalies = IdentifyAnomalies(members);
 
             // Determine the current and previous financial years
-            int currentFinancialYearStart = today.Month >= 4 ? today.Year : today.Year - 1;
-            DateTime startOfPreviousFinancialYear = new DateTime(currentFinancialYearStart - 1, 4, 1);
-            DateTime endOfPreviousFinancialYear = new DateTime(currentFinancialYearStart, 3, 31);
-            DateTime startOfCurrentFinancialYear = new DateTime(currentFinancialYearStart, 4, 1);
-            DateTime endOfCurrentFinancialYear = new DateTime(currentFinancialYearStart + 1, 3, 31);
+            int currentSubsYearStart = today.Month >= 4 ? today.Year : today.Year - 1;
+            DateTime startOfPreviousSubsYear = new DateTime(currentSubsYearStart - 1, 4, 1);
+            DateTime endOfPreviousSubsYear = new DateTime(currentSubsYearStart, 3, 31);
+            DateTime startOfCurrentSubsYear = new DateTime(currentSubsYearStart, 4, 1);
+            DateTime endOfCurrentSubsYear = new DateTime(currentSubsYearStart + 1, 3, 31);
+
+            int currentFinancialYearStart = today.Month >= 10 ? today.Year : today.Year - 1;
+            DateTime startOfPreviousFinancialYear = new DateTime(currentFinancialYearStart - 1, 10, 1);
+            DateTime endOfPreviousFinancialYear = new DateTime(currentFinancialYearStart, 9, 30);
+            DateTime startOfCurrentFinancialYear = new DateTime(currentFinancialYearStart, 10, 1);
+            DateTime endOfCurrentFinancialYear = new DateTime(currentFinancialYearStart + 1, 9, 30);
 
             // Get all of the events that have taken place up to the start of the last financial year
-            var memberEvents = await _dataService.GetMembershipEvents(startOfPreviousFinancialYear.AddDays(-1), today);
+            var memberEvents = await _dataService.GetMembershipEvents(startOfPreviousSubsYear.AddDays(-1), today);
 
             // Start with todays results
             var todaysResults = GetReportEntry(today, members);
@@ -54,8 +55,12 @@ namespace BOTGC.API.Services.ReportServices
 
             var monthlySnapshots = new Dictionary<DateTime, MembershipSnapshotDto>();
 
+            var previousDayGroupings = members
+                .Where(m => m.IsActive == true)
+                .ToDictionary(m => m.MemberNumber, m => m.MembershipCategoryGroup);
+
             // Process each day backwards from yesterday to the start of the previous financial year
-            for (var currentDate = today.AddDays(-1); currentDate >= startOfPreviousFinancialYear.AddDays(-1); currentDate = currentDate.AddDays(-1))
+            for (var currentDate = today.AddDays(-1); currentDate >= startOfPreviousSubsYear.AddDays(-1); currentDate = currentDate.AddDays(-1))
             {
                 // Get events that occurred on this date
                 var eventsOnThisDay = memberEvents.Where(e => e.DateOfChange.HasValue && e.DateOfChange.Value.Date == currentDate.Date).ToList();
@@ -90,7 +95,7 @@ namespace BOTGC.API.Services.ReportServices
                     }
                     else
                     {
-                        _logger.LogWarning($"Exoected to find a member with id {memberEvent.MemberId} but no member was found");
+                        _logger.LogWarning($"Expected to find a member with id {memberEvent.MemberId} but no member was found");
                     }
                 }
 
@@ -98,25 +103,73 @@ namespace BOTGC.API.Services.ReportServices
                 foreach (var member in members)
                     member.SetPrimaryCategory(currentDate).SetCategoryGroup();
 
+                // Build today's active members with their current group
+                var todayActiveGroups = members
+                     .Where(m => m.IsActive == true)
+                     .ToDictionary(m => m.MemberNumber, m => m.MembershipCategoryGroup);
+
+                var (joinersByGroup, leaversByGroup) = ComputeGroupJoinersAndLeavers(previousDayGroupings, todayActiveGroups);
+
+
                 // Compute and store the statistics for this day after applying reversals
                 var dailyReportEntry = GetReportEntry(currentDate, members);
+
+                dailyReportEntry.DailyJoinersByCategoryGroup = joinersByGroup;
+                dailyReportEntry.DailyLeaversByCategoryGroup = leaversByGroup;
+
                 dataPoints.Insert(0, dailyReportEntry);
 
                 if (IsMonthEnd(currentDate))
                 {
                     monthlySnapshots[currentDate] = CreateSnapshot(members, currentDate);
                 }
+
+                previousDayGroupings = todayActiveGroups;
             }
 
             EnsureMonthlyAndQuarterlyStats(report, monthlySnapshots);
-            EnsureFullYearData(dataPoints, endOfCurrentFinancialYear);
-            ApplyGrowthTargets(dataPoints, startOfPreviousFinancialYear, endOfPreviousFinancialYear);
+            EnsureFullYearData(dataPoints, endOfCurrentSubsYear);
+            //ApplyGrowthTargets(dataPoints, startOfPreviousFinancialYear, endOfPreviousFinancialYear);
             ApplyGrowthTargets(dataPoints, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
 
-            report.DataPoints = dataPoints.Where(dp => dp.Date >= startOfPreviousFinancialYear && dp.Date <= endOfCurrentFinancialYear).ToList();
+            report.DataPoints = dataPoints.Where(dp => dp.Date >= startOfPreviousSubsYear && dp.Date <= endOfCurrentSubsYear).ToList();
             report.DataPointsCsv = ConvertToCsv(report.DataPoints);
 
             return report;
+        }
+
+        private (Dictionary<string, int> Joiners, Dictionary<string, int> Leavers) ComputeGroupJoinersAndLeavers(Dictionary<int?, string> previousDayGroups,
+                                                                                                                 Dictionary<int?, string> todayGroups)
+        {
+            var joiners = new Dictionary<string, int>();
+            var leavers = new Dictionary<string, int>();
+
+            var yesterdayIds = previousDayGroups.Keys;
+            var todayIds = todayGroups.Keys;
+
+            var newIds = todayIds.Except(yesterdayIds);
+            var exitedIds = yesterdayIds.Except(todayIds);
+            var commonIds = todayIds.Intersect(yesterdayIds);
+
+            foreach (var id in newIds)
+                AddToCount(joiners, todayGroups[id]);
+
+            foreach (var id in exitedIds)
+                AddToCount(leavers, previousDayGroups[id]);
+
+            foreach (var id in commonIds)
+            {
+                var prevGroup = previousDayGroups[id];
+                var nowGroup = todayGroups[id];
+
+                if (!string.Equals(prevGroup, nowGroup, StringComparison.Ordinal))
+                {
+                    AddToCount(leavers, prevGroup);
+                    AddToCount(joiners, nowGroup);
+                }
+            }
+
+            return (joiners, leavers);
         }
 
         private MembershipSnapshotDto CreateSnapshot(List<MemberDto> members, DateTime date)
@@ -238,17 +291,17 @@ namespace BOTGC.API.Services.ReportServices
             // Populate category breakdown
             var playingCategoryBreakdown = members
                 .Where(m => m.PrimaryCategory == MembershipPrimaryCategories.PlayingMember && m.IsActive!.Value)
-                .GroupBy(m => m.MembershipCategory)
+                .GroupBy(m => m.MembershipCategory!)
                 .ToDictionary(g => g.Key, g => g.Count());
 
             var nonPlayingCategoryBreakdown = members
                 .Where(m => m.PrimaryCategory == MembershipPrimaryCategories.NonPlayingMember && m.IsActive!.Value)
-                .GroupBy(m => m.MembershipCategory)
+                .GroupBy(m => m.MembershipCategory!)
                 .ToDictionary(g => g.Key, g => g.Count());
 
             var categoryGroupBreakdown = members
                 .Where(m => m.IsActive!.Value)
-                .GroupBy(m => m.MembershipCategoryGroup)
+                .GroupBy(m => m.MembershipCategoryGroup ?? "Other")
                 .ToDictionary(g => g.Key, g => g.Count());
 
             return new MembershipReportEntryDto
@@ -388,5 +441,13 @@ namespace BOTGC.API.Services.ReportServices
                 CategoryChanges = categoryChanges
             };
         }
+
+        private void AddToCount(Dictionary<string, int> dict, string key)
+        {
+            if (string.IsNullOrWhiteSpace(key)) return;
+            if (!dict.TryAdd(key, 1))
+                dict[key]++;
+        }
+
     }
 }

@@ -19,6 +19,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Queues" Version="12.22.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
+    <PackageReference Include="libphonenumber-csharp" Version="9.0.5" />
     <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.Face" Version="2.8.0-preview.3" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.2" />
     <PackageReference Include="QuestPDF" Version="2025.4.0" />

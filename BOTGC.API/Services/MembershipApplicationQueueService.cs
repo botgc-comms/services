@@ -117,7 +117,7 @@ namespace BOTGC.API.Services
         public MembershipApplicationQueueService(IOptions<AppSettings> settings, ILogger<MembershipApplicationQueueService> logger)
             : base(
                 new QueueClient(settings.Value.Queue.ConnectionString, AppConstants.MembershipApplicationQueueName),
-                new QueueClient(settings.Value.Queue.ConnectionString, $"{AppConstants.MembershipApplicationQueueName}-dql"),
+                new QueueClient(settings.Value.Queue.ConnectionString, $"{AppConstants.MembershipApplicationQueueName}-dlq"),
                 logger)
         {
         }
@@ -128,7 +128,7 @@ namespace BOTGC.API.Services
         public NewMemberAddedQueueService(IOptions<AppSettings> settings, ILogger<NewMemberAddedQueueService> logger)
             : base(
                 new QueueClient(settings.Value.Queue.ConnectionString, AppConstants.NewMemberAddedQueueName),
-                new QueueClient(settings.Value.Queue.ConnectionString, $"{AppConstants.NewMemberAddedQueueName}-dql"),
+                new QueueClient(settings.Value.Queue.ConnectionString, $"{AppConstants.NewMemberAddedQueueName}-dlq"),
                 logger)
         {
         }
@@ -139,7 +139,7 @@ namespace BOTGC.API.Services
         public MemberPropertyUpdateQueueService(IOptions<AppSettings> settings, ILogger<MemberPropertyUpdateQueueService> logger)
             : base(
                 new QueueClient(settings.Value.Queue.ConnectionString, AppConstants.MemberPropertyUpdateQueueName),
-                new QueueClient(settings.Value.Queue.ConnectionString, $"{AppConstants.MemberPropertyUpdateQueueName}-dql"),
+                new QueueClient(settings.Value.Queue.ConnectionString, $"{AppConstants.MemberPropertyUpdateQueueName}-dlq"),
                 logger)
         {
         }

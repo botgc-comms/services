@@ -97,6 +97,8 @@
         public string LeaderBoardUrl { get; set; } = "/competition.php?compid={compid}&preview=1";
         public string SecurityLogMobileOrders { get; set; } = "/log.php?search=Mobile+order&person=&start={today}&starttime=&end={today}&endtime=";
         public string UpdateMemberPropertiesUrl { get; set; } = "/member.php?memberid={memberid}&requestType=ajax&ajaxaction=saveparamvalue";
+
+
     }
 
     public class FileCacheStorage

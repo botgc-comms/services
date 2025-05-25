@@ -151,7 +151,7 @@ namespace BOTGC.API.Common
                     member.IsActive = member.MembershipStatus.Equals("R", StringComparison.OrdinalIgnoreCase);
 
                     // Set the primary membership category
-                    MembershipHelper.SetPrimaryCategory(member);
+                    member.SetPrimaryCategory().SetCategoryGroup();
 
                     members.Add(member);
                 }

@@ -17,7 +17,58 @@
     <h1>Membership Report</h1>
 
     <canvas id="membershipChart"></canvas>
-    <canvas id="categoryBreakdownChart"></canvas>
+    <canvas id="categoryGroupBreakdownChart"></canvas>
+    <canvas id="dailyJoinLeaveChart"></canvas>
+
+    @foreach (var quarter in Model.QuarterlyStats)
+    {
+        <h2>@quarter.PeriodDescription</h2>
+        <table class="govuk-table">
+            <thead>
+                <tr>
+                    <th class="govuk-table__header">Metric</th>
+                    <th class="govuk-table__header">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="govuk-table__cell">New Members</td>
+                    <td class="govuk-table__cell">@quarter.NewMembers</td>
+                </tr>
+                <tr>
+                    <td class="govuk-table__cell">Leavers</td>
+                    <td class="govuk-table__cell">@quarter.Leavers</td>
+                </tr>
+                <tr>
+                    <td class="govuk-table__cell">Deaths</td>
+                    <td class="govuk-table__cell">@quarter.Deaths</td>
+                </tr>
+            </tbody>
+        </table>
+
+        @if (quarter.CategoryChanges?.Any() == true)
+        {
+            <h3>Category Changes</h3>
+            <table class="govuk-table">
+                <thead>
+                    <tr>
+                        <th class="govuk-table__header">From → To</th>
+                        <th class="govuk-table__header">Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var change in quarter.CategoryChanges)
+                    {
+                        <tr>
+                            <td class="govuk-table__cell">@change.Key</td>
+                            <td class="govuk-table__cell">@change.Value</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -28,7 +79,7 @@
             const labels = dataPoints.map(dp => new Date(dp.date).toLocaleDateString());
             const playingMembers = dataPoints.map(dp => dp.playingMembers || 0);
             const nonPlayingMembers = dataPoints.map(dp => dp.nonPlayingMembers || 0);
-            const targetPlayingMembers = dataPoints.map(dp => dp.targetPlayingMembers || 0);
+            const targetPlayingMembers = dataPoints.map(dp => dp.targetPlayingMembers !== 0 ? dp.targetPlayingMembers : undefined);
 
             // Restore key dates (e.g., start of financial year)
             const keyDates = [
@@ -56,21 +107,155 @@
 
             // Prepare datasets for the first chart
             prepareMembershipChart(labels, playingMembers, nonPlayingMembers, targetPlayingMembers, annotations);
-
-            // Prepare and sort playing categories for the second chart
-            const sortedCategories = sortPlayingCategories(dataPoints);
-            const stackedData = prepareStackedData(dataPoints, sortedCategories);
-            const categoryColors = assignCategoryColors(sortedCategories);
-
-            // Prepare datasets for the second chart
-            prepareCategoryBreakdownChart(labels, sortedCategories, stackedData, categoryColors);
+            prepareCategoryGroupBreakdownChart(labels, dataPoints);
+            prepareJoinerLeaverBarChart(labels, dataPoints);
         });
 
-        /**
-         * Prepare and render the Membership Chart (Playing vs Non-Playing Members)
-         * 🚨 NOT STACKED (as per your shared code)
-         */
+        function prepareJoinerLeaverBarChart(labels, dataPoints) {
+            const categoryGroups = [...new Set(dataPoints.flatMap(dp =>
+                Object.keys(dp.dailyJoinersByCategoryGroup || {}).concat(
+                    Object.keys(dp.dailyLeaversByCategoryGroup || {}))
+            ))];
+
+            const categoryColors = {};
+            categoryGroups.forEach((group, i) => {
+                categoryColors[group] = getDistinctColor(i); // shared colour for both joiners & leavers
+            });
+
+            const joinerDatasets = categoryGroups.map(group => ({
+                label: `Joiners - ${group}`,
+                data: dataPoints.map(dp => (dp.dailyJoinersByCategoryGroup?.[group] || 0)),
+                backgroundColor: `${categoryColors[group]}FF`,
+                stack: 'joiners'
+            }));
+
+            const leaverDatasets = categoryGroups.map(group => ({
+                label: `Leavers - ${group}`,
+                data: dataPoints.map(dp => -(dp.dailyLeaversByCategoryGroup?.[group] || 0)), // NEGATIVE for visual
+                backgroundColor: `${categoryColors[group]}FF`, // same colour
+                stack: 'leavers'
+            }));
+
+            const ctx = document.getElementById('dailyJoinLeaveChart');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [...joinerDatasets, ...leaverDatasets]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: context => {
+                                    const value = Math.abs(context.raw);
+                                    const type = context.raw >= 0 ? 'Joiners' : 'Leavers';
+                                    return `${type} - ${context.dataset.label.split(' - ')[1]}: ${value}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true, title: { display: true, text: "Date" } },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: { display: true, text: "Joiners (+) / Leavers (−)" }
+                        }
+                    }
+                }
+            });
+        }
+
+
+
+        function prepareCategoryGroupBreakdownChart(labels, dataPoints) {
+            const allGroups = [...new Set(dataPoints.flatMap(dp =>
+                dp.categoryGroupBreakdown ? Object.keys(dp.categoryGroupBreakdown) : []
+            ))].sort();
+
+            const stackedData = {};
+            allGroups.forEach(group => stackedData[group] = []);
+
+            dataPoints.forEach((dp, index) => {
+                allGroups.forEach(group => {
+                    let value = dp.categoryGroupBreakdown?.[group] ?? null;
+                    if (value === null && index > 0) {
+                        value = stackedData[group][index - 1]; // carry forward
+                    }
+                    stackedData[group].push(value);
+                });
+            });
+
+            const colors = assignCategoryColors(allGroups);
+
+            const datasets = allGroups.map(group => ({
+                label: group,
+                data: stackedData[group],
+                backgroundColor: `${colors[group]}55`,
+                borderColor: colors[group],
+                fill: '-1',
+                pointRadius: 0,
+                borderWidth: 1
+            }));
+
+            new Chart(document.getElementById('categoryGroupBreakdownChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: "Date" } },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: { display: true, text: "Members" }
+                        }
+                    }
+                }
+            });
+        }
+
         function prepareMembershipChart(labels, playingMembers, nonPlayingMembers, targetPlayingMembers, annotations) {
+
+            const targetPoints = targetPlayingMembers
+                .map((value, index) => ({ value, index }))
+                .filter(p => p.value !== undefined);
+
+            const redDotAnnotations = targetPoints.length >= 2
+                ? [
+                    {
+                        type: 'point',
+                        xValue: labels[targetPoints[0].index],
+                        yValue: targetPoints[0].value,
+                        backgroundColor: 'red',
+                        radius: 5,
+                        borderColor: 'white',
+                        borderWidth: 1
+                    },
+                    {
+                        type: 'point',
+                        xValue: labels[targetPoints[targetPoints.length - 1].index],
+                        yValue: targetPoints[targetPoints.length - 1].value,
+                        backgroundColor: 'red',
+                        radius: 5,
+                        borderColor: 'white',
+                        borderWidth: 1
+                    }
+                ]
+                : [];
+
+            const combinedAnnotations = [...(annotations || []), ...redDotAnnotations];
+
             new Chart(document.getElementById('membershipChart'), {
                 type: 'line',
                 data: {
@@ -97,6 +282,7 @@
                         {
                             label: 'Target Playing Members (5% Growth)',
                             data: targetPlayingMembers,
+                            spanGaps: false,
                             borderColor: 'green',
                             borderDash: [5, 5],
                             borderWidth: 1,
@@ -109,12 +295,12 @@
                     responsive: true,
                     plugins: {
                         legend: { position: 'top' },
-                        annotation: { annotations: annotations } // ✅ Restored financial year vertical line
+                        annotation: { annotations: combinedAnnotations } 
                     },
                     scales: {
                         x: { title: { display: true, text: "Date" } },
                         y: {
-                            stacked: false, // 🚨 Ensuring it is NOT stacked
+                            stacked: false, 
                             beginAtZero: true,
                             title: { display: true, text: "Members" }
                         }

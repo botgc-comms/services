@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PhoneNumbers;
+using System.ComponentModel.DataAnnotations;
 
 namespace BOTGC.MembershipApplication.Models
 {
@@ -7,6 +8,28 @@ namespace BOTGC.MembershipApplication.Models
         public override bool IsValid(object? value)
         {
             return value is bool b && b;
+        }
+    }
+
+    public class UkPhoneAttribute : ValidationAttribute
+    {
+        private static readonly PhoneNumberUtil _phoneUtil = PhoneNumberUtil.GetInstance();
+
+        public override bool IsValid(object? value)
+        {
+            var input = value as string;
+            if (string.IsNullOrWhiteSpace(input))
+                return true;
+
+            try
+            {
+                var number = _phoneUtil.Parse(input, "GB");
+                return _phoneUtil.IsValidNumberForRegion(number, "GB");
+            }
+            catch (NumberParseException)
+            {
+                return false;
+            }
         }
     }
 
@@ -35,10 +58,10 @@ namespace BOTGC.MembershipApplication.Models
         public DateTime? DateOfBirth { get; set; }
 
         [Required(ErrorMessage = "Please provide your telephone number.")]
-        [Phone(ErrorMessage = "Please enter a valid telephone number.")]
+        [UkPhone(ErrorMessage = "Please enter a valid UK telephone number.")]
         public string Telephone { get; set; } = string.Empty;
 
-        [Phone(ErrorMessage = "Please enter a valid alternative telephone number.")]
+        [UkPhone(ErrorMessage = "Please enter a valid UK alternative telephone number.")]
         public string? AlternativeTelephone { get; set; }
 
         [Required(ErrorMessage = "Please enter your email address.")]

@@ -392,13 +392,13 @@ namespace BOTGC.API.Services
         {
             try
             {
-                var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.NewMembershipApplicationUrl}".Replace("{memberid}", memberId.ToString());
+                var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.UpdateMemberPropertiesUrl}".Replace("{memberid}", memberId.ToString());
 
-                var content = new StringContent($"paramid={property.ToString()}&user_id={memberId}&param_value={value}");
+                var content = new StringContent($"paramid=1&user_id={memberId}&param_value={value}");
 
                 var data = new Dictionary<string, string>
                 {
-                    { "paramid", property.ToString() },
+                    { "paramid", ((int)property).ToString() },
                     { "user_id", memberId.ToString() },
                     { "param_value", value }
                 };

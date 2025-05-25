@@ -61,6 +61,9 @@ namespace BOTGC.API.Common
 
         public static Dictionary<string, string> MapToFormData(NewMemberApplicationDto newMember, MemberCDHLookupDto? cdhLookup = null)
         {
+            var altTel = UkPhoneNormaliser.Standardise(newMember.AlternativeTelephone ?? "", true);
+            var mobTel = UkPhoneNormaliser.Standardise(newMember.Telephone, true);
+
             var data = new Dictionary<string, string>
             {
                 { "gender", MapGender(newMember.Gender) },
@@ -70,8 +73,8 @@ namespace BOTGC.API.Common
                 { "altforename", "" },
                 { "dob", newMember.DateOfBirth.ToString("dd/MM/yyyy") },
 
-                { "tel1", newMember.Telephone },
-                { "tel2", newMember.AlternativeTelephone ?? "" },
+                { "tel1",  altTel ?? mobTel ?? "" },
+                { "tel2", mobTel ?? "" },
                 { "tel3", "" },
 
                 { "email", newMember.Email },
