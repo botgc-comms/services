@@ -295,10 +295,10 @@ output "applicationform_app_name" {
 }
 
 output "cdn_base_url" {
-  value = "https://${azurerm_cdn_endpoint.js_delivery.endpoint_host_name}"
+  value = "https://${azurerm_cdn_endpoint.js_delivery.host_name}"
 }
 
 output "membership_embed_js_url" {
-  value = "https://${azurerm_cdn_endpoint.js_delivery.endpoint_host_name}/js/membership-form-embed.js"
+  value = "https://${azurerm_cdn_endpoint.js_delivery.host_name}/js/membership-form-embed.js"
 }
 
