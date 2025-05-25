@@ -37,6 +37,33 @@ data "azurerm_storage_container" "data" {
   storage_account_name = data.azurerm_storage_account.services_api_sa.name
 }
 
+resource "azurerm_cdn_profile" "main" {
+  name                = "cdn-${var.project_name}-${var.environment}"
+  resource_group_name = azurerm_resource_group.services_api_rg.name
+  location            = azurerm_resource_group.services_api_rg.location
+  sku                 = "Standard_Microsoft"
+}
+
+resource "azurerm_cdn_endpoint" "js_delivery" {
+  name                = "cdnjs-${var.project_name}-${var.environment}"
+  profile_name        = azurerm_cdn_profile.main.name
+  location            = azurerm_resource_group.services_api_rg.location
+  resource_group_name = azurerm_resource_group.services_api_rg.name
+  origin_host_header  = data.azurerm_storage_account.services_api_sa.primary_web_host
+  is_http_allowed     = false
+  is_https_allowed    = true
+  origin_path         = ""
+  content_types_to_compress = [
+    "application/javascript"
+  ]
+  is_compression_enabled = true
+
+  origin {
+    name      = "blobstorageorigin"
+    host_name = data.azurerm_storage_account.services_api_sa.primary_web_host
+  }
+}
+
 resource "azurerm_storage_queue" "membership_applications_queue" {
   name                 = "membershipapplications"
   storage_account_name = data.azurerm_storage_account.services_api_sa.name
@@ -270,4 +297,12 @@ output "leaderboards_app_name" {
 
 output "applicationform_app_name" {
   value = azurerm_linux_web_app.services_application_form.name
+}
+
+output "cdn_base_url" {
+  value = "https://${azurerm_cdn_endpoint.js_delivery.host_name}"
+}
+
+output "membership_embed_js_url" {
+  value = "https://${azurerm_cdn_endpoint.js_delivery.host_name}/js/membership-form-embed.js"
 }
