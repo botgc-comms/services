@@ -114,8 +114,8 @@ resource "azurerm_linux_web_app" "services_api_app" {
   app_settings = {
     "APPINSIGHTS_INSTRUMENTATIONKEY"                         = azurerm_application_insights.app_insights.instrumentation_key
     "APPLICATIONINSIGHTS_CONNECTION_STRING"                  = azurerm_application_insights.app_insights.connection_string
-    "SCM_DO_BUILD_DURING_DEPLOYMENT"                         = true
-    "WEBSITE_RUN_FROM_PACKAGE"                               = "1"
+    SCM_DO_BUILD_DURING_DEPLOYMENT                           = "true"
+    ENABLE_ORYX_BUILD                                        = "true"
     "MEMBER_ID"                                              = var.member_id
     "MEMBER_PIN"                                             = var.member_pin
     "ADMIN_PASSWORD"                                         = var.admin_password
