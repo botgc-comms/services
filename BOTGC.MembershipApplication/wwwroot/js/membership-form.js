@@ -1,6 +1,4 @@
 ﻿function updateMembershipDescription() {
-    console.log(membershipCategories);
-
     const selectedValue = $('#MembershipCategory').val();
     const selected = membershipCategories.find(c => c.name === selectedValue);
     const $desc = $('#membership-description');

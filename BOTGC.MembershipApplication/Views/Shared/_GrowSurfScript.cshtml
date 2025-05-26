@@ -1,11 +1,15 @@
 ﻿@{
+    var nonce = Context.Items["CSPNonce"] as string ?? "";
+}
+
+@{
     var campaignId = ViewData["GrowSurfCampaignId"]?.ToString();
     
     var participantEmail = ViewData["Participant.Email"]?.ToString();
     var participantHash = ViewData["Participant.Hash"]?.ToString();
 }
 
-<script type="text/javascript">
+<script nonce="@nonce" type="text/javascript">
     @if (!string.IsNullOrEmpty(participantEmail) && !string.IsNullOrEmpty(participantHash))
     {
         <text>

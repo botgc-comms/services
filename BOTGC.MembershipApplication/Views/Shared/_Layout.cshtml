@@ -1,31 +1,31 @@
 ﻿@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@{
+    var nonce = Context.Items["CSPNonce"] as string ?? "";
+}
+
 <!DOCTYPE html>
-
 <html lang="en">
+<head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Membership Application</title>
 
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>@ViewData["Title"] - Membership Application</title>
+    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
 
-        <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
+    @if (Env.IsDevelopment())
+    {
+        <script nonce="@nonce" src="~/js/dist/vendor.bundle.js"></script>
+    }
+    else
+    {
+        <script nonce="@nonce" src="~/js/dist/vendor.bundle.min.js"></script>
+    }
 
-        @if (Env.IsDevelopment())
-        {
-            <script src="~/js/dist/vendor.bundle.js"></script>
-        }
-        else
-        {
-            <script src="~/js/dist/vendor.bundle.min.js"></script>
-        }
+    @RenderSection("Head", required: false)
+</head>
+<body>
+    @RenderBody()
 
-        @RenderSection("Head", required: false)
-    </head>
-
-    <body>
-        @RenderBody()
-
-        @await RenderSectionAsync("Scripts", required: false)
-    </body>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
 </html>

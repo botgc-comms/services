@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BOTGC.MembershipApplication
 {
@@ -83,7 +83,7 @@ namespace BOTGC.MembershipApplication
                 var path = context.Request.Path.Value?.ToLowerInvariant();
                 if (_excludedPaths.Contains(path))
                 {
-                    await next(); // Skip CSP
+                    await next();
                     return;
                 }
 
@@ -91,7 +91,6 @@ namespace BOTGC.MembershipApplication
                 var settings = context.RequestServices.GetRequiredService<AppSettings>();
                 _apiUrl = settings.API.Url;
 
-                // Always add API URL to connect-src if not already present
                 if (!_connectSrc.Contains(_apiUrl))
                 {
                     _connectSrc.Add(_apiUrl);
@@ -108,12 +107,17 @@ namespace BOTGC.MembershipApplication
                     _connectSrc.Add("wss://localhost:*");
                 }
 
+                var nonceBytes = RandomNumberGenerator.GetBytes(16);
+                var nonce = Convert.ToBase64String(nonceBytes);
+
+                var scriptSrcWithNonce = _scriptSrc.Distinct().Append($"'nonce-{nonce}'");
+
                 var csp = string.Join(" ", new[]
                 {
                     "default-src 'self';",
-                    $"script-src {string.Join(" ", _scriptSrc.Distinct())};",
+                    $"script-src {string.Join(" ", scriptSrcWithNonce)};",
                     $"style-src {string.Join(" ", _styleSrc.Distinct())};",
-                    "img-src 'self' data:;",
+                    "img-src 'self' data: https://growsurf-blog.s3-us-west-2.amazonaws.com;",
                     $"font-src {string.Join(" ", _fontSrc.Distinct())};",
                     $"connect-src {string.Join(" ", _connectSrc.Distinct())};",
                     $"frame-src {string.Join(" ", _frameSrc.Distinct())};",
@@ -123,6 +127,8 @@ namespace BOTGC.MembershipApplication
                 });
 
                 context.Response.Headers["Content-Security-Policy"] = csp;
+
+                context.Items["CSPNonce"] = nonce;
 
                 await next();
             });

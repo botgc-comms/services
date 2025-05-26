@@ -3,6 +3,10 @@
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
 
 @{
+    var nonce = Context.Items["CSPNonce"] as string ?? "";
+}
+
+@{
     ViewData["Title"] = "Application Form";
 
   var categoryGroups = ViewData["MembershipCategories"] as List<MembershipCategoryGroup> ?? new();
@@ -15,17 +19,17 @@
 }
 
 @section Head {
-    <script>
+    <script nonce="@nonce">
         const membershipCategories = @Html.Raw(categoriesJson);
     </script>
 
     @if (Env.IsDevelopment())
     {
-        <script src="~/js/dist/membership.bundle.js"></script>
+        <script nonce="@nonce" src="~/js/dist/membership.bundle.js"></script>
     }
     else
     {
-        <script src="~/js/dist/membership.bundle.min.js"></script>
+        <script nonce="@nonce" src="~/js/dist/membership.bundle.min.js"></script>
     }
 
     @await Html.PartialAsync("_GrowSurfScript")
@@ -239,7 +243,7 @@
 </form>
 
 @section Scripts {
-    <script>
+    <script nonce="@nonce">
         document.addEventListener('DOMContentLoaded', function () {
             const apiKey = '@ViewData["GetAddressApiKey"]';
             enableAutocomplete(apiKey);
