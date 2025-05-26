@@ -19,7 +19,7 @@
     $desc.html(description).toggle(!!selected);
 }
 
-async function enableAutocomplete(apiKey) {
+window.enableAutocomplete = async function (apiKey) {
     await getAddress.autocomplete('AddressLine1', apiKey, {
         selected: (address) => {
             const line1 = address.formatted_address[0] || ''
