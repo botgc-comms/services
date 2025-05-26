@@ -120,8 +120,9 @@ jobs:
           -o published
 
     - name: Zip API for Deployment
-      run: zip -r api.zip . -x '*.git*'
-      working-directory: published
+      run: |
+        cd published
+        zip -r ../api.zip . -x '*.git*'
 
     - name: Install Azure CLI
       run: |
@@ -182,7 +183,6 @@ jobs:
           --name ${{ needs.terraform.outputs.leaderboards_app_name }} `
           --src-path published/leaderboards.zip `
           --type zip
-          --timeout 900
       shell: powershell
 
   deploy-applicationform:
@@ -230,7 +230,6 @@ jobs:
           --name ${{ needs.terraform.outputs.applicationform_app_name }} `
           --src-path published/membershipapplication.zip `
           --type zip
-          --timeout 900
       shell: powershell
   
   upload-membership-embed:
