@@ -59,6 +59,13 @@ resource "azurerm_cdn_endpoint" "js_delivery" {
   }
 }
 
+resource "azurerm_storage_container" "web" {
+  name                  = "$web"
+  storage_account_name  = data.azurerm_storage_account.services_api_sa.name
+  container_access_type = "blob"
+}
+
+
 resource "azurerm_storage_queue" "membership_applications_queue" {
   name                 = "membershipapplications"
   storage_account_name = data.azurerm_storage_account.services_api_sa.name
