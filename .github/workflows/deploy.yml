@@ -120,9 +120,8 @@ jobs:
           -o published
 
     - name: Zip API for Deployment
-      run: |
-        cd published
-        zip -r ../api.zip . -x '*.git*'
+      run: zip -r api.zip . -x '*.git*'
+      working-directory: published
 
     - name: Install Azure CLI
       run: |

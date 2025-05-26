@@ -56,6 +56,7 @@ resource "azurerm_linux_web_app" "services_api_app" {
     "AppSettings__IG__Urls__CompetitionSettingsUrl"          = "/compadmin3.php?compid={compid}&tab=settings"
     "AppSettings__IG__Urls__LeaderBoardUrl"                  = "/competition.php?compid={compid}&preview=1"
     "AppSettings__IG__URLS__SecurityLogMobileOrders"         = "/log.php?search=Mobile+order&person=&start={today}&starttime=&end={today}&endtime="
+    "AppSettings__IG__URLS__UpdateMemberPropertiesUrl"       = "/member.php?memberid={memberid}&requestType=ajax&ajaxaction=saveparamvalue"
 
     "AppSettings__Queue__ConnectionString" = data.azurerm_storage_account.services_api_sa.primary_connection_string
     "AppSettings__Queue__Name"             = azurerm_storage_queue.membership_applications_queue.name
