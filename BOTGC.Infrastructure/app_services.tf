@@ -22,6 +22,8 @@ resource "azurerm_linux_web_app" "services_api_app" {
 
     "AppSettings__TrophyFilePath"                            = "/data/trophies"
 
+    "AppSettings__ApplicationInsights__ConnectionString"     = azurerm_application_insights.app_insights.connection_string   
+
     "AppSettings__Auth__XApiKey"                             = var.x_api_key
 
     "AppSettings__AzureFaceApi__EndPoint"                    = "https://face-botgc-shared.cognitiveservices.azure.com/"
@@ -90,6 +92,8 @@ resource "azurerm_linux_web_app" "services_leaderboards_app" {
     "DATA_CONTAINER_CONNECTION_STRING"                       = data.azurerm_storage_account.services_api_sa.primary_connection_string
     "ASPNETCORE_ENVIRONMENT"                                 = "Production"
 
+    "AppSettings__ApplicationInsights__ConnectionString"     = azurerm_application_insights.app_insights.connection_string
+
     "AppSettings__API__XApiKey"                              = var.x_api_key
     "AppSettings__API__Url"                                  = "https://${azurerm_linux_web_app.services_api_app.default_hostname}"
   }
@@ -118,6 +122,8 @@ resource "azurerm_linux_web_app" "services_application_form" {
     "WEBSITE_RUN_FROM_PACKAGE"                               = "1"
     "DATA_CONTAINER_CONNECTION_STRING"                       = data.azurerm_storage_account.services_api_sa.primary_connection_string
     "ASPNETCORE_ENVIRONMENT"                                 = "Production"
+
+    "AppSettings__ApplicationInsights__ConnectionString"     = azurerm_application_insights.app_insights.connection_string
 
     "AppSettings__API__XApiKey"                              = var.x_api_key
     "AppSettings__API__Url"                                  = "https://${azurerm_linux_web_app.services_api_app.default_hostname}"

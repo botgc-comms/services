@@ -319,14 +319,31 @@ namespace BOTGC.API.Services.ReportServices
         private void EnsureFullYearData(List<MembershipReportEntryDto> dataPoints, DateTime endOfCurrentFinancialYear)
         {
             DateTime lastRecordedDate = dataPoints.Last().Date;
+            var lastEntry = dataPoints.Last();
+
+            var lastCategoryGroupBreakdown = lastEntry.CategoryGroupBreakdown != null
+                ? new Dictionary<string, int>(lastEntry.CategoryGroupBreakdown)
+                : new Dictionary<string, int>();
+
+            var lastPlayingCategoryBreakdown = lastEntry.PlayingCategoryBreakdown != null
+                ? new Dictionary<string, int>(lastEntry.PlayingCategoryBreakdown)
+                : new Dictionary<string, int>();
+
+            var lastNonPlayingCategoryBreakdown = lastEntry.NonPlayingCategoryBreakdown != null
+                ? new Dictionary<string, int>(lastEntry.NonPlayingCategoryBreakdown)
+                : new Dictionary<string, int>();
+
             for (var currentDate = lastRecordedDate.AddDays(1); currentDate <= endOfCurrentFinancialYear; currentDate = currentDate.AddDays(1))
             {
                 dataPoints.Add(new MembershipReportEntryDto
                 {
                     Date = currentDate,
-                    PlayingMembers = dataPoints.Last().PlayingMembers,
-                    NonPlayingMembers = dataPoints.Last().NonPlayingMembers,
-                    TargetPlayingMembers = 0
+                    PlayingMembers = lastEntry.PlayingMembers,
+                    NonPlayingMembers = lastEntry.NonPlayingMembers,
+                    TargetPlayingMembers = 0,
+                    CategoryGroupBreakdown = new Dictionary<string, int>(lastCategoryGroupBreakdown),
+                    PlayingCategoryBreakdown = new Dictionary<string, int>(lastPlayingCategoryBreakdown),
+                    NonPlayingCategoryBreakdown = new Dictionary<string, int>(lastNonPlayingCategoryBreakdown)
                 });
             }
         }

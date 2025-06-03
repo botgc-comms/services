@@ -1,4 +1,5 @@
-﻿using BOTGC.API.Dto;
+﻿using BOTGC.API.Common;
+using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -65,7 +66,7 @@ namespace BOTGC.API.Services
                             {
                                 col.Spacing(5);
                                 col.Item().Text($"Title: {application.Title}");
-                                col.Item().Text($"Forename: {application.Forename}");
+                                col.Item().Text($"Forename: {NameCasingHelper.CapitaliseForename(application.Forename)}");
                                 col.Item().Text($"Date of Birth: {application.DateOfBirth:dd/MM/yyyy}");
                                 col.Item().Text($"Alternative Phone: {application.AlternativeTelephone}");
                             });
@@ -74,7 +75,7 @@ namespace BOTGC.API.Services
                             {
                                 col.Spacing(5);
                                 col.Item().Text($"Gender: {(application.Gender == "M" ? "Male" : application.Gender == "F" ? "Female" : "Other")}");
-                                col.Item().Text($"Surname: {application.Surname}");
+                                col.Item().Text($"Surname: {NameCasingHelper.CapitaliseSurname(application.Surname)}");
                                 col.Item().Text($"Telephone: {application.Telephone}");
                                 col.Item().Text($"Email: {application.Email}");
                             });

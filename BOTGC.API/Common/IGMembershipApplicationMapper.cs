@@ -68,8 +68,8 @@ namespace BOTGC.API.Common
             {
                 { "gender", MapGender(newMember.Gender) },
                 { "title", newMember.Title },
-                { "forename", newMember.Forename },
-                { "surname", newMember.Surname },
+                { "forename", NameCasingHelper.CapitaliseForename(newMember.Forename) },
+                { "surname", NameCasingHelper.CapitaliseSurname(newMember.Surname) },
                 { "altforename", "" },
                 { "dob", newMember.DateOfBirth.ToString("dd/MM/yyyy") },
 

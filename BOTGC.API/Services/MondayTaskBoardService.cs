@@ -1,4 +1,5 @@
-﻿using BOTGC.API.Dto;
+﻿using BOTGC.API.Common;
+using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -108,13 +109,17 @@ namespace BOTGC.API.Services
             var memberId = applicationResult.MemberId;
             var dto = applicationResult.Application;
 
-            _logger.LogInformation("Creating Monday task for membership application: {Forename} {Surname} (ApplicationId: {ApplicationId})",
-                dto.Forename, dto.Surname, dto.ApplicationId);
+            var forename = NameCasingHelper.CapitaliseForename(dto.Forename);
+            var surname = NameCasingHelper.CapitaliseSurname(dto.Surname);
+            var name = $"{forename} {surname}";
 
+            _logger.LogInformation("Creating Monday task for membership application: {Name} (ApplicationId: {ApplicationId})",
+                name, dto.ApplicationId);
+                        
             var boardId = await GetBoardIdByNameAsync("Membership Applications")
                          ?? throw new InvalidOperationException("Board not found.");
 
-            var itemName = $"Online Application - {dto.Forename} {dto.Surname}";
+            var itemName = $"Online Application - {name}";
 
             var userId = await GetUserIdByEmailAsync("clubmanager@botgc.co.uk");
 
@@ -123,7 +128,7 @@ namespace BOTGC.API.Services
                 ["status"] = new { label = "Working on it" },
                 ["color_mkq7h26c"] = new { label = MapMembershipCategoryToListItem(dto.MembershipCategory) },
                 ["date4"] = new { date = dto.ApplicationDate.ToString("yyyy-MM-dd") },
-                ["text_mkq639pw"] = $"{dto.Forename} {dto.Surname}",
+                ["text_mkq639pw"] = $"{name}",
                 ["text_mkq6xbq4"] = dto.Telephone,
                 ["text_mkq6vbtw"] = dto.Email,
                 ["link_mkq67bhc"] = memberId == null ? null : new

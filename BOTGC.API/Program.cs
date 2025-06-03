@@ -58,6 +58,23 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration.GetSection("
 var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
 MembershipHelper.Configure(appSettings);
 
+// Conditionally enable Application Insights in non-development environments
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddApplicationInsightsTelemetry(options =>
+    {
+        options.ConnectionString = appSettings.ApplicationInsights.ConnectionString;
+    });
+
+    builder.Logging.AddApplicationInsights(
+        configureTelemetryConfiguration: (config) =>
+        {
+            config.ConnectionString = appSettings.ApplicationInsights.ConnectionString;
+        },
+        configureApplicationInsightsLoggerOptions: _ => { }
+    );
+}
+
 //builder.Services.AddSingleton<TrophyFilesDiskStorage>();
 builder.Services.AddSingleton<ITrophyFiles, TrophyFilesGitHub>();
 builder.Services.AddSingleton<ITrophyDataStore, TrophyDataStore>();

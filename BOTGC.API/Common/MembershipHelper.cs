@@ -49,6 +49,7 @@ namespace BOTGC.API.Common
         {
             if (member == null) return member;
             member.PrimaryCategory = GetPrimaryCategory(member, date);
+            member.IsActive = member.PrimaryCategory != MembershipPrimaryCategories.None;
 
             return member;
         }

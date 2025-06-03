@@ -1,5 +1,6 @@
 ﻿using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
+using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -35,6 +36,7 @@ namespace BOTGC.API.Services.BackgroundServices
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             const int maxAttempts = 5;
+            Exception? lastError = null;
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -56,6 +58,8 @@ namespace BOTGC.API.Services.BackgroundServices
                     if (resultDto.ApplicationId == null)
                     {
                         _logger.LogWarning("New application message was missing required data", message.Message.MessageId);
+
+                        resultDto.Exception = lastError;
                         await _newMemberAddedQueueService.DeadLetterEnqueueAsync(resultDto, message.Message.DequeueCount, DateTime.UtcNow, stoppingToken);
                         await _newMemberAddedQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
                         continue;
@@ -78,6 +82,7 @@ namespace BOTGC.API.Services.BackgroundServices
                     {
                         if (message.Message.DequeueCount > maxAttempts)
                         {
+                            resultDto.Exception = lastError;
                             await _newMemberAddedQueueService.DeadLetterEnqueueAsync(resultDto, message.Message.DequeueCount, DateTime.UtcNow, stoppingToken);
                             await _newMemberAddedQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
                             continue;
@@ -111,6 +116,8 @@ namespace BOTGC.API.Services.BackgroundServices
                         }
                         catch (Exception ex)
                         {
+                            lastError = ex;
+
                             _logger.LogError(ex,
                                 "Error processing new member result for ApplicationId {ApplicationId}.",
                                 resultDto.Application.ApplicationId);
@@ -121,6 +128,8 @@ namespace BOTGC.API.Services.BackgroundServices
                     }
                     catch (Exception ex)
                     {
+                        lastError = ex;
+
                         _logger.LogError(ex,
                             "Unexpected error processing new member result for ApplicationId {ApplicationId}.",
                             resultDto.Application.ApplicationId);

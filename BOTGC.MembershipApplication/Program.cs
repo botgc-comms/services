@@ -26,6 +26,26 @@ if (environment.IsDevelopment())
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<AppSettings>>().Value);
 
+var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
+
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddApplicationInsightsTelemetry(options =>
+    {
+        var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
+        options.ConnectionString = appSettings.ApplicationInsights.ConnectionString;
+    });
+
+    builder.Logging.AddApplicationInsights(
+        configureTelemetryConfiguration: (config) =>
+        {
+            var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
+            config.ConnectionString = appSettings.ApplicationInsights.ConnectionString;
+        },
+        configureApplicationInsightsLoggerOptions: _ => { }
+    );
+}
+
 // Configure Dependency Injection
 builder.Services.AddHttpClient<IReferralService, GrowSurfService>();
 builder.Services.AddHttpContextAccessor();

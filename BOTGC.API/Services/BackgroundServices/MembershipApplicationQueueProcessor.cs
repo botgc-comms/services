@@ -40,6 +40,7 @@ namespace BOTGC.API.Services.BackgroundServices
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             const int maxAttempts = 5;
+            Exception? lastError = null; 
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -88,7 +89,8 @@ namespace BOTGC.API.Services.BackgroundServices
                             var failureResult = new NewMemberApplicationResultDto
                             {
                                 ApplicationId = newMember.ApplicationId,
-                                Application = newMember
+                                Application = newMember, 
+                                Exception = lastError
                             };
 
                             await _membershipApplicationQueueService.EnqueueAsync(failureResult, stoppingToken);
@@ -104,6 +106,7 @@ namespace BOTGC.API.Services.BackgroundServices
                         }
                         catch (Exception ex)
                         {
+                            lastError = ex;
                             _logger.LogError(ex, "Error submitting new member application for ApplicationId {ApplicationId}.", newMember.ApplicationId);
                             await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, message.Message.DequeueCount)), stoppingToken);
                             continue;

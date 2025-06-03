@@ -28,6 +28,6 @@ public class MembershipReportController : Controller
 
         var data = await response.Content.ReadFromJsonAsync<MembershipReportDto>();
 
-        return View(data); // Pass first report to the view
+        return View(data); 
     }
 }

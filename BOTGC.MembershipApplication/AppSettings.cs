@@ -6,8 +6,13 @@ public class AppSettings
     public ApiSettings API { get; set; } = new();
     public GetAddressIOSettings GetAddressIOSettings { get; set; } = new();
     public GrowSurfSettings GrowSurfSettings { get; set; } = new();
+    public ApplicationInsightsSettings ApplicationInsights { get; set; } = new();
 }
 
+public class ApplicationInsightsSettings
+{
+    public string ConnectionString { get; set; } = string.Empty;
+}
 public class ApiSettings
 {
     public string Url { get; set; } = string.Empty;

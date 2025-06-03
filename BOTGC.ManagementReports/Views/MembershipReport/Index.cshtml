@@ -20,53 +20,70 @@
     <canvas id="categoryGroupBreakdownChart"></canvas>
     <canvas id="dailyJoinLeaveChart"></canvas>
 
-    @foreach (var quarter in Model.QuarterlyStats)
-    {
-        <h2>@quarter.PeriodDescription</h2>
-        <table class="govuk-table">
-            <thead>
-                <tr>
-                    <th class="govuk-table__header">Metric</th>
-                    <th class="govuk-table__header">Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="govuk-table__cell">New Members</td>
-                    <td class="govuk-table__cell">@quarter.NewMembers</td>
-                </tr>
-                <tr>
-                    <td class="govuk-table__cell">Leavers</td>
-                    <td class="govuk-table__cell">@quarter.Leavers</td>
-                </tr>
-                <tr>
-                    <td class="govuk-table__cell">Deaths</td>
-                    <td class="govuk-table__cell">@quarter.Deaths</td>
-                </tr>
-            </tbody>
-        </table>
-
-        @if (quarter.CategoryChanges?.Any() == true)
+    <nav class="tabs" role="tablist" aria-label="Quarterly Membership Reports">
+        @for (int i = 0; i < Model.QuarterlyStats.Count; i++)
         {
-            <h3>Category Changes</h3>
-            <table class="govuk-table">
+            var quarter = Model.QuarterlyStats[i];
+            <button
+                class="tab-button"
+                role="tab"
+                aria-selected="@(i == 0 ? "true" : "false")"
+                aria-controls="panel-@i"
+                id="tab-@i"
+                tabindex="@(i == 0 ? "0" : "-1")"
+            >
+                @quarter.PeriodDescription
+            </button>
+        }
+    </nav>
+
+    @for (int i = 0; i < Model.QuarterlyStats.Count; i++)
+    {
+        var quarter = Model.QuarterlyStats[i];
+        <section class="tab-panel"
+                 role="tabpanel"
+                 tabindex="0"
+                 aria-labelledby="tab-@i"
+                 id="panel-@i"
+                 aria-hidden="@(i == 0 ? "false" : "true")">
+            <h2>@quarter.PeriodDescription</h2>
+
+            <table>
                 <thead>
                     <tr>
-                        <th class="govuk-table__header">From → To</th>
-                        <th class="govuk-table__header">Count</th>
+                        <th>Metric</th>
+                        <th>Value</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var change in quarter.CategoryChanges)
-                    {
-                        <tr>
-                            <td class="govuk-table__cell">@change.Key</td>
-                            <td class="govuk-table__cell">@change.Value</td>
-                        </tr>
-                    }
+                    <tr><td>New Members</td><td>@quarter.NewMembers</td></tr>
+                    <tr><td>Leavers</td><td>@quarter.Leavers</td></tr>
+                    <tr><td>Deaths</td><td>@quarter.Deaths</td></tr>
                 </tbody>
             </table>
-        }
+
+            @if (quarter.CategoryChanges?.Any() == true)
+            {
+                <h3>Category Changes</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>From → To</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var change in quarter.CategoryChanges)
+                        {
+                            <tr>
+                                <td>@change.Key</td>
+                                <td>@change.Value</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </section>
     }
 
 
@@ -75,6 +92,37 @@
             const dataPoints = @Html.Raw(Json.Serialize(Model.DataPoints));
 
             console.log("Raw DataPoints:", dataPoints);
+
+            const tabs = document.querySelectorAll('.tab-button');
+            const panels = document.querySelectorAll('.tab-panel');
+
+            tabs.forEach((tab, i) => {
+              tab.addEventListener('click', () => {
+                // Deselect all tabs and hide all panels
+                tabs.forEach(t => {
+                  t.setAttribute('aria-selected', 'false');
+                  t.setAttribute('tabindex', '-1');
+                });
+                panels.forEach(p => p.setAttribute('aria-hidden', 'true'));
+
+                // Select the clicked tab and show corresponding panel
+                tab.setAttribute('aria-selected', 'true');
+                tab.setAttribute('tabindex', '0');
+                panels[i].setAttribute('aria-hidden', 'false');
+                panels[i].focus();
+              });
+
+              // Allow keyboard navigation with arrow keys
+              tab.addEventListener('keydown', (e) => {
+                let newIndex = null;
+                if (e.key === 'ArrowRight') newIndex = (i + 1) % tabs.length;
+                if (e.key === 'ArrowLeft') newIndex = (i - 1 + tabs.length) % tabs.length;
+                if (newIndex !== null) {
+                  tabs[newIndex].focus();
+                  e.preventDefault();
+                }
+              });
+            });
 
             const labels = dataPoints.map(dp => new Date(dp.date).toLocaleDateString());
             const playingMembers = dataPoints.map(dp => dp.playingMembers || 0);
@@ -171,23 +219,23 @@
         }
 
 
-
         function prepareCategoryGroupBreakdownChart(labels, dataPoints) {
             const allGroups = [...new Set(dataPoints.flatMap(dp =>
                 dp.categoryGroupBreakdown ? Object.keys(dp.categoryGroupBreakdown) : []
-            ))].sort();
+            ))];
 
+            // Sort groups by average ascending
+            const categoryAverages = {};
+            allGroups.forEach(group => {
+                const total = dataPoints.reduce((sum, dp) => sum + (dp.categoryGroupBreakdown?.[group] || 0), 0);
+                categoryAverages[group] = total / dataPoints.length;
+            });
+            allGroups.sort((a, b) => categoryAverages[a] - categoryAverages[b] || a.localeCompare(b));
+
+            // Prepare stacked data with carry-forward for gaps (you have no nulls, so just map)
             const stackedData = {};
-            allGroups.forEach(group => stackedData[group] = []);
-
-            dataPoints.forEach((dp, index) => {
-                allGroups.forEach(group => {
-                    let value = dp.categoryGroupBreakdown?.[group] ?? null;
-                    if (value === null && index > 0) {
-                        value = stackedData[group][index - 1]; // carry forward
-                    }
-                    stackedData[group].push(value);
-                });
+            allGroups.forEach(group => {
+                stackedData[group] = dataPoints.map(dp => dp.categoryGroupBreakdown?.[group] || 0);
             });
 
             const colors = assignCategoryColors(allGroups);
@@ -197,7 +245,7 @@
                 data: stackedData[group],
                 backgroundColor: `${colors[group]}55`,
                 borderColor: colors[group],
-                fill: '-1',
+                fill: 'origin',    // Changed here
                 pointRadius: 0,
                 borderWidth: 1
             }));
@@ -224,6 +272,7 @@
                 }
             });
         }
+
 
         function prepareMembershipChart(labels, playingMembers, nonPlayingMembers, targetPlayingMembers, annotations) {
 
