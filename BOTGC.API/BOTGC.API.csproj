@@ -11,7 +11,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
 
-    <EmbeddedResource Include="Assets\img\logo.png" />
+    <EmbeddedResource Include="assets\img\logo.png" />
   </ItemGroup>
 
   <ItemGroup>

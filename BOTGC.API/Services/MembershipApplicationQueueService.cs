@@ -44,13 +44,12 @@ namespace BOTGC.API.Services
         {
             try
             {
-                var envelope = new DeadLetterEnvelope<T>
-                {
-                    OriginalMessage = item,
-                    DequeueCount = dequeueCount,
-                    FailedAt = errorAt ?? DateTime.UtcNow, 
-                    LastError = lastError
-                };
+                var envelope = new DeadLetterEnvelope<T>(
+                    item,
+                    dequeueCount,
+                    errorAt ?? DateTime.UtcNow,
+                    lastError
+                );
 
                 var json = JsonSerializer.Serialize(envelope);
                 await _deadLetterQueueClient.SendMessageAsync(json, cancellationToken);
