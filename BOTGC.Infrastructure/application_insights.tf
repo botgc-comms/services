@@ -7,38 +7,32 @@ resource "azurerm_application_insights" "app_insights" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "app_insights_diag" {
-  name                       = "appinsights-diagnostics"
+  name                       = "diag-${azurerm_application_insights.app_insights.name}"
   target_resource_id         = azurerm_application_insights.app_insights.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.logs.id
 
-  log {
-    category = "Request"
-    enabled  = true
+  enabled_log {
+    category = "AppRequests"
   }
 
-  log {
-    category = "Trace"
-    enabled  = true
+  enabled_log {
+    category = "AppTraces"
   }
 
-  log {
-    category = "Exception"
-    enabled  = true
+  enabled_log {
+    category = "AppExceptions"
   }
 
-  log {
-    category = "Dependency"
-    enabled  = true
+  enabled_log {
+    category = "AppMetrics"
   }
 
-  log {
-    category = "Availability"
-    enabled  = true
-  }
-
-  log {
+  enabled_log {
     category = "PerformanceCounters"
-    enabled  = true
+  }
+
+  enabled_log {
+    category = "Dependencies"
   }
 
   metric {
