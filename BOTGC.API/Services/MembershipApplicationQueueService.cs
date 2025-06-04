@@ -6,6 +6,7 @@ using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using System.Text.Json;
 
 namespace BOTGC.API.Services
@@ -63,32 +64,37 @@ namespace BOTGC.API.Services
             }
         }
 
-
         public async Task<IQueueMessage<T>[]> ReceiveMessagesAsync(int maxMessages, TimeSpan? visibilityTimeout, CancellationToken cancellationToken = default)
         {
-            var messages = await ReceiveMessageAsync(_queueClient, maxMessages, visibilityTimeout ?? TimeSpan.FromMinutes(AppConstants.QueueVisibilityTimeoutMinutes), cancellationToken);
+            var messages = await ReceiveMessageAsync(
+                _queueClient,
+                maxMessages,
+                visibilityTimeout ?? TimeSpan.FromMinutes(AppConstants.QueueVisibilityTimeoutMinutes),
+                cancellationToken
+            );
 
             return messages.Select(m =>
             {
-                T payload = default!;
+                T? payload = default;
+                var raw = m.MessageText;
 
                 try
                 {
-                    try
+                    var envelope = JsonSerializer.Deserialize<DeadLetterEnvelope<T>>(raw);
+                    if (envelope != null && envelope.OriginalMessage != null)
                     {
-                        payload = JsonSerializer.Deserialize<T>(m.MessageText)!;
+                        payload = envelope.OriginalMessage;
                     }
-                    catch (JsonException)
+                    else
                     {
-                        try
+                        var deserialised = JsonSerializer.Deserialize<T>(raw);
+                        if (deserialised != null)
                         {
-                            var envelope = JsonSerializer.Deserialize<DeadLetterEnvelope<T>>(m.MessageText);
-                            if (envelope != null)
-                                payload = envelope.OriginalMessage!;
+                            payload = deserialised;
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            _logger.LogError(ex, "Failed to unwrap dead-letter envelope for message of type {Type}.", typeof(T).Name);
+                            _logger.LogWarning("Deserialised object of type {Type} was null", typeof(T).Name);
                         }
                     }
                 }
