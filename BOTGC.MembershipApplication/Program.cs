@@ -32,18 +32,19 @@ if (!builder.Environment.IsDevelopment())
 {
     builder.Services.AddApplicationInsightsTelemetry(options =>
     {
-        var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
         options.ConnectionString = appSettings.ApplicationInsights.ConnectionString;
     });
 
     builder.Logging.AddApplicationInsights(
         configureTelemetryConfiguration: (config) =>
         {
-            var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
             config.ConnectionString = appSettings.ApplicationInsights.ConnectionString;
         },
         configureApplicationInsightsLoggerOptions: _ => { }
     );
+
+    builder.Logging.AddFilter<Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider>(
+        "", LogLevel.Information);
 }
 
 // Configure Dependency Injection
