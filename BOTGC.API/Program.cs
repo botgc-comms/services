@@ -73,6 +73,9 @@ if (!builder.Environment.IsDevelopment())
         },
         configureApplicationInsightsLoggerOptions: _ => { }
     );
+
+    builder.Logging.AddFilter<Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider>(
+        "", LogLevel.Information);
 }
 
 //builder.Services.AddSingleton<TrophyFilesDiskStorage>();
