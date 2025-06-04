@@ -9,7 +9,7 @@ resource "azurerm_application_insights" "app_insights" {
 resource "azurerm_monitor_diagnostic_setting" "app_insights_diag" {
   name                       = "diag-${azurerm_application_insights.app_insights.name}"
   target_resource_id         = azurerm_application_insights.app_insights.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.logs.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics.id
 
   enabled_log {
     category = "AppRequests"
