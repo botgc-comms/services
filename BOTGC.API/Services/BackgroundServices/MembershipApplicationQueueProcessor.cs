@@ -89,8 +89,7 @@ namespace BOTGC.API.Services.BackgroundServices
                             var failureResult = new NewMemberApplicationResultDto
                             {
                                 ApplicationId = newMember.ApplicationId,
-                                Application = newMember, 
-                                Exception = lastError
+                                Application = newMember 
                             };
 
                             await _membershipApplicationQueueService.EnqueueAsync(failureResult, stoppingToken);

@@ -40,7 +40,7 @@ namespace BOTGC.API.Services
             }
         }
 
-        public async Task DeadLetterEnqueueAsync(T item, long dequeueCount, DateTime? errorAt = null, CancellationToken cancellationToken = default)
+        public async Task DeadLetterEnqueueAsync(T item, long dequeueCount, DateTime? errorAt = null, Exception? lastError = null, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -48,7 +48,8 @@ namespace BOTGC.API.Services
                 {
                     OriginalMessage = item,
                     DequeueCount = dequeueCount,
-                    FailedAt = errorAt ?? DateTime.UtcNow
+                    FailedAt = errorAt ?? DateTime.UtcNow, 
+                    LastError = lastError
                 };
 
                 var json = JsonSerializer.Serialize(envelope);

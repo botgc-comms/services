@@ -36,6 +36,7 @@ namespace BOTGC.API.Services.BackgroundServices
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             const int maxAttempts = 5;
+            Exception lastError = default;
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -56,7 +57,7 @@ namespace BOTGC.API.Services.BackgroundServices
                     {
                         if (message.Message.DequeueCount > maxAttempts)
                         {
-                            await _memberPropertyUpdateQueueService.DeadLetterEnqueueAsync(propertyUpdate, message.Message.DequeueCount, DateTime.UtcNow, stoppingToken);
+                            await _memberPropertyUpdateQueueService.DeadLetterEnqueueAsync(propertyUpdate, message.Message.DequeueCount, DateTime.UtcNow, lastError, stoppingToken);
                             await _memberPropertyUpdateQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
                             continue;
                         }
@@ -68,6 +69,8 @@ namespace BOTGC.API.Services.BackgroundServices
                         }
                         catch (Exception ex)
                         {
+                            lastError = ex;
+
                             _logger.LogError(ex,
                                 "Error updating property {Property} for member {MemberId}.",
                                 propertyUpdate.Property.GetDisplayName(),
@@ -79,6 +82,8 @@ namespace BOTGC.API.Services.BackgroundServices
                     }
                     catch (Exception ex)
                     {
+                        lastError = ex;
+
                         _logger.LogError(ex,
                             "Unexpected error processing property update for member {MemberId}.",
                             propertyUpdate.MemberId);

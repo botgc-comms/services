@@ -59,8 +59,7 @@ namespace BOTGC.API.Services.BackgroundServices
                     {
                         _logger.LogWarning("New application message was missing required data", message.Message.MessageId);
 
-                        resultDto.Exception = lastError;
-                        await _newMemberAddedQueueService.DeadLetterEnqueueAsync(resultDto, message.Message.DequeueCount, DateTime.UtcNow, stoppingToken);
+                        await _newMemberAddedQueueService.DeadLetterEnqueueAsync(resultDto, message.Message.DequeueCount, DateTime.UtcNow, lastError, stoppingToken);
                         await _newMemberAddedQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
                         continue;
                     }
@@ -82,8 +81,7 @@ namespace BOTGC.API.Services.BackgroundServices
                     {
                         if (message.Message.DequeueCount > maxAttempts)
                         {
-                            resultDto.Exception = lastError;
-                            await _newMemberAddedQueueService.DeadLetterEnqueueAsync(resultDto, message.Message.DequeueCount, DateTime.UtcNow, stoppingToken);
+                            await _newMemberAddedQueueService.DeadLetterEnqueueAsync(resultDto, message.Message.DequeueCount, DateTime.UtcNow, lastError, stoppingToken);
                             await _newMemberAddedQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
                             continue;
                         }

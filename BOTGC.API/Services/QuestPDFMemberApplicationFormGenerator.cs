@@ -34,6 +34,9 @@ namespace BOTGC.API.Services
 
             var logoPath = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "img", "logo.png");
 
+            var assembly = typeof(QuestPDFMemberApplicationFormGenerator).Assembly;
+            using var logoStream = assembly.GetManifestResourceStream("BOTGC.API.Assets.img.logo.png");
+
             var pdfBytes = Document.Create(container =>
             {
                 container.Page(page =>
@@ -49,7 +52,10 @@ namespace BOTGC.API.Services
 
                         column.Item().Column(headerCol =>
                         {
-                            headerCol.Item().AlignCenter().MaxWidth(100).Image(logoPath).FitWidth();
+                            if (logoStream != null)
+                            {
+                                headerCol.Item().AlignCenter().MaxWidth(100).Image(logoStream).FitWidth();
+                            }
                             headerCol.Item().AlignCenter().Text("Burton on Trent Golf Club").Bold().FontSize(16);
                             headerCol.Item().AlignCenter().Text("43 Ashby Road East, Burton on Trent, DE15 0PS");
                             headerCol.Item().AlignCenter().Text("Tel: 01283 544551 Email: clubsecretary@botgc.co.uk");

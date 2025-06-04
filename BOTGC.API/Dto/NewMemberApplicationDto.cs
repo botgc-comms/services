@@ -43,7 +43,6 @@ namespace BOTGC.API.Dto
         public string ApplicationId { get; set; }
         public int? MemberId { get; set; }
         public NewMemberApplicationDto Application { get; set; }
-        public Exception? Exception { get; set; }
     }
 
     public class NewMemberPropertyUpdateDto

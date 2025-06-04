@@ -10,6 +10,8 @@
     <Content Include="assets\img\logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+
+    <EmbeddedResource Include="Assets\img\logo.png" />
   </ItemGroup>
 
   <ItemGroup>
