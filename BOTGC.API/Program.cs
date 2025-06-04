@@ -146,9 +146,13 @@ app.MapGet("/", () => Results.Ok("Service is running"))
 
 app.MapHealthChecks("/health");
 
-app.UseWhen(context => !context.Request.Path.StartsWithSegments("/swagger"), appBuilder =>
-{
-    appBuilder.UseMiddleware<AuthKeyMiddleware>();
+app.UseWhen(context =>
+    !context.Request.Path.StartsWithSegments("/swagger") &&
+    !context.Request.Path.StartsWithSegments("/health") &&
+    context.Request.Path != "/", 
+    appBuilder =>
+    {
+        appBuilder.UseMiddleware<AuthKeyMiddleware>();
 });
 
 app.UseSwagger();
