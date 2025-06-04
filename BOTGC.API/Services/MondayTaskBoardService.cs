@@ -76,7 +76,7 @@ namespace BOTGC.API.Services
             if (board != null)
             {
                 var boardId = board?["id"]?.ToString();
-                _logger.LogDebug("Found board ID {BoardId} for board name {BoardName}.", boardId, boardName);
+                _logger.LogDebug("Creating Monday task for membership application {BoardId} for board name {BoardName}.", boardId, boardName);
                 return boardId;
             }
 
@@ -176,6 +176,12 @@ namespace BOTGC.API.Services
 
             var responseJson = JsonNode.Parse(await response.Content.ReadAsStringAsync());
             var itemId = responseJson?["data"]?["create_item"]?["id"]?.ToString()!;
+
+            if (string.IsNullOrWhiteSpace(itemId))
+            {
+                _logger.LogError("Failed to create Monday item. Response content: {Response}", responseJson);
+                throw new InvalidOperationException("Failed to retrieve item ID from Monday response.");
+            }
 
             _logger.LogInformation("Successfully created Monday task with ID {ItemId} for application {ApplicationId}.", itemId, dto.ApplicationId);
 
