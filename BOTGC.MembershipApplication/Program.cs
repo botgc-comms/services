@@ -35,12 +35,16 @@ if (!builder.Environment.IsDevelopment())
         options.ConnectionString = appSettings.ApplicationInsights.ConnectionString;
     });
 
-    builder.Logging.AddApplicationInsights(
-        configureTelemetryConfiguration: (config) =>
-        {
-            config.ConnectionString = appSettings.ApplicationInsights.ConnectionString;
-        },
-        configureApplicationInsightsLoggerOptions: _ => { }
+    builder.Logging.AddApplicationInsights (
+         configureTelemetryConfiguration: (config) =>
+         {
+             config.ConnectionString = appSettings.ApplicationInsights.ConnectionString;
+         },
+         configureApplicationInsightsLoggerOptions: options =>
+         {
+             options.IncludeScopes = true;
+             options.TrackExceptionsAsExceptionTelemetry = true;
+         }
     );
 
     builder.Logging.AddFilter<Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider>(

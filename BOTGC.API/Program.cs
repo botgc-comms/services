@@ -71,7 +71,11 @@ if (!builder.Environment.IsDevelopment())
         {
             config.ConnectionString = appSettings.ApplicationInsights.ConnectionString;
         },
-        configureApplicationInsightsLoggerOptions: _ => { }
+        configureApplicationInsightsLoggerOptions: options =>
+        {
+            options.IncludeScopes = true; 
+            options.TrackExceptionsAsExceptionTelemetry = true;
+        }
     );
 
     builder.Logging.AddFilter<Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider>(
