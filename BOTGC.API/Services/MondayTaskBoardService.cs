@@ -131,11 +131,12 @@ namespace BOTGC.API.Services
                 ["text_mkq639pw"] = $"{name}",
                 ["text_mkq6xbq4"] = dto.Telephone,
                 ["text_mkq6vbtw"] = dto.Email,
-                ["link_mkq67bhc"] = memberId == null ? null : new
-                {
-                    url = $"https://www.botgc.co.uk/member.php?memberid={memberId}",
-                    text = memberId
-                },
+                ["link_mkq67bhc"] = memberId == null ? null :
+                    JsonSerializer.Serialize(new
+                    {
+                        url = $"https://www.botgc.co.uk/member.php?memberid={memberId}",
+                        text = memberId
+                    }),
                 ["date_mkq7q88n"] = new { date = dto.ApplicationDate.AddDays(3).ToString("yyyy-MM-dd") },
                 ["date_mkq7j3ma"] = new { date = dto.ApplicationDate.AddDays(5).ToString("yyyy-MM-dd") },
                 ["text_mkq7w63d"] = dto.ApplicationId,
