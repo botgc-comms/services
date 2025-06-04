@@ -24,11 +24,15 @@ resource "azurerm_monitor_diagnostic_setting" "app_insights_diag" {
   }
 
   enabled_log {
-    category = "AppMetrics"
+    category = "AppPerformanceCounters"
   }
 
   enabled_log {
-    category = "Dependencies"
+    category = "AppDependencies"
+  }
+
+  enabled_log {
+    category = "AppMetrics"
   }
 
   metric {
@@ -36,4 +40,5 @@ resource "azurerm_monitor_diagnostic_setting" "app_insights_diag" {
     enabled  = true
   }
 }
+
 
