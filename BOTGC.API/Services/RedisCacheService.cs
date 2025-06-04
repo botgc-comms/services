@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
+using System.Text.Json;
 using BOTGC.API.Interfaces;
 using System;
 using System.Threading.Tasks;
@@ -34,12 +34,17 @@ namespace BOTGC.API.Services
             if (string.IsNullOrEmpty(data))
                 return null;
 
-            return JsonConvert.DeserializeObject<T>(data);
+            if (data != null)
+            {
+                return JsonSerializer.Deserialize<T>(data);
+            }
+
+            return null;
         }
 
         public async Task SetAsync<T>(string key, T value, TimeSpan expiration) where T : class
         {
-            var json = JsonConvert.SerializeObject(value, Formatting.Indented);
+            var json = JsonSerializer.Serialize(value, new JsonSerializerOptions { WriteIndented = true });
             var options = new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = expiration

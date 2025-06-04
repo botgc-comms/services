@@ -130,55 +130,66 @@ namespace BOTGC.API.Services
                 text = $"{memberId}"
             };
 
-            var columnValues = new Dictionary<string, string?>
+            var columnValuesObject = new Dictionary<string, object?>
             {
-                ["status"] = JsonSerializer.Serialize(new { label = "Working on it" }),
-                ["color_mkq7h26c"] = JsonSerializer.Serialize(new { label = MapMembershipCategoryToListItem(dto.MembershipCategory) }),
-                ["date4"] = JsonSerializer.Serialize(new { date = dto.ApplicationDate.ToString("yyyy-MM-dd") }),
-                ["text_mkq639pw"] = JsonSerializer.Serialize(name),
-                ["text_mkq6xbq4"] = JsonSerializer.Serialize(dto.Telephone),
-                ["text_mkq6vbtw"] = JsonSerializer.Serialize(dto.Email),
-                ["link_mkq67bhc"] = memberId == null ? null : JsonSerializer.Serialize(new
+                ["status"] = new { label = "Working on it" },
+                ["color_mkq7h26c"] = new { label = MapMembershipCategoryToListItem(dto.MembershipCategory) },
+                ["date4"] = new { date = dto.ApplicationDate.ToString("yyyy-MM-dd") },
+                ["text_mkq639pw"] = name,
+                ["text_mkq6xbq4"] = dto.Telephone,
+                ["text_mkq6vbtw"] = dto.Email,
+                ["link_mkq67bhc"] = memberId == null ? null : new
                 {
                     url = $"https://www.botgc.co.uk/member.php?memberid={memberId}",
                     text = memberId.ToString()
-                }),
-                ["date_mkq7q88n"] = JsonSerializer.Serialize(new { date = dto.ApplicationDate.AddDays(3).ToString("yyyy-MM-dd") }),
-                ["date_mkq7j3ma"] = JsonSerializer.Serialize(new { date = dto.ApplicationDate.AddDays(5).ToString("yyyy-MM-dd") }),
-                ["text_mkq7w63d"] = JsonSerializer.Serialize(dto.ApplicationId),
-                ["boolean_mkqnq3va"] = JsonSerializer.Serialize(new { @checked = dto.ArrangeFinance == true }),
-                ["text_mkqn9qqm"] = JsonSerializer.Serialize(dto.ReferrerId)
+                },
+                ["date_mkq7q88n"] = new { date = dto.ApplicationDate.AddDays(3).ToString("yyyy-MM-dd") },
+                ["date_mkq7j3ma"] = new { date = dto.ApplicationDate.AddDays(5).ToString("yyyy-MM-dd") },
+                ["text_mkq7w63d"] = dto.ApplicationId,
+                ["boolean_mkqnq3va"] = new { @checked = dto.ArrangeFinance == true },  
+                ["text_mkqn9qqm"] = dto.ReferrerId
             };
 
             if (!string.IsNullOrWhiteSpace(userId))
             {
-                columnValues["person"] = JsonSerializer.Serialize(new
+                columnValuesObject["person"] = new
                 {
                     personsAndTeams = new[]
                     {
                         new { id = int.Parse(userId), kind = "person" }
                     }
-                });
+                };
             }
-            
-           var mutation = @"
-                mutation ($boardId: ID!, $itemName: String!, $columnValues: JSON!) {
-                    create_item(board_id: $boardId, item_name: $itemName, column_values: $columnValues) {
-                        id
-                    }
-                }";
 
+            // Fix incorrect property name "checkedValue" => "checked"
+            var json = JsonSerializer.Serialize(columnValuesObject, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = null,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
+
+            // Construct GraphQL variables
             var variables = new
             {
                 boardId,
                 itemName,
-                columnValues
+                columnValues = json // already stringified
             };
 
-            var payload = new { query = mutation, variables };
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var payload = new
+            {
+                query = @"
+                    mutation ($boardId: ID!, $itemName: String!, $columnValues: JSON!) {
+                        create_item(board_id: $boardId, item_name: $itemName, column_values: $columnValues) {
+                            id
+                        }
+                    }",
+                variables
+            };
 
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(string.Empty, content);
+
             response.EnsureSuccessStatusCode();
 
             var responseJson = JsonNode.Parse(await response.Content.ReadAsStringAsync());
