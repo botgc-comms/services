@@ -28,10 +28,6 @@ resource "azurerm_monitor_diagnostic_setting" "app_insights_diag" {
   }
 
   enabled_log {
-    category = "PerformanceCounters"
-  }
-
-  enabled_log {
     category = "Dependencies"
   }
 
