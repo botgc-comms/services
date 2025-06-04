@@ -35,7 +35,7 @@ namespace BOTGC.API.Services
             var logoPath = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "img", "logo.png");
 
             var assembly = typeof(QuestPDFMemberApplicationFormGenerator).Assembly;
-            using var logoStream = assembly.GetManifestResourceStream("BOTGC.API.Assets.img.logo.png");
+            using var logoStream = assembly.GetManifestResourceStream("BOTGC.API.assets.img.logo.png");
 
             var pdfBytes = Document.Create(container =>
             {
