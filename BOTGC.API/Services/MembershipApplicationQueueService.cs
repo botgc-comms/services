@@ -44,16 +44,16 @@ namespace BOTGC.API.Services
         {
             try
             {
-                var deadLetterPayload = new
+                var envelope = new DeadLetterEnvelope<T>
                 {
                     OriginalMessage = item,
                     DequeueCount = dequeueCount,
                     FailedAt = errorAt ?? DateTime.UtcNow
                 };
 
-                var deadLetterJson = JsonSerializer.Serialize(deadLetterPayload);
+                var json = JsonSerializer.Serialize(envelope);
+                await _deadLetterQueueClient.SendMessageAsync(json, cancellationToken);
 
-                await _deadLetterQueueClient.SendMessageAsync(deadLetterJson, cancellationToken);
                 _logger.LogInformation("Queued dead-letter message of type {Type}.", typeof(T).Name);
             }
             catch (Exception ex)
@@ -63,16 +63,34 @@ namespace BOTGC.API.Services
             }
         }
 
+
         public async Task<IQueueMessage<T>[]> ReceiveMessagesAsync(int maxMessages, TimeSpan? visibilityTimeout, CancellationToken cancellationToken = default)
         {
             var messages = await ReceiveMessageAsync(_queueClient, maxMessages, visibilityTimeout ?? TimeSpan.FromMinutes(AppConstants.QueueVisibilityTimeoutMinutes), cancellationToken);
 
             return messages.Select(m =>
             {
-                T? payload = default;
+                T payload = default!;
+
                 try
                 {
-                    payload = JsonSerializer.Deserialize<T>(m.MessageText);
+                    try
+                    {
+                        payload = JsonSerializer.Deserialize<T>(m.MessageText)!;
+                    }
+                    catch (JsonException)
+                    {
+                        try
+                        {
+                            var envelope = JsonSerializer.Deserialize<DeadLetterEnvelope<T>>(m.MessageText);
+                            if (envelope != null)
+                                payload = envelope.OriginalMessage!;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to unwrap dead-letter envelope for message of type {Type}.", typeof(T).Name);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {

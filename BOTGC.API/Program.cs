@@ -87,6 +87,8 @@ builder.Services.AddSingleton<IMembershipReportingService, MembershipReportingSe
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddHealthChecks();
+
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.Limits.MaxRequestBodySize = null; // Unlimited
@@ -131,6 +133,11 @@ else
 builder.Services.AddIGSupport();
 
 var app = builder.Build();
+
+app.MapGet("/", () => Results.Ok("Service is running"))
+   .AllowAnonymous();
+
+app.MapHealthChecks("/health");
 
 app.UseWhen(context => !context.Request.Path.StartsWithSegments("/swagger"), appBuilder =>
 {
