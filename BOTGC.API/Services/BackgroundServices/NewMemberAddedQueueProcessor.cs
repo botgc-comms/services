@@ -77,60 +77,50 @@ namespace BOTGC.API.Services.BackgroundServices
                         continue;
                     }
 
+                    if (message.Message.DequeueCount > maxAttempts)
+                    {
+                        await _newMemberAddedQueueService.DeadLetterEnqueueAsync(resultDto, message.Message.DequeueCount, DateTime.UtcNow, lastError, stoppingToken);
+                        await _newMemberAddedQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
+                        continue;
+                    }
+
                     try
                     {
-                        if (message.Message.DequeueCount > maxAttempts)
+                        // Generate the PDF
+                        var pdfBytes = _pdfGeneratorService.GeneratePdf(resultDto.Application);
+
+                        var taskItemId = await _taskBoardService.FindExistingApplicationItemIdAsync(resultDto.ApplicationId);
+
+                        if (taskItemId == null)
                         {
-                            await _newMemberAddedQueueService.DeadLetterEnqueueAsync(resultDto, message.Message.DequeueCount, DateTime.UtcNow, lastError, stoppingToken);
+                            taskItemId = await _taskBoardService.CreateMemberApplicationAsync(resultDto);
+                        }
+
+                        if (taskItemId != null)
+                        {
+                            var fileName = $"MembershipApplication_{resultDto.Application.ApplicationId}.pdf";
+                            await _taskBoardService.AttachFile(taskItemId, pdfBytes, fileName);
+
+                            _logger.LogInformation("Successfully processed and attached PDF for ApplicationId {ApplicationId}.", resultDto.Application.ApplicationId);
+
                             await _newMemberAddedQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
-                            continue;
-                        }
-
-                        try
-                        {
-                            // Generate the PDF
-                            var pdfBytes = _pdfGeneratorService.GeneratePdf(resultDto.Application);
-
-                            // Check for existing ticket
-                            var taskItemId = await _taskBoardService.FindExistingApplicationItemIdAsync(resultDto.ApplicationId);
-
-                            if (taskItemId == null)
-                            {
-                                // Create the task item
-                                taskItemId = await _taskBoardService.CreateMemberApplicationAsync(resultDto);
-                            }
-
-                            if (taskItemId != null)
-                            {
-                                // Attach the PDF to the task
-                                var fileName = $"MembershipApplication_{resultDto.Application.ApplicationId}.pdf";
-                                await _taskBoardService.AttachFile(taskItemId, pdfBytes, fileName);
-
-                                _logger.LogInformation("Successfully processed and attached PDF for ApplicationId {ApplicationId}.", resultDto.Application.ApplicationId);
-
-                                // Remove the message from the queue
-                                await _newMemberAddedQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            lastError = ex;
-
-                            _logger.LogError(ex,
-                                "Error processing new member result for ApplicationId {ApplicationId}.",
-                                resultDto.Application.ApplicationId);
-
-                            // Exponential backoff before retry
-                            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, message.Message.DequeueCount)), stoppingToken);
                         }
                     }
                     catch (Exception ex)
                     {
                         lastError = ex;
 
-                        _logger.LogError(ex,
-                            "Unexpected error processing new member result for ApplicationId {ApplicationId}.",
-                            resultDto.Application.ApplicationId);
+                        _logger.LogError(ex, "Error processing ApplicationId {ApplicationId}.", resultDto.Application.ApplicationId);
+
+                        if (message.Message.DequeueCount >= maxAttempts)
+                        {
+                            await _newMemberAddedQueueService.DeadLetterEnqueueAsync(resultDto, message.Message.DequeueCount, DateTime.UtcNow, ex, stoppingToken);
+                            await _newMemberAddedQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
+                        }
+                        else
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, message.Message.DequeueCount)), stoppingToken);
+                        }
                     }
                 }
 

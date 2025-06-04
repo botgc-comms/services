@@ -15,12 +15,4 @@ namespace BOTGC.API.Models
         }
     }
 
-    public class DeadLetterEnvelope<T>
-    {
-        public T? OriginalMessage { get; set; } = default!;
-        public long DequeueCount { get; set; }
-        public DateTime FailedAt { get; set; }
-        public Exception? LastError { get; set; }
-    }
-
 }
