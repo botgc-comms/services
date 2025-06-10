@@ -47,6 +47,7 @@
                  id="panel-@i"
                  aria-hidden="@(i == 0 ? "false" : "true")">
             <h2>@quarter.PeriodDescription</h2>
+            <h4>@quarter.FromDate.ToString("dd MMMM yyyy") - @quarter.ToDate.ToString("dd MMMM yyyy")</h4>
 
             <table>
                 <thead>

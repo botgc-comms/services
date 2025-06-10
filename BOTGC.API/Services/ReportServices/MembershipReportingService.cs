@@ -120,9 +120,9 @@ namespace BOTGC.API.Services.ReportServices
 
                 dataPoints.Insert(0, dailyReportEntry);
 
-                if (IsMonthEnd(currentDate) || currentDate.Date == today.Date)
+                if (IsMonthEnd(currentDate) || currentDate.Date == today.Date.AddDays(-1))
                 {
-                    monthlySnapshots[currentDate] = CreateSnapshot(members, currentDate);
+                    monthlySnapshots[currentDate.Date] = CreateSnapshot(members, currentDate);
                 }
 
                 previousDayGroupings = todayActiveGroups;
@@ -387,6 +387,20 @@ namespace BOTGC.API.Services.ReportServices
                     throw new InvalidOperationException($"Quarterly snapshots are out of order! {fromSnapshot.SnapshotDate} is not before {toSnapshot.SnapshotDate}");
 
                 report.QuarterlyStats.Add(ComputeMembershipDelta(fromSnapshot, toSnapshot, GetPeriodDescription(toSnapshot.SnapshotDate)));
+            }
+
+            var today = DateTime.UtcNow.Date.AddDays(-1);
+
+            // only if we have a today-snapshot and it's past the last full quarter
+            if (monthlySnapshots.ContainsKey(today) && today > quarterEndDates.Last())
+            {
+                var fromSnapshot = monthlySnapshots[quarterEndDates.Last()];
+                var toSnapshot = monthlySnapshots[today];
+                var periodDesc = GetPeriodDescription(today); 
+                
+                report.QuarterlyStats.Add(
+                    ComputeMembershipDelta(fromSnapshot, toSnapshot, periodDesc)
+                );
             }
         }
 
