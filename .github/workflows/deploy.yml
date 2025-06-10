@@ -156,14 +156,20 @@ jobs:
           --settings GIT_COMMIT_SHA=${{ github.sha }}
 
     - name: Deploy to App Service
-      run: |
-        az webapp deploy --resource-group rg-botgcapps-prd \
-          --name ${{ needs.terraform.outputs.api_app_name }} \
-          --src-path published/api.zip \
-          --type zip \
-          --async true \
-          --timeout 1800000 \
-          --enable-kudu-warmup false
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ needs.terraform.outputs.api_app_name }}
+        package: ./published/api.zip
+    
+    # - name: Deploy to App Service
+    #   run: |
+    #     az webapp deploy --resource-group rg-botgcapps-prd \
+    #       --name ${{ needs.terraform.outputs.api_app_name }} \
+    #       --src-path published/api.zip \
+    #       --type zip \
+    #       --async true \
+    #       --timeout 1800000 \
+    #       --enable-kudu-warmup false
 
   deploy-leaderboards:
     runs-on: windows-latest
