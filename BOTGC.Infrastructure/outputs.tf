@@ -10,6 +10,10 @@ output "applicationform_app_name" {
   value = azurerm_linux_web_app.services_application_form.name
 }
 
+output "managementreports_app_name" {
+  value = azurerm_linux_web_app.services_mgntreports_form.name
+}
+
 output "cdn_base_url" {
   value = "https://${azurerm_cdn_endpoint.js_delivery.fqdn}"
 }

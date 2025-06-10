@@ -20,6 +20,7 @@ jobs:
       api_app_name: ${{ steps.get_api_app_name.outputs.api_app_name }}
       leaderboards_app_name: ${{ steps.get_leaderboards_app_name.outputs.leaderboards_app_name }}
       applicationform_app_name: ${{ steps.get_applicationform_app_name.outputs.applicationform_app_name }}
+      managementreports_app_name: ${{ steps.get_applicationform_app_name.outputs.managementreports_app_name }}
 
     steps:
     - name: Checkout code
@@ -91,6 +92,19 @@ jobs:
         applicationform_app_name=$(terraform output -raw applicationform_app_name)
         echo "applicationform_app_name=${applicationform_app_name}"
         echo "applicationform_app_name=${applicationform_app_name}" >> "$GITHUB_OUTPUT"
+      working-directory: BOTGC.Infrastructure
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+    - name: Get Management Reports App Name
+      id: get_managementreports_app_name
+      run: |
+        managementreports_app_name=$(terraform output -raw managementreports_app_name)
+        echo "managementreports_app_name=${managementreports_app_name}"
+        echo "managementreports_app_name=${managementreports_app_name}" >> "$GITHUB_OUTPUT"
       working-directory: BOTGC.Infrastructure
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -256,4 +270,50 @@ jobs:
           --overwrite
       env:
         AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+    
+  deploy-management-reports:
+    runs-on: windows-latest
+    needs: terraform
+  
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+  
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'
 
+    - name: Install Node Modules
+      run: npm install
+      working-directory: BOTGC.ManagementReports
+  
+    - name: Publish API
+      run: dotnet publish BOTGC.ManagementReports/BOTGC.ManagementReports.csproj -c Release -r linux-x64 --self-contained true -o published
+  
+    - name: Zip API for Deployment
+      run: Compress-Archive -Path * -DestinationPath managementreports.zip
+      working-directory: published
+      shell: pwsh
+  
+    - name: Install Azure CLI
+      run: |
+        Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
+        Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+      shell: powershell
+  
+    - name: Azure CLI Login
+      run: |
+        az login --service-principal `
+          -u ${{ secrets.AZURE_CLIENT_ID }} `
+          -p ${{ secrets.AZURE_CLIENT_SECRET }} `
+          --tenant ${{ secrets.AZURE_TENANT_ID }}
+      shell: powershell
+  
+    - name: Deploy to App Service
+      run: |
+        az webapp deploy --resource-group rg-botgcapps-prd `
+          --name ${{ needs.terraform.outputs.managementreports_app_name }} `
+          --src-path published/managementreports.zip `
+          --type zip
+      shell: powershell
