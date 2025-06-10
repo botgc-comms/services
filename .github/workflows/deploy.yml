@@ -161,7 +161,7 @@ jobs:
           --name ${{ needs.terraform.outputs.api_app_name }} \
           --src-path published/api.zip \
           --type zip \
-          --async
+          --async true
 
   deploy-leaderboards:
     runs-on: windows-latest
