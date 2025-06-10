@@ -149,10 +149,17 @@ app.MapHealthChecks("/health");
 app.UseWhen(context =>
     !context.Request.Path.StartsWithSegments("/swagger") &&
     !context.Request.Path.StartsWithSegments("/health") &&
+    !context.Request.Path.StartsWithSegments("/version") &&
     context.Request.Path != "/", 
     appBuilder =>
     {
         appBuilder.UseMiddleware<AuthKeyMiddleware>();
+});
+
+app.MapGet("/version", () =>
+{
+    var sha = builder.Configuration["GIT_COMMIT_SHA"] ?? "unknown";
+    return Results.Ok(sha);
 });
 
 app.UseSwagger();

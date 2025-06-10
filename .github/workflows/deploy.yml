@@ -148,14 +148,20 @@ jobs:
           -p ${{ secrets.AZURE_CLIENT_SECRET }} \
           --tenant ${{ secrets.AZURE_TENANT_ID }}
 
+    - name: Stamp commit into App Settings
+      run: |
+        az webapp config appsettings set \
+          --resource-group rg-botgcapps-prd \
+          --name ${{ needs.terraform.outputs.api_app_name }} \
+          --settings GIT_COMMIT_SHA=${{ github.sha }}
+
     - name: Deploy to App Service
-      env:
-        AZURE_HTTP_TIMEOUT: 600
       run: |
         az webapp deploy --resource-group rg-botgcapps-prd \
           --name ${{ needs.terraform.outputs.api_app_name }} \
           --src-path published/api.zip \
-          --type zip
+          --type zip \
+          --async
 
   deploy-leaderboards:
     runs-on: windows-latest
