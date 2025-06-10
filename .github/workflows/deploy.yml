@@ -137,10 +137,6 @@ jobs:
       run: zip -r api.zip . -x '*.git*'
       working-directory: published
 
-    - name: Install Azure CLI
-      run: |
-        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-
     - name: Azure CLI Login
       run: |
         az login --service-principal \
@@ -160,16 +156,6 @@ jobs:
       with:
         app-name: ${{ needs.terraform.outputs.api_app_name }}
         package: ./published/api.zip
-    
-    # - name: Deploy to App Service
-    #   run: |
-    #     az webapp deploy --resource-group rg-botgcapps-prd \
-    #       --name ${{ needs.terraform.outputs.api_app_name }} \
-    #       --src-path published/api.zip \
-    #       --type zip \
-    #       --async true \
-    #       --timeout 1800000 \
-    #       --enable-kudu-warmup false
 
   deploy-leaderboards:
     runs-on: windows-latest
@@ -192,11 +178,11 @@ jobs:
       working-directory: published
       shell: pwsh
 
-    - name: Install Azure CLI
-      run: |
-        Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
-        Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
-      shell: powershell
+    # - name: Install Azure CLI
+    #   run: |
+    #     Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
+    #     Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+    #   shell: powershell
 
     - name: Azure CLI Login
       run: |
@@ -207,14 +193,21 @@ jobs:
       shell: powershell
 
     - name: Deploy to App Service
-      env:
-        AZURE_HTTP_TIMEOUT: 600
-      run: |
-        az webapp deploy --resource-group rg-botgcapps-prd `
-          --name ${{ needs.terraform.outputs.leaderboards_app_name }} `
-          --src-path published/leaderboards.zip `
-          --type zip
-      shell: powershell
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ needs.terraform.outputs.leaderboards_app_name }}
+        package: ./published/leaderboards.zip
+
+
+    # - name: Deploy to App Service
+    #   env:
+    #     AZURE_HTTP_TIMEOUT: 600
+    #   run: |
+    #     az webapp deploy --resource-group rg-botgcapps-prd `
+    #       --name ${{ needs.terraform.outputs.leaderboards_app_name }} `
+    #       --src-path published/leaderboards.zip `
+    #       --type zip
+    #   shell: powershell
 
   deploy-applicationform:
     runs-on: windows-latest
@@ -241,11 +234,11 @@ jobs:
       working-directory: published
       shell: pwsh
   
-    - name: Install Azure CLI
-      run: |
-        Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
-        Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
-      shell: powershell
+    # - name: Install Azure CLI
+    #   run: |
+    #     Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
+    #     Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+    #   shell: powershell
   
     - name: Azure CLI Login
       run: |
@@ -256,14 +249,20 @@ jobs:
       shell: powershell
   
     - name: Deploy to App Service
-      env:
-        AZURE_HTTP_TIMEOUT: 600
-      run: |
-        az webapp deploy --resource-group rg-botgcapps-prd `
-          --name ${{ needs.terraform.outputs.applicationform_app_name }} `
-          --src-path published/membershipapplication.zip `
-          --type zip
-      shell: powershell
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ needs.terraform.outputs.applicationform_app_name }}
+        package: ./published/membershipapplication.zip
+
+    # - name: Deploy to App Service
+    #   env:
+    #     AZURE_HTTP_TIMEOUT: 600
+    #   run: |
+    #     az webapp deploy --resource-group rg-botgcapps-prd `
+    #       --name ${{ needs.terraform.outputs.applicationform_app_name }} `
+    #       --src-path published/membershipapplication.zip `
+    #       --type zip
+    #   shell: powershell
   
   upload-membership-embed:
     runs-on: ubuntu-latest
@@ -316,11 +315,11 @@ jobs:
       working-directory: published
       shell: pwsh
   
-    - name: Install Azure CLI
-      run: |
-        Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
-        Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
-      shell: powershell
+    # - name: Install Azure CLI
+    #   run: |
+    #     Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
+    #     Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+    #   shell: powershell
   
     - name: Azure CLI Login
       run: |
@@ -329,13 +328,19 @@ jobs:
           -p ${{ secrets.AZURE_CLIENT_SECRET }} `
           --tenant ${{ secrets.AZURE_TENANT_ID }}
       shell: powershell
-  
+
     - name: Deploy to App Service
-      env:
-        AZURE_HTTP_TIMEOUT: 600
-      run: |
-        az webapp deploy --resource-group rg-botgcapps-prd `
-          --name ${{ needs.terraform.outputs.managementreports_app_name }} `
-          --src-path published/managementreports.zip `
-          --type zip
-      shell: powershell
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ needs.terraform.outputs.managementreports_app_name }}
+        package: ./published/managementreportsv.zip
+        
+    # - name: Deploy to App Service
+    #   env:
+    #     AZURE_HTTP_TIMEOUT: 600
+    #   run: |
+    #     az webapp deploy --resource-group rg-botgcapps-prd `
+    #       --name ${{ needs.terraform.outputs.managementreports_app_name }} `
+    #       --src-path published/managementreports.zip `
+    #       --type zip
+    #   shell: powershell

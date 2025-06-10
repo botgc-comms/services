@@ -150,7 +150,8 @@ app.MapGet("/version", () =>
 {
     var sha = builder.Configuration["GIT_COMMIT_SHA"] ?? "unknown";
     return Results.Ok(sha);
-});
+})
+.AllowAnonymous();
 
 app.UseWhen(context =>
     !context.Request.Path.StartsWithSegments("/swagger") &&
