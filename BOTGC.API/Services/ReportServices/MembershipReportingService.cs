@@ -129,7 +129,6 @@ namespace BOTGC.API.Services.ReportServices
 
             EnsureMonthlyAndQuarterlyStats(report, monthlySnapshots);
             EnsureFullYearData(dataPoints, endOfCurrentSubsYear);
-            //ApplyGrowthTargets(dataPoints, startOfPreviousFinancialYear, endOfPreviousFinancialYear);
             ApplyGrowthTargets(dataPoints, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
 
             report.DataPoints = dataPoints.Where(dp => dp.Date >= startOfPreviousSubsYear && dp.Date <= endOfCurrentSubsYear).ToList();

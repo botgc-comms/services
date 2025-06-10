@@ -141,7 +141,7 @@ resource "azurerm_linux_web_app" "services_application_form" {
 }
 
 resource "azurerm_linux_web_app" "services_mgntreports_form" {
-  name                = "applicationform-${var.project_name}-${var.environment}"
+  name                = "mgntreports-${var.project_name}-${var.environment}"
   location            = azurerm_resource_group.services_api_rg.location
   resource_group_name = azurerm_resource_group.services_api_rg.name
   service_plan_id     = azurerm_service_plan.services_api_asp.id
