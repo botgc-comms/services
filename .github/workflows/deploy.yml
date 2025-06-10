@@ -20,7 +20,7 @@ jobs:
       api_app_name: ${{ steps.get_api_app_name.outputs.api_app_name }}
       leaderboards_app_name: ${{ steps.get_leaderboards_app_name.outputs.leaderboards_app_name }}
       applicationform_app_name: ${{ steps.get_applicationform_app_name.outputs.applicationform_app_name }}
-      managementreports_app_name: ${{ steps.get_applicationform_app_name.outputs.managementreports_app_name }}
+      managementreports_app_name: ${{ steps.get_managementreports_app_name.outputs.managementreports_app_name }}
 
     steps:
     - name: Checkout code
