@@ -1,6 +1,7 @@
 ﻿using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
+using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 
 namespace BOTGC.API.Services.ReportServices
 {
@@ -119,7 +120,7 @@ namespace BOTGC.API.Services.ReportServices
 
                 dataPoints.Insert(0, dailyReportEntry);
 
-                if (IsMonthEnd(currentDate))
+                if (IsMonthEnd(currentDate) || currentDate.Date == today.Date)
                 {
                     monthlySnapshots[currentDate] = CreateSnapshot(members, currentDate);
                 }
@@ -207,9 +208,16 @@ namespace BOTGC.API.Services.ReportServices
                    (date.Month == 12 && date.Day == 31);   // Q4 End (Dec 31)
         }
 
-        private int GetQuarterNumber(DateTime date)
+        private int GetQuarterNumber(DateTime d)
         {
-            return (date.Month - 1) / 3 + 1;
+            switch (d.Month)
+            {
+                case 12: return 1; // Dec → FY Q1
+                case 3: return 2;  // Mar → FY Q2
+                case 6: return 3;  // Jun → FY Q3
+                case 9: return 4;  // Sep → FY Q4
+                default: throw new InvalidOperationException("Not a fiscal quarter end");
+            }
         }
 
         private List<MembershipAnomalyDto> IdentifyAnomalies(List<MemberDto> members)
@@ -378,8 +386,20 @@ namespace BOTGC.API.Services.ReportServices
                 if (fromSnapshot.SnapshotDate >= toSnapshot.SnapshotDate)
                     throw new InvalidOperationException($"Quarterly snapshots are out of order! {fromSnapshot.SnapshotDate} is not before {toSnapshot.SnapshotDate}");
 
-                report.QuarterlyStats.Add(ComputeMembershipDelta(fromSnapshot, toSnapshot, $"Q{GetQuarterNumber(toSnapshot.SnapshotDate)} {toSnapshot.SnapshotDate.Year}"));
+                report.QuarterlyStats.Add(ComputeMembershipDelta(fromSnapshot, toSnapshot, GetPeriodDescription(toSnapshot.SnapshotDate)));
             }
+        }
+
+        private string GetPeriodDescription(DateTime snapshotDate)
+        {
+            var sd = snapshotDate;
+            int fq = GetQuarterNumber(sd);
+
+            // roll Dec into the next calendar year’s Q1 label
+            int labelYear = sd.Month == 12 ? sd.Year + 1 : sd.Year;
+            string suffix = (sd.Date == DateTime.UtcNow.Date) ? " (To Date)" : "";
+
+            return $"Q{fq} {labelYear % 100:00}{suffix}";
         }
 
         private void ApplyGrowthTargets(List<MembershipReportEntryDto> dataPoints, DateTime start, DateTime end)
@@ -404,7 +424,7 @@ namespace BOTGC.API.Services.ReportServices
 
         private MembershipDeltaDto ComputeMembershipDelta(MembershipSnapshotDto fromSnapshot, MembershipSnapshotDto toSnapshot, string periodDescription)
         {
-            // ✅ **Filter out future joiners from both snapshots**
+            // Filter out future joiners from both snapshots**
             var filteredFromMembers = fromSnapshot.Members
                 .Where(m => !m.JoinDate.HasValue || m.JoinDate!.Value <= fromSnapshot.SnapshotDate)
                 .ToDictionary(m => m.MemberNumber!.Value);
@@ -413,24 +433,24 @@ namespace BOTGC.API.Services.ReportServices
                 .Where(m => !m.JoinDate.HasValue || m.JoinDate!.Value <= toSnapshot.SnapshotDate)
                 .ToDictionary(m => m.MemberNumber!.Value);
 
-            // ✅ **Identify new members: They exist in `toSnapshot` but NOT in `fromSnapshot`**
+            // Identify new members: They exist in `toSnapshot` but NOT in `fromSnapshot`**
             var newMembers = filteredToMembers.Keys.Except(filteredFromMembers.Keys).ToList();
 
-            // ✅ **Identify leavers: They now have status "L" but did NOT in `fromSnapshot`**
+            // Identify leavers: They now have status "L" but did NOT in `fromSnapshot`**
             var leavers = filteredToMembers.Values
                 .Where(m => m.MembershipStatus == "L"
                             && filteredFromMembers.TryGetValue(m.MemberNumber!.Value, out var prevMember)
                             && prevMember.MembershipStatus != "L")
                 .ToList();
 
-            // ✅ **Identify deaths: They now have status "D" but did NOT in `fromSnapshot`**
+            // Identify deaths: They now have status "D" but did NOT in `fromSnapshot`**
             var deaths = filteredToMembers.Values
                 .Where(m => m.MembershipStatus == "D"
                             && filteredFromMembers.TryGetValue(m.MemberNumber!.Value, out var prevMember)
                             && prevMember.MembershipStatus != "D")
                 .ToList();
 
-            // ✅ **Category Changes: Members who exist in both but changed category**
+            // Category Changes: Members who exist in both but changed category**
             var categoryChanges = new Dictionary<string, int>();
 
             foreach (var member in filteredToMembers.Values)

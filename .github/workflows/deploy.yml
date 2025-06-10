@@ -149,6 +149,8 @@ jobs:
           --tenant ${{ secrets.AZURE_TENANT_ID }}
 
     - name: Deploy to App Service
+      env:
+        AZURE_HTTP_TIMEOUT: 600
       run: |
         az webapp deploy --resource-group rg-botgcapps-prd \
           --name ${{ needs.terraform.outputs.api_app_name }} \
@@ -191,6 +193,8 @@ jobs:
       shell: powershell
 
     - name: Deploy to App Service
+      env:
+        AZURE_HTTP_TIMEOUT: 600
       run: |
         az webapp deploy --resource-group rg-botgcapps-prd `
           --name ${{ needs.terraform.outputs.leaderboards_app_name }} `
@@ -238,6 +242,8 @@ jobs:
       shell: powershell
   
     - name: Deploy to App Service
+      env:
+        AZURE_HTTP_TIMEOUT: 600
       run: |
         az webapp deploy --resource-group rg-botgcapps-prd `
           --name ${{ needs.terraform.outputs.applicationform_app_name }} `
@@ -311,6 +317,8 @@ jobs:
       shell: powershell
   
     - name: Deploy to App Service
+      env:
+        AZURE_HTTP_TIMEOUT: 600
       run: |
         az webapp deploy --resource-group rg-botgcapps-prd `
           --name ${{ needs.terraform.outputs.managementreports_app_name }} `
