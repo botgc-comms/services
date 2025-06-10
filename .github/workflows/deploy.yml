@@ -161,7 +161,9 @@ jobs:
           --name ${{ needs.terraform.outputs.api_app_name }} \
           --src-path published/api.zip \
           --type zip \
-          --async true
+          --async true \
+          --timeout 1800000 \
+          --enable-kudu-warmup false
 
   deploy-leaderboards:
     runs-on: windows-latest
