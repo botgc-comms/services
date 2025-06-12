@@ -36,6 +36,8 @@ public class MembershipController : Controller
         var newApplication = new MembershipApplication.Models.MembershipApplication();
         var categories = await _categoryCache.GetAll();
 
+        var suppressLogoParam = Request.Query["suppressLogo"];
+
         // This is the only line you need to pass to JS
         ViewData["MembershipCategories"] = categories;
         ViewData["GrowSurfCampaignId"] = _settings.GrowSurfSettings.CampaignId;
