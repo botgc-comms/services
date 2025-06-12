@@ -75,3 +75,9 @@ th {
     background-color: #f0f0f0;
     font-weight: 600;
 }
+
+input[type="date"] {
+    -webkit-appearance: textfield !important;
+    appearance: textfield;
+    background: white;
+}

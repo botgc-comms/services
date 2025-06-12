@@ -411,7 +411,7 @@ namespace BOTGC.API.Services.ReportServices
 
             // roll Dec into the next calendar year’s Q1 label
             int labelYear = sd.Month == 12 ? sd.Year + 1 : sd.Year;
-            string suffix = (sd.Date == DateTime.UtcNow.Date) ? " (To Date)" : "";
+            string suffix = (sd.Date == DateTime.UtcNow.Date.AddDays(-1)) ? " (To Date)" : "";
 
             return $"Q{fq} {labelYear % 100:00}{suffix}";
         }
