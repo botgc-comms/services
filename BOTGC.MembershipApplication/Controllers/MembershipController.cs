@@ -36,12 +36,18 @@ public class MembershipController : Controller
         var newApplication = new MembershipApplication.Models.MembershipApplication();
         var categories = await _categoryCache.GetAll();
 
-        var suppressLogoParam = Request.Query["suppressLogo"];
-
+        var supressLogo = "false";
+        var suppressLogoParamKey = Request.Query.Keys.FirstOrDefault(k => k.ToLower() == "suppresslogo");
+        if (!string.IsNullOrEmpty(suppressLogoParamKey))
+        {
+            supressLogo = string.Equals(suppressLogoParamKey, "true", StringComparison.OrdinalIgnoreCase) ? "true": "false";
+        }
+            
         // This is the only line you need to pass to JS
         ViewData["MembershipCategories"] = categories;
         ViewData["GrowSurfCampaignId"] = _settings.GrowSurfSettings.CampaignId;
         ViewData["GetAddressApiKey"] = _settings.GetAddressIOSettings.ApiKey;
+        ViewData["SupressLogo"] = supressLogo;
 
         // Store the referrer in TempData so we can pass it along on POST
         var referrerId = _referrerService.GetReferrerId();

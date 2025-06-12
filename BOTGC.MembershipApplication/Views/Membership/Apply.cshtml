@@ -4,6 +4,7 @@
 
 @{
     var nonce = Context.Items["CSPNonce"] as string ?? "";
+    var supressLogo = string.Equals(ViewData["SupressLogo"]?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
 }
 
 @{
@@ -33,6 +34,15 @@
     }
 
     @await Html.PartialAsync("_GrowSurfScript")
+}
+
+@if (!supressLogo)
+{
+    <div class="text-center mb-4 club-logo">
+        <img src="~/img/Burton%20on%20Trent%20%20-%201894.png"
+             alt="Burton on Trent Golf Club logo"
+             class="mx-auto d-block" />
+    </div>
 }
 
 <h1 id="membership-form-heading">Application Form</h1>
