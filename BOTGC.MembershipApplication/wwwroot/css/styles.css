@@ -434,4 +434,15 @@ h1, h2 {
   margin: 0.5em 0;
 }
 
+.club-logo img {
+  width: 23vw;
+}
+
+input[type=date] {
+  -webkit-appearance: textfield !important;
+  -webkit-min-logical-width: calc(100% - 16px);
+  appearance: textfield;
+  background: white;
+}
+
 /*# sourceMappingURL=styles.css.map */

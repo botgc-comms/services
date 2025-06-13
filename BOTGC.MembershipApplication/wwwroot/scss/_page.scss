@@ -256,5 +256,8 @@ h1, h2 {
 }
 
 .club-logo {
-    width: 23vw;
+    img {
+        width: 23vw;
+        max-width: 18em;
+    }
 }

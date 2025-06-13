@@ -1,4 +1,4 @@
-name: Deploy Infrastructure and API
+﻿name: Deploy Infrastructure and API
 
 on:
   push:
@@ -208,8 +208,12 @@ jobs:
     - name: Install Node Modules
       run: npm install
       working-directory: BOTGC.MembershipApplication
+
+    - name: Build SCSS → CSS
+      run: npm run sass:build
+      working-directory: BOTGC.MembershipApplication
   
-    - name: Publish API
+    - name: Publish Application Form
       run: dotnet publish BOTGC.MembershipApplication/BOTGC.MembershipApplication.csproj -c Release -r linux-x64 --self-contained true -o published
   
     - name: Zip API for Deployment
@@ -274,7 +278,7 @@ jobs:
       run: npm install
       working-directory: BOTGC.ManagementReports
   
-    - name: Publish API
+    - name: Publish Management Reports
       run: dotnet publish BOTGC.ManagementReports/BOTGC.ManagementReports.csproj -c Release -r linux-x64 --self-contained true -o published
   
     - name: Zip API for Deployment
