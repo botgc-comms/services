@@ -9811,22 +9811,32 @@ var FingerprintJS=function(e){"use strict";var n=function(){return n=Object.assi
 function updateMembershipDescription() {
     const selectedValue = $('#MembershipCategory').val();
     const selected = membershipCategories.find(c => c.name === selectedValue);
-    const $desc = $('#membership-description');
-
-    let description = selected?.description || '';
 
     $('#finance-section').toggle(!!selected?.financeAvailable);
 
+    let descriptionText = selected?.description || '';
+
     const hasReferrer = $('#ReferrerId').val();
     if (hasReferrer) {
-        if (selected?.referrerEligable) {
-            description += ' <strong>Great news – this category qualifies for our referral reward scheme.</strong>';
-        } else {
-            description += ' <strong>Note: This category is not eligible for the referral reward scheme.</strong>';
-        }
+        descriptionText += selected?.referrerEligable
+            ? ' <strong>Great news – this category qualifies for our referral reward scheme.</strong>'
+            : ' <strong>Note: This category is not eligible for the referral reward scheme.</strong>';
     }
 
-    $desc.html(description).toggle(!!selected);
+    if (selected) {
+        const html = `
+<div class="membership-info">
+  <p class="membership-price">Price: ${selected.price}</p>
+  <p class="membership-description">${descriptionText}</p>
+</div>`;
+        $('#membership-description')
+            .html(html)
+            .show();
+    } else {
+        $('#membership-description')
+            .empty()
+            .hide();
+    }
 }
 
 window.enableAutocomplete = async function (apiKey) {

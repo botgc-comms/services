@@ -261,3 +261,26 @@ h1, h2 {
         max-width: 18em;
     }
 }
+
+.membership-info {
+    background-color: #f8f9f9;
+    border: 1px solid #dde0e3;
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-top: 1rem;
+    font-family: Arial, sans-serif;
+}
+
+.membership-price {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    colour: #2c3e50;
+}
+
+.membership-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    colour: #4a4a4a;
+}

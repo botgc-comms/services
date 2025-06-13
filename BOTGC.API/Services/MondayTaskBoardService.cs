@@ -438,6 +438,7 @@ namespace BOTGC.API.Services
                     Name = name,
                     Title = GetColumnText(columnMap["Description"]),
                     Description = GetText(GetColumnValue(columnMap["Information"])),
+                    Price = columnMap.TryGetValue("Price", out var priceColId) ? GetColumnText(priceColId) : "",
                     FinanceAvailable = IsChecked(GetColumnValue(columnMap["Finance Eligible"])),
                     ReferrerEligable = IsChecked(GetColumnValue(columnMap["Referrer Eligible"])),
                     IsOnWaitingList = IsChecked(GetColumnValue(columnMap["Waiting List"])),

@@ -142,16 +142,19 @@ builder.Services.AddIGSupport();
 var app = builder.Build();
 
 app.MapGet("/", () => Results.Ok("Service is running"))
-   .AllowAnonymous();
+   .AllowAnonymous()
+   .ExcludeFromDescription();
 
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health")
+    .ExcludeFromDescription();
 
 app.MapGet("/version", () =>
 {
     var sha = builder.Configuration["GIT_COMMIT_SHA"] ?? "unknown";
     return Results.Ok(sha);
 })
-.AllowAnonymous();
+.AllowAnonymous()
+.ExcludeFromDescription();
 
 app.UseWhen(context =>
     !context.Request.Path.StartsWithSegments("/swagger") &&
