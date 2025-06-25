@@ -462,11 +462,133 @@ h1, h2 {
   colour: #4a4a4a;
 }
 
-input[type=date] {
-  -webkit-appearance: textfield !important;
-  -webkit-min-logical-width: calc(100% - 16px);
-  appearance: textfield;
-  background: white;
+.membership-categories {
+  margin-top: 1rem;
+  font-weight: 300;
+  font-size: 1rem;
+  width: 80vw;
+  max-width: 50rem;
+  text-align: justify;
+}
+
+.category-group-heading {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 0.5rem;
+  text-align: left;
+}
+
+.category-table {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.category-row {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #fafafa;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.category-title {
+  font-size: 1.1rem;
+}
+
+.category-price {
+  background-color: #eee;
+  color: #222;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.category-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.category-price {
+  font-weight: normal;
+  font-size: 1rem;
+  color: #666;
+}
+
+.category-description {
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.4;
+}
+
+.category-row.waiting-list {
+  border-left: 4px solid #c00;
+  background-color: #fff5f5;
+}
+
+.waiting-list-message {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #a00;
+  font-weight: 500;
+}
+
+.category-group-description {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  color: #444;
+}
+
+.junior-membership-highlight {
+  margin-top: 1rem;
+  font-weight: 300;
+  font-size: 1rem;
+  width: 80vw;
+  max-width: 50rem;
+  text-align: justify;
+}
+
+.junior-membership-highlight h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #1e90ff;
+}
+
+@supports (-webkit-touch-callout: none) {
+  select {
+    color: #222 !important;
+    background-color: #fff !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+  input[type=date] {
+    -webkit-appearance: textfield !important;
+    appearance: textfield !important;
+    background: white !important;
+    height: 42px !important;
+    padding: 10px !important;
+    font-size: 0.875rem !important;
+    border: 1px solid #ccc !important;
+    border-radius: 5px !important;
+    box-sizing: border-box !important;
+    line-height: normal !important;
+  }
 }
 
 /*# sourceMappingURL=styles.css.map */

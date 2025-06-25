@@ -4,12 +4,13 @@
 
 @{
     var nonce = Context.Items["CSPNonce"] as string ?? "";
+    var supressLogo = string.Equals(ViewData["SupressLogo"]?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
 }
 
 @{
-    ViewData["Title"] = "Application Form";
+    ViewData["Title"] = "Membership Categories";
 
-  var categoryGroups = ViewData["MembershipCategories"] as List<MembershipCategoryGroup> ?? new();
+    var categoryGroups = ViewData["MembershipCategories"] as List<MembershipCategoryGroup> ?? new();
     var categories = categoryGroups.SelectMany(g => g.Categories).ToList();
 
     var categoriesJson = JsonSerializer.Serialize(
@@ -22,231 +23,84 @@
     <script nonce="@nonce">
         const membershipCategories = @Html.Raw(categoriesJson);
     </script>
-
-    @if (Env.IsDevelopment())
-    {
-        <script nonce="@nonce" src="~/js/dist/membership.bundle.js"></script>
-    }
-    else
-    {
-        <script nonce="@nonce" src="~/js/dist/membership.bundle.min.js"></script>
-    }
-
-    @await Html.PartialAsync("_GrowSurfScript")
 }
 
-<h1 id="membership-form-heading">Application Form</h1>
+@if (!supressLogo)
+{
+    <div class="text-center mb-4 club-logo">
+        <img src="~/img/Burton%20on%20Trent%20%20-%201894.png"
+             alt="Burton on Trent Golf Club logo"
+             class="mx-auto d-block" />
+    </div>
+}
+
+<h1 id="membership-form-heading">Memebrship Categories</h1>
 
 <section class="membership-intro">
-    @if (!String.IsNullOrEmpty(Model.ReferrerId) && !String.IsNullOrEmpty(Model.ReferrerName))
+    <p>We’re currently welcoming new membership applications across a wide range of categories. Most do not have a joining fee or waiting list — and you don’t need a proposer or seconder to apply.</p>
+
+    <p>If you’re unsure which category is right for you, or want to check availability, please contact the Club Manager on 01283 544551 (Option 1) or email <a href="mailto:clubmanager@botgc.co.uk">clubmanager@botgc.co.uk</a></p>
+</section>
+
+<section class="membership-categories">
+    @foreach (var group in categoryGroups)
     {
-            <div class="referral-banner">
-                <h2>
-                    Great news – your friend @Model.ReferrerName has recommended you to join us!
-                </h2>
-                <p>
-                    When you become a playing member, both you and @Model.ReferrerName will each receive <strong>£50 credit</strong> in your clubhouse accounts as a thank-you. 
-                </p>
-                <p class="small text-muted">
-                    *Referral reward applies to full, 5-day, 6-day, intermediate, and flexi memberships only.
-                </p>
-            </div>
+        var categoriesToShow = group.Categories.Where(c => c.Display).ToList();
+        if (!categoriesToShow.Any()) continue;
+
+        <h2 class="category-group-heading">@group.Name</h2>
+
+        @if (group.Name == "Full Playing Memberships")
+        {
+            <p class="category-group-description">
+                These categories offer full access to the course and facilities, either seven days a week or on selected days. They’re ideal for regular golfers who want to play competitively or recreationally.
+            </p>
+        }
+        else if (group.Name == "Special Categories")
+        {
+            <p class="category-group-description">
+                These membership options include junior, student, social and clubhouse access. They’re designed for more casual use of the club, or to support younger golfers and family members.
+            </p>
+        }
+
+        <div class="category-table">
+            @foreach (var cat in categoriesToShow)
+            {
+                var rowClass = cat.IsOnWaitingList ? "category-row waiting-list" : "category-row";
+
+                <div class="@rowClass">
+                    <div class="category-header">
+                        <strong class="category-title">@cat.Title</strong>
+                        <span class="category-price">@cat.Price</span>
+                    </div>
+                    <div class="category-description">
+                        @Html.Raw(cat.Description)
+
+                        @if (cat.IsOnWaitingList)
+                        {
+                            <div class="waiting-list-message">This category currently has a waiting list.</div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
     }
+</section>
 
-    <p>We’re currently welcoming new membership applications with <strong>no joining fee</strong> and <strong>no waiting list</strong>. Whether you’re an experienced golfer, new to the game, or just keen to enjoy the social side of the club, we’d love to hear from you. There’s no need for a proposer or seconder — simply complete the form below to apply.</p>
-
-    <p>Once we receive your application, we’ll invite you to visit the club and meet a member of our membership committee. It’s a relaxed opportunity to explore the facilities, ask questions, and get to know us.</p>
-
-    <p>If your application is successful, we’ll send you your joining instructions and payment details — and that’s it, you’ll be part of the club!</p>
-
-    <p>Not sure which membership is right for you? <a href="#" target="_blank">See our full list of membership options</a> to find the one that suits you best.</p>
+<section class="membership-categories">
+    <h2 class="category-group-heading">Junior Membership</h2>
+    <p class ="category-group-description">
+        We are proud to have a vibrant and growing junior section with over 60 young members of all ages and abilities. Whether your child is entirely new to golf or already developing their skills, our junior membership is a fantastic way to get started, improve their game, and make new friends.
+    </p>
+    <p class="category-group-description">
+        We currently offer a free first-year membership to all juniors up to and including the age of 17. From fun social activities to friendly and competitive golf events, there are plenty of opportunities to enjoy the game both on and off the course. Juniors benefit from regular coaching, access to club competitions, and a welcoming, inclusive environment.
+    </p>
+    <p class="category-group-description">
+        To find out more about our junior section or to get involved, please contact our team at
+        <a href="mailto:juniors@botgc.co.uk">juniors@botgc.co.uk</a>.
+    </p>
 </section>
 
 
-<div id="error-summary" tabindex="-1" class="sr-only" aria-hidden="true">There are validation errors on the form</div>
-
-<form class="membership-form" asp-action="Apply" method="post" novalidate aria-labelledby="membership-form-heading">
-    @Html.AntiForgeryToken()
-
-    @Html.HiddenFor(m => m.ReferrerId)
-    @Html.HiddenFor(m => m.ReferrerName)
-    @Html.HiddenFor(m => m.Fingerprint)
-
-    <div asp-validation-summary="All" role="alert" aria-live="assertive"></div>
-
-    <fieldset>
-        <legend class="sr-only">Membership Application Details</legend>
-
-        <div class="form-group">
-            <label asp-for="MembershipCategory">Type of Membership<span aria-hidden="true">*</span></label>
-
-            <select asp-for="MembershipCategory" class="form-control" aria-required="true">
-                <option value="">Please select a membership type</option>
-
-                @foreach (var group in categoryGroups.OrderBy(g => g.Order))
-                {
-                    <optgroup label="@group.Name">
-                        @foreach (var category in group.Categories.Where(c => c.Display))
-                        {
-                            <option value="@category.Name"
-                                    data-description="@category.Description"
-                                    data-finance="@category.FinanceAvailable.ToString().ToLowerInvariant()">
-                                @category.Title
-                            </option>
-                        }
-                    </optgroup>
-                }
-            </select>
-
-            <span asp-validation-for="MembershipCategory" class="text-danger"></span>
-            <div id="membership-description" class="mt-2 text-muted" aria-live="polite"></div>
-        </div>
-
-        <div class="form-group">
-            <label for="Gender">Gender<span aria-hidden="true">*</span></label>
-            <select asp-for="Gender" class="form-control" required aria-required="true">
-                <option disabled selected value="">Please select</option>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
-            </select>
-            <span class="text-muted" id="genderNote" style="display:none;">
-                Please note: To comply with <a href="https://www.randa.org/en/articles/the-r-a-introduces-fair-competition-policy-for-its-professional-and-elite-amateur-championships" target="_blank" rel="noopener noreferrer">R&amp;A guidance on fair competition</a>, we may need to know the gender assigned at birth if you intend to compete in club or county-level events. This information will be handled sensitively and in confidence.
-            </span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Title">Title<span aria-hidden="true">*</span></label>
-            <select asp-for="Title" required aria-required="true">
-                <option disabled selected value="">Please select</option>
-                <option>Mr.</option>
-                <option>Mrs.</option>
-                <option>Ms.</option>
-                <option>Miss</option>
-                <option>Dr.</option>
-            </select>
-            <span asp-validation-for="Title"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Forename">Forename<span aria-hidden="true">*</span></label>
-            <input asp-for="Forename" required aria-required="true" autocomplete="given-name" />
-            <span asp-validation-for="Forename"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Surname">Surname<span aria-hidden="true">*</span></label>
-            <input asp-for="Surname" required aria-required="true" autocomplete="family-name" />
-            <span asp-validation-for="Surname"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="DateOfBirth">Date of Birth<span aria-hidden="true">*</span></label>
-            <input asp-for="DateOfBirth" type="date" required aria-required="true" autocomplete="bday" />
-            <span asp-validation-for="DateOfBirth"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Telephone">Mobile Telephone<span aria-hidden="true">*</span></label>
-            <input asp-for="Telephone" required aria-required="true" autocomplete="tel" />
-            <span asp-validation-for="Telephone"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="AlternativeTelephone">Alternative Telephone</label>
-            <input asp-for="AlternativeTelephone" autocomplete="tel" />
-            <span asp-validation-for="AlternativeTelephone"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Email">Email Address<span aria-hidden="true">*</span></label>
-            <input asp-for="Email" type="email" required aria-required="true" autocomplete="email" aria-describedby="emailHelp" />
-            <small id="emailHelp" class="form-text text-muted">We’ll never share your email address.</small>
-            <span asp-validation-for="Email"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="AddressLine1">First Address Line<span aria-hidden="true">*</span></label>
-            <input asp-for="AddressLine1" id="AddressLine1" required aria-required="true" autocomplete="address-line1" />
-            <small id="address-help" class="form-text text-muted">Start typing your address and select it from the list, or complete the fields manually.</small>
-            <span asp-validation-for="AddressLine1"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="AddressLine2">Second Address Line</label>
-            <input asp-for="AddressLine2" id="AddressLine2" autocomplete="address-line2" />
-            <span asp-validation-for="AddressLine2"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Town">Town / City<span aria-hidden="true">*</span></label>
-            <input asp-for="Town" id="Town" required aria-required="true" autocomplete="address-level2" />
-            <span asp-validation-for="Town"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="County">County</label>
-            <input asp-for="County" id="County" autocomplete="address-level1" />
-            <span asp-validation-for="County"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Postcode">Postcode<span aria-hidden="true">*</span></label>
-            <input asp-for="Postcode" id="Postcode" required aria-required="true" autocomplete="postal-code" />
-            <span asp-validation-for="Postcode"></span>
-        </div>
-
-        <div class="form-check flex mb-3">
-            <input class="form-check-input" asp-for="HasCdhId" type="checkbox" id="HasCdhId" />
-            <label class="form-check-label" for="HasCdhId">
-                If you are a golfer with a handicap, you’ll likely have a CDH number. Tick this box to enter it.
-            </label>
-        </div>
-
-        <div class="form-group" id="cdh-section" style="display:none;">
-            <label asp-for="CdhId">CDH ID</label>
-            <input asp-for="CdhId" autocomplete="off" />
-            <span asp-validation-for="CdhId"></span>
-        </div>
-
-        <div class="form-group mb-3" id="finance-section" style="display: none;" data-if-finance-available="true">
-            <label class="form-label d-block">Are you looking to arrange finance to pay your membership fees?</label>
-
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="ArrangeFinance" id="ArrangeFinanceYes" value="true">
-                <label class="form-check-label" for="ArrangeFinanceYes">Yes</label>
-            </div>
-
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="ArrangeFinance" id="ArrangeFinanceNo" value="false" checked>
-                <label class="form-check-label" for="ArrangeFinanceNo">No</label>
-            </div>
-        </div>
-
-        <div class="form-check mb-3">
-            <input asp-for="AgreeToClubRules" class="form-check-input" type="checkbox" />
-            <label class="form-check-label" for="AgreeToClubRules">
-                I confirm that I have read and agree to the
-                <a href="/documents/club-rules.pdf" target="_blank" rel="noopener noreferrer">Club Rules</a>
-                <span aria-hidden="true">*</span>
-            </label>
-        </div>
-        <span asp-validation-for="AgreeToClubRules" class="text-danger"></span>
-
-        <p class="text-muted mt-4">
-            By submitting this application, you consent to the processing of your personal data in accordance with our
-            <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
-        </p>
-
-        <button id="submit-button" type="submit" aria-busy="false">Submit Application</button>
-        <span id="form-loading" class="sr-only" aria-hidden="true">Submitting...</span>
-    </fieldset>
-</form>
-
 @section Scripts {
-    <script nonce="@nonce">
-        document.addEventListener('DOMContentLoaded', function () {
-            const apiKey = '@ViewData["GetAddressApiKey"]';
-            enableAutocomplete(apiKey);
-        });
-    </script>
 }

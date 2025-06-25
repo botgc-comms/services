@@ -123,4 +123,23 @@ public class MembershipController : Controller
 
         return View();
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Categories()
+    {
+        var categories = await _categoryCache.GetAll();
+
+        var supressLogo = "false";
+        var suppressLogoParamKey = Request.Query.Keys.FirstOrDefault(k => k.ToLower() == "suppresslogo");
+        if (!string.IsNullOrEmpty(suppressLogoParamKey))
+        {
+            supressLogo = string.Equals(suppressLogoParamKey, "true", StringComparison.OrdinalIgnoreCase) ? "true" : "false";
+        }
+
+        // This is the only line you need to pass to JS
+        ViewData["MembershipCategories"] = categories;
+        ViewData["SupressLogo"] = supressLogo;
+
+        return View();
+    }
 }

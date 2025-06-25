@@ -1,7 +1,22 @@
 
-input[type="date"] {
-    -webkit-appearance: textfield !important;
-    -webkit-min-logical-width: calc(100% - 16px);
-    appearance: textfield;
-    background: white;
+@supports (-webkit-touch-callout: none) {
+    select {
+        color: #222 !important;
+        background-color: #fff !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
+    input[type="date"] {
+        -webkit-appearance: textfield !important;
+        appearance: textfield !important;
+        background: white !important;
+        height: 42px !important; 
+        padding: 10px !important;
+        font-size: 0.875rem !important;
+        border: 1px solid #ccc !important;
+        border-radius: 5px !important;
+        box-sizing: border-box !important;
+        line-height: normal !important;
+    }
 }
