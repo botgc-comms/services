@@ -329,6 +329,16 @@ h1, h2 {
     font-size: 1.1rem;
 }
 
+.category-mob-title {
+    font-size: 1.1rem;
+}
+
+.category-mob-title,
+.category-mob-subtitle,
+.category-mob-price {
+    display: none;
+}
+
 .category-price {
     background-color: #eee;
     color: #222;
@@ -339,6 +349,12 @@ h1, h2 {
     white-space: nowrap;
 }
 
+.category-price-container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
 .category-title {
     display: flex;
     justify-content: space-between;
@@ -346,12 +362,6 @@ h1, h2 {
     font-size: 1.2rem;
     font-weight: bold;
     margin-bottom: 0.5rem;
-}
-
-.category-price {
-    font-weight: normal;
-    font-size: 1rem;
-    color: #666;
 }
 
 .category-description {
@@ -391,4 +401,45 @@ h1, h2 {
     margin-top: 0;
     font-size: 1.5rem;
     color: #1e90ff;
+}
+
+@media (max-width: 600px) {
+    .category-header {
+        flex-direction: column;
+        align-items: flex-start;
+        position: relative;
+        padding-bottom: 1rem; 
+    }
+
+    .category-title {
+        display: none;
+    }
+
+    .category-mob-title,
+    .category-mob-subtitle {
+        display: block;
+        line-height: 1.3;
+    }
+
+    .category-mob-subtitle {
+        font-weight: 400;
+        color: #666;
+        font-size: 0.95rem;
+        margin-top: 0.2rem;
+    }
+
+    .category-price {
+        display: none;
+    }
+
+    .category-mob-price {
+        display: inline-block;
+        font-weight: 600;
+        background-color: #e8f0fa;
+        color: #1d3557;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        white-space: nowrap;
+        margin-top: 1rem;
+    }
 }

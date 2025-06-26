@@ -1,4 +1,6 @@
 ﻿@using System.Text.Json
+@using System.Text.RegularExpressions
+
 @model BOTGC.MembershipApplication.Models.MembershipApplication
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
 
@@ -39,7 +41,7 @@
 <section class="membership-intro">
     <p>We’re currently welcoming new membership applications across a wide range of categories. Most do not have a joining fee or waiting list — and you don’t need a proposer or seconder to apply.</p>
 
-    <p>If you’re unsure which category is right for you, or want to check availability, please contact the Club Manager on 01283 544551 (Option 1) or email <a href="mailto:clubmanager@botgc.co.uk">clubmanager@botgc.co.uk</a></p>
+    <p>If you’re unsure which category is right for you, or want to check availability, please contact the Club Manager on 01283 544551 or email <a href="mailto:clubmanager@botgc.co.uk">clubmanager@botgc.co.uk</a></p>
 </section>
 
 <section class="membership-categories">
@@ -66,11 +68,28 @@
         <div class="category-table">
             @foreach (var cat in categoriesToShow)
             {
+                string mobMain = cat.Title;
+                string? mobSub = null;
+
+                var match = Regex.Match(cat.Title, @"^(.*?)\s*(?:–\s*(.*)|-\s*(.*)|\((.*?)\))$");
+                if (match.Success)
+                {
+                    mobMain = match.Groups[1].Value.Trim();
+                    mobSub = match.Groups[2].Success ? match.Groups[2].Value.Trim()
+                    : match.Groups[3].Success ? match.Groups[3].Value.Trim()
+                    : match.Groups[4].Value.Trim();
+                }
+
                 var rowClass = cat.IsOnWaitingList ? "category-row waiting-list" : "category-row";
 
                 <div class="@rowClass">
                     <div class="category-header">
                         <strong class="category-title">@cat.Title</strong>
+                        <strong class="category-mob-title">@mobMain</strong>
+                        @if (!string.IsNullOrEmpty(mobSub))
+                        {
+                            <strong class="category-mob-subtitle">@mobSub</strong>
+                        }
                         <span class="category-price">@cat.Price</span>
                     </div>
                     <div class="category-description">
@@ -80,6 +99,10 @@
                         {
                             <div class="waiting-list-message">This category currently has a waiting list.</div>
                         }
+                    </div>
+
+                    <div class="category-price-container">
+                        <span class="category-mob-price">@cat.Price</span>
                     </div>
                 </div>
             }

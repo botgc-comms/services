@@ -1,4 +1,6 @@
-﻿@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+﻿@using Microsoft.Extensions.Hosting
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+
 @{
     var nonce = Context.Items["CSPNonce"] as string ?? "";
 }
@@ -10,8 +12,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Membership Application</title>
 
-    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
-
     @if (Env.IsDevelopment())
     {
         <script nonce="@nonce" src="~/js/dist/vendor.bundle.js"></script>
@@ -20,6 +20,9 @@
     {
         <script nonce="@nonce" src="~/js/dist/vendor.bundle.min.js"></script>
     }
+
+    <link rel="icon" type="image/png" href="@Url.Content("~/img/Burton on Trent  - favicon.png")" />
+    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
 
     @RenderSection("Head", required: false)
 </head>
