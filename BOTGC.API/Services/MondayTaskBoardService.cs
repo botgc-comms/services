@@ -85,13 +85,16 @@ namespace BOTGC.API.Services
             return null;
         }
 
-        private string MapMembershipCategoryToListItem(string membershipCategory)
+        private string MapMembershipCategoryToListItem(string membershipCategory, DateTime dateOfBirth)
         {
+            var age = CalculateAge(dateOfBirth);
+
             string categoryName = membershipCategory switch
             {
+                "7Day" when age >= 22 && age <= 29 => "Intermediate",
                 "7Day" => "7 Day",
-                "6Day" => "6 Day", 
-                "5Day" => "5 Day", 
+                "6Day" => "6 Day",
+                "5Day" => "5 Day",
                 "Intermediate" => "Intermediate",
                 "Student" => "Student",
                 "Junior" => "Junior",
@@ -103,6 +106,19 @@ namespace BOTGC.API.Services
             };
 
             return categoryName;
+        }
+
+        private static int CalculateAge(DateTime dateOfBirth)
+        {
+            var today = DateTime.Today;
+            var age = today.Year - dateOfBirth.Year;
+
+            if (dateOfBirth.Date > today.AddYears(-age))
+            {
+                age--;
+            }
+
+            return age;
         }
 
         public async Task<string> CreateMemberApplicationAsync(NewMemberApplicationResultDto applicationResult)
@@ -133,7 +149,7 @@ namespace BOTGC.API.Services
             var columnValuesObject = new Dictionary<string, object?>
             {
                 ["status"] = new { label = "Working on it" },
-                ["color_mkq7h26c"] = new { label = MapMembershipCategoryToListItem(dto.MembershipCategory) },
+                ["color_mkq7h26c"] = new { label = MapMembershipCategoryToListItem(dto.MembershipCategory, dto.DateOfBirth) },
                 ["date4"] = new { date = dto.ApplicationDate.ToString("yyyy-MM-dd") },
                 ["text_mkq639pw"] = name,
                 ["text_mkq6xbq4"] = dto.Telephone,

@@ -637,6 +637,13 @@ h1, h2 {
     min-width: 0 !important;
     text-align: left !important;
   }
+  input[type=date]::-webkit-datetime-edit {
+    text-align: left !important;
+  }
+  input[type=date]::-webkit-inner-spin-button,
+  input[type=date]::-webkit-clear-button {
+    display: none !important;
+  }
 }
 
 /*# sourceMappingURL=styles.css.map */

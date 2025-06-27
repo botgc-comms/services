@@ -138,6 +138,7 @@ namespace BOTGC.API.Common
 
             string categoryName = userSelection switch
             {
+                "7Day" when age >= 22 && age <= 29 => $"Intermediate {age}",
                 "7Day" => gender == "F" ? "7FN - Lady 7 Day (N)" : "7MN - Gent 7 Day (N)",
                 "6Day" => gender == "F" ? "6FN - Lady 6 Day (N)" : "6MN - Gent 6 Day (N)",
                 "5Day" => gender == "F" ? "5FN - Lady 5 Day (N)" : "5MN - Gent 5 Day (N)",
