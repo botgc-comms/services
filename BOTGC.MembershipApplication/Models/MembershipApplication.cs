@@ -100,6 +100,8 @@ namespace BOTGC.MembershipApplication.Models
 
         public bool ArrangeFinance { get; set; }
 
+        public string Channel { get; set; } = "Direct";
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var financeEligible = new[] { "7Day", "6Day", "5Day", "Intermediate" };

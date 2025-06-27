@@ -50,17 +50,17 @@
 <section class="membership-intro">
     @if (!String.IsNullOrEmpty(Model.ReferrerId) && !String.IsNullOrEmpty(Model.ReferrerName))
     {
-            <div class="referral-banner">
-                <h2>
-                    Great news – your friend @Model.ReferrerName has recommended you to join us!
-                </h2>
-                <p>
-                    When you become a playing member, both you and @Model.ReferrerName will each receive <strong>£50 credit</strong> in your clubhouse accounts as a thank-you. 
-                </p>
-                <p class="small text-muted">
-                    *Referral reward applies to full, 5-day, 6-day, intermediate, and flexi memberships only.
-                </p>
-            </div>
+        <div class="referral-banner">
+            <h2>
+                Great news – your friend @Model.ReferrerName has recommended you to join us!
+            </h2>
+            <p>
+                When you become a playing member, both you and @Model.ReferrerName will each receive <strong>£50 credit</strong> in your clubhouse accounts as a thank-you. 
+            </p>
+            <p class="small text-muted">
+                *Referral reward applies to full, 5-day, 6-day, intermediate, and flexi memberships only.
+            </p>
+        </div>
     }
 
     <p>We’re currently welcoming new membership applications with <strong>no joining fee</strong> and <strong>no waiting list</strong>. Whether you’re an experienced golfer, new to the game, or just keen to enjoy the social side of the club, we’d love to hear from you. There’s no need for a proposer or seconder — simply complete the form below to apply.</p>
@@ -83,6 +83,7 @@
     @Html.HiddenFor(m => m.ReferrerId)
     @Html.HiddenFor(m => m.ReferrerName)
     @Html.HiddenFor(m => m.Fingerprint)
+    @Html.HiddenFor(m => m.Channel)
 
     <div asp-validation-summary="All" role="alert" aria-live="assertive"></div>
 

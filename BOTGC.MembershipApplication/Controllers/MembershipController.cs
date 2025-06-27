@@ -42,17 +42,12 @@ public class MembershipController : Controller
         {
             supressLogo = string.Equals(suppressLogoParamKey, "true", StringComparison.OrdinalIgnoreCase) ? "true": "false";
         }
-            
-        // This is the only line you need to pass to JS
-        ViewData["MembershipCategories"] = categories;
-        ViewData["GrowSurfCampaignId"] = _settings.GrowSurfSettings.CampaignId;
-        ViewData["GetAddressApiKey"] = _settings.GetAddressIOSettings.ApiKey;
-        ViewData["SupressLogo"] = supressLogo;
 
-        // Store the referrer in TempData so we can pass it along on POST
+        var channelFromQuery = Request.Query["channel"].ToString();
         var referrerId = _referrerService.GetReferrerId();
+        string channel;
 
-        if (!string.IsNullOrEmpty(referrerId))
+        if (!string.IsNullOrWhiteSpace(referrerId))
         {
             var referrer = await _referrerService.GetParticipantByIdAsync(referrerId);
             if (referrer != null)
@@ -61,8 +56,26 @@ public class MembershipController : Controller
                 TempData["GrowSurfReferrer"] = referrerId;
                 newApplication.ReferrerId = referrerId;
                 newApplication.ReferrerName = $"{referrer.FirstName} {referrer.LastName}";
+                channel = "Referral";
+            }
+            else
+            {
+                channel = !string.IsNullOrWhiteSpace(channelFromQuery) ? channelFromQuery : "Direct";
             }
         }
+        else
+        {
+            channel = !string.IsNullOrWhiteSpace(channelFromQuery) ? channelFromQuery : "Direct";
+        }
+
+        newApplication.Channel = channel;
+
+        // This is the only line you need to pass to JS
+        ViewData["MembershipCategories"] = categories;
+        ViewData["GrowSurfCampaignId"] = _settings.GrowSurfSettings.CampaignId;
+        ViewData["GetAddressApiKey"] = _settings.GetAddressIOSettings.ApiKey;
+        ViewData["SupressLogo"] = supressLogo;
+        ViewData["Channel"] = channel;
 
         return View(newApplication);
     }
@@ -71,6 +84,21 @@ public class MembershipController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Apply(BOTGC.MembershipApplication.Models.MembershipApplication application)
     {
+        var supressLogo = "false";
+        var suppressLogoParamKey = Request.Query.Keys.FirstOrDefault(k => k.ToLower() == "suppresslogo");
+        if (!string.IsNullOrEmpty(suppressLogoParamKey))
+        {
+            supressLogo = string.Equals(suppressLogoParamKey, "true", StringComparison.OrdinalIgnoreCase) ? "true" : "false";
+        }
+
+        var categories = await _categoryCache.GetAll();
+
+        ViewData["MembershipCategories"] = categories;
+        ViewData["GrowSurfCampaignId"] = _settings.GrowSurfSettings.CampaignId;
+        ViewData["GetAddressApiKey"] = _settings.GetAddressIOSettings.ApiKey;
+        ViewData["SupressLogo"] = supressLogo;
+        ViewData["Channel"] = application.Channel ?? "Direct";
+
         // Check that the application is valid
         if (!ModelState.IsValid)
             return View(application);

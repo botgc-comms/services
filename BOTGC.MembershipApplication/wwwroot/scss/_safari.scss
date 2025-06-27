@@ -17,7 +17,6 @@
         border-radius: 5px !important;
         box-sizing: border-box !important;
         line-height: normal !important;
-        width: 100% !important;
         min-width: 0 !important;
         text-align: left !important;
     }
@@ -28,6 +27,7 @@
 
     input::-webkit-date-and-time-value {
         text-align: left;
+        width: 95% !important;
     }
 
     input[type="date"]::-webkit-inner-spin-button,

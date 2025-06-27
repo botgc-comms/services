@@ -149,6 +149,7 @@ namespace BOTGC.API.Services
             var columnValuesObject = new Dictionary<string, object?>
             {
                 ["status"] = new { label = "Working on it" },
+                ["color_mksadsjf"] = new { label = dto.Channel },
                 ["color_mkq7h26c"] = new { label = MapMembershipCategoryToListItem(dto.MembershipCategory, dto.DateOfBirth) },
                 ["date4"] = new { date = dto.ApplicationDate.ToString("yyyy-MM-dd") },
                 ["text_mkq639pw"] = name,

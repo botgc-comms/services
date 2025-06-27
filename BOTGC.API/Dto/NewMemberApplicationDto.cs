@@ -33,6 +33,7 @@ namespace BOTGC.API.Dto
         public string? ReferrerId { get; set; }
 
         public bool ArrangeFinance { get; set; }
+        public string Channel { get; set; } = "Direct";
 
         // Internal fields
         public DateTime ApplicationDate { get; set; } = DateTime.UtcNow;
