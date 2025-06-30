@@ -12,12 +12,26 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
+    <script>
+        Chart.register(window['chartjs-plugin-annotation']);
+    </script>
+
 </head>
 <body>
     <h1>Membership Report</h1>
 
+    <h2>Playing vs Non-Playing Members</h2>
     <canvas id="membershipChart"></canvas>
+
+    <h2>Total Members by Category</h2>
     <canvas id="categoryGroupBreakdownChart"></canvas>
+
+    <h2>Daily Membership Revenue</h2>
+    <canvas id="revenueVsBudgetChart"></canvas>
+
+    <h2>Accumulated Membership Revenue</h2>
+    <canvas id="accRevenueVsBudgetChart"></canvas>
+
     <canvas id="dailyJoinLeaveChart"></canvas>
 
     <nav class="tabs" role="tablist" aria-label="Quarterly Membership Reports">
@@ -74,11 +88,38 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var change in quarter.CategoryChanges)
+                        @foreach (var change in quarter.CategoryChanges
+                       .OrderByDescending(kv => kv.Value)
+                       .ThenBy(kv => kv.Key))
                         {
                             <tr>
                                 <td>@change.Key</td>
                                 <td>@change.Value</td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            }
+
+            @if (quarter.CategoryGroupTotals?.Any() == true)
+            {
+                <h3>Category Group Totals</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Group</th>
+                            <th>Total Members</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var group in quarter.CategoryGroupTotals
+                       .OrderByDescending(g => g.Value)
+                       .ThenBy(g => g.Key))
+                        {
+                            <tr>
+                                <td>@group.Key</td>
+                                <td>@group.Value</td>
                             </tr>
                         }
                     </tbody>
@@ -86,7 +127,6 @@
             }
         </section>
     }
-
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -125,40 +165,196 @@
               });
             });
 
-            const labels = dataPoints.map(dp => new Date(dp.date).toLocaleDateString());
+            const labels = dataPoints.map(dp =>
+                new Date(dp.date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
+            );
             const playingMembers = dataPoints.map(dp => dp.playingMembers || 0);
             const nonPlayingMembers = dataPoints.map(dp => dp.nonPlayingMembers || 0);
             const targetPlayingMembers = dataPoints.map(dp => dp.targetPlayingMembers !== 0 ? dp.targetPlayingMembers : undefined);
 
             // Restore key dates (e.g., start of financial year)
             const keyDates = [
-                { label: "Start of Financial Year", date: "2024-04-01", color: "black" }
+                {
+                    label: "Start of Financial Year",
+                    date: "@Model.FinancialYearStart.ToString("dd/MM/yyyy")",
+                    color: "black",
+                    dashed: false
+                },
+                {
+                    label: "End of Financial Year",
+                    date: "@Model.FinancialYearEnd.ToString("dd/MM/yyyy")",
+                    color: "black",
+                    dashed: false
+                },
+                {
+                    label: "Today",
+                    date: "@Model.Today.ToString("dd/MM/yyyy")",
+                    color: "orange",
+                    dashed: false
+                }
             ];
 
-            const annotations = keyDates
-                .map(keyDate => {
-                    const index = labels.indexOf(new Date(keyDate.date).toLocaleDateString());
-                    return index !== -1 ? {
-                        type: "line",
-                        mode: "vertical",
-                        scaleID: "x",
-                        value: index,
-                        borderColor: keyDate.color,
-                        borderWidth: 1,
-                        label: {
-                            content: keyDate.label,
-                            enabled: true,
-                            position: "top"
-                        }
-                    } : null;
-                })
-                .filter(Boolean);
+            const annotations = keyDates.map(kd => ({
+                type: "line",
+                xMin: kd.date,
+                xMax: kd.date,
+                borderColor: kd.color,
+                borderWidth: 1,
+                borderDash: kd.dashed ? [5, 5] : undefined,
+                label: {
+                    content: kd.label,
+                    enabled: true,
+                    position: "start"
+                }
+            }));
 
             // Prepare datasets for the first chart
             prepareMembershipChart(labels, playingMembers, nonPlayingMembers, targetPlayingMembers, annotations);
             prepareCategoryGroupBreakdownChart(labels, dataPoints);
             prepareJoinerLeaverBarChart(labels, dataPoints);
+            prepareRevenueChart(dataPoints, annotations);
+            prepareAccRevenueChart(dataPoints, annotations);
         });
+                
+        
+        function prepareRevenueChart(dataPoints, annotations) {
+            const startDate = new Date("2024-10-01"); // Start of FY
+            const endDate = new Date("2025-09-30");   // End of FY
+
+            const filtered = dataPoints.filter(dp => {
+                const d = new Date(dp.date);
+                return d >= startDate && d <= endDate;
+            });
+
+            const labels = filtered.map(dp => new Date(dp.date).toLocaleDateString("en-GB"));
+
+            // let actualSum = 0;
+            // let targetSum = 0;
+            // const actuals = filtered.map(dp => (actualSum += dp.actualRevenue || 0));
+            // const targets = filtered.map(dp => (targetSum += dp.targetRevenue || 0));
+
+            const actuals = filtered.map(dp => dp.actualRevenue || 0);
+            const targets = filtered.map(dp => dp.targetRevenue || 0);
+
+            new Chart(document.getElementById('revenueVsBudgetChart'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: "Actual Revenue (£)",
+                            data: actuals,
+                            borderColor: "blue",
+                            backgroundColor: "rgba(0, 0, 255, 0.1)",
+                            fill: false,
+                            tension: 0.2,
+                            pointRadius: 0
+                        },
+                        {
+                            label: "Target Revenue (£)",
+                            data: targets,
+                            borderColor: "green",
+                            borderDash: [4, 4],
+                            backgroundColor: "rgba(0, 128, 0, 0.1)",
+                            fill: false,
+                            tension: 0.2,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        annotation: {
+                            annotations: annotations
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: "Date" },
+                            ticks: {
+                                callback: function(value, index, ticks) {
+                                    return this.getLabelForValue(value);
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "£ Revenue per Day" }
+                        }
+                    }
+                }
+            });
+        }
+
+        function prepareAccRevenueChart(dataPoints, annotations) {
+            const startDate = new Date("2024-10-01"); // Start of FY
+            const endDate = new Date("2025-09-30");   // End of FY
+
+            const filtered = dataPoints.filter(dp => {
+                const d = new Date(dp.date);
+                return d >= startDate && d <= endDate;
+            });
+
+            const labels = filtered.map(dp => new Date(dp.date).toLocaleDateString("en-GB"));
+
+            let actualSum = 0;
+            let targetSum = 0;
+            const actuals = filtered.map(dp => (actualSum += dp.actualRevenue || 0));
+            const targets = filtered.map(dp => (targetSum += dp.targetRevenue || 0));
+
+            new Chart(document.getElementById('accRevenueVsBudgetChart'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: "Actual Revenue (£)",
+                            data: actuals,
+                            borderColor: "blue",
+                            backgroundColor: "rgba(0, 0, 255, 0.1)",
+                            fill: false,
+                            tension: 0.2,
+                            pointRadius: 0
+                        },
+                        {
+                            label: "Target Revenue (£)",
+                            data: targets,
+                            borderColor: "green",
+                            borderDash: [4, 4],
+                            backgroundColor: "rgba(0, 128, 0, 0.1)",
+                            fill: false,
+                            tension: 0.2,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        annotation: {
+                            annotations: annotations
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: "Date" },
+                            ticks: {
+                                callback: function(value, index, ticks) {
+                                    return this.getLabelForValue(value);
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "£ Revenue per Day" }
+                        }
+                    }
+                }
+            });
+        }
 
         function prepareJoinerLeaverBarChart(labels, dataPoints) {
             const categoryGroups = [...new Set(dataPoints.flatMap(dp =>
@@ -219,7 +415,6 @@
             });
         }
 
-
         function prepareCategoryGroupBreakdownChart(labels, dataPoints) {
             const allGroups = [...new Set(dataPoints.flatMap(dp =>
                 dp.categoryGroupBreakdown ? Object.keys(dp.categoryGroupBreakdown) : []
@@ -273,7 +468,6 @@
                 }
             });
         }
-
 
         function prepareMembershipChart(labels, playingMembers, nonPlayingMembers, targetPlayingMembers, annotations) {
 
@@ -359,11 +553,6 @@
             });
         }
 
-        /**
-         * Sort playing categories by:
-         *  1. Ascending average value (smallest at the bottom)
-         *  2. Alphabetically as a secondary sort
-         */
         function sortPlayingCategories(dataPoints) {
             let categoryAverages = {};
             const playingCategories = [...new Set(dataPoints.flatMap(dp => dp.playingCategoryBreakdown ? Object.keys(dp.playingCategoryBreakdown) : []))];
@@ -377,10 +566,6 @@
             return playingCategories.sort((a, b) => categoryAverages[a] - categoryAverages[b] || a.localeCompare(b));
         }
 
-        /**
-         * Prepares stacked data for the second graph
-         * Ensures last known values are carried forward to prevent drop-off
-         */
         function prepareStackedData(dataPoints, sortedCategories) {
             let stackedData = {};
             sortedCategories.forEach(category => stackedData[category] = []);
@@ -398,9 +583,6 @@
             return stackedData;
         }
 
-        /**
-         * Assign distinct colors to each category
-         */
         function assignCategoryColors(sortedCategories) {
             return sortedCategories.reduce((acc, category, index) => {
                 const color = getDistinctColor(index);
@@ -409,9 +591,6 @@
             }, {});
         }
 
-        /**
-         * Prepare and render the Category Breakdown Chart (Stacked Membership Categories)
-         */
         function prepareCategoryBreakdownChart(labels, sortedCategories, stackedData, categoryColors) {
             const categoryDatasets = sortedCategories.map(category => ({
                 label: category,
@@ -462,9 +641,6 @@
             });
         }
 
-        /**
-         * Generate distinct colors per category
-         */
         function getDistinctColor(index) {
             const colors = [
                 '#FF5733', '#33FF57', '#3357FF', '#F39C12', '#9B59B6',

@@ -52,6 +52,7 @@
             Gender = source.Gender;
             MembershipCategory = source.MembershipCategory;
             MembershipStatus = source.MembershipStatus;
+            MembershipCategoryGroup = source.MembershipCategoryGroup;
             PrimaryCategory = source.PrimaryCategory;
             Address1 = source.Address1;
             Address2 = source.Address2;

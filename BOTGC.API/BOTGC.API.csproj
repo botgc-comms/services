@@ -31,4 +31,80 @@
     <PackageReference Include="System.Drawing.Common" Version="9.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\OFL.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-ThinItalic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-Thin.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-SemiBoldItalic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-SemiBold.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-MediumItalic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-Medium.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-LightItalic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-Light.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-Italic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-ExtraLightItalic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-ExtraLight.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-ExtraBoldItalic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-ExtraBold.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-BoldItalic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-Bold.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-BlackItalic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\simon\.nuget\packages\questpdf\2025.4.0\buildTransitive\..\LatoFont\Lato-Black.ttf" />
+  </ItemGroup>
+
 </Project>

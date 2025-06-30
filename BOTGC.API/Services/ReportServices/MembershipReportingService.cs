@@ -1,6 +1,9 @@
 ﻿using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 
 namespace BOTGC.API.Services.ReportServices
@@ -28,7 +31,7 @@ namespace BOTGC.API.Services.ReportServices
             var counts = members.GroupBy(m => m.MembershipCategory).Select(g => g.Count()).ToList();
 
             var report = new MembershipReportDto();
-            var today = DateTime.UtcNow;
+            var today = DateTime.UtcNow.Date;
 
             var dataPoints = new List<MembershipReportEntryDto>();
 
@@ -47,11 +50,21 @@ namespace BOTGC.API.Services.ReportServices
             DateTime startOfCurrentFinancialYear = new DateTime(currentFinancialYearStart, 10, 1);
             DateTime endOfCurrentFinancialYear = new DateTime(currentFinancialYearStart + 1, 9, 30);
 
+            report.Today = today;
+            report.SubscriptionYearStart = startOfCurrentSubsYear;
+            report.SubscriptionYearEnd = endOfCurrentSubsYear;
+            report.FinancialYearStart = startOfCurrentFinancialYear;
+            report.FinancialYearEnd = endOfCurrentFinancialYear;
+
+            // Load budget and subscription fees
+            var (categoryFees, dailyTargetRevenue) = await LoadRevenueConfig(startOfCurrentFinancialYear, endOfCurrentFinancialYear);
+
             // Get all of the events that have taken place up to the start of the last financial year
             var memberEvents = await _dataService.GetMembershipEvents(startOfPreviousSubsYear.AddDays(-1), today);
 
             // Start with todays results
-            var todaysResults = GetReportEntry(today, members);
+            var todaysResults = GetReportEntry(today, members, categoryFees, dailyTargetRevenue);
+
             dataPoints.Add(todaysResults);
 
             var monthlySnapshots = new Dictionary<DateTime, MembershipSnapshotDto>();
@@ -113,7 +126,8 @@ namespace BOTGC.API.Services.ReportServices
 
 
                 // Compute and store the statistics for this day after applying reversals
-                var dailyReportEntry = GetReportEntry(currentDate, members);
+                var dailyReportEntry = GetReportEntry(currentDate, members, categoryFees, dailyTargetRevenue);
+
 
                 dailyReportEntry.DailyJoinersByCategoryGroup = joinersByGroup;
                 dailyReportEntry.DailyLeaversByCategoryGroup = leaversByGroup;
@@ -129,7 +143,7 @@ namespace BOTGC.API.Services.ReportServices
             }
 
             EnsureMonthlyAndQuarterlyStats(report, monthlySnapshots);
-            EnsureFullYearData(dataPoints, endOfCurrentSubsYear);
+            EnsureFullYearData(dataPoints, endOfCurrentSubsYear, dailyTargetRevenue);
             ApplyGrowthTargets(dataPoints, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
 
             report.DataPoints = dataPoints.Where(dp => dp.Date >= startOfPreviousSubsYear && dp.Date <= endOfCurrentSubsYear).ToList();
@@ -284,7 +298,11 @@ namespace BOTGC.API.Services.ReportServices
             return anomalies;
         }
 
-        private MembershipReportEntryDto GetReportEntry(DateTime date, List<MemberDto> members)
+        private MembershipReportEntryDto GetReportEntry(
+            DateTime date,
+            List<MemberDto> members,
+            Dictionary<string, decimal> categoryFees,
+            Dictionary<DateTime, decimal> dailyTargetRevenue)
         {
             var playingMembers = members.Where(m => m.PrimaryCategory == MembershipPrimaryCategories.PlayingMember && m.IsActive!.Value).ToList();
             var nonPlayingMembers = members.Where(m => m.PrimaryCategory == MembershipPrimaryCategories.NonPlayingMember && m.IsActive!.Value).ToList();
@@ -311,6 +329,27 @@ namespace BOTGC.API.Services.ReportServices
                 .GroupBy(m => m.MembershipCategoryGroup ?? "Other")
                 .ToDictionary(g => g.Key, g => g.Count());
 
+            decimal actualRevenue = 0;
+
+            foreach (var member in members.Where(m => m.IsActive == true))
+            {
+                if (!string.IsNullOrWhiteSpace(member.MembershipCategory))
+                {
+                    var trimmedCategory = member.MembershipCategory.Trim();
+
+                    if (categoryFees.TryGetValue(trimmedCategory, out var annualFee))
+                    {
+                        actualRevenue += annualFee / 365m;
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"No annual fee found for category '{trimmedCategory}' on {date:yyyy-MM-dd} for member ID {member.MemberNumber}");
+                    }
+                }
+            }
+
+            decimal targetRevenue = dailyTargetRevenue.TryGetValue(date, out var target) ? target : 0;
+
             return new MembershipReportEntryDto
             {
                 Date = date,
@@ -319,11 +358,13 @@ namespace BOTGC.API.Services.ReportServices
                 AveragePlayingMembersAge = averageAge,
                 PlayingCategoryBreakdown = playingCategoryBreakdown,
                 NonPlayingCategoryBreakdown = nonPlayingCategoryBreakdown, 
-                CategoryGroupBreakdown = categoryGroupBreakdown
+                CategoryGroupBreakdown = categoryGroupBreakdown,
+                ActualRevenue = actualRevenue,
+                TargetRevenue = targetRevenue
             };
         }
 
-        private void EnsureFullYearData(List<MembershipReportEntryDto> dataPoints, DateTime endOfCurrentFinancialYear)
+        private void EnsureFullYearData(List<MembershipReportEntryDto> dataPoints, DateTime endOfCurrentFinancialYear, Dictionary<DateTime, decimal> dailyTargetRevenue)
         {
             DateTime lastRecordedDate = dataPoints.Last().Date;
             var lastEntry = dataPoints.Last();
@@ -348,6 +389,8 @@ namespace BOTGC.API.Services.ReportServices
                     PlayingMembers = lastEntry.PlayingMembers,
                     NonPlayingMembers = lastEntry.NonPlayingMembers,
                     TargetPlayingMembers = 0,
+                    ActualRevenue = lastEntry.ActualRevenue,
+                    TargetRevenue = dailyTargetRevenue.TryGetValue(currentDate, out var t) ? t : 0,
                     CategoryGroupBreakdown = new Dictionary<string, int>(lastCategoryGroupBreakdown),
                     PlayingCategoryBreakdown = new Dictionary<string, int>(lastPlayingCategoryBreakdown),
                     NonPlayingCategoryBreakdown = new Dictionary<string, int>(lastNonPlayingCategoryBreakdown)
@@ -436,6 +479,35 @@ namespace BOTGC.API.Services.ReportServices
             }
         }
 
+        private async Task<(Dictionary<string, decimal> categoryFees, Dictionary<DateTime, decimal> dailyTargetRevenue)> LoadRevenueConfig(DateTime financialYearStart, DateTime financialYearEnd)
+        {
+            string basePath = Path.Combine(AppContext.BaseDirectory, "Data");
+
+            string feesPath = Path.Combine(basePath, "MembershipFees 2425.json");
+            string budgetPath = Path.Combine(basePath, "Membership Subscription Budget 2425.json");
+
+            var categoryFees = JsonSerializer.Deserialize<Dictionary<string, decimal>>(await File.ReadAllTextAsync(feesPath))!;
+            var monthlyBudget = JsonSerializer.Deserialize<Dictionary<string, decimal>>(await File.ReadAllTextAsync(budgetPath))!;
+
+            var dailyTarget = new Dictionary<DateTime, decimal>();
+
+            foreach (var month in monthlyBudget)
+            {
+                var monthStart = DateTime.ParseExact(month.Key + "-01", "yyyy-MM-dd", null);
+                int daysInMonth = DateTime.DaysInMonth(monthStart.Year, monthStart.Month);
+                decimal dailyAmount = month.Value / daysInMonth;
+
+                for (int day = 0; day < daysInMonth; day++)
+                {
+                    var current = monthStart.AddDays(day);
+                    if (current >= financialYearStart && current <= financialYearEnd)
+                        dailyTarget[current] = dailyAmount;
+                }
+            }
+
+            return (categoryFees, dailyTarget);
+        }
+
         private MembershipDeltaDto ComputeMembershipDelta(MembershipSnapshotDto fromSnapshot, MembershipSnapshotDto toSnapshot, string periodDescription)
         {
             // Filter out future joiners from both snapshots**
@@ -464,19 +536,38 @@ namespace BOTGC.API.Services.ReportServices
                             && prevMember.MembershipStatus != "D")
                 .ToList();
 
+            var categoryGroupTotals = toSnapshot.Members
+                .Where(m => m.IsActive == true)
+                .GroupBy(m => m.MembershipCategoryGroup ?? "Other")
+                .ToDictionary(g => g.Key, g => g.Count());
+
             // Category Changes: Members who exist in both but changed category**
             var categoryChanges = new Dictionary<string, int>();
 
             foreach (var member in filteredToMembers.Values)
             {
-                if (filteredFromMembers.TryGetValue(member.MemberNumber!.Value, out var prevMember) &&
-                    member.MembershipCategory != prevMember.MembershipCategory)
+                //if (filteredFromMembers.TryGetValue(member.MemberNumber!.Value, out var prevMember) &&
+                //    member.MembershipCategory != prevMember.MembershipCategory)
+                //{
+                //    string transitionKey = $"{prevMember.MembershipCategory} → {member.MembershipCategory}";
+                //    if (categoryChanges.ContainsKey(transitionKey))
+                //        categoryChanges[transitionKey]++;
+                //    else
+                //        categoryChanges[transitionKey] = 1;
+                //}
+
+                // Show movement between category groups
+                if (filteredFromMembers.TryGetValue(member.MemberNumber!.Value, out var prevMember))
                 {
-                    string transitionKey = $"{prevMember.MembershipCategory} → {member.MembershipCategory}";
-                    if (categoryChanges.ContainsKey(transitionKey))
-                        categoryChanges[transitionKey]++;
-                    else
-                        categoryChanges[transitionKey] = 1;
+                    string prevGroup = prevMember.MembershipCategoryGroup ?? "Other";
+                    string newGroup = member.MembershipCategoryGroup ?? "Other";
+
+                    if (!string.Equals(prevGroup, newGroup, StringComparison.Ordinal))
+                    {
+                        string transitionKey = $"{prevGroup} → {newGroup}";
+                        if (!categoryChanges.TryAdd(transitionKey, 1))
+                            categoryChanges[transitionKey]++;
+                    }
                 }
             }
 
@@ -488,7 +579,8 @@ namespace BOTGC.API.Services.ReportServices
                 NewMembers = newMembers.Count,
                 Leavers = leavers.Count,
                 Deaths = deaths.Count,
-                CategoryChanges = categoryChanges
+                CategoryChanges = categoryChanges,
+                CategoryGroupTotals = categoryGroupTotals
             };
         }
 

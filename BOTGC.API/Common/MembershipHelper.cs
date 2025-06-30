@@ -73,7 +73,7 @@ namespace BOTGC.API.Common
             if (code.Contains("SOCIAL")) member.MembershipCategoryGroup = "Social Membership";
             if (code.Contains("CLUBHOUSE")) member.MembershipCategoryGroup = "Clubhouse Only";
             if (code.Contains("FAMILY")) member.MembershipCategoryGroup = "Family";
-            if (code.Contains("CORP") || code.Contains("CORPORATE")) member.MembershipCategoryGroup = "Corporate";
+            if (code.Contains("CORP")) member.MembershipCategoryGroup = "Corporate";
 
             return member;
         }
