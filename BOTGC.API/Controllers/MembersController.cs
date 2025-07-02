@@ -70,8 +70,8 @@ namespace BOTGC.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving junior members.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving junior members.");
+                _logger.LogError(ex, "Error retrieving the management report for membership.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving the management report for membership.");
             }
         }
 

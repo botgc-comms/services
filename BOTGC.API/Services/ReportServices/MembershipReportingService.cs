@@ -224,14 +224,14 @@ namespace BOTGC.API.Services.ReportServices
 
         private int GetQuarterNumber(DateTime d)
         {
-            switch (d.Month)
+            return d.Month switch
             {
-                case 12: return 1; // Dec → FY Q1
-                case 3: return 2;  // Mar → FY Q2
-                case 6: return 3;  // Jun → FY Q3
-                case 9: return 4;  // Sep → FY Q4
-                default: throw new InvalidOperationException("Not a fiscal quarter end");
-            }
+                10 or 11 or 12 => 1,
+                1 or 2 or 3 => 2,
+                4 or 5 or 6 => 3,
+                7 or 8 or 9 => 4,
+                _ => throw new InvalidOperationException("Invalid month")
+            };
         }
 
         private List<MembershipAnomalyDto> IdentifyAnomalies(List<MemberDto> members)
