@@ -89,4 +89,32 @@
             $("#details-" + playerId).toggle();
         });
     });
+
+    function hideOverflowingLeaderboardRows() {
+        const table = document.getElementById("leaderboard-table");
+        if (!table) return;
+
+        const thead = table.querySelector("thead");
+        const tbody = table.querySelector("tbody");
+        const rows = tbody.querySelectorAll("tr");
+
+        // Reset visibility
+        rows.forEach(row => row.style.display = "");
+
+        const rowHeight = rows[0]?.getBoundingClientRect().height || 0;
+        const headerHeight = thead?.getBoundingClientRect().height || 0;
+        const tableTop = table.getBoundingClientRect().top;
+        const viewportHeight = window.innerHeight;
+
+        // Allow a small buffer below the table (e.g., 20px)
+        const availableHeight = viewportHeight - tableTop - 20;
+        const maxVisibleRows = Math.floor((availableHeight - headerHeight) / rowHeight) - 2;
+
+        rows.forEach((row, index) => {
+            row.style.display = index < maxVisibleRows ? "" : "none";
+        });
+    }
+
+    window.addEventListener("load", hideOverflowingLeaderboardRows);
+    window.addEventListener("resize", hideOverflowingLeaderboardRows);
 </script>
