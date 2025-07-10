@@ -72,7 +72,6 @@ body {
 
         .trophy {
             height: 7vw;
-            max-height: 13rem;
             min-height: 4rem;
             width: auto;
         }
@@ -209,10 +208,11 @@ tr {
 
 .logo {
     position: absolute;
-    bottom: 30px;
-    left: 30px;
+    bottom: 2vw;
+    left: 2vw;
     opacity: 0.5;
-    max-width: 300px;
+    width: auto;
+    height: 24vw;
 }
 
 #leaderboard-table {

@@ -26,7 +26,9 @@
                         var qrUrl = $"{scheme}://{host}/Home/CompetitionSelected?sessionId={sessionId}&competitionId={comp.Id}";
                         <div class="qr-item">
                             <div>@comp.Name</div>
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@(qrUrl)" alt="QR for @comp.Name" />
+                            <a href="@(qrUrl)">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@(qrUrl)" alt="QR for @comp.Name" />
+                            </a>
                             <div>Scan to select</div>
                         </div>
                     }
