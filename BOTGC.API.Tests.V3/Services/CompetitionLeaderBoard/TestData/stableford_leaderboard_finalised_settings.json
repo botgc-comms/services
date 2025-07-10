@@ -1,0 +1,22 @@
+{
+  "id": 7109,
+  "tags": [],
+  "comments": "<p style=\"text-align: center;\"><img class=\"originalHeight:386 originalWidth:455 size:custom align-top\" style=\"vertical-align: top;\" src=\"images/thumbs/sites/burtonontrent/Opens/100x100/0/Burton Barrel.JPG\" alt=\"\" width=\"66\" height=\"66\"></p>\r\n<h1 style=\"text-align: center;\"><em>Burton Barrel 4BBB<br></em></h1>\r\n<p><em>Price includes Competition Entry&nbsp; + 1 Course Meal<br></em></p>\r\n<p><em>Visitors &pound;80 per Team<br></em></p>\r\n<p><em>Members &pound;50&nbsp; per Team<br></em></p>\r\n<p><em>Member + Visitor &pound;65 per Team<br></em></p>\r\n<p><em><br>As there is a meal provided please contact the<a href=\"contact_us\" target=\"_blank\"> Secretary</a> should you have any special dietary requirements.<br></em></p>",
+  "name": "Burton Barrel 4BBB 2025",
+  "contact": "Philip Joynes",
+  "format": "Stableford",
+  "resultsDisplay": "Nett",
+  "date": "2025-06-29T00:00:00",
+  "links": [
+    {
+      "rel": "settings",
+      "href": "/api/competitions/7109",
+      "method": "GET"
+    },
+    {
+      "rel": "leaderboard",
+      "href": "/api/competitions/7109/leaderboard",
+      "method": "GET"
+    }
+  ]
+}

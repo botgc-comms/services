@@ -12,6 +12,6 @@ namespace BOTGC.API.Dto
         public string Format { get; set; }
 
         public string ResultsDisplay { get; set; }
-        public DateTime Datae { get; set; }
+        public DateTime Date { get; set; }
     }
 }

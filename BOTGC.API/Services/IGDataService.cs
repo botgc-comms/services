@@ -23,8 +23,8 @@ namespace BOTGC.API.Services
         private const string __CACHE_TEESHEET = "TeeSheet_By_Date_{date}";
         private const string __CACHE_ACTIVECOMPETITIONS= "Active_Competitions";
         private const string __CACHE_FUTURECOMPETITIONS = "Future_Competitions";
-        private const string __CACHE_COMPETITIONSETTINGS = "Competition_Settings";
-        private const string __CACHE_LEADERBOARD = "Leaderboard_Settings";
+        private const string __CACHE_COMPETITIONSETTINGS = "Competition_Settings_{compid}";
+        private const string __CACHE_LEADERBOARD = "Leaderboard_Settings_{compid}";
         private const string __CACHE_MEMBERCDHLOOKUP = "MemberCDHLookup_{cdhid}";
         private const string __CACHE_MEMBERSHIPCATEGORIES = "Member_Categories";
 
@@ -43,10 +43,11 @@ namespace BOTGC.API.Services
         private readonly IReportParser<CompetitionDto> _competitionReportParser;
         private readonly IReportParser<MemberEventDto> _memberEventReportParser;
         private readonly IReportParser<CompetitionSettingsDto> _competitionSettingsReportParser;
-        private readonly IReportParser<LeaderBoardDto> _leaderboardReportParser;
         private readonly IReportParser<SecurityLogEntryDto> _securityLogEntryParser;
         private readonly IReportParser<MemberCDHLookupDto> _memberCDHLookupReportParser;
         private readonly IReportParser<NewMemberResponseDto> _newMemberResponseReportParser;
+
+        private readonly IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto> _leaderboardReportParser;
 
         public IGDataService(IOptions<AppSettings> settings,
                                 ILogger<IGDataService> logger,
@@ -58,10 +59,10 @@ namespace BOTGC.API.Services
                                 IReportParser<TeeSheetDto> teeSheetParser,
                                 IReportParser<CompetitionDto> competitionReportParser,
                                 IReportParser<CompetitionSettingsDto> competitionSettingsReportParser,
-                                IReportParser<LeaderBoardDto> leaderBoardReportParser,
                                 IReportParser<SecurityLogEntryDto> securityLogEntryParser,
                                 IReportParser<MemberCDHLookupDto> memberCDHLookupReportParser,
                                 IReportParser<NewMemberResponseDto> newMemberResponseReportParser,
+                                IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto> leaderBoardReportParser,
                                 ITaskBoardService taskBoardService,
                                 IGSessionService igSessionManagementService,                
                                 IServiceScopeFactory serviceScopeFactory)
@@ -261,7 +262,7 @@ namespace BOTGC.API.Services
         public async Task<CompetitionSettingsDto?> GetCompetitionSettingsAsync(string competitionId)
         {
             var competitionSettingsUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.CompetitionSettingsUrl}".Replace("{compid}", competitionId);
-            var competitionSettings = await GetData<CompetitionSettingsDto>(competitionSettingsUrl, _competitionSettingsReportParser, __CACHE_COMPETITIONSETTINGS, TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins));
+            var competitionSettings = await GetData<CompetitionSettingsDto>(competitionSettingsUrl, _competitionSettingsReportParser, __CACHE_COMPETITIONSETTINGS.Replace("{compid}", competitionId), TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins));
 
             if (competitionSettings != null && competitionSettings.Any())
             {
@@ -275,14 +276,19 @@ namespace BOTGC.API.Services
 
         public async Task<LeaderBoardDto?> GetCompetitionLeaderboardAsync(string competitionId)
         {
+            var competitionSettings = await this.GetCompetitionSettingsAsync(competitionId);
+
             var leaderboardUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.LeaderBoardUrl}".Replace("{compid}", competitionId);
-            var leaderboard = await GetData<LeaderBoardDto>(leaderboardUrl, _leaderboardReportParser, __CACHE_LEADERBOARD, TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins));
+            var leaderboard = await GetData<LeaderBoardDto, CompetitionSettingsDto>(leaderboardUrl, _leaderboardReportParser, competitionSettings, __CACHE_LEADERBOARD.Replace("{compid}", competitionId), TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins));
 
             if (leaderboard != null && leaderboard.Any())
             {
                 _logger.LogInformation($"Successfully retrieved the leaderboard for competition {competitionId}.");
+                
+                var retVal = leaderboard.FirstOrDefault();
+                retVal.CompetitionDetails = competitionSettings;
 
-                return leaderboard.FirstOrDefault();
+                return retVal;
             }
 
             return null;
@@ -458,7 +464,7 @@ namespace BOTGC.API.Services
             _logger.LogInformation("Fetching {ReportType} report from {Url}", typeof(T).Name, reportUrl);
             var doc = await _igSessionManagementService.PostPageContent(reportUrl, data);
 
-            var items = parser.ParseReport(doc);
+            var items = await parser.ParseReport(doc);
 
             // Step 4: Add Hateoas Links
             if (linkBuilder != null)
@@ -477,11 +483,36 @@ namespace BOTGC.API.Services
             return items;
         }
 
-        private async Task<List<T>> GetData<T>(string reportUrl,
-                                               IReportParser<T> parser,
-                                               string? cacheKey = null,
-                                               TimeSpan? cacheTTL = null, 
-                                               Func<T, List<HateoasLink>>? linkBuilder = null) where T : HateoasResource, new()
+        private async Task<List<T>> GetData<T>(
+            string reportUrl,
+            IReportParser<T> parser,
+            string? cacheKey = null,
+            TimeSpan? cacheTTL = null,
+            Func<T, List<HateoasLink>>? linkBuilder = null
+        ) where T : HateoasResource, new()
+        {
+            return await ExecuteGet(reportUrl, async doc => await parser.ParseReport(doc), cacheKey, cacheTTL, linkBuilder);
+        }
+
+        private async Task<List<T>> GetData<T, TMetadata>(
+            string reportUrl,
+            IReportParserWithMetadata<T, TMetadata> parser,
+            TMetadata metadata,
+            string? cacheKey = null,
+            TimeSpan? cacheTTL = null,
+            Func<T, List<HateoasLink>>? linkBuilder = null
+        ) where T : HateoasResource, new()
+        {
+            return await ExecuteGet(reportUrl, async doc => await parser.ParseReport(doc, metadata), cacheKey, cacheTTL, linkBuilder);
+        }
+
+        private async Task<List<T>> ExecuteGet<T>(
+            string reportUrl,
+            Func<HtmlDocument, Task<List<T>>> parse,
+            string? cacheKey,
+            TimeSpan? cacheTTL,
+            Func<T, List<HateoasLink>>? linkBuilder
+        ) where T : HateoasResource, new()
         {
             ICacheService? cacheService = null;
 
@@ -509,7 +540,7 @@ namespace BOTGC.API.Services
             _logger.LogInformation("Fetching {ReportType} report from {Url}", typeof(T).Name, reportUrl);
             var doc = await _igSessionManagementService.GetPageContent(reportUrl);
 
-            var items = parser.ParseReport(doc);
+            var items = await parse(doc);
 
             // Step 4: Add Hateoas Links
             if (linkBuilder != null)

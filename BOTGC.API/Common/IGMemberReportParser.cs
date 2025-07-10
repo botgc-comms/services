@@ -19,7 +19,7 @@ namespace BOTGC.API.Common
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public List<MemberDto> ParseReport(HtmlDocument document)
+        public async Task<List<MemberDto>> ParseReport(HtmlDocument document)
         {
             var members = new List<MemberDto>();
 

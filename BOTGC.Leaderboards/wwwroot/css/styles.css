@@ -1,3 +1,389 @@
-﻿@use 'fonts';@use 'page'
+@font-face {
+  font-family: "The Seasons";
+  src: url("/fonts/Fontspring-DEMO-theseasons-reg.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "The Seasons";
+  src: url("/fonts/Fontspring-DEMO-theseasons-bd.otf") format("opentype");
+  font-weight: bold;
+  font-style: normal;
+}
+@font-face {
+  font-family: "The Seasons";
+  src: url("/fonts/Fontspring-DEMO-theseasons-lt.otf") format("opentype");
+  font-weight: lighter;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Multiple Sans Pro";
+  src: url("/fonts/Multiple Sans Pro.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Multiple Sans Pro";
+  src: url("/fonts/Multiple Sans Pro Bold.otf") format("opentype");
+  font-weight: bold;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Multiple Sans Pro";
+  src: url("/fonts/Multiple Sans Pro ExtraLight.otf") format("opentype");
+  font-weight: 200;
+  font-style: normal;
+}
+body {
+  /*font-family: Arial, Georgia, serif;*/
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+  background: url("/img/course-photo.jpg") no-repeat center center fixed;
+  background-size: cover;
+}
 
-/*# sourceMappingURL=data:application/json;base64,ewoJInZlcnNpb24iOiAzLAoJImZpbGUiOiAid3d3cm9vdC9zY3NzL2luZGV4LmNzcyIsCgkic291cmNlcyI6IFsKCQkid3d3cm9vdC9zY3NzL2luZGV4LnNjc3MiCgldLAoJIm5hbWVzIjogW10sCgkibWFwcGluZ3MiOiAiQUFBQSxJQUFJLENBQUosT0FBSSxDQUNKLElBQUksQ0FBSixNQUFJIgp9 */
+.leaderboard {
+  display: grid;
+  grid-template-rows: 1fr 6fr 1fr;
+  width: 80%;
+  height: 90%;
+  background: linear-gradient(to bottom right, rgba(36, 108, 155, 0.9), rgba(23, 43, 56, 0.9));
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.flash {
+  position: absolute;
+  top: -1000%;
+  left: -1000%;
+  width: 400%;
+  height: 400%;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 80%, rgba(255, 255, 255, 0) 100%);
+  transform: skewX(-30deg);
+  animation: flash 12s infinite;
+}
+
+@keyframes flash {
+  0%, 10%, 90%, 100% {
+    opacity: 1;
+  }
+  100% {
+    top: 1000%;
+    left: 1000%;
+  }
+}
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+  width: 100%;
+}
+.header .header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 2rem;
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.header .trophy-wrapper {
+  flex-shrink: 0;
+}
+.header .trophy-wrapper .trophy {
+  height: 7vw;
+  max-height: 13rem;
+  min-height: 4rem;
+  width: auto;
+}
+.header .text {
+  max-width: 60vw;
+  font-size: 6vw;
+  font-weight: normal;
+  color: white;
+  white-space: nowrap;
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.header #competition-title {
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 0.5fr 4fr 0.5fr;
+  grid-column: 1/-1;
+  gap: 10px;
+  font-size: clamp(0.75rem, 2vw, 3em);
+  letter-spacing: 1px;
+}
+
+.table-container {
+  position: relative;
+  z-index: 1;
+}
+.table-container .orange-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 20%;
+  background-color: rgb(245, 179, 0);
+  z-index: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 4px;
+  position: relative;
+  z-index: 1;
+}
+table th, table td {
+  padding: 10px;
+  text-align: left;
+  transition: transform 0.5s ease;
+  background: transparent;
+  color: black;
+}
+table th {
+  color: black;
+  text-align: center;
+}
+
+.rank-cell, .name-cell {
+  color: white;
+}
+
+.handicap-cell {
+  color: black;
+  text-align: center;
+}
+.handicap-cell .badge {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  line-height: 30px;
+  font-size: 15px;
+  background: white;
+  text-align: center;
+}
+
+.par-cell, .score-cell, .thru-cell {
+  text-align: center;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+tr {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.moving-up {
+  animation: move-up 0.5s forwards;
+}
+
+.moving-down {
+  animation: move-down 0.5s forwards;
+}
+
+@keyframes move-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes move-down {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.logo {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  opacity: 0.5;
+  max-width: 300px;
+}
+
+#leaderboard-table {
+  font-size: clamp(0.75rem, 2vw, 4em) !important;
+}
+
+#leaderboard-body tr {
+  transition: transform 0.5s ease-in-out;
+  height: 2.5rem;
+  display: table-row;
+  width: 100%;
+}
+
+.score-header {
+  color: black;
+}
+
+.handicap-cell, .score-cell, .par-cell, .thru-cell {
+  padding: 0.5rem;
+  text-align: center;
+  color: white;
+}
+.handicap-cell .overall-score-cell, .score-cell .overall-score-cell, .par-cell .overall-score-cell, .thru-cell .overall-score-cell {
+  color: black;
+}
+
+/* Additional Styles for Collapsible Score Table */
+.details-row {
+  display: none;
+  background-color: #f9f9f9;
+}
+
+.score-details {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.score-details th, .score-details td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+/* Styles for Highlighting Scores */
+.counted-score {
+  background-color: lightgreen;
+  font-weight: bold;
+}
+
+.final-score {
+  background-color: gold;
+  font-weight: bold;
+}
+
+/* Clickable Player Row */
+.player-row {
+  cursor: pointer;
+}
+.player-row:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.qr-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4rem 6rem;
+  justify-content: center;
+  align-items: start;
+  margin: 4rem auto 0 auto;
+  width: 100%;
+  max-width: 1000px;
+  padding: 0 1rem;
+}
+
+.qr-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5rem 8rem;
+  justify-content: center;
+  align-items: start;
+  margin: 5rem auto 0 auto;
+  width: 100%;
+  max-width: 1600px;
+  padding: 0 1rem;
+}
+
+.qr-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 800px;
+  min-width: 600px;
+  height: 900px;
+  padding: 4rem;
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 24px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.qr-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.2);
+}
+
+.qr-item > div:first-child {
+  font-weight: normal;
+  font-size: 3rem;
+  line-height: 1.2;
+  margin-bottom: 2.5rem;
+  color: #111;
+  text-align: center;
+  text-wrap: balance;
+  max-width: 90%;
+  min-height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-item img {
+  width: 440px;
+  height: 440px;
+  object-fit: contain;
+  margin-bottom: 2rem;
+}
+
+.qr-item > div:last-child {
+  font-size: 1.6rem;
+  color: #444;
+}
+
+@media (max-width: 1200px) {
+  .qr-list {
+    grid-template-columns: 1fr;
+    gap: 4rem;
+    padding: 0 2rem;
+  }
+  .qr-item {
+    max-width: 90%;
+    height: auto;
+  }
+  .qr-item > div:first-child {
+    font-size: 2.5rem;
+  }
+  .qr-item img {
+    width: 320px;
+    height: 320px;
+  }
+  .qr-item > div:last-child {
+    font-size: 1.4rem;
+  }
+}

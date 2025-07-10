@@ -42,6 +42,25 @@ namespace BOTGC.API.Common
             };
         }
 
+        public static List<HateoasLink> GetCompetitionLinks(CompetitionSettingsDto competition)
+        {
+            return new List<HateoasLink>
+            {
+                new HateoasLink
+                {
+                    Rel = "settings",
+                    Href = $"/api/competitions/{competition.Id}",
+                    Method = "GET"
+                },
+                new HateoasLink
+                {
+                    Rel = "leaderboard",
+                    Href = $"/api/competitions/{competition.Id}/leaderboard",
+                    Method = "GET"
+                }
+            };
+        }
+
         public static List<HateoasLink> GetRoundLinks(RoundDto round)
         {
             return new List<HateoasLink>

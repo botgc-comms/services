@@ -1,0 +1,54 @@
+﻿@using BOTGC.Leaderboards.Models;
+
+@model IEnumerable<CompetitionDetailsViewModel>
+
+@{
+    var sessionId = (ViewBag.SessionId as string) ?? Guid.NewGuid().ToString();
+    var scheme = Context.Request.Scheme;
+    var host = Context.Request.Host;
+}
+
+<div class="leaderboard">
+    <div class="flash"></div>
+    <img src="@Url.Content("~/img/club-logo.png")" alt="Logo" class="logo">
+    <div class="header">
+        <div class="text">
+            <div id="competition-title">Select a Competition</div>
+        </div>
+    </div>
+    <div class="content">
+        <div class="left"></div>
+        <div class="central">
+            <div class="table-container">
+                <div class="qr-list">
+                    @foreach (var comp in Model)
+                    {
+                        var qrUrl = $"{scheme}://{host}/Home/CompetitionSelected?sessionId={sessionId}&competitionId={comp.Id}";
+                        <div class="qr-item">
+                            <div>@comp.Name</div>
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@(qrUrl)" alt="QR for @comp.Name" />
+                            <div>Scan to select</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="right"></div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    const sessionId = '@sessionId';
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl('/competitionhub')
+        .build();
+
+    connection.on("CompetitionSelected", function (competitionId) {
+        window.location.href = '/leaderboard?competitionId=' + competitionId;
+    });
+
+    connection.start().then(function () {
+        connection.invoke("JoinSession", sessionId);
+    });
+</script>

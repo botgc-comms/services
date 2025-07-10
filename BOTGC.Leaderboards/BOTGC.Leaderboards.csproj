@@ -24,4 +24,8 @@
     <Folder Include="wwwroot\css\" />
   </ItemGroup>
 
+  <Target Name="RunGulpTasks" BeforeTargets="Build">
+    <Exec Command="npx gulp" />
+  </Target>
+
 </Project>

@@ -19,6 +19,37 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Services\CompetitionLeaderBoard\TestData\medal_leaderboard_finalised_settings.json" />
+    <None Remove="Services\CompetitionLeaderBoard\TestData\medal_leaderboard_inprogress.html" />
+    <None Remove="Services\CompetitionLeaderBoard\TestData\medal_leaderboard_inprogress_settings.json" />
+    <None Remove="Services\CompetitionLeaderBoard\TestData\stableford_leaderboard_finalised_settings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Services\CompetitionLeaderBoard\TestData\medal_leaderboard_finalised_settings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Services\CompetitionLeaderBoard\TestData\medal_leaderboard_inprogress.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Services\CompetitionLeaderBoard\TestData\medal_leaderboard_inprogress_settings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Services\CompetitionLeaderBoard\TestData\stableford_leaderboard_finalised.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Services\CompetitionLeaderBoard\TestData\medal_leaderboard_finalised.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Services\CompetitionLeaderBoard\TestData\stableford_leaderboard_finalised_settings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Services\CompetitionProcessors\TestData\JuniorEclecticCompetitionProcessor\a_maximum_of_three_casual_play_rounds_allowed.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

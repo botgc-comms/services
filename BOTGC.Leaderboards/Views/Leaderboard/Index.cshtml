@@ -1,0 +1,92 @@
+﻿@using BOTGC.Leaderboards.Models;
+
+@model LeaderboardViewModel
+<div class="leaderboard">
+
+    <div class="flash"></div>
+    <img src="~/img/club-logo.png" alt="Logo" class="logo">
+    <div class="header">
+        <div class="header-inner">
+            <div class="trophy-wrapper">
+                <img class="trophy" src="/img/junioreclectic.png" alt="Trophy">
+            </div>
+            <div class="text">
+                <div id="competition-title">@Model.CompetitionDetails.Name</div>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <div class="left"></div>
+        <div class="central">
+            <div class="table-container">
+                <div class="orange-bg"></div>
+                <table id="leaderboard-table">
+                    @if (Model != null && Model.Players.Any())
+                    {
+                        <thead>
+                            <tr class="score-header">
+                                <th style="width:calc(10%);"></th>
+                                <th style="width:calc(70%);"></th>
+                                <th style="width:calc(20%)" class="score-cell">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var players = Model.Players.OrderBy(p => p.Position).Take(30).ToList();
+                                var remainingRows = 30 - players.Count;
+                            }
+
+                            @foreach (var player in players)
+                            {
+                                <tr class="player-row" data-player-id="@player.Names.Replace(" ", "-")">
+                                    <td class="score-cell">@player.Position</td>
+                                    <td class="name-cell toggle-details">@player.Names (@player.PlayingHandicap)</td>
+                                    <td class="score-cell overall-score-cell">@player.Score</td>
+                                </tr>
+                            }
+
+                            @for (int i = 0; i < remainingRows; i++)
+                            {
+                                <tr class="placeholder-row">
+                                    <td class="score-cell">&nbsp;</td>
+                                    <td class="name-cell">&nbsp;</td>
+                                    <td class="score-cell overall-score-cell">&nbsp;</td>
+                                </tr>
+                            }
+                        </tbody>
+                    }
+                    else
+                    {
+                        <thead>
+                            <tr>
+                                <th colspan="3" class="waiting-header">Waiting for results...</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < 30; i++)
+                            {
+                                <tr class="placeholder-row">
+                                    <td class="score-cell">&nbsp;</td>
+                                    <td class="name-cell">&nbsp;</td>
+                                    <td class="score-cell overall-score-cell">&nbsp;</td>
+                                </tr>
+                            }
+                        </tbody>
+                    }
+
+
+                </table>
+            </div>
+        </div>
+        <div class="right"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".toggle-details").click(function () {
+            var playerId = $(this).closest("tr").data("player-id");
+            $("#details-" + playerId).toggle();
+        });
+    });
+</script>

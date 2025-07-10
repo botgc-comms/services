@@ -20,7 +20,7 @@ namespace BOTGC.API.Common
         /// </summary>
         /// <param name="document">The HTML document containing the round table.</param>
         /// <returns>A list of parsed <see cref="RoundDto"/> objects.</returns>
-        public List<RoundDto> ParseReport(HtmlDocument document)
+        public async Task<List<RoundDto>> ParseReport(HtmlDocument document)
         {
             var rounds = new List<RoundDto>();
 

@@ -1,0 +1,1671 @@
+﻿<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Medal #6 :: Golf</title>
+
+
+    <link href="/styles/bootstrap.1655723398.css" rel="stylesheet" media="screen" type="text/css">
+    <link href="/styles/bootstrap_common.1655723398.css" rel="stylesheet" media="screen" type="text/css">
+
+
+    <link href="/customcss/styles/burtonontrent.1691603954.css" rel="stylesheet" type="text/css" media="screen">
+
+    <link href="/print.1656928773.css" rel="stylesheet" type="text/css" media="print">
+    <script>
+        var deviceType = 'computer';
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="/javascript/html5shiv.js"></script>
+    <![endif]-->
+
+
+    <script src="/javascript/jquery.min.js"></script>
+    <script src="/javascript/jquery-migrate-1.4.1.min.js"></script>
+    <link rel="stylesheet" href="/styles/fa440/css/font-awesome.min.css">
+    <script src="/javascript/jquery.mb.browser-master/jquery.mb.browser.min.js"></script>
+    <script type="text/javascript" src="/javascript/bootstrap.1655723397.js"></script>
+
+
+    <link href="/images/sites/burtonontrent/favicon.png" type="image/png" rel="icon">
+
+    <meta name="revisit-after" content="1 days">
+    <meta name="robots" content="index,follow">
+    <meta name="description" content="Burton on Trent Golf Club">
+    <meta name="keywords" content="Golf Burton Wakes Derby Golfing Opens">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="content-language" content="en">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&amp;family=Nunito+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+    <script src="/images/resources/burtonontrent/jquery.jcarousel.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('.body-public .carousel-content').jcarousel({
+                items: '.carousel-item',
+                list: '.carousel-holder',
+                wrap: 'circular',
+                animation: 2000
+            })
+
+                //Autoscroll
+                .jcarouselAutoscroll({
+                    interval: 5000,
+                    target: '+=1',
+                    autostart: true
+                });
+
+            //Navigation
+            $('.carousel-prev').click(function () {
+                $('.carousel-content').jcarousel('scroll', '-=1');
+            });
+
+            $('.carousel-next').click(function () {
+                $('.carousel-content').jcarousel('scroll', '+=1');
+            });
+
+            $('.body-public .image-jcarousel').jcarousel({
+                items: '.image-carousel-item',
+                list: '.image-carousel-wrapper',
+                wrap: 'circular',
+                animation: 2000
+            })
+
+                //Autoscroll
+                .jcarouselAutoscroll({
+                    interval: 5000,
+                    target: '+=1',
+                    autostart: true
+                });
+
+            //Navigation
+            $('.image-prev').click(function () {
+                $('.image-jcarousel').jcarousel('scroll', '-=1');
+            });
+
+            $('.image-next').click(function () {
+                $('.image-jcarousel').jcarousel('scroll', '+=1');
+            });
+
+        });
+
+    </script>
+    <script type="text/javascript" src="/main.js"></script>
+    <script type="text/javascript" src="javascript/highcharts.js"></script>
+    <script type="text/javascript" src="javascript/piechart.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('a#awhyinterest').click(function () {
+                $('p#whyinterest').slideToggle();
+            });
+
+        });
+    </script>
+    <script type="text/javascript">
+        function set_timer(url, time) {
+            window.setTimeout(function () {
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    success: function (resp) {
+                        fails = 0;
+                        $(datadiv).fadeOut('fast', function () {
+                            $('div#cutbar').remove();
+                            $(datadiv).html(resp).fadeIn('fast');
+                        });
+                    },
+                    complete: function (x, status) {
+                        if (status != 'success') return;
+                        var hdr = x.getResponseHeader('X-IG-Next-URL');
+                        if (hdr) {
+                            var split = hdr.split(';');
+                            if (split[0] == 'ENDINPROGRESS') {
+                                window.location.reload();
+                            } else if (split[0] == 'PAUSEINPROGRESS') {
+                                maxloads = 1;
+                            }
+                            pageload++;
+                            if (pageload >= maxloads) {
+                                $('#liveloading').remove();
+                            } else {
+                                set_timer(url, split[1]);
+                            }
+                        }
+                    },
+                    timeout: 3000,
+                    error: function (x) {
+                        fails++;
+                        if (fails == 1)
+                            datadiv.append('<p id="ajaxwarning">[1]</p>');
+                        else
+                            $('#ajaxwarning').html('[' + fails + ']');
+                        set_timer(url, time);
+                    }
+                });
+            }, time * 1000);
+        }
+        var datadiv = null;
+        var fails = 0;
+        var pageload = 0;
+        var maxloads = 30;
+        var url = 'liveresults.php?compid=7269';
+        $(function () {
+            set_timer('liveresults.php?compid=7269', 120);
+            datadiv = $('<div></div>');
+            $('table.global').before(datadiv);
+            datadiv.wrapInner($('table.global'));
+        });
+    </script>
+    <script type="text/javascript">var layout3 = false;</script>
+</head>
+<body class="body-class-members page-url-competitionphpcompid7248preview1  body-root-competition.php body-nav-current-1 body-nav-current-has-2   php-competition   " data-new-gr-c-s-check-loaded="14.1111.0" data-gr-ext-installed="">
+
+    <div style="display:none;"><p><a style="display:none;" href="/extlink.php" rel="nofollow">More</a></p></div>
+    <div id="outerborder">
+        <div id="outleft"></div>
+        <div id="container">
+            <!--sphider_noindex-->
+            <div id="printbanner"><p class="clubname"><span class="clubnametext">Burton On Trent Golf Club</span><img src="/images/resources/burtonontrent/burton-logo.png" align="right" alt=""></p></div><div class="header-wrapper noprint">
+                <div class="header-space">
+                    <div class="header-logo">
+                        <a href="/"><img src="/images/resources/burtonontrent/bot-1894.png"><span class="header-club-name">Burton on Trent</span></a>
+                    </div>
+                    <div class="header-left-link">
+                        <a href="/visitorbooking">Visitor Tee Booking</a>
+                    </div>
+                    <div class="header-right-link">
+                        <a href="/membership">Become A Member</a>
+                    </div>
+                    <div class="navbar navbar-inverse">
+                        <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="club-menu-button-lines">
+                                <span class="icon-bar top-bar"></span>
+                                <span class="icon-bar middle-bar"></span>
+                                <span class="icon-bar bottom-bar"></span>
+                            </span>
+                            <span class="club-menu-button">Menu</span>
+                        </button>
+                        <div class="nav-collapse collapse">
+                            <div class="navbar-inner">
+                                <div id="topmenu">
+                                    <ul id="nav" class="nav">
+                                        <li class="first nav-level-1 nav-menu-home"><a href="/"><span>Home</span></a></li>
+                                        <li class="dropdown nav-level-1 nav-haslevel-2 nav-menu-information">
+                                            <a href="/information" class="moredown dropdown-toggle" data-toggle="dropdown"><span>Information</span></a>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                                                <li class=" nav-level-2 nav-menu-captains_corner_2025"><a href="/captains_corner_2025"><span>Captains Corner 2025</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-1894_clubs"><a href="/1894_clubs"><span>1894 Clubs</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-club_sections"><a href="/club_sections"><span>Club Sections</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-committee_and_section_minutes"><a href="/committee_and_section_minutes"><span>Committee &amp; Section Minutes</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-course_manager_reports"><a href="/course_manager_reports"><span>Course Manager Reports</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-competition_results_and_prizes"><a href="/competition_results_and_prizes"><span>Competition Results &amp; Prizes</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-safeguard"><a href="/safeguard"><span>Safeguarding</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-club_officials"><a href="/club_officials"><span>Club Officials</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-rules_-_etiquette_-_help"><a href="/rules_-_etiquette_-_help"><span>Rules &amp; Etiquette</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-bot_gc_-_club_rules"><a href="/bot_gc_-_club_rules"><span>BoT GC - Club Rules</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-members_green_fees"><a href="/members_green_fees"><span>Visitors Green Fees</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-world_handicap_system"><a href="/world_handicap_system"><span>World Handicap System</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-bar_and_catering"><a href="/bar_and_catering"><span>Bar &amp; Catering</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-ks_wright"><a href="/ks_wright"><span>KS Wright</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-website_help"><a href="/website_help"><span>Help Documents</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-enviroment_old"><a href="/enviroment_old"><span>Environment</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-t2green"><a href="/t2green"><span>T2Green</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-information"><a href="/information"><span>More</span></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="dropdown nav-level-1 nav-haslevel-2 current nav-menu-competition.php">
+                                            <a href="/competition.php" class="moredown dropdown-toggle" data-toggle="dropdown"><span>Competitions</span></a>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                                                <li class=" nav-level-2 nav-menu-competition2.php"><a href="/competition2.php"><span>Past</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-competition2.php?time=future"><a href="/competition2.php?time=future"><span>Upcoming</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-knockout.php"><a href="/knockout.php"><span>Knockouts</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-matchfixtures/"><a href="/matchfixtures/"><span>Matches</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-ongoing.php"><a href="/ongoing.php"><span>Ongoing</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-boardcomps.php"><a href="/boardcomps.php"><span>Board Competitions</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-hcaplist.php"><a href="/hcaplist.php"><span>Handicaps</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-halloffame.php"><a href="/halloffame.php"><span>Hall of Fame</span></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="dropdown nav-level-1 nav-haslevel-2 nav-menu-roundmgmt.php">
+                                            <a href="/roundmgmt.php" class="moredown dropdown-toggle" data-toggle="dropdown"><span>My Golf</span></a>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                                                <li class=" nav-level-2 nav-menu-roundmgmt.php"><a href="/roundmgmt.php"><span>My Rounds</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-analysis.php"><a href="/analysis.php"><span>Analysis</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-hcaprecord.php"><a href="/hcaprecord.php"><span>Handicap Record</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-hcapcertificate.php"><a href="/hcapcertificate.php"><span>Handicap Certificate</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-myeposaccount.php"><a href="/myeposaccount.php"><span>My Account</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-friends.php"><a href="/friends.php"><span>Friends</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-prefs.php"><a href="/prefs.php"><span>Preferences</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-directory.php"><a href="/directory.php"><span>Directory</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-messages.php"><a href="/messages.php"><span>Messages</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-memberbooking/"><a href="/memberbooking/"><span>Book Teetime</span></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="memberdiary nav-level-1 nav-menu-diary.php"><a href="/diary.php"><span>Diary</span></a></li>
+                                        <li class=" nav-level-1 nav-menu-club_events.php"><a href="/club_events.php"><span>What's On</span></a></li>
+                                        <li class="dropdown nav-level-1 nav-haslevel-2 nav-menu-siteadmin.php">
+                                            <a href="/siteadmin.php" class="moredown dropdown-toggle" data-toggle="dropdown" role="button"><span>Admin&nbsp;<span class="notificationnum badge">11</span></span></a>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                                                <li class=" nav-level-2 nav-menu-admincontact2.php"><a href="/admincontact2.php"><span>Help &amp; Support</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-newsadmin.php"><a href="/newsadmin.php"><span>News</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-diaryadmin.php"><a href="/diaryadmin.php"><span>Member Diary</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-pageadmin2.php"><a href="/pageadmin2.php"><span>Site Content</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-compdash.php"><a href="/compdash.php"><span>Competitions</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-playeradmin.php"><a href="/playeradmin.php"><span>Players</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-membership2.php"><a href="/membership2.php"><span>Membership</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-tilldash.php"><a href="/tilldash.php"><span>EPOS Admin</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-communications.php"><a href="/communications.php"><span>Communications</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-teecontrol.php"><a href="/teecontrol.php"><span>Tees &amp; Bookings</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-clearacceptreports.php"><a href="/clearacceptreports.php"><span>intelligentgolfPay</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-siteadmin.php?action=edit"><a href="/siteadmin.php?action=edit"><span>Settings</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-securityadmin.php"><a href="/securityadmin.php"><span>Security Admin</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-sitestats.php"><a href="/sitestats.php"><span>Website Statistics</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-ignews.php"><a href="/ignews.php"><span>Update News&nbsp;<span class="notificationnum badge">11</span> </span></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class=" nav-level-1 nav-menu-?action=logout"><a href="/?action=logout" id="logoutbtn"><span>Logout</span></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-wrapper">
+                <div id="globalwrap">
+                    <!--/sphider_noindex--><div class="global">
+                        <h3>Medal #6</h3><p class="noprint" style=""></p><div class="inprogresstext"><h4>Competition in Progress</h4><a href="/competition.php?go=startsheet&amp;compid=7269" class="button btn"><i class="fa fa-table"></i> View Startsheet</a><p id="liveloading" class=""><img src="/images/processingbar.gif"><br><i>Page will refresh results automatically for one hour</i></p></div><div class="global btn-group noprint hideplasma"><a href="?tab=details&amp;compid=7269&amp;preview=1&amp;div=all" class="button btn active">All Results</a> <a href="?tab=details&amp;compid=7269&amp;div=1&amp;preview=1" class="button btn ">Division One</a> <a href="?tab=details&amp;compid=7269&amp;div=2&amp;preview=1" class="button btn ">Division Two</a> <a href="?tab=details&amp;compid=7269&amp;div=3&amp;preview=1" class="button btn ">Division Three</a> <a href="?tab=details&amp;compid=7269&amp;div=4&amp;preview=1" class="button btn ">Division Four</a></div><div style="display: block;">
+                            <div class="global btn-group noprint hideplasma"><a href="?tab=details&amp;compid=7269&amp;div=all" class="button btn active">All Results</a> <a href="?tab=details&amp;compid=7269&amp;div=1" class="button btn ">Division One</a> <a href="?tab=details&amp;compid=7269&amp;div=2" class="button btn ">Division Two</a> <a href="?tab=details&amp;compid=7269&amp;div=3" class="button btn ">Division Three</a> <a href="?tab=details&amp;compid=7269&amp;div=4" class="button btn ">Division Four</a></div><table class="global table table-striped">
+                                <thead>
+                                    <tr>
+                                        <td colspan="2"> Results</td>
+                                        <td>Status</td>
+                                        <td>Total</td>
+                                        <td>Thru</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">1st</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=638">Daniel Clarke</a>(8)  </td>
+                                        <td><span class="negativescore" style="color:red;">-6</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112955" title="Countback results:
+ Back 9 - 31.0000, Back 6 - 24.3330, Back 3 - 12.6670, Back 1 - 3.5560">65</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">2nd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=97936">Jack Foster</a>(27)  </td>
+                                        <td><span class="negativescore" style="color:red;">-6</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112929" title="Countback results:
+ Back 9 - 33.5000, Back 6 - 24.0000, Back 3 - 12.5000, Back 1 - 2.5000">65</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">3rd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=97">John Copeman</a>(13)  </td>
+                                        <td><span class="negativescore" style="color:red;">-6</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112858" title="Countback results:
+ Back 9 - 33.5000, Back 6 - 24.6670, Back 3 - 11.8330, Back 1 - 3.2780">65</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">4th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=941">Sam Steele</a>(9)  </td>
+                                        <td><span class="negativescore" style="color:red;">-4</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112943" title="Countback results:
+ Back 9 - 32.5000, Back 6 - 22.0000, Back 3 - 11.5000, Back 1 - 3.5000">67</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">5th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=365">Stephen Turner</a>(11)  </td>
+                                        <td><span class="negativescore" style="color:red;">-3</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112896" title="Countback results:
+ Back 9 - 34.5000, Back 6 - 25.3330, Back 3 - 11.1670, Back 1 - 3.3890">68</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">6th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=40">Kenneth Chaderton</a>(31)  </td>
+                                        <td><span class="negativescore" style="color:red;">-3</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112938" title="Countback results:
+ Back 9 - 35.5000, Back 6 - 27.6670, Back 3 - 11.8330, Back 1 - 2.2780">68</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">7th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=94944">Matt Murfitt</a>(28)  </td>
+                                        <td><span class="negativescore" style="color:red;">-2</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112912" title="Countback results:
+ Back 9 - 33.0000, Back 6 - 24.6670, Back 3 - 9.3330, Back 1 - 2.4440">69</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">8th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=7">Nicholas Jones</a>(20)  </td>
+                                        <td><span class="negativescore" style="color:red;">-2</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112868" title="Countback results:
+ Back 9 - 35.0000, Back 6 - 25.3330, Back 3 - 12.6670, Back 1 - 2.8890">69</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">9th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=645">Stephen Mole</a>(19)  </td>
+                                        <td><span class="negativescore" style="color:red;">-2</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112948" title="Countback results:
+ Back 9 - 36.5000, Back 6 - 25.6670, Back 3 - 13.8330, Back 1 - 2.9440">69</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">10th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=82575">Sam Ayre</a>(8)  </td>
+                                        <td><span class="negativescore" style="color:red;">-1</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112944" title="Countback results:
+ Back 9 - 33.0000, Back 6 - 22.3330, Back 3 - 10.6670, Back 1 - 3.5560">70</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">11th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=516">David Brightman</a>(6)  </td>
+                                        <td><span class="negativescore" style="color:red;">-1</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112855" title="Countback results:
+ Back 9 - 34.0000, Back 6 - 25.0000, Back 3 - 13.0000, Back 1 - 3.6670">70</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">12th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=910">Joe Clarke</a>(0)  </td>
+                                        <td><span class="negativescore" style="color:red;">-1</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112965" title="Countback results:
+ Back 9 - 34.0000, Back 6 - 25.0000, Back 3 - 13.0000, Back 1 - 4.0000">70</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">13th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=97778">Adrian Tuck</a>(15)  </td>
+                                        <td><span class="negativescore" style="color:red;">-1</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112869" title="Countback results:
+ Back 9 - 34.5000, Back 6 - 24.0000, Back 3 - 10.5000, Back 1 - 3.1670">70</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">14th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=578">Brian Bambrick-Sattar</a>(11)  </td>
+                                        <td><span class="negativescore" style="color:red;">-1</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112957" title="Countback results:
+ Back 9 - 34.5000, Back 6 - 24.3330, Back 3 - 12.1670, Back 1 - 3.3890">70</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">15th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=458">Jeff Ellis</a>(18)  </td>
+                                        <td><span class="negativescore" style="color:red;">-1</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112918" title="Countback results:
+ Back 9 - 35.0000, Back 6 - 26.0000, Back 3 - 13.0000, Back 1 - 3.0000">70</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">16th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=477">David Simnett</a>(13)  </td>
+                                        <td><span class="negativescore" style="color:red;">-1</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112902" title="Countback results:
+ Back 9 - 35.5000, Back 6 - 24.6670, Back 3 - 12.8330, Back 1 - 3.2780">70</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">17th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=742">John Brake</a>(23)  </td>
+                                        <td><span class="negativescore" style="color:red;">-1</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112865" title="Countback results:
+ Back 9 - 36.5000, Back 6 - 28.3330, Back 3 - 14.1670, Back 1 - 5.7220">70</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">18th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=34">Mark Parker</a>(2)  </td>
+                                        <td><span class="negativescore" style="color:red;">-1</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112856" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 27.3330, Back 3 - 11.6670, Back 1 - 3.8890">70</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">19th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=163">Matthew Whyman</a>(4)  </td>
+                                        <td>LEVEL</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112852" title="Countback results:
+ Back 9 - 33.0000, Back 6 - 24.6670, Back 3 - 13.3330, Back 1 - 5.7780">71</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">20th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=82010">Lewis Horlick</a>(19)  </td>
+                                        <td>LEVEL</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112945" title="Countback results:
+ Back 9 - 33.5000, Back 6 - 24.6670, Back 3 - 12.8330, Back 1 - 2.9440">71</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">21st</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=81986">David Edwards</a>(15)  </td>
+                                        <td>LEVEL</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112894" title="Countback results:
+ Back 9 - 34.5000, Back 6 - 25.0000, Back 3 - 13.5000, Back 1 - 5.1670">71</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">22nd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=122">David Kerr-Delworth</a>(6)  </td>
+                                        <td>LEVEL</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112924" title="Countback results:
+ Back 9 - 35.0000, Back 6 - 25.0000, Back 3 - 13.0000, Back 1 - 5.6670">71</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">23rd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=844">Mitch Poulton</a>(5)  </td>
+                                        <td>LEVEL</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112937" title="Countback results:
+ Back 9 - 35.5000, Back 6 - 23.3330, Back 3 - 12.1670, Back 1 - 3.7220">71</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">24th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=474">Rob Elson</a>(7)  </td>
+                                        <td>LEVEL</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112913" title="Countback results:
+ Back 9 - 35.5000, Back 6 - 25.6670, Back 3 - 12.8330, Back 1 - 4.6110">71</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">25th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=84987">David Bourne</a>(27)  </td>
+                                        <td>LEVEL</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112922" title="Countback results:
+ Back 9 - 35.5000, Back 6 - 26.0000, Back 3 - 10.5000, Back 1 - 3.5000">71</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">26th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=98872">Richard Evans</a>(26)  </td>
+                                        <td>LEVEL</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112885" title="Countback results:
+ Back 9 - 36.0000, Back 6 - 27.3330, Back 3 - 13.6670, Back 1 - 3.5560">71</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">27th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=76220">Sean Jenney</a>(11)  </td>
+                                        <td>LEVEL</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112921" title="Countback results:
+ Back 9 - 36.5000, Back 6 - 25.3330, Back 3 - 12.1670, Back 1 - 4.3890">71</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">28th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=739">Roger Hill</a>(24)  </td>
+                                        <td>LEVEL</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112870" title="Countback results:
+ Back 9 - 37.0000, Back 6 - 29.0000, Back 3 - 14.0000, Back 1 - 4.6670">71</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">29th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=81387">Nick Hart</a>(6)  </td>
+                                        <td>LEVEL</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112967" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 28.0000, Back 3 - 16.0000, Back 1 - 5.6670">71</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">30th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=76540">Philip Kavanagh</a>(14)  </td>
+                                        <td>+1</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112933" title="Countback results:
+ Back 9 - 33.0000, Back 6 - 24.3330, Back 3 - 11.6670, Back 1 - 3.2220">72</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">31st</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=94741">Gerry Morton</a>(16)  </td>
+                                        <td>+1</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112926" title="Countback results:
+ Back 9 - 34.0000, Back 6 - 24.6670, Back 3 - 11.3330, Back 1 - 3.1110">72</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">32nd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=693">Paul Foster</a>(9)  </td>
+                                        <td>+1</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112930" title="Countback results:
+ Back 9 - 34.5000, Back 6 - 25.0000, Back 3 - 11.5000, Back 1 - 4.5000">72</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">33rd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=80189">Clinton Terangi-Day</a>(8)  </td>
+                                        <td>+1</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112878" title="Countback results:
+ Back 9 - 35.0000, Back 6 - 25.3330, Back 3 - 14.6670, Back 1 - 4.5560">72</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">34th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=522">Stephen Adcock</a>(17)  </td>
+                                        <td>+1</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112917" title="Countback results:
+ Back 9 - 36.5000, Back 6 - 27.3330, Back 3 - 15.1670, Back 1 - 5.0560">72</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">35th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=883">Todd Foster</a>(8)  </td>
+                                        <td>+1</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112931" title="Countback results:
+ Back 9 - 37.0000, Back 6 - 26.3330, Back 3 - 13.6670, Back 1 - 3.5560">72</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">36th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=598">Tracey Kirkham</a>(14)  </td>
+                                        <td><span class="negativescore" style="color:red;">-1</span></td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112920" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 26.3330, Back 3 - 12.6670, Back 1 - 4.2220">72</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">37th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=867">Philip Greenlee</a>(19)  </td>
+                                        <td>+2</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112883" title="Countback results:
+ Back 9 - 33.5000, Back 6 - 23.6670, Back 3 - 12.8330, Back 1 - 2.9440">73</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">38th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=89">Ian Rayworth</a>(23)  </td>
+                                        <td>+2</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112860" title="Countback results:
+ Back 9 - 33.5000, Back 6 - 24.3330, Back 3 - 11.1670, Back 1 - 2.7220">73</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">39th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=842">Ralph Mason</a>(16)  </td>
+                                        <td>+2</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112936" title="Countback results:
+ Back 9 - 35.0000, Back 6 - 25.6670, Back 3 - 11.3330, Back 1 - 3.1110">73</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">40th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=82261">Nathan Sturgess</a>(16)  </td>
+                                        <td>+2</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112942" title="Countback results:
+ Back 9 - 36.0000, Back 6 - 26.6670, Back 3 - 11.3330, Back 1 - 3.1110">73</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">41st</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=37">Alan Spencer</a>(20)  </td>
+                                        <td>+2</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112890" title="Countback results:
+ Back 9 - 36.0000, Back 6 - 27.3330, Back 3 - 13.6670, Back 1 - 5.8890">73</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">42nd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=463">Michael Scott</a>(20)  </td>
+                                        <td>+2</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112854" title="Countback results:
+ Back 9 - 37.0000, Back 6 - 28.3330, Back 3 - 15.6670, Back 1 - 4.8890">73</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">43rd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=94732">Kieran Smith</a>(11)  </td>
+                                        <td>+2</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112862" title="Countback results:
+ Back 9 - 37.5000, Back 6 - 26.3330, Back 3 - 14.1670, Back 1 - 3.3890">73</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">44th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=793">David Walker</a>(20)  </td>
+                                        <td>+2</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112916" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 27.3330, Back 3 - 14.6670, Back 1 - 3.8890">73</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">45th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=509">Trevor Newton</a>(14)  </td>
+                                        <td>+2</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112889" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 29.3330, Back 3 - 11.6670, Back 1 - 4.2220">73</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">46th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=91">David Cooke</a>(4)  </td>
+                                        <td>+2</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112952" title="Countback results:
+ Back 9 - 39.0000, Back 6 - 25.6670, Back 3 - 12.3330, Back 1 - 3.7780">73</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">47th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=153">James Elrick</a>(14)  </td>
+                                        <td>+2</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112950" title="Countback results:
+ Back 9 - 39.0000, Back 6 - 27.3330, Back 3 - 14.6670, Back 1 - 5.2220">73</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">48th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=97165">Edward Fox</a>(29)  </td>
+                                        <td>+3</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112892" title="Countback results:
+ Back 9 - 33.5000, Back 6 - 24.3330, Back 3 - 12.1670, Back 1 - 4.3890">74</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">49th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=939">Kian Moran</a>(6)  </td>
+                                        <td>+3</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112951" title="Countback results:
+ Back 9 - 36.0000, Back 6 - 28.0000, Back 3 - 14.0000, Back 1 - 4.6670">74</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">50th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=132">Kristian Hansen</a>(8)  </td>
+                                        <td>+3</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112935" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 26.3330, Back 3 - 12.6670, Back 1 - 5.5560">74</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">51st</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=94739">Matthew Lisle</a>(10)  </td>
+                                        <td>+3</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112932" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 28.6670, Back 3 - 13.3330, Back 1 - 4.4440">74</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">52nd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=431">Anthony Barkway</a>(23)  </td>
+                                        <td>+3</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112872" title="Countback results:
+ Back 9 - 38.5000, Back 6 - 26.3330, Back 3 - 13.1670, Back 1 - 4.7220">74</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">53rd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=164">Colin Rigby</a>(18)  </td>
+                                        <td>+3</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112908" title="Countback results:
+ Back 9 - 39.0000, Back 6 - 28.0000, Back 3 - 12.0000, Back 1 - 4.0000">74</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">54th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=710">Craig Histed</a>(16)  </td>
+                                        <td>+3</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112970" title="Countback results:
+ Back 9 - 39.0000, Back 6 - 28.6670, Back 3 - 13.3330, Back 1 - 3.1110">74</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">55th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=91722">Dan Palk</a>(14)  </td>
+                                        <td>+3</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112963" title="Countback results:
+ Back 9 - 41.0000, Back 6 - 30.3330, Back 3 - 15.6670, Back 1 - 4.2220">74</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">56th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=98768">David Milsom</a>(21)  </td>
+                                        <td>+4</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112966" title="Countback results:
+ Back 9 - 29.5000, Back 6 - 23.0000, Back 3 - 13.5000, Back 1 - 2.8330">75</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">57th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=84437">Garth Grundy</a>(21)  </td>
+                                        <td>+4</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112882" title="Countback results:
+ Back 9 - 37.5000, Back 6 - 27.0000, Back 3 - 13.5000, Back 1 - 5.8330">75</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">58th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=98873">Roy Shuttleworth</a>(22)  </td>
+                                        <td>+4</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112884" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 26.6670, Back 3 - 13.3330, Back 1 - 3.7780">75</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">59th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=929">Neil Carter</a>(10)  </td>
+                                        <td>+4</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112939" title="Countback results:
+ Back 9 - 41.0000, Back 6 - 26.6670, Back 3 - 13.3330, Back 1 - 4.4440">75</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">60th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=447">Raymond Ebberley</a>(18)  </td>
+                                        <td>+4</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112905" title="Countback results:
+ Back 9 - 41.0000, Back 6 - 27.0000, Back 3 - 13.0000, Back 1 - 5.0000">75</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">61st</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=84038">Chris Jerram</a>(28)  </td>
+                                        <td>+4</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112871" title="Countback results:
+ Back 9 - 41.0000, Back 6 - 28.6670, Back 3 - 13.3330, Back 1 - 4.4440">75</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">62nd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=134">Adam Barclay</a>(4)  </td>
+                                        <td>+5</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112959" title="Countback results:
+ Back 9 - 35.0000, Back 6 - 25.6670, Back 3 - 12.3330, Back 1 - 3.7780">76</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">63rd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=93151">Ian Wooldridge</a>(10)  </td>
+                                        <td>+5</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112964" title="Countback results:
+ Back 9 - 36.0000, Back 6 - 25.6670, Back 3 - 11.3330, Back 1 - 3.4440">76</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">64th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=518">Stanley Ward</a>(17)  </td>
+                                        <td>+5</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112898" title="Countback results:
+ Back 9 - 36.5000, Back 6 - 25.3330, Back 3 - 12.1670, Back 1 - 5.0560">76</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">65th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=78875">Leon Pittom</a>(11)  </td>
+                                        <td>+5</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112853" title="Countback results:
+ Back 9 - 38.5000, Back 6 - 26.3330, Back 3 - 13.1670, Back 1 - 4.3890">76</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">66th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=90">Michael Edwards</a>(23)  </td>
+                                        <td>+5</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112861" title="Countback results:
+ Back 9 - 38.5000, Back 6 - 27.3330, Back 3 - 13.1670, Back 1 - 4.7220">76</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">67th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=723">Toby D'angibau</a>(16)  </td>
+                                        <td>+5</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112969" title="Countback results:
+ Back 9 - 40.0000, Back 6 - 27.6670, Back 3 - 12.3330, Back 1 - 3.1110">76</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">68th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=90955">Martin Hoogendyk</a>(20)  </td>
+                                        <td>+5</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112866" title="Countback results:
+ Back 9 - 41.0000, Back 6 - 29.3330, Back 3 - 11.6670, Back 1 - 3.8890">76</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">69th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=537">David Beckett</a>(14)  </td>
+                                        <td>+6</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112925" title="Countback results:
+ Back 9 - 35.0000, Back 6 - 25.3330, Back 3 - 12.6670, Back 1 - 4.2220">77</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">70th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=97890">Charles Eames</a>(14)  </td>
+                                        <td>+6</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112911" title="Countback results:
+ Back 9 - 35.0000, Back 6 - 26.3330, Back 3 - 13.6670, Back 1 - 4.2220">77</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">71st</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=94738">Jack Weaver</a>(19)  </td>
+                                        <td>+6</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112863" title="Countback results:
+ Back 9 - 36.5000, Back 6 - 28.6670, Back 3 - 15.8330, Back 1 - 6.9440">77</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">72nd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=98422">Martin Berwick</a>(16)  </td>
+                                        <td>+6</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112947" title="Countback results:
+ Back 9 - 37.0000, Back 6 - 27.6670, Back 3 - 13.3330, Back 1 - 5.1110">77</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">73rd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=637">Ian Moran</a>(10)  </td>
+                                        <td>+6</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112953" title="Countback results:
+ Back 9 - 39.0000, Back 6 - 26.6670, Back 3 - 11.3330, Back 1 - 3.4440">77</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">74th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=274">Stephen Gower</a>(14)  </td>
+                                        <td>+6</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112940" title="Countback results:
+ Back 9 - 39.0000, Back 6 - 29.3330, Back 3 - 14.6670, Back 1 - 4.2220">77</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">75th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=287">Victor Prince</a>(13)  </td>
+                                        <td>+6</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112923" title="Countback results:
+ Back 9 - 39.5000, Back 6 - 28.6670, Back 3 - 14.8330, Back 1 - 4.2780">77</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">76th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=94">Douglas Ward</a>(14)  </td>
+                                        <td>+6</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112859" title="Countback results:
+ Back 9 - 41.0000, Back 6 - 31.3330, Back 3 - 17.6670, Back 1 - 4.2220">77</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">77th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=560">David Rose</a>(4)  </td>
+                                        <td>+7</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112972" title="Countback results:
+ Back 9 - 37.0000, Back 6 - 25.6670, Back 3 - 14.3330, Back 1 - 3.7780">78</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">78th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=21">Malcolm Howells</a>(32)  </td>
+                                        <td>+7</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112914" title="Countback results:
+ Back 9 - 37.0000, Back 6 - 26.3330, Back 3 - 13.6670, Back 1 - 4.2220">78</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">79th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=202">Robert Morris</a>(20)  </td>
+                                        <td>+7</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112867" title="Countback results:
+ Back 9 - 37.0000, Back 6 - 28.3330, Back 3 - 14.6670, Back 1 - 2.8890">78</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">80th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=484">Alan Copestake</a>(14)  </td>
+                                        <td>+7</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112881" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 26.3330, Back 3 - 12.6670, Back 1 - 4.2220">78</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">81st</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=73">Adrian Harper</a>(16)  </td>
+                                        <td>+7</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112897" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 28.6670, Back 3 - 12.3330, Back 1 - 4.1110">78</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">82nd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=93148">Andrew Wilson</a>(17)  </td>
+                                        <td>+7</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112879" title="Countback results:
+ Back 9 - 39.5000, Back 6 - 27.3330, Back 3 - 12.1670, Back 1 - 4.0560">78</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">83rd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=460">Colin Bondon</a>(21)  </td>
+                                        <td>+7</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112876" title="Countback results:
+ Back 9 - 39.5000, Back 6 - 28.0000, Back 3 - 14.5000, Back 1 - 2.8330">78</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">84th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=97891">Stephen Shaw</a>(22)  </td>
+                                        <td>+7</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112910" title="Countback results:
+ Back 9 - 40.0000, Back 6 - 26.6670, Back 3 - 12.3330, Back 1 - 3.7780">78</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">85th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=82582">Donald McAughtrie</a>(30)  </td>
+                                        <td>+7</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112877" title="Countback results:
+ Back 9 - 40.0000, Back 6 - 28.0000, Back 3 - 12.0000, Back 1 - 4.3330">78</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">86th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=512">John Knight</a>(13)  </td>
+                                        <td>+7</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112857" title="Countback results:
+ Back 9 - 42.5000, Back 6 - 32.6670, Back 3 - 16.8330, Back 1 - 5.2780">78</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">87th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=782">Andrew Lyons</a>(13)  </td>
+                                        <td>+8</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112971" title="Countback results:
+ Back 9 - 31.5000, Back 6 - 22.6670, Back 3 - 10.8330, Back 1 - 3.2780">79</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">88th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=866">Peter Sumner</a>(20)  </td>
+                                        <td>+8</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112956" title="Countback results:
+ Back 9 - 35.0000, Back 6 - 25.3330, Back 3 - 12.6670, Back 1 - 3.8890">79</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">89th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=437">Christopher Edwards</a>(8)  </td>
+                                        <td>+8</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112909" title="Countback results:
+ Back 9 - 37.0000, Back 6 - 27.3330, Back 3 - 12.6670, Back 1 - 3.5560">79</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">90th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=528">John Banton</a>(24)  </td>
+                                        <td>+8</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112875" title="Countback results:
+ Back 9 - 37.0000, Back 6 - 28.0000, Back 3 - 13.0000, Back 1 - 4.6670">79</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">91st</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=90957">Martin Hall</a>(30)  </td>
+                                        <td>+8</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112915" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 30.0000, Back 3 - 16.0000, Back 1 - 6.3330">79</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">92nd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=82578">Andy Stevens</a>(31)  </td>
+                                        <td>+8</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112904" title="Countback results:
+ Back 9 - 42.5000, Back 6 - 28.6670, Back 3 - 11.8330, Back 1 - 3.2780">79</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">93rd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=88880">Andrew Brown</a>(28)  </td>
+                                        <td>+9</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112864" title="Countback results:
+ Back 9 - 35.0000, Back 6 - 24.6670, Back 3 - 14.3330, Back 1 - 4.4440">80</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">94th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=209">Graham Flockett</a>(4)  </td>
+                                        <td>+9</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112960" title="Countback results:
+ Back 9 - 38.0000, Back 6 - 27.6670, Back 3 - 13.3330, Back 1 - 3.7780">80</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">95th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=90556">Nathan Moore</a>(20)  </td>
+                                        <td>+9</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112962" title="Countback results:
+ Back 9 - 40.0000, Back 6 - 27.3330, Back 3 - 14.6670, Back 1 - 4.8890">80</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">96th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=98789">William Fox</a>(27)  </td>
+                                        <td>+10</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112893" title="Countback results:
+ Back 9 - 37.5000, Back 6 - 23.0000, Back 3 - 11.5000, Back 1 - 3.5000">81</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">97th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=265">James Grundy</a>(9)  </td>
+                                        <td>+10</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112946" title="Countback results:
+ Back 9 - 37.5000, Back 6 - 28.0000, Back 3 - 13.5000, Back 1 - 4.5000">81</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">98th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=531">Jonathan Hardwick</a>(18)  </td>
+                                        <td>+10</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112968" title="Countback results:
+ Back 9 - 43.0000, Back 6 - 29.0000, Back 3 - 13.0000, Back 1 - 4.0000">81</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">99th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=94855">David Valente</a>(30)  </td>
+                                        <td>+10</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112899" title="Countback results:
+ Back 9 - 46.0000, Back 6 - 34.0000, Back 3 - 18.0000, Back 1 - 6.3330">81</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">100th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=508">Keith Francis</a>(19)  </td>
+                                        <td>+10</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112919" title="Countback results:
+ Back 9 - 47.5000, Back 6 - 35.6670, Back 3 - 23.8330, Back 1 - 13.9440">81</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">101st</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=49">Stephen Read</a>(22)  </td>
+                                        <td>+11</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112874" title="Countback results:
+ Back 9 - 42.0000, Back 6 - 33.6670, Back 3 - 17.3330, Back 1 - 7.7780">82</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">102nd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=88284">Paul Holbrook</a>(15)  </td>
+                                        <td>+12</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112888" title="Countback results:
+ Back 9 - 38.5000, Back 6 - 28.0000, Back 3 - 13.5000, Back 1 - 4.1670">83</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">103rd</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=97777">Charlie Sears</a>(11)  </td>
+                                        <td>+12</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112928" title="Countback results:
+ Back 9 - 43.5000, Back 6 - 33.3330, Back 3 - 18.1670, Back 1 - 5.3890">83</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">104th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=138">David Brittain</a>(20)  </td>
+                                        <td>+12</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112891" title="Countback results:
+ Back 9 - 45.0000, Back 6 - 34.3330, Back 3 - 16.6670, Back 1 - 3.8890">83</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">105th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=95818">Malcolm Lister</a>(19)  </td>
+                                        <td>+12</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112873" title="Countback results:
+ Back 9 - 45.5000, Back 6 - 29.6670, Back 3 - 13.8330, Back 1 - 4.9440">83</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">106th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=709">Adam Toone</a>(15)  </td>
+                                        <td>+13</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112973" title="Countback results:
+ Back 9 - 36.5000, Back 6 - 25.0000, Back 3 - 13.5000, Back 1 - 6.1670">84</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">107th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=96954">Clive Mackrell</a>(9)  </td>
+                                        <td>+13</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112895" title="Countback results:
+ Back 9 - 41.5000, Back 6 - 31.0000, Back 3 - 15.5000, Back 1 - 6.5000">84</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">108th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=93283">Ceri Rigby</a>(28)  </td>
+                                        <td>+12</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112907" title="Countback results:
+ Back 9 - 40.0000, Back 6 - 28.6670, Back 3 - 14.3330, Back 1 - 4.4440">85</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">109th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=870">Sam Taylor</a>(10)  </td>
+                                        <td>+14</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112958" title="Countback results:
+ Back 9 - 41.0000, Back 6 - 30.6670, Back 3 - 15.3330, Back 1 - 4.4440">85</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">110th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=78806">Simon Nadin</a>(23)  </td>
+                                        <td>+14</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112906" title="Countback results:
+ Back 9 - 44.5000, Back 6 - 33.3330, Back 3 - 13.1670, Back 1 - 3.7220">85</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">111th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=99">Vincent Moran</a>(21)  </td>
+                                        <td>+15</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112954" title="Countback results:
+ Back 9 - 43.5000, Back 6 - 33.0000, Back 3 - 16.5000, Back 1 - 4.8330">86</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">112th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=93672">Andrew Iliff</a>(29)  </td>
+                                        <td>+16</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112934" title="Countback results:
+ Back 9 - 41.5000, Back 6 - 30.3330, Back 3 - 15.1670, Back 1 - 4.3890">87</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">113th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=871">David A Jones</a>(15)  </td>
+                                        <td>NR</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112880" title="Countback results:
+ Back 9 - 34.5000, Back 6 - 25.0000, Back 3 - 12.5000, Back 1 - 3.1670">NR</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">114th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=83689">Michael Staley</a>(7)  </td>
+                                        <td>NR</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112949" title="Countback results:
+ Back 9 - 29.5000, Back 6 - 18.6670, Back 3 - 12.8330, Back 1 - 2.6110">NR</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">115th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=83048">Neil Shore</a>(21)  </td>
+                                        <td>NR</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112961" title="Countback results:
+ Back 9 - 33.5000, Back 6 - 25.0000, Back 3 - 7.5000, Back 1 - -1.1670">NR</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">116th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=266">David Grundy</a>(8)  </td>
+                                        <td>NR</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112941" title="Countback results:
+ Back 9 - 35.0000, Back 6 - 23.3330, Back 3 - 12.6670, Back 1 - 3.5560">NR</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">117th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=682">Stephen Toombs</a>(35)  </td>
+                                        <td>NR</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112901" title="Countback results:
+ Back 9 - 37.5000, Back 6 - 28.3330, Back 3 - 8.1670, Back 1 - -1.9440">NR</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="even">
+                                        <td width="10%"><span class="results_position">118th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=626">Geoffrey Wright</a>(21)  </td>
+                                        <td>NR</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112903" title="Countback results:
+ Back 9 - 28.5000, Back 6 - 13.0000, Back 3 - 2.5000, Back 1 - -1.1670">NR</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                    <tr class="odd">
+                                        <td width="10%"><span class="results_position">119th</span></td>
+                                        <td>  <a href="roundmgmt.php?playerid=92855">Mark Pattison</a>(30)  </td>
+                                        <td>NR</td>
+                                        <td>
+                                            <a href="viewround.php?roundid=112900" title="Countback results:
+ Back 9 - 26.0000, Back 6 - 16.0000, Back 3 - 9.0000, Back 1 - -1.6670">NR</a> <i></i>
+                                        </td>
+                                        <td>18</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div><div id="printfooter"><br><img src="/images/resources/burtonontrent/burton-logo.png" style="float:left;" class="footerClubLogo"><br><p class="\&quot;para\&quot;" style="\&quot;text-align:center;\&quot;">Created by intelligentgolf version 10.1.2.<br><br></p></div>
+                </div>
+                <script>
+                    var userID = '646-83642';
+                    var properties = {
+                        id: userID,
+                        name: 'Simon Parsons',
+                        user_level: '5',
+                        membertype: '7MN - Gent 7 Day (N)',
+                    };
+                </script> <!--sphider_noindex-->
+            </div>
+        </div>
+        <div class="scrollTop noprint">
+            <a id="scroll-up"><i class="fa fa-chevron-up"></i></a>
+        </div>
+        <div class="members-footer noprint">
+            <div class="page-space">
+                <div class="members-row row-fluid">
+                    <div class="span9 mf-copy">
+                        Copyright © 2025, Burton On Trent Golf Club. All Rights Reserved.
+                    </div>
+                    <div class="span3 mf-ig-logo">
+                        <a href="https://www.intelligentgolf.co.uk" target="_blank"><img src="/images/darkbg_ig_logo.png"></a>
+                    </div>
+                </div>
+            </div>
+        </div> <!--/sphider_noindex--> <div class="floathelp noprint"><a href="/admincontact.php?link=%2Fcompetition.php%3Fcompid%3D7269%26preview%3D1">Help</a></div>
+    </div>
+    <div id="outright"></div>
+    <!-- Google tag (gtag.js) -->
+    <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-CJP8W7NC82"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag("js", new Date());
+
+        gtag("config", "G-CJP8W7NC82", {
+            "auth": "Logged In",
+            "userLevel": "5",
+            "memberType": "7MN - Gent 7 Day (N)"
+        });</script><!-- Page generated by 10.0.1.245 -->
+    <!--sphider_noindex-->
+    <script>
+
+        // set pf year
+
+        $(document).ready(function () {
+            var str = $('.mf-copy').text();
+            $('.pf-copy').text(str);
+        });
+
+        // testimonial smooth slideshow
+
+        $(document).ready(function () {
+            setInterval(function () {
+                var slideshowHeight = $('.body-public .home-testimonials .nivo-caption').height();
+                $('.body-public .home-testimonials .galleryInner').height(slideshowHeight + 'px');
+            }, 100);
+        });
+
+        // scorecard button
+
+        $('.body-public a#score-open-link').click(function () {
+            $('.scorecard-content').slideDown('400');
+            $('a#score-open-link').addClass('hide');
+            $('a#score-close-link').addClass('disp');
+        });
+
+        $('.body-public a#score-close-link').click(function () {
+            $('.scorecard-content').slideUp('400');
+            $('a#score-open-link').removeClass('hide');
+            $('a#score-close-link').removeClass('disp');
+        });
+
+        // newsletter label fade
+
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($('.body-public .pf-newsletter .customFormLine:nth-child(1)').children('input').length > 0) {
+                    if ($('.pf-newsletter .customFormLine:nth-child(1) input').val().length >= 1) {
+                        $('.pf-newsletter .customFormLine:nth-child(1)').addClass('hide-label');
+                    }
+                    else {
+                        $('.pf-newsletter .customFormLine:nth-child(1)').removeClass('hide-label');
+                    }
+                }
+            }, 200);
+        });
+
+        // button switcherer
+
+        $('.btn-navbar').click(function () {
+            $('.btn-navbar').toggleClass('active');
+        });
+
+        // navbar fixererer
+
+        $(window).on("scroll touchmove", function () {
+            var winwidth = window.innerWidth;
+            if (winwidth > 979) {
+                $('body').toggleClass('fix', $(document).scrollTop() > 50);
+            }
+            else {
+                $('body').removeClass('fix');
+            }
+        });
+
+        // invalid page
+
+        $(document).ready(function () {
+            var checkInvalid = $('.body-public #globalwrap h3').html();
+            if (checkInvalid == "Invalid Page") {
+                $('body').addClass('invalid-page');
+            }
+        });
+
+        // scroll to top
+
+        $(document).ready(function () {
+            $('.scrollTop #scroll-up').click(function () {
+                $('html, body').animate({
+                    scrollTop: $('#outerborder').offset().top - 0
+                }, 2500)
+            });
+        });
+
+        $(window).scroll(function () {
+            if ($(this).scrollTop() > 200) {
+                $('.scrollTop a').css('opacity', '1');
+            } else {
+                $('.scrollTop a').css('opacity', '0');
+            }
+        });
+
+        // home scroll
+
+        $('.body-public .home-explore').click(function () {
+            var winWidth = $(window).width();
+            if (winWidth >= 980) {
+                $("html, body").animate({
+                    scrollTop: $('.home-main').offset().top - 160
+                }, 1500, 'linear');
+            }
+            else {
+                $("html, body").animate({
+                    scrollTop: $('.home-main').offset().top - 60
+                }, 1500, 'linear');
+            }
+        });
+
+        // home status
+
+        $('.body-public .home-status-trig').click(function () {
+            $('.body-public .home-status-section').slideToggle('400');
+        });
+
+        // sub menu math
+
+        $(window).scroll(function () {
+            var slideshowHeight = $('.body-public.body-contentpage .inner-slideshow').height();
+            var winWidth = $(window).width();
+            if (winWidth >= 980) {
+                slideshowHeight = slideshowHeight - 120;
+            }
+            if (slideshowHeight < $(this).scrollTop()) {
+                $('.body-public').addClass('sub-menu-stick');
+            }
+            else {
+                $('.body-public').removeClass('sub-menu-stick');
+            }
+        });
+
+        // home box links
+
+        $(document).ready(function () {
+            var boxLinkOne = $('.body-public .home-row-box-one .editor-only a').attr('href');
+            $('.body-public .home-row-box-one > a').attr('href', boxLinkOne);
+            var boxLinkTwo = $('.body-public .home-row-box-two .editor-only a').attr('href');
+            $('.body-public .home-row-box-two > a').attr('href', boxLinkTwo);
+            var boxLinkThree = $('.body-public .home-row-box-three .editor-only a').attr('href');
+            $('.body-public .home-row-box-three > a').attr('href', boxLinkThree);
+            var boxLinkFour = $('.body-public .home-row-box-four .editor-only a').attr('href');
+            $('.body-public .home-row-box-four > a').attr('href', boxLinkFour);
+        });
+
+    </script> <!--/sphider_noindex--> <!-- Generated in 1.6777 seconds -->
+</body>
+<grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration>
+</html>

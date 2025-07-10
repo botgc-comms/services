@@ -14,7 +14,7 @@ namespace BOTGC.API.Common
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public List<TeeSheetDto> ParseReport(HtmlDocument document)
+        public async Task<List<TeeSheetDto>> ParseReport(HtmlDocument document)
         {
             var teeSheets = new List<TeeSheetDto>();
             var playerMap = new Dictionary<string, PlayerTeeTimesDto>();

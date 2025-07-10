@@ -1,6 +1,15 @@
 ﻿namespace BOTGC.Leaderboards.Models
 {
-    public class Player
+    public class PlayerViewModel
+    {
+        public int Position { get; set; }
+        public string Names { get; set; }
+        public string PlayingHandicap { get; set; }
+        public string? Score { get; set; }
+        public string Countback { get; set; }
+    }
+
+    public class PlayerMultiRound
     {
         public string Name { get; set; }
         public int Total { get; set; }

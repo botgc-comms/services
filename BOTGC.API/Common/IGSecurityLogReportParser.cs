@@ -19,7 +19,7 @@ namespace BOTGC.API.Common
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public List<SecurityLogEntryDto> ParseReport(HtmlDocument document)
+        public async Task<List<SecurityLogEntryDto>> ParseReport(HtmlDocument document)
         {
             var events = new List<SecurityLogEntryDto>();
 

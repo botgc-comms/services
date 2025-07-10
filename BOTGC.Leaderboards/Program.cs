@@ -12,11 +12,13 @@ if (environment.IsDevelopment())
 {
     mvcBuilder.AddRazorRuntimeCompilation();
 }
+builder.Services.AddSignalR();
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration.GetSection("AppSettings"));
 
 builder.Services.AddHttpClient<IJuniorEclecticService, JuniorEclecticService>();
+builder.Services.AddHttpClient<ILeaderboardService, LeaderboardService>();
 
 var app = builder.Build();
 
@@ -39,6 +41,8 @@ app.UseEndpoints(endpoints =>
         name: "default",
         pattern: "{controller=JuniorEclectic}/{action=Index}");
 });
+
+app.MapHub<CompetitionHub>("/competitionhub");
 
 app.MapControllerRoute(
     name: "default",

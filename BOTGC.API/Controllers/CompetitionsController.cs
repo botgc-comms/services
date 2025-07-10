@@ -122,7 +122,7 @@ namespace BOTGC.API.Controllers
             }
         }
 
-        [HttpGet("/{competitionId}/leaderboard")]
+        [HttpGet("{competitionId}/leaderboard")]
         public async Task<IActionResult> GetCompetitionLeaderboard(string competitionId)
         {
             _logger.LogInformation($"Fetching leaderboard for competition {competitionId}...");

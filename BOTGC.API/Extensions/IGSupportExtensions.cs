@@ -26,6 +26,8 @@ namespace BOTGC.API.Extensions
 
             var httpClient = new HttpClient(httpHandler);
 
+            services.AddSingleton<IDataService, IGDataService>();
+
             services.AddSingleton(cookieContainer);
             services.AddSingleton(httpClient);
             services.AddSingleton<IGSessionService>(); 
@@ -39,11 +41,11 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IReportParser<MemberEventDto>, IGMemberEventsReportParser>();
             services.AddSingleton<IReportParser<TeeSheetDto>, IGTeeSheetReportParser>();
             services.AddSingleton<IReportParser<CompetitionDto>, IGCompetitionReportParser>();
-            services.AddSingleton<IReportParser<LeaderBoardDto>, IGLeaderboardReportParser>();
             services.AddSingleton<IReportParser<CompetitionSettingsDto>, IGCompetitionSettingsReportParser>();
             services.AddSingleton<IReportParser<SecurityLogEntryDto>, IGSecurityLogReportParser>();
             services.AddSingleton<IReportParser<MemberCDHLookupDto>, IGCDHLookupReportParser>();
             services.AddSingleton<IReportParser<NewMemberResponseDto>, IGNewMemberResponseReportParser>();
+            services.AddSingleton<IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto>, IGLeaderboardReportParser>();
 
             services.AddSingleton<IQueueService<NewMemberApplicationDto>, MembershipApplicationQueueService>();
             services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, NewMemberAddedQueueService>();
@@ -65,8 +67,6 @@ namespace BOTGC.API.Extensions
             services.AddHostedService<MembershipApplicationQueueProcessor>();
             services.AddHostedService<MemberPropertyUpdatesQueueProcessor>();
             services.AddHostedService<NewMemberAddedQueueProcessor>();
-
-            services.AddSingleton<IDataService, IGDataService>();
 
             return services;
         }
