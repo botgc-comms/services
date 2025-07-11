@@ -24,14 +24,16 @@
                     @foreach (var comp in Model)
                     {
                         var qrUrl = $"{scheme}://{host}/Home/CompetitionSelected?sessionId={sessionId}&competitionId={comp.Id}";
+                        var encodedQrUrl = System.Net.WebUtility.UrlEncode(qrUrl);
                         <div class="qr-item">
                             <div>@comp.Name</div>
-                            <a href="@(qrUrl)">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@(qrUrl)" alt="QR for @comp.Name" />
+                            <a href="@qrUrl">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@encodedQrUrl" alt="QR for @comp.Name" />
                             </a>
                             <div>Scan to select</div>
                         </div>
                     }
+
                 </div>
             </div>
         </div>
