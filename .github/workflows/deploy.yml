@@ -9,6 +9,7 @@ on:
       - 'BOTGC.API.Tests.V2/**'
       - 'BOTGC.Infrastructure/**'
       - 'BOTGC.MembershipApplication/**'
+      - 'BOTGC.Leaderboards/**'
       - 'terraform/**'
       - '.github/workflows/*.yml'
 
