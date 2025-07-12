@@ -32,8 +32,8 @@
                         </thead>
                         <tbody>
                             @{
-                                var players = Model.Players.OrderBy(p => p.Position).Take(30).ToList();
-                                var remainingRows = 30 - players.Count;
+                                var players = Model.Players.OrderBy(p => p.Position).Take(25).ToList();
+                                var remainingRows = 25 - players.Count;
                             }
 
                             @foreach (var player in players)
