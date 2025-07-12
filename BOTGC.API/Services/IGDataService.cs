@@ -279,7 +279,7 @@ namespace BOTGC.API.Services
             var competitionSettings = await this.GetCompetitionSettingsAsync(competitionId);
 
             var leaderboardUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.LeaderBoardUrl}".Replace("{compid}", competitionId);
-            var leaderboard = await GetData<LeaderBoardDto, CompetitionSettingsDto>(leaderboardUrl, _leaderboardReportParser, competitionSettings, __CACHE_LEADERBOARD.Replace("{compid}", competitionId), TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins));
+            var leaderboard = await GetData<LeaderBoardDto, CompetitionSettingsDto>(leaderboardUrl, _leaderboardReportParser, competitionSettings, __CACHE_LEADERBOARD.Replace("{compid}", competitionId), TimeSpan.FromMinutes(_settings.Cache.VeryShortTerm_TTL_mins));
 
             if (leaderboard != null && leaderboard.Any())
             {
@@ -464,23 +464,33 @@ namespace BOTGC.API.Services
             _logger.LogInformation("Fetching {ReportType} report from {Url}", typeof(T).Name, reportUrl);
             var doc = await _igSessionManagementService.PostPageContent(reportUrl, data);
 
-            var items = await parser.ParseReport(doc);
-
-            // Step 4: Add Hateoas Links
-            if (linkBuilder != null)
+            if (doc != null)
             {
-                foreach (var item in items)
+
+                var items = await parser.ParseReport(doc);
+
+                // Step 4: Add Hateoas Links
+                if (linkBuilder != null)
                 {
-                    item.Links = linkBuilder(item);
+                    foreach (var item in items)
+                    {
+                        item.Links = linkBuilder(item);
+                    }
                 }
-            }
 
-            if (!string.IsNullOrEmpty(cacheKey))
+                if (!string.IsNullOrEmpty(cacheKey))
+                {
+                    await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
+                }
+
+                return items;
+            }
+            else
             {
-                await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
-            }
+                _logger.LogError("Failed to retrieve data from {Url} for {ReportType}", reportUrl, typeof(T).Name);
 
-            return items;
+                return null;
+            }
         }
 
         private async Task<List<T>> GetData<T>(
