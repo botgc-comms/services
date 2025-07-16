@@ -16,4 +16,11 @@ public class LeaderboardController : Controller
 
         return View(vm);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetLeaderboardData(int competitionId)
+    {
+        var vm = await _leaderboardService.GetPlayersAsync(competitionId);
+        return Json(vm.Players);
+    }
 }

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Updates the leaderboard table rows in-place, matching player position to row.
  * @param {number} competitionId - The competition ID to fetch data for.
  * @param {number} [rowCount=25] - The number of rows to display.
@@ -38,3 +38,4 @@ function updateLeaderboardRows(competitionId, rowCount = 25, endpoint = '/Leader
             // console.error(error);
         });
 }
+

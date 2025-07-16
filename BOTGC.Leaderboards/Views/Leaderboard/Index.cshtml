@@ -1,6 +1,23 @@
 ﻿@using BOTGC.Leaderboards.Models;
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
 
 @model LeaderboardViewModel
+
+@{
+    var nonce = Context.Items["CSPNonce"] as string ?? "";
+}
+
+@section Head {
+    @if (Env.IsDevelopment())
+    {
+        <script nonce="@nonce" src="~/js/dist/leaderboard.bundle.js"></script>
+    }
+    else
+    {
+        <script nonce="@nonce" src="~/js/dist/leaderboard.bundle.min.js"></script>
+    }
+}
+
 <div class="leaderboard">
 
     <div class="flash"></div>
@@ -36,21 +53,13 @@
                                 var remainingRows = 25 - players.Count;
                             }
 
-                            @foreach (var player in players)
+                            @for (int i = 1; i <= 25; i++)
                             {
-                                <tr class="player-row" data-player-id="@player.Names.Replace(" ", "-")">
-                                    <td class="score-cell">@player.Position</td>
-                                    <td class="name-cell toggle-details">@player.Names (@player.PlayingHandicap)</td>
-                                    <td class="score-cell overall-score-cell">@player.Score</td>
-                                </tr>
-                            }
-
-                            @for (int i = 0; i < remainingRows; i++)
-                            {
-                                <tr class="placeholder-row">
-                                    <td class="score-cell">&nbsp;</td>
-                                    <td class="name-cell">&nbsp;</td>
-                                    <td class="score-cell overall-score-cell">&nbsp;</td>
+                                var player = Model.Players.FirstOrDefault(p => p.Position == i);
+                                <tr id="row-@i" class="player-row">
+                                    <td class="score-cell">@i</td>
+                                    <td class="name-cell toggle-details">@((player != null) ? $"{player.Names} ({player.PlayingHandicap})" : "")</td>
+                                    <td class="score-cell overall-score-cell">@((player != null) ? player.Score : "")</td>
                                 </tr>
                             }
                         </tbody>
@@ -117,4 +126,13 @@
 
     window.addEventListener("load", hideOverflowingLeaderboardRows);
     window.addEventListener("resize", hideOverflowingLeaderboardRows);
+
+    // Set the competitionId from your model
+    const competitionId = @Model.CompetitionDetails.Id;
+
+    // Initial update (optional)
+    updateLeaderboardRows(competitionId);
+
+    // Poll every 30 seconds
+    setInterval(() => updateLeaderboardRows(competitionId), 30000);
 </script>

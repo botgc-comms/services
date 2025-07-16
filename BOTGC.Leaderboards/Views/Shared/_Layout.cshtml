@@ -3,12 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - Leaderboards</title>
+
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    @RenderSection("Head", required: false)
 </head>
+
 <body>
     @RenderBody()
 

@@ -12,7 +12,8 @@ const paths = {
         './wwwroot/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js'
     ],
     app: [
-        './wwwroot/js/site.js'
+        './wwwroot/js/site.js', 
+        './wwwroot/js/leaderboard.js'
     ]
 };
 
@@ -34,7 +35,7 @@ function vendorScripts() {
 
 function appScripts() {
     return gulp.src(paths.app)
-        .pipe(concat('app.bundle.js'))
+        .pipe(concat('leaderboard.bundle.js'))
         .pipe(gulp.dest(outputPath))
         .pipe(uglify({ mangle: { toplevel: true } }))
         .pipe(rename({ suffix: '.min' }))
