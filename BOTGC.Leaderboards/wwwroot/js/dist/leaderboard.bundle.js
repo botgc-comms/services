@@ -1,3 +1,4 @@
+
 /**
  * Updates the leaderboard table rows in-place, matching player position to row.
  * @param {number} competitionId - The competition ID to fetch data for.
@@ -16,6 +17,8 @@ function updateLeaderboardRows(competitionId, rowCount = 25, endpoint = '/Leader
             players.forEach(player => {
                 playerMap[player.position] = player;
             });
+
+            console.log(`Updating Leaderboard..... ${new Date().toLocaleString()}`);
 
             // Update each row by position
             for (let i = 1; i <= rowCount; i++) {
@@ -38,4 +41,6 @@ function updateLeaderboardRows(competitionId, rowCount = 25, endpoint = '/Leader
             // console.error(error);
         });
 }
+
+window.updateLeaderboardRows = updateLeaderboardRows;
 
