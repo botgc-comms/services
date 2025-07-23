@@ -29,6 +29,7 @@ namespace BOTGC.API.Services
         private const string __CACHE_LEADERBOARD = "Leaderboard_Settings_{compid}";
         private const string __CACHE_MEMBERCDHLOOKUP = "MemberCDHLookup_{cdhid}";
         private const string __CACHE_MEMBERSHIPCATEGORIES = "Member_Categories";
+        private const string __CACHE_STOCKLEVELS = "Stock_Levels";
 
         private readonly AppSettings _settings;
         private readonly ILogger<IGDataService> _logger;
@@ -42,6 +43,7 @@ namespace BOTGC.API.Services
         private readonly IReportParser<PlayerIdLookupDto> _playerIdLookupParser;
         private readonly IReportParser<ScorecardDto> _scorecardReportParser;
         private readonly IReportParser<TeeSheetDto> _teesheetReportParser;
+        private readonly IReportParser<StockItemDto> _stockLevelReportParser;
         private readonly IReportParser<CompetitionDto> _competitionReportParser;
         private readonly IReportParser<MemberEventDto> _memberEventReportParser;
         private readonly IReportParser<CompetitionSettingsDto> _competitionSettingsReportParser;
@@ -67,6 +69,7 @@ namespace BOTGC.API.Services
                                 IReportParser<SecurityLogEntryDto> securityLogEntryParser,
                                 IReportParser<MemberCDHLookupDto> memberCDHLookupReportParser,
                                 IReportParser<NewMemberResponseDto> newMemberResponseReportParser,
+                                IReportParser<StockItemDto> stockLevelReportParser, 
                                 IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto> leaderBoardReportParser,
                                 IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto> clubChampionshipLeaderboardReportParser,
                                 ITaskBoardService taskBoardService,
@@ -92,6 +95,7 @@ namespace BOTGC.API.Services
             _securityLogEntryParser = securityLogEntryParser ?? throw new ArgumentNullException(nameof(securityLogEntryParser));
             _memberCDHLookupReportParser = memberCDHLookupReportParser ?? throw new ArgumentNullException(nameof(memberCDHLookupReportParser));
             _newMemberResponseReportParser = newMemberResponseReportParser ?? throw new ArgumentNullException(nameof(newMemberResponseReportParser));
+            _stockLevelReportParser = stockLevelReportParser ?? throw new ArgumentNullException(nameof(stockLevelReportParser));
 
             _taskBoardService = taskBoardService ?? throw new ArgumentNullException(nameof(taskBoardService));
         }
@@ -244,6 +248,21 @@ namespace BOTGC.API.Services
             }
 
             return null;
+        }
+
+        public async Task<List<StockItemDto>> GetStockLevels()
+        {
+            var cacheKey = __CACHE_STOCKLEVELS;
+            
+            var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.StockItemsUrl}";
+            var stockItems = await GetData<StockItemDto>(reportUrl, _stockLevelReportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins));
+
+            if (stockItems != null && stockItems.Any())
+            {
+                _logger.LogInformation($"Successfully retrieved the stock list.");
+            }
+
+            return stockItems;
         }
 
         public async Task<List<CompetitionDto>> GetActiveAndFutureCompetitionsAsync()

@@ -9,4 +9,5 @@ namespace BOTGC.API.Dto
         public int Order { get; set; }
         public List<MembershipCategoryDto> Categories { get; set; } = new();
     }
+
 }

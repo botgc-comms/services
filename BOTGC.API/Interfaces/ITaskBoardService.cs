@@ -1,4 +1,5 @@
 ﻿using BOTGC.API.Dto;
+using BOTGC.API.Models;
 
 namespace BOTGC.API.Interfaces
 {
@@ -8,5 +9,6 @@ namespace BOTGC.API.Interfaces
         Task<string> CreateMemberApplicationAsync(NewMemberApplicationResultDto dto);
         Task<string?> FindExistingApplicationItemIdAsync(string applicationId);
         Task<List<MembershipCategoryGroupDto>> GetMembershipCategories();
+        Task<StockBoardSyncResult> SyncStockLevelsAsync(List<StockItemDto> stockItems);
     }
 }

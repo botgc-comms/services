@@ -1,6 +1,7 @@
 ﻿using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
@@ -481,6 +482,192 @@ namespace BOTGC.API.Services
                 .ToList();
 
             return retVal;
+        }
+
+        public async Task<StockBoardSyncResult> SyncStockLevelsAsync(List<StockItemDto> stockItems)
+        {
+            var alertDate = DateTime.Now;
+
+            _logger.LogInformation("Syncing stock items to Monday Stock Levels board…");
+
+            var boardId = await GetBoardIdByNameAsync("Stock Levels")
+                         ?? throw new InvalidOperationException("Stock Levels board not found.");
+
+            // 1. Fetch all items from Monday with Stock ID mapping
+            var query = @"
+                query GetBoardItems($boardId: [ID!]) {
+                  boards(ids: $boardId) {
+                    items_page(limit: 500) {
+                      items {
+                        id
+                        name
+                        column_values(ids: [""text_mkt4f493""]) {
+                          id
+                          text
+                          value
+                        }
+                      }
+                    }
+                  }
+                }";
+
+            
+            var payload = new { query, variables = new { boardId = new[] { boardId } } };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(string.Empty, content);
+            response.EnsureSuccessStatusCode();
+            var json = JsonNode.Parse(await response.Content.ReadAsStringAsync());
+            var items = json?["data"]?["boards"]?[0]?["items_page"]?["items"]?.AsArray();
+
+            // Build a lookup: Stock ID -> (itemId, name)
+            var mondayIdMap = items?
+                .Where(i => i?["column_values"]?[0]?["text"] != null)
+                .ToDictionary(
+                    i => i["column_values"][0]["text"]!.ToString(),
+                    i => i["id"]!.ToString()
+                ) ?? new Dictionary<string, string>();
+
+            var created = new List<string>();
+            var updated = new List<string>();
+
+            foreach (var dto in stockItems)
+            {
+                string statusLabel = "OK";
+
+                if (dto.TotalQuantity.HasValue && dto.MinAlert.HasValue && dto.MinAlert.Value > 0 && dto.TotalQuantity <= dto.MinAlert)
+                {
+                    statusLabel = "Very Low";
+                }
+                else if (dto.TotalQuantity.HasValue && dto.MaxAlert.HasValue && dto.MaxAlert.Value > 0 && dto.TotalQuantity <= dto.MaxAlert)
+                {
+                    statusLabel = "Running Low";
+                }
+
+                var columnValuesObject = new Dictionary<string, object?>
+                {
+                    ["text_mkt4f493"] = dto.Id.ToString(),                                    // Stock ID (required for upsert)
+                    ["status"] = new { label = statusLabel },                                 // Status (Running Low, Very Low, OK)
+                    ["date4"] = alertDate.ToString("yyyy-MM-dd"),                             // Alert Date
+                    ["numeric_mkt46h37"] = dto.TotalQuantity,                                 // Total Stock
+                    ["numeric_mkt4q9cz"] = dto.MinAlert,                                      // Min Alert
+                    ["numeric_mkt46r6t"] = dto.MaxAlert,                                      // Max Alert
+                    ["text_mkt4tafy"] = dto.Division,                                         // Division
+                    ["text_mkt46vft"] = dto.Unit                                              // Unit
+                };
+
+                var columnValuesJson = JsonSerializer.Serialize(columnValuesObject, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = null,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                });
+
+                var itemName = dto.Name;
+
+                if (!string.IsNullOrEmpty(dto.Id.ToString()) && mondayIdMap.TryGetValue(dto.Id.ToString(), out var mondayItemId))
+                {
+                    // UPDATE
+                    var updateMutation = @"
+                        mutation ($boardId: ID!, $itemId: ID!, $columnValues: JSON!) {
+                            change_multiple_column_values(board_id: $boardId, item_id: $itemId, column_values: $columnValues) {
+                                id
+                            }
+                        }";
+
+                    var updatePayload = new
+                    {
+                        query = updateMutation,
+                        variables = new
+                        {
+                            boardId, 
+                            itemId = mondayItemId,
+                            columnValues = columnValuesJson
+                        }
+                    };
+
+                    var updateContent = new StringContent(JsonSerializer.Serialize(updatePayload), Encoding.UTF8, "application/json");
+                    var updateResponse = await _httpClient.PostAsync(string.Empty, updateContent);
+                    updateResponse.EnsureSuccessStatusCode();
+
+                    updated.Add(dto.Id.ToString());
+                    _logger.LogInformation("Updated Monday stock item {StockId} ({ItemId})", dto.Id, mondayItemId);
+                }
+                else
+                {
+                    // CREATE
+                    var createMutation = @"
+                        mutation ($boardId: ID!, $itemName: String!, $columnValues: JSON!) {
+                            create_item(board_id: $boardId, item_name: $itemName, column_values: $columnValues) {
+                                id
+                            }
+                        }";
+
+                    var createPayload = new
+                    {
+                        query = createMutation,
+                        variables = new
+                        {
+                            boardId,
+                            itemName = dto.Name,
+                            columnValues = columnValuesJson
+                        }
+                    };
+
+                    var createContent = new StringContent(JsonSerializer.Serialize(createPayload), Encoding.UTF8, "application/json");
+                    var createResponse = await _httpClient.PostAsync(string.Empty, createContent);
+                    createResponse.EnsureSuccessStatusCode();
+
+                    created.Add(dto.Id.ToString());
+                    _logger.LogInformation("Created new Monday stock item {StockId} ({ItemName})", dto.Id, itemName);
+                }
+            }
+
+            var idsPassedIn = new HashSet<string>(stockItems.Select(x => x.Id.ToString()));
+            var mondayUntouched = mondayIdMap.Keys.Except(idsPassedIn).ToList();
+
+            foreach (var stockId in mondayUntouched)
+            {
+                var itemId = mondayIdMap[stockId];
+
+                var resetColumnValues = new Dictionary<string, object?>
+                {
+                    ["status"] = new { label = "OK" }
+                };
+                var resetJson = JsonSerializer.Serialize(resetColumnValues, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = null
+                });
+
+                // UPDATE
+                var updateMutation = @"
+                        mutation ($boardId: ID!, $itemId: ID!, $columnValues: JSON!) {
+                            change_multiple_column_values(board_id: $boardId, item_id: $itemId, column_values: $columnValues) {
+                                id
+                            }
+                        }";
+
+                var updatePayload = new
+                {
+                    query = updateMutation,
+                    variables = new
+                    {
+                        boardId,
+                        itemId,
+                        columnValues = resetJson
+                    }
+                };
+
+                var updateContent = new StringContent(JsonSerializer.Serialize(updatePayload), Encoding.UTF8, "application/json");
+                var updateResponse = await _httpClient.PostAsync(string.Empty, updateContent);
+                updateResponse.EnsureSuccessStatusCode();
+            }
+
+            return new StockBoardSyncResult
+            {
+                Created = created,
+                Updated = updated,
+                ExistingMondayIds = mondayIdMap.Keys.ToList()
+            };
         }
     }
 }

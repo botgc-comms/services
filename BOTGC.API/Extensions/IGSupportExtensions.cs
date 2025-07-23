@@ -46,6 +46,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IReportParser<SecurityLogEntryDto>, IGSecurityLogReportParser>();
             services.AddSingleton<IReportParser<MemberCDHLookupDto>, IGCDHLookupReportParser>();
             services.AddSingleton<IReportParser<NewMemberResponseDto>, IGNewMemberResponseReportParser>();
+            services.AddSingleton<IReportParser<StockItemDto>, IGStockItemReportParser>();
             services.AddSingleton<IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto>, IGLeaderboardReportParser>();
             services.AddSingleton<IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>, IGClubChampionshipLeaderboardReportParser>();
             
@@ -56,8 +57,9 @@ namespace BOTGC.API.Extensions
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 
             services.AddSingleton<ITeeTimeUsageTaskQueue, TeeTimeUsageTaskQueue>();
-
+            services.AddSingleton<IStockAnalysisTaskQueue, StockLevelAnalysisTaskQueue>();
             services.AddSingleton<ICompetitionTaskQueue, CompetitionTaskQueue>();
+            
             services.AddSingleton<ICompetitionProcessorResolver, CompetitionProcessorResolver>();
 
             services.AddSingleton<IMemberApplicationFormPdfGeneratorService, QuestPDFMemberApplicationFormGenerator>();
@@ -69,6 +71,7 @@ namespace BOTGC.API.Extensions
             services.AddHostedService<MembershipApplicationQueueProcessor>();
             services.AddHostedService<MemberPropertyUpdatesQueueProcessor>();
             services.AddHostedService<NewMemberAddedQueueProcessor>();
+            services.AddHostedService<StockLevelAnalysisQueueProcessor>();
 
             return services;
         }
