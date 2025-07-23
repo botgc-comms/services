@@ -157,19 +157,6 @@ public class LeaderboardService : ILeaderboardService
                 PropertyNameCaseInsensitive = true
             });
 
-            // No custom sorting/grouping—use positions as given
-            var players = parsedData.Total
-                .Select(p => new PlayerMultiRoundViewModel
-                {
-                    Name = p.PlayerName,
-                    R1 = p.R1 ?? "",
-                    R2 = p.R2 ?? "",
-                    Par = p.Par ?? "",
-                    Thru = ParseThru(p.Thru),
-                    Position = p.Position ?? 0
-                })
-                .ToList();
-
             var competitionDetails = new CompetitionDetailsViewModel
             {
                 Id = parsedData.CompetitionDetails.Id ?? competitionId,
@@ -179,11 +166,34 @@ public class LeaderboardService : ILeaderboardService
                 ResultsDisplay = parsedData.CompetitionDetails.ResultsDisplay
             };
 
-            return new ClubChampionshipLeaderboardViewModel
+            if (parsedData.Total != null)
             {
-                Players = players,
-                CompetitionDetails = competitionDetails
-            };
+                // No custom sorting/grouping—use positions as given
+                var players = parsedData.Total
+                    .Select(p => new PlayerMultiRoundViewModel
+                    {
+                        Name = p.PlayerName,
+                        R1 = p.R1 ?? "",
+                        R2 = p.R2 ?? "",
+                        Par = p.Par ?? "",
+                        Thru = ParseThru(p.Thru),
+                        Position = p.Position ?? 0
+                    })
+                    .ToList();
+
+                return new ClubChampionshipLeaderboardViewModel
+                {
+                    Players = players,
+                    CompetitionDetails = competitionDetails
+                };
+            }
+            else
+            {
+                return new ClubChampionshipLeaderboardViewModel
+                {
+                    CompetitionDetails = competitionDetails
+                };
+            }
         }
         catch (Exception ex)
         {

@@ -351,8 +351,10 @@ namespace BOTGC.API.Services
                 var r1Id = competitionSettings.MultiPartCompetition.FirstOrDefault(
                     r => Regex.IsMatch(r.Key, "R(?:ound)?\\s*1", RegexOptions.IgnoreCase),
                     competitionSettings.MultiPartCompetition.ElementAt(0));
+
                 var r1Url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.LeaderBoardUrl}"
                     .Replace("{compid}", r1Id.Value.ToString()).Replace("{grossOrNett}", grossOrNett);
+
                 var r1 = await GetData<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>(
                     r1Url, _clubChampionshipLeaderboardReportParser, competitionSettings,
                     __CACHE_LEADERBOARD.Replace("{compid}", competitionId) + "_R1",
@@ -361,8 +363,10 @@ namespace BOTGC.API.Services
                 var r2Id = competitionSettings.MultiPartCompetition.FirstOrDefault(
                     r => Regex.IsMatch(r.Key, "R(?:ound)?\\s*2", RegexOptions.IgnoreCase),
                     competitionSettings.MultiPartCompetition.ElementAt(1));
+
                 var r2Url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.LeaderBoardUrl}"
                     .Replace("{compid}", r2Id.Value.ToString()).Replace("{grossOrNett}", grossOrNett);
+
                 var r2 = await GetData<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>(
                     r2Url, _clubChampionshipLeaderboardReportParser, competitionSettings,
                     __CACHE_LEADERBOARD.Replace("{compid}", competitionId) + "_R2",
@@ -421,15 +425,13 @@ namespace BOTGC.API.Services
                         combined[i].Position = i + 1;
                     }
 
-                    var retVal = new ClubChampionshipLeaderBoardDto
+                    return new ClubChampionshipLeaderBoardDto
                     {
                         CompetitionDetails = competitionSettings,
                         Round1 = r1,
                         Round2 = r2,
                         Total = combined
                     };
-
-                    return retVal;
                 }
 
                 int ParseToPar(string par)
@@ -476,7 +478,10 @@ namespace BOTGC.API.Services
                 }
             }
 
-            return null;
+            return new ClubChampionshipLeaderBoardDto
+            {
+                CompetitionDetails = competitionSettings
+            };
         }
 
         public async Task<List<SecurityLogEntryDto>?> GetMobileOrders(DateTime? forDate = null)

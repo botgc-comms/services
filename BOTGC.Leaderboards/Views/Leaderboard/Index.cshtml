@@ -38,7 +38,7 @@
             <div class="table-container">
                 <div class="orange-bg"></div>
                 <table id="leaderboard-table">
-                    @if (Model != null && Model.Players.Any())
+                    @if (Model != null && Model.Players != null && Model.Players.Any())
                     {
                         <thead>
                             <tr class="score-header">
