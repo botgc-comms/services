@@ -32,6 +32,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.Use(async (context, next) =>
+{
+    var nonce = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+    context.Items["CSPNonce"] = nonce;
+    await next();
+});
+
 app.UseStaticFiles();
 app.UseRouting();
 

@@ -21,7 +21,7 @@
         <div class="central">
             <div class="table-container">
                 <div class="qr-list">
-                    @foreach (var comp in Model)
+                    @foreach (var comp in Model.Take(6))
                     {
                         var qrUrl = $"{scheme}://{host}/Home/CompetitionSelected?sessionId={sessionId}&competitionId={comp.Id}";
                         var encodedQrUrl = System.Net.WebUtility.UrlEncode(qrUrl);
@@ -30,7 +30,6 @@
                             <a href="@qrUrl">
                                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@encodedQrUrl" alt="QR for @comp.Name" />
                             </a>
-                            <div>Scan to select</div>
                         </div>
                     }
 
@@ -43,13 +42,27 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
+
+    const leaderboardUrls = {
+        @foreach (var comp in Model.Take(6))
+        {
+            <text>@comp.Id: "@comp.LeaderboardUrl",</text>
+        }
+    };
+
     const sessionId = '@sessionId';
     const connection = new signalR.HubConnectionBuilder()
         .withUrl('/competitionhub')
         .build();
 
     connection.on("CompetitionSelected", function (competitionId) {
-        window.location.href = '/leaderboard?competitionId=' + competitionId;
+        const url = leaderboardUrls[competitionId];
+        if (url) {
+            window.location.href = url;
+        } else {
+            // fallback or show error
+            window.location.href = '/leaderboard?competitionId=' + competitionId;
+        }
     });
 
     connection.start().then(function () {

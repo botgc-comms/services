@@ -146,5 +146,30 @@ namespace BOTGC.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while leaderboard for compeition {competitionId}.");
             }
         }
+
+        [HttpGet("{competitionId}/clubChampionshipsLeaderboard")]
+        public async Task<IActionResult> GetClubChampionshipsCompetitionLeaderboard(string competitionId)
+        {
+            _logger.LogInformation($"Fetching leaderboard for competition {competitionId}...");
+
+            try
+            {
+                var settings = await _reportService.GetClubChampionshipsLeaderboardAsync(competitionId);
+
+                if (settings == null)
+                {
+                    _logger.LogWarning($"No leaderboard found for competition {competitionId}.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved leaderboard for competition {competitionId}.");
+                return Ok(settings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving leaderboard for competition id {competitionId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while leaderboard for compeition {competitionId}.");
+            }
+        }
     }
 }

@@ -42,11 +42,13 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IReportParser<TeeSheetDto>, IGTeeSheetReportParser>();
             services.AddSingleton<IReportParser<CompetitionDto>, IGCompetitionReportParser>();
             services.AddSingleton<IReportParser<CompetitionSettingsDto>, IGCompetitionSettingsReportParser>();
+            services.AddSingleton<IReportParser<CompetitionSummaryDto>, IGCompetitionSummaryReportParser>();
             services.AddSingleton<IReportParser<SecurityLogEntryDto>, IGSecurityLogReportParser>();
             services.AddSingleton<IReportParser<MemberCDHLookupDto>, IGCDHLookupReportParser>();
             services.AddSingleton<IReportParser<NewMemberResponseDto>, IGNewMemberResponseReportParser>();
             services.AddSingleton<IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto>, IGLeaderboardReportParser>();
-
+            services.AddSingleton<IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>, IGClubChampionshipLeaderboardReportParser>();
+            
             services.AddSingleton<IQueueService<NewMemberApplicationDto>, MembershipApplicationQueueService>();
             services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, NewMemberAddedQueueService>();
             services.AddSingleton<IQueueService<NewMemberPropertyUpdateDto>, MemberPropertyUpdateQueueService>();

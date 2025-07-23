@@ -15,36 +15,34 @@ public class HomeController : Controller
         _hubContext = hubContext;
     }
 
-    private async Task<List<CompetitionDetailsViewModel>> GetCompetitions()
+    private async Task<List<CompetitionDetailsViewModel>> GetCompetitions(DateTime? date = null)
     {
         var competitions = await _leaderboardService.GetCompetitionsAsync();
-        var fromDate = DateTime.Now.Date;
-        var toDate = fromDate.AddDays(5);
-        return competitions.Where(c => c.Date >= fromDate && c.Date <= toDate).ToList();
+        var fromDate = (date ?? DateTime.Now.Date).AddDays(-2);
+        var toDate = fromDate.AddDays(2);
+        var selectedCompetitions = competitions.Where(c => c.Date >= fromDate && c.Date <= toDate).ToList();
+
+        return selectedCompetitions;
     }
 
-    public async Task<IActionResult> Index()
+    [HttpGet]
+    public async Task<IActionResult> Index(DateTime? date = null)
     {
-        var upcomingCompetitions = await GetCompetitions();
+        var upcomingCompetitions = await GetCompetitions(date);
 
-        if (upcomingCompetitions.Count > 1)
+        if (upcomingCompetitions.Count == 1 && upcomingCompetitions[0].Date.Date == DateTime.Today)
         {
-            return RedirectToAction("CompetitionSelection");
-        }
-        else if (upcomingCompetitions.Count == 1)
-        {
-            return RedirectToAction("Index", "Leaderboard", new { competitionId = upcomingCompetitions[0].Id });
+            return Redirect(upcomingCompetitions[0].LeaderboardUrl);
         }
         else
         {
-            ViewBag.ErrorMessage = "No upcoming competitions found.";
-            return View();
+            return RedirectToAction("CompetitionSelection", new { date });
         }
     }
 
-    public async Task<IActionResult> CompetitionSelection()
+    public async Task<IActionResult> CompetitionSelection(DateTime? date = null)
     {
-        var upcomingCompetitions = await GetCompetitions();
+        var upcomingCompetitions = await GetCompetitions(date);
         return View("CompetitionSelection", upcomingCompetitions);
     }
 

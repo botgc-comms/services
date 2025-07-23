@@ -46,6 +46,8 @@
 
   "FSH - Lady Social Honorary": 0,
   "House": 50,
+  "Clubhouse": 0,
+  "Family Clubhouse": 0,
 
   "MSH - Gent Social Honorary": 0,
   "MX - Student": 675,
@@ -53,5 +55,6 @@
   "Professional Player": 1252.50,
   "SOCL - Social Members": 100,
   "STAFF - Member of Staff": 0,
-  "Burton Flexi 20/40":  500
+  "Burton Flexi 20/40": 500,
+  "Medical Exemption":  0
 }

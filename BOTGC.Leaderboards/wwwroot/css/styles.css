@@ -360,3 +360,7 @@ tr {
     font-size: 2.2rem;
   }
 }
+.score-below-par {
+  color: #d32f2f; /* red */
+  font-weight: bold;
+}

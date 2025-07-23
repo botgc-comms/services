@@ -9,15 +9,13 @@
         public string Countback { get; set; }
     }
 
-    public class PlayerMultiRound
+    public class PlayerMultiRoundViewModel
     {
         public string Name { get; set; }
-        public int Total { get; set; }
+        public string Par { get; set; }
         public int Thru { get; set; }
         public int Position { get; set; }
-        public int Ph { get; set; } // Handicap
-        public string Final { get; set; }
-        public int R1 { get; set; } // Round 1 Score
-        public int R2 { get; set; } // Round 2 Score
+        public string R1 { get; set; } 
+        public string R2 { get; set; } 
     }
 }

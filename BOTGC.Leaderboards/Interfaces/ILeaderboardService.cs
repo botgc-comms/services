@@ -5,6 +5,7 @@ namespace BOTGC.Leaderboards.Interfaces;
 
 public interface ILeaderboardService
 {
-    Task<LeaderboardViewModel?> GetPlayersAsync(int competitionId);
+    Task<LeaderboardViewModel?> GetLeaderboardPlayersAsync(int competitionId);
     Task<List<CompetitionDetailsViewModel>> GetCompetitionsAsync();
+    Task<ClubChampionshipLeaderboardViewModel?> GetClubChampionshipLeaderboardPlayersAsync(int competitionId);
 }

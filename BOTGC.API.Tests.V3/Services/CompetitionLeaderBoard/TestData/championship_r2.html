@@ -1,0 +1,521 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>TEST - DO NOT ENTER - R2 :: Golf</title>
+
+
+    <link href="/styles/bootstrap.1655723398.css" rel="stylesheet" media="screen" type="text/css">
+    <link href="/styles/bootstrap_common.1655723398.css" rel="stylesheet" media="screen" type="text/css">
+
+
+    <link href="/customcss/styles/burtonontrent.1691603954.css" rel="stylesheet" type="text/css" media="screen">
+
+    <link href="/print.1656928773.css" rel="stylesheet" type="text/css" media="print">
+    <script>
+        var deviceType = 'computer';
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="/javascript/html5shiv.js"></script>
+    <![endif]-->
+
+
+    <script src="/javascript/jquery.min.js"></script>
+    <script src="/javascript/jquery-migrate-1.4.1.min.js"></script>
+    <link rel="stylesheet" href="/styles/fa440/css/font-awesome.min.css">
+    <script src="/javascript/jquery.mb.browser-master/jquery.mb.browser.min.js"></script>
+    <script type="text/javascript" src="/javascript/bootstrap.1655723397.js"></script>
+
+
+    <link href="/images/sites/burtonontrent/favicon.png" type="image/png" rel="icon" />
+
+    <meta name="revisit-after" content="1 days">
+    <meta name="robots" content="index,follow">
+    <meta name="description" content="Burton on Trent Golf Club">
+    <meta name="keywords" content="Golf Burton Wakes Derby Golfing Opens">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv='content-language' content='en'>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <script src="/images/resources/burtonontrent/jquery.jcarousel.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('.body-public .carousel-content').jcarousel({
+                items: '.carousel-item',
+                list: '.carousel-holder',
+                wrap: 'circular',
+                animation: 2000
+            })
+
+                //Autoscroll
+                .jcarouselAutoscroll({
+                    interval: 5000,
+                    target: '+=1',
+                    autostart: true
+                });
+
+            //Navigation
+            $('.carousel-prev').click(function () {
+                $('.carousel-content').jcarousel('scroll', '-=1');
+            });
+
+            $('.carousel-next').click(function () {
+                $('.carousel-content').jcarousel('scroll', '+=1');
+            });
+
+            $('.body-public .image-jcarousel').jcarousel({
+                items: '.image-carousel-item',
+                list: '.image-carousel-wrapper',
+                wrap: 'circular',
+                animation: 2000
+            })
+
+                //Autoscroll
+                .jcarouselAutoscroll({
+                    interval: 5000,
+                    target: '+=1',
+                    autostart: true
+                });
+
+            //Navigation
+            $('.image-prev').click(function () {
+                $('.image-jcarousel').jcarousel('scroll', '-=1');
+            });
+
+            $('.image-next').click(function () {
+                $('.image-jcarousel').jcarousel('scroll', '+=1');
+            });
+
+        });
+
+    </script>
+    <script type="text/javascript" src="/main.js"></script>
+    <script type="text/javascript" src="javascript/highcharts.js"></script>
+    <script type="text/javascript" src="javascript/piechart.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('a#awhyinterest').click(function () {
+                $('p#whyinterest').slideToggle();
+            });
+
+        });
+    </script>
+    <script type="text/javascript">
+        function set_timer(url, time) {
+            window.setTimeout(function () {
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    success: function (resp) {
+                        fails = 0;
+                        $(datadiv).fadeOut('fast', function () {
+                            $('div#cutbar').remove();
+                            $(datadiv).html(resp).fadeIn('fast');
+                        });
+                    },
+                    complete: function (x, status) {
+                        if (status != 'success') return;
+                        var hdr = x.getResponseHeader('X-IG-Next-URL');
+                        if (hdr) {
+                            var split = hdr.split(';');
+                            if (split[0] == 'ENDINPROGRESS') {
+                                window.location.reload();
+                            } else if (split[0] == 'PAUSEINPROGRESS') {
+                                maxloads = 1;
+                            }
+                            pageload++;
+                            if (pageload >= maxloads) {
+                                $('#liveloading').remove();
+                            } else {
+                                set_timer(url, split[1]);
+                            }
+                        }
+                    },
+                    timeout: 3000,
+                    error: function (x) {
+                        fails++;
+                        if (fails == 1)
+                            datadiv.append('<p id="ajaxwarning">[1]</p>');
+                        else
+                            $('#ajaxwarning').html('[' + fails + ']');
+                        set_timer(url, time);
+                    }
+                });
+            }, time * 1000);
+        }
+        var datadiv = null;
+        var fails = 0;
+        var pageload = 0;
+        var maxloads = 30;
+        var url = 'liveresults.php?compid=7097';
+        $(function () {
+            set_timer('liveresults.php?compid=7097', 120);
+            datadiv = $('<div></div>');
+            $('table.global').before(datadiv);
+            datadiv.wrapInner($('table.global'));
+        });
+    </script>
+    <script type='text/javascript'>var layout3 = false;</script>
+</head>
+<body class="body-class-members page-url-competitionphpcompid7100preview1  body-root-competition.php body-nav-current-1 body-nav-current-has-2   php&#45;competition   ">
+
+    <div style='display:none;'><p><a style='display:none;' href='/extlink.php' rel='nofollow'>More</a></p></div>
+    <div id="outerborder">
+        <div id="outleft"></div>
+        <div id="container">
+            <!--sphider_noindex-->
+            <div id="printbanner"><p class="clubname"><span class='clubnametext'>Burton On Trent Golf Club</span><img src="/images/resources/burtonontrent/burton-logo.png" align="right" alt=""></p></div><div class="header-wrapper noprint">
+                <div class="header-space">
+                    <div class="header-logo">
+                        <a href="/"><img src="/images/resources/burtonontrent/bot-1894.png"><span class="header-club-name">Burton on Trent</span></a>
+                    </div>
+                    <div class="header-left-link">
+                        <a href="/visitorbooking">Visitor Tee Booking</a>
+                    </div>
+                    <div class="header-right-link">
+                        <a href="/membership">Become A Member</a>
+                    </div>
+                    <div class="navbar navbar-inverse">
+                        <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="club-menu-button-lines">
+                                <span class="icon-bar top-bar"></span>
+                                <span class="icon-bar middle-bar"></span>
+                                <span class="icon-bar bottom-bar"></span>
+                            </span>
+                            <span class="club-menu-button">Menu</span>
+                        </button>
+                        <div class="nav-collapse collapse">
+                            <div class="navbar-inner">
+                                <div id="topmenu">
+                                    <ul id="nav" class="nav">
+                                        <li class="first nav-level-1 nav-menu-home"><a href="/"><span>Home</span></a></li>
+                                        <li class="dropdown nav-level-1 nav-haslevel-2 nav-menu-information">
+                                            <a href="/information" class="moredown dropdown-toggle" data-toggle="dropdown"><span>Information</span></a>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                                                <li class=" nav-level-2 nav-menu-captains_corner_2025"><a href="/captains_corner_2025"><span>Captains Corner 2025</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-1894_clubs"><a href="/1894_clubs"><span>1894 Clubs</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-club_sections"><a href="/club_sections"><span>Club Sections</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-committee_and_section_minutes"><a href="/committee_and_section_minutes"><span>Committee &amp; Section Minutes</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-course_manager_reports"><a href="/course_manager_reports"><span>Course Manager Reports</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-competition_results_and_prizes"><a href="/competition_results_and_prizes"><span>Competition Results &amp; Prizes</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-safeguard"><a href="/safeguard"><span>Safeguarding</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-club_officials"><a href="/club_officials"><span>Club Officials</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-rules_-_etiquette_-_help"><a href="/rules_-_etiquette_-_help"><span>Rules & Etiquette</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-bot_gc_-_club_rules"><a href="/bot_gc_-_club_rules"><span>BoT GC - Club Rules</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-members_green_fees"><a href="/members_green_fees"><span>Visitors Green Fees</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-world_handicap_system"><a href="/world_handicap_system"><span>World Handicap System</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-bar_and_catering"><a href="/bar_and_catering"><span>Bar &amp; Catering</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-ks_wright"><a href="/ks_wright"><span>KS Wright</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-website_help"><a href="/website_help"><span>Help Documents</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-enviroment_old"><a href="/enviroment_old"><span>Environment</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-t2green"><a href="/t2green"><span>T2Green</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-information"><a href="/information"><span>More</span></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="dropdown nav-level-1 nav-haslevel-2 current nav-menu-competition.php">
+                                            <a href="/competition.php" class="moredown dropdown-toggle" data-toggle="dropdown"><span>Competitions</span></a>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                                                <li class=" nav-level-2 nav-menu-competition2.php"><a href="/competition2.php"><span>Past</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-competition2.php?time=future"><a href="/competition2.php?time=future"><span>Upcoming</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-knockout.php"><a href="/knockout.php"><span>Knockouts</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-matchfixtures/"><a href="/matchfixtures/"><span>Matches</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-ongoing.php"><a href="/ongoing.php"><span>Ongoing</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-boardcomps.php"><a href="/boardcomps.php"><span>Board Competitions</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-hcaplist.php"><a href="/hcaplist.php"><span>Handicaps</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-halloffame.php"><a href="/halloffame.php"><span>Hall of Fame</span></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="dropdown nav-level-1 nav-haslevel-2 nav-menu-roundmgmt.php">
+                                            <a href="/roundmgmt.php" class="moredown dropdown-toggle" data-toggle="dropdown"><span>My Golf</span></a>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                                                <li class=" nav-level-2 nav-menu-roundmgmt.php"><a href="/roundmgmt.php"><span>My Rounds</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-analysis.php"><a href="/analysis.php"><span>Analysis</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-hcaprecord.php"><a href="/hcaprecord.php"><span>Handicap Record</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-hcapcertificate.php"><a href="/hcapcertificate.php"><span>Handicap Certificate</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-myeposaccount.php"><a href="/myeposaccount.php"><span>My Account</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-friends.php"><a href="/friends.php"><span>Friends</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-prefs.php"><a href="/prefs.php"><span>Preferences</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-directory.php"><a href="/directory.php"><span>Directory</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-messages.php"><a href="/messages.php"><span>Messages</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-memberbooking/"><a href="/memberbooking/"><span>Book Teetime</span></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="memberdiary nav-level-1 nav-menu-diary.php"><a href="/diary.php"><span>Diary</span></a></li>
+                                        <li class=" nav-level-1 nav-menu-club_events.php"><a href='/club_events.php'><span>What's On</span></a></li>
+                                        <li class="dropdown nav-level-1 nav-haslevel-2 nav-menu-siteadmin.php">
+                                            <a href="/siteadmin.php" class="moredown dropdown-toggle" data-toggle="dropdown" role="button"><span>Admin&nbsp;<span class='notificationnum badge'>13</span></span></a>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                                                <li class=" nav-level-2 nav-menu-admincontact2.php"><a href="/admincontact2.php"><span>Help &amp; Support<span class='notificationnum badge'>1</span> </span></a></li>
+                                                <li class=" nav-level-2 nav-menu-newsadmin.php"><a href="/newsadmin.php"><span>News</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-diaryadmin.php"><a href="/diaryadmin.php"><span>Member Diary</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-pageadmin2.php"><a href="/pageadmin2.php"><span>Site Content</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-compdash.php"><a href="/compdash.php"><span>Competitions</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-playeradmin.php"><a href="/playeradmin.php"><span>Players</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-membership2.php"><a href="/membership2.php"><span>Membership</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-tilldash.php"><a href="/tilldash.php"><span>EPOS Admin</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-communications.php"><a href="/communications.php"><span>Communications</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-teecontrol.php"><a href="/teecontrol.php"><span>Tees &amp; Bookings</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-clearacceptreports.php"><a href="/clearacceptreports.php"><span>intelligentgolfPay</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-siteadmin.php?action=edit"><a href="/siteadmin.php?action=edit"><span>Settings</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-securityadmin.php"><a href="/securityadmin.php"><span>Security Admin</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-sitestats.php"><a href="/sitestats.php"><span>Website Statistics</span></a></li>
+                                                <li class=" nav-level-2 nav-menu-ignews.php"><a href="/ignews.php"><span>Update News&nbsp;<span class='notificationnum badge'>12</span> </span></a></li>
+                                            </ul>
+                                        </li>
+                                        <li class=" nav-level-1 nav-menu-?action=logout"><a href="/?action=logout" id="logoutbtn"><span>Logout</span></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-wrapper">
+                <div id="globalwrap">
+                    <!--/sphider_noindex--><div class="global">
+                        <h3>TEST - DO NOT ENTER - R2</h3><p class='noprint' style=''></p><div class='inprogresstext'><h4>Competition in Progress</h4><p id='liveloading' class=''><img src='/images/processingbar.gif'><br><i>Page will refresh results automatically for one hour</i></p></div><table class="global table table-striped">
+                            <colgroup class="result-colgroup-pos-photo-name"><col class="results-col-pos" /><col class="results-col-photo" /><col class="results-col-name" /></colgroup>
+                            <thead><tr><td colspan="3" class='leaderboardText'>Gross Leaderboard <a href="?compid=7097&preview=1&sort=0" style="font-size:x-small;" class="hideplasma">switch</a></td><td>Latest</td><td>After</td><td class='rdetail'><a href='/competition.php?compid=7097'>R2</a></td><td>Total</td><td>Par</td></tr></thead>
+                            <div class="global btn-group noprint hideplasma"><a href="?tab=details&compid=7097&preview=1&div=all" class="button btn active">All Results</a> <a href="?tab=details&compid=7097&div=1&preview=1" class="button btn ">Division One</a> <a href="?tab=details&compid=7097&div=2&preview=1" class="button btn ">Division Two</a> <a href="?tab=details&compid=7097&div=3&preview=1" class="button btn ">Division Three</a> <a href="?tab=details&compid=7097&div=4&preview=1" class="button btn ">Division Four</a></div>
+                            <tr class="odd">
+                                <td class="poscol">1st</td>
+                                <td class='flagcol'></td>
+                                <td class="namecol">Simon Parsons
+                                <td>&nbsp;</td>
+                                <td>18</td>
+                                <td title="">57</td>
+                                <td><span style='color:#CC0000;'>-14</span></td>
+                            </tr>
+                            <tr class="even">
+                                <td class="poscol">2nd</td>
+                                <td class='flagcol'></td>
+                                <td class="namecol">Seth Parsons
+                                <td><a href="viewround.php?roundid=105023&live=1"><span style='color:#CC0000;'>-13</span></a></td>
+                                <td>11</td>
+                                <td></td>
+                                <td><span style='color:#CC0000;'>-13</span></td>
+                            </tr>
+                            <tr class="odd">
+                                <td class="poscol">3rd</td>
+                                <td class='flagcol'></td>
+                                <td class="namecol">Philip Gill
+                                <td><a href="viewround.php?roundid=105025&live=1">LEVEL</a></td>
+                                <td>8</td>
+                                <td></td>
+                                <td>LEVEL</td>
+                            </tr>
+                            <tr class="even">
+                                <td class="poscol">4th</td>
+                                <td class='flagcol'></td>
+                                <td class="namecol">Boyd Brimsted
+                                <td>&nbsp;</td>
+                                <td>18</td>
+                                <td title="">97</td>
+                                <td>+26</td>
+                            </tr>
+                        </table><table class="notwos">
+                            <thead><tr><td colspan="3">Twos Report</td></tr></thead>
+                            <tr><td><a href="viewround.php?roundid=105026">Boyd Brimsted</a> (13)</td><td>2</td><td>15th</td></tr>
+                            <tr><td><a href="viewround.php?roundid=105026">Boyd Brimsted</a> (13)</td><td>1</td><td>18th</td></tr>
+                            <tr><td><a href="viewround.php?roundid=105023">Seth Parsons</a> (42)</td><td>2</td><td>1st</td></tr>
+                            <tr><td><a href="viewround.php?roundid=105023">Seth Parsons</a> (42)</td><td>2</td><td>6th</td></tr>
+                            <tr><td><a href="viewround.php?roundid=105023">Seth Parsons</a> (42)</td><td>2</td><td>10th</td></tr>
+                            <tr><td><a href="viewround.php?roundid=105024">Simon Parsons</a> (19)</td><td>2</td><td>10th</td></tr>
+                            <tr><td><a href="viewround.php?roundid=105024">Simon Parsons</a> (19)</td><td>2</td><td>13th</td></tr>
+                            <tr><td><a href="viewround.php?roundid=105024">Simon Parsons</a> (19)</td><td>2</td><td>14th</td></tr>
+                            <tr><td><a href="viewround.php?roundid=105024">Simon Parsons</a> (19)</td><td>2</td><td>16th</td></tr>
+                            <tr><td><a href="viewround.php?roundid=105024">Simon Parsons</a> (19)</td><td>2</td><td>17th</td></tr>
+                            <tr><td><a href="viewround.php?roundid=105024">Simon Parsons</a> (19)</td><td>2</td><td>18th</td></tr>
+                        </table>
+                    </div><div id="printfooter"><br><img src="/images/resources/burtonontrent/burton-logo.png" style="float:left;" class="footerClubLogo"><br><p class=\"para\" style=\"text-align:center;\">Created by intelligentgolf version 10.1.2.<br><br></div>
+                </div>
+                <script>
+                    var userID = '646-83642';
+                    var properties = {
+                        id: userID,
+                        name: 'Simon Parsons',
+                        user_level: '5',
+                        membertype: '7MN - Gent 7 Day (N)',
+                    };
+                </script> <!--sphider_noindex-->
+            </div>
+        </div>
+        <div class="scrollTop noprint">
+            <a id="scroll-up"><i class="fa fa-chevron-up"></i></a>
+        </div>
+        <div class="members-footer noprint">
+            <div class="page-space">
+                <div class="members-row row-fluid">
+                    <div class="span9 mf-copy">
+                        Copyright &copy; 2025, Burton On Trent Golf Club. All Rights Reserved.
+                    </div>
+                    <div class="span3 mf-ig-logo">
+                        <a href="https://www.intelligentgolf.co.uk" target="_blank"><img src="/images/darkbg_ig_logo.png"></a>
+                    </div>
+                </div>
+            </div>
+        </div> <!--/sphider_noindex--> <div class='floathelp noprint'><a href='/admincontact.php?link=%2Fcompetition.php%3Fcompid%3D7097%26preview%3D1'>Help</a></div>
+    </div></div>
+    <div id="outright"></div></div>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CJP8W7NC82"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag("js", new Date());
+
+        gtag("config", "G-CJP8W7NC82", {
+            "auth": "Logged In",
+            "userLevel": "5",
+            "memberType": "7MN - Gent 7 Day (N)"
+        });</script><!-- Page generated by 10.0.1.210 -->
+    <!--sphider_noindex-->
+    <script>
+
+        // set pf year
+
+        $(document).ready(function () {
+            var str = $('.mf-copy').text();
+            $('.pf-copy').text(str);
+        });
+
+        // testimonial smooth slideshow
+
+        $(document).ready(function () {
+            setInterval(function () {
+                var slideshowHeight = $('.body-public .home-testimonials .nivo-caption').height();
+                $('.body-public .home-testimonials .galleryInner').height(slideshowHeight + 'px');
+            }, 100);
+        });
+
+        // scorecard button
+
+        $('.body-public a#score-open-link').click(function () {
+            $('.scorecard-content').slideDown('400');
+            $('a#score-open-link').addClass('hide');
+            $('a#score-close-link').addClass('disp');
+        });
+
+        $('.body-public a#score-close-link').click(function () {
+            $('.scorecard-content').slideUp('400');
+            $('a#score-open-link').removeClass('hide');
+            $('a#score-close-link').removeClass('disp');
+        });
+
+        // newsletter label fade
+
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($('.body-public .pf-newsletter .customFormLine:nth-child(1)').children('input').length > 0) {
+                    if ($('.pf-newsletter .customFormLine:nth-child(1) input').val().length >= 1) {
+                        $('.pf-newsletter .customFormLine:nth-child(1)').addClass('hide-label');
+                    }
+                    else {
+                        $('.pf-newsletter .customFormLine:nth-child(1)').removeClass('hide-label');
+                    }
+                }
+            }, 200);
+        });
+
+        // button switcherer
+
+        $('.btn-navbar').click(function () {
+            $('.btn-navbar').toggleClass('active');
+        });
+
+        // navbar fixererer
+
+        $(window).on("scroll touchmove", function () {
+            var winwidth = window.innerWidth;
+            if (winwidth > 979) {
+                $('body').toggleClass('fix', $(document).scrollTop() > 50);
+            }
+            else {
+                $('body').removeClass('fix');
+            }
+        });
+
+        // invalid page
+
+        $(document).ready(function () {
+            var checkInvalid = $('.body-public #globalwrap h3').html();
+            if (checkInvalid == "Invalid Page") {
+                $('body').addClass('invalid-page');
+            }
+        });
+
+        // scroll to top
+
+        $(document).ready(function () {
+            $('.scrollTop #scroll-up').click(function () {
+                $('html, body').animate({
+                    scrollTop: $('#outerborder').offset().top - 0
+                }, 2500)
+            });
+        });
+
+        $(window).scroll(function () {
+            if ($(this).scrollTop() > 200) {
+                $('.scrollTop a').css('opacity', '1');
+            } else {
+                $('.scrollTop a').css('opacity', '0');
+            }
+        });
+
+        // home scroll
+
+        $('.body-public .home-explore').click(function () {
+            var winWidth = $(window).width();
+            if (winWidth >= 980) {
+                $("html, body").animate({
+                    scrollTop: $('.home-main').offset().top - 160
+                }, 1500, 'linear');
+            }
+            else {
+                $("html, body").animate({
+                    scrollTop: $('.home-main').offset().top - 60
+                }, 1500, 'linear');
+            }
+        });
+
+        // home status
+
+        $('.body-public .home-status-trig').click(function () {
+            $('.body-public .home-status-section').slideToggle('400');
+        });
+
+        // sub menu math
+
+        $(window).scroll(function () {
+            var slideshowHeight = $('.body-public.body-contentpage .inner-slideshow').height();
+            var winWidth = $(window).width();
+            if (winWidth >= 980) {
+                slideshowHeight = slideshowHeight - 120;
+            }
+            if (slideshowHeight < $(this).scrollTop()) {
+                $('.body-public').addClass('sub-menu-stick');
+            }
+            else {
+                $('.body-public').removeClass('sub-menu-stick');
+            }
+        });
+
+        // home box links
+
+        $(document).ready(function () {
+            var boxLinkOne = $('.body-public .home-row-box-one .editor-only a').attr('href');
+            $('.body-public .home-row-box-one > a').attr('href', boxLinkOne);
+            var boxLinkTwo = $('.body-public .home-row-box-two .editor-only a').attr('href');
+            $('.body-public .home-row-box-two > a').attr('href', boxLinkTwo);
+            var boxLinkThree = $('.body-public .home-row-box-three .editor-only a').attr('href');
+            $('.body-public .home-row-box-three > a').attr('href', boxLinkThree);
+            var boxLinkFour = $('.body-public .home-row-box-four .editor-only a').attr('href');
+            $('.body-public .home-row-box-four > a').attr('href', boxLinkFour);
+        });
+
+    </script> <!--/sphider_noindex--> <!-- Generated in 0.3454 seconds -->
+</body>
+</html>

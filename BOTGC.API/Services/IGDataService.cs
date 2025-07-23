@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Extensions;
 using System.Collections.Specialized;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BOTGC.API.Services
@@ -24,6 +25,7 @@ namespace BOTGC.API.Services
         private const string __CACHE_ACTIVECOMPETITIONS= "Active_Competitions";
         private const string __CACHE_FUTURECOMPETITIONS = "Future_Competitions";
         private const string __CACHE_COMPETITIONSETTINGS = "Competition_Settings_{compid}";
+        private const string __CACHE_COMPETITIONSUMMARY = "Competition_Summary_{compid}";
         private const string __CACHE_LEADERBOARD = "Leaderboard_Settings_{compid}";
         private const string __CACHE_MEMBERCDHLOOKUP = "MemberCDHLookup_{cdhid}";
         private const string __CACHE_MEMBERSHIPCATEGORIES = "Member_Categories";
@@ -43,11 +45,13 @@ namespace BOTGC.API.Services
         private readonly IReportParser<CompetitionDto> _competitionReportParser;
         private readonly IReportParser<MemberEventDto> _memberEventReportParser;
         private readonly IReportParser<CompetitionSettingsDto> _competitionSettingsReportParser;
+        private readonly IReportParser<CompetitionSummaryDto> _competitionSummaryReportParser;
         private readonly IReportParser<SecurityLogEntryDto> _securityLogEntryParser;
         private readonly IReportParser<MemberCDHLookupDto> _memberCDHLookupReportParser;
         private readonly IReportParser<NewMemberResponseDto> _newMemberResponseReportParser;
 
         private readonly IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto> _leaderboardReportParser;
+        private readonly IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto> _clubChampionshipLeaderboardReportParser;
 
         public IGDataService(IOptions<AppSettings> settings,
                                 ILogger<IGDataService> logger,
@@ -59,10 +63,12 @@ namespace BOTGC.API.Services
                                 IReportParser<TeeSheetDto> teeSheetParser,
                                 IReportParser<CompetitionDto> competitionReportParser,
                                 IReportParser<CompetitionSettingsDto> competitionSettingsReportParser,
+                                IReportParser<CompetitionSummaryDto> competitionSummaryReportParser,
                                 IReportParser<SecurityLogEntryDto> securityLogEntryParser,
                                 IReportParser<MemberCDHLookupDto> memberCDHLookupReportParser,
                                 IReportParser<NewMemberResponseDto> newMemberResponseReportParser,
                                 IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto> leaderBoardReportParser,
+                                IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto> clubChampionshipLeaderboardReportParser,
                                 ITaskBoardService taskBoardService,
                                 IGSessionService igSessionManagementService,                
                                 IServiceScopeFactory serviceScopeFactory)
@@ -80,7 +86,9 @@ namespace BOTGC.API.Services
             _teesheetReportParser = teeSheetParser ?? throw new ArgumentNullException(nameof(teeSheetParser));
             _competitionReportParser = competitionReportParser ?? throw new ArgumentNullException(nameof(competitionReportParser));
             _competitionSettingsReportParser = competitionSettingsReportParser ?? throw new ArgumentNullException(nameof(competitionSettingsReportParser));
+            _competitionSummaryReportParser = competitionSummaryReportParser ?? throw new ArgumentNullException(nameof(competitionSummaryReportParser));
             _leaderboardReportParser = leaderBoardReportParser ?? throw new ArgumentNullException(nameof(leaderBoardReportParser));
+            _clubChampionshipLeaderboardReportParser = clubChampionshipLeaderboardReportParser ?? throw new ArgumentNullException(nameof(clubChampionshipLeaderboardReportParser));
             _securityLogEntryParser = securityLogEntryParser ?? throw new ArgumentNullException(nameof(securityLogEntryParser));
             _memberCDHLookupReportParser = memberCDHLookupReportParser ?? throw new ArgumentNullException(nameof(memberCDHLookupReportParser));
             _newMemberResponseReportParser = newMemberResponseReportParser ?? throw new ArgumentNullException(nameof(newMemberResponseReportParser));
@@ -246,17 +254,45 @@ namespace BOTGC.API.Services
             var upcomingCompetitionsUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.UpcomingCompetitionsUrl}";
             var upcomingCompetitions = await GetData<CompetitionDto>(upcomingCompetitionsUrl, _competitionReportParser, __CACHE_FUTURECOMPETITIONS, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins));
 
+            // Combine both lists, handling nulls
+            var allCompetitions = new List<CompetitionDto>();
+            if (activeCompetitions != null) allCompetitions.AddRange(activeCompetitions);
+            if (upcomingCompetitions != null) allCompetitions.AddRange(upcomingCompetitions);
 
-            if (activeCompetitions != null && upcomingCompetitions != null)
+            // Remove duplicates by Id
+            allCompetitions = allCompetitions
+                .Where(c => c.Id.HasValue)
+                .GroupBy(c => c.Id.Value)
+                .Select(g => g.First())
+                .ToList();
+
+            // Fix missing dates by fetching settings
+            foreach (var comp in allCompetitions.Where(c => !c.Date.HasValue))
             {
-                var result = activeCompetitions.Union(upcomingCompetitions).Where(c => c.Date >= DateTime.Today.Date).OrderBy(c => c.Date).ToList();
-
-                _logger.LogInformation($"Successfully retrieved the {result.Count} current and future competitions.");
-
-                return result;
+                if (comp.Id.HasValue && comp.Id.Value > 0)
+                {
+                    var settings = await GetCompetitionSettingsAsync(comp.Id.Value.ToString());
+                    if (settings != null)
+                    {
+                        comp.Date = settings.Date;
+                        comp.MultiPartCompetition = settings.MultiPartCompetition;
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"No settings found for competition {comp.Id}.");
+                    }
+                }
             }
 
-            return null;
+            // Only return competitions with a valid date in the future
+            var result = allCompetitions
+                .Where(c => c.Date.HasValue && c.Date.Value >= DateTime.Today.Date)
+                .OrderBy(c => c.Date)
+                .ToList();
+
+            _logger.LogInformation($"Successfully retrieved {result.Count} current and future competitions.");
+
+            return result;
         }
 
         public async Task<CompetitionSettingsDto?> GetCompetitionSettingsAsync(string competitionId)
@@ -264,11 +300,20 @@ namespace BOTGC.API.Services
             var competitionSettingsUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.CompetitionSettingsUrl}".Replace("{compid}", competitionId);
             var competitionSettings = await GetData<CompetitionSettingsDto>(competitionSettingsUrl, _competitionSettingsReportParser, __CACHE_COMPETITIONSETTINGS.Replace("{compid}", competitionId), TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins));
 
+            var competitionSummaryUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.CompetitionSummaryUrl}".Replace("{compid}", competitionId);
+            var competitionSummary = await GetData<CompetitionSummaryDto>(competitionSummaryUrl, _competitionSummaryReportParser, __CACHE_COMPETITIONSUMMARY.Replace("{compid}", competitionId), TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins));
+
             if (competitionSettings != null && competitionSettings.Any())
             {
                 _logger.LogInformation($"Successfully retrieved the competition settings or {competitionId}.");
 
-                return competitionSettings.FirstOrDefault();
+                var retVal = competitionSettings.FirstOrDefault();
+                if (retVal != null)
+                {
+                    retVal.MultiPartCompetition = competitionSummary.FirstOrDefault()?.MultiPartCompetition;
+                }
+
+                return retVal;
             }
 
             return null;
@@ -278,7 +323,8 @@ namespace BOTGC.API.Services
         {
             var competitionSettings = await this.GetCompetitionSettingsAsync(competitionId);
 
-            var leaderboardUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.LeaderBoardUrl}".Replace("{compid}", competitionId);
+            var grossOrNett = competitionSettings.ResultsDisplay.ToLower().Contains("net") ? "1" : "2";
+            var leaderboardUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.LeaderBoardUrl}".Replace("{compid}", competitionId).Replace("{grossOrNett}", grossOrNett);
             var leaderboard = await GetData<LeaderBoardDto, CompetitionSettingsDto>(leaderboardUrl, _leaderboardReportParser, competitionSettings, __CACHE_LEADERBOARD.Replace("{compid}", competitionId), TimeSpan.FromMinutes(_settings.Cache.VeryShortTerm_TTL_mins));
 
             if (leaderboard != null && leaderboard.Any())
@@ -289,6 +335,145 @@ namespace BOTGC.API.Services
                 retVal.CompetitionDetails = competitionSettings;
 
                 return retVal;
+            }
+
+            return null;
+        }
+
+        public async Task<ClubChampionshipLeaderBoardDto?> GetClubChampionshipsLeaderboardAsync(string competitionId)
+        {
+            var competitionSettings = await this.GetCompetitionSettingsAsync(competitionId);
+
+            if (competitionSettings.MultiPartCompetition != null && competitionSettings.MultiPartCompetition.Count == 2)
+            {
+                var grossOrNett = "2"; // Club champs is a gross competition
+
+                var r1Id = competitionSettings.MultiPartCompetition.FirstOrDefault(
+                    r => Regex.IsMatch(r.Key, "R(?:ound)?\\s*1", RegexOptions.IgnoreCase),
+                    competitionSettings.MultiPartCompetition.ElementAt(0));
+                var r1Url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.LeaderBoardUrl}"
+                    .Replace("{compid}", r1Id.Value.ToString()).Replace("{grossOrNett}", grossOrNett);
+                var r1 = await GetData<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>(
+                    r1Url, _clubChampionshipLeaderboardReportParser, competitionSettings,
+                    __CACHE_LEADERBOARD.Replace("{compid}", competitionId) + "_R1",
+                    TimeSpan.FromMinutes(_settings.Cache.VeryShortTerm_TTL_mins));
+
+                var r2Id = competitionSettings.MultiPartCompetition.FirstOrDefault(
+                    r => Regex.IsMatch(r.Key, "R(?:ound)?\\s*2", RegexOptions.IgnoreCase),
+                    competitionSettings.MultiPartCompetition.ElementAt(1));
+                var r2Url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.LeaderBoardUrl}"
+                    .Replace("{compid}", r2Id.Value.ToString()).Replace("{grossOrNett}", grossOrNett);
+                var r2 = await GetData<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>(
+                    r2Url, _clubChampionshipLeaderboardReportParser, competitionSettings,
+                    __CACHE_LEADERBOARD.Replace("{compid}", competitionId) + "_R2",
+                    TimeSpan.FromMinutes(_settings.Cache.VeryShortTerm_TTL_mins));
+
+                var combined = new List<ChampionshipLeaderboardPlayerDto>();
+
+                if (r1 != null && r1.Any())
+                {
+                    var allPlayers = r1.Select(p => p.PlayerName)
+                        .Union(r2?.Select(p => p.PlayerName) ?? Enumerable.Empty<string>())
+                        .Distinct();
+
+                    foreach (var playerName in allPlayers)
+                    {
+                        var p1 = r1.FirstOrDefault(x => x.PlayerName == playerName);
+                        var p2 = r2?.FirstOrDefault(x => x.PlayerName == playerName);
+
+                        var toPar1 = ParseToPar(p1?.Par);
+                        var toPar2 = ParseToPar(p2?.Par);
+                        var totalPar = toPar1 + toPar2;
+                        var totalParStr = totalPar == 0 ? "LEVEL" : (totalPar > 0 ? $"+{totalPar}" : totalPar.ToString());
+
+                        var thru1 = ParseThru(p1?.Thru);
+                        var thru2 = ParseThru(p2?.Thru);
+                        var combinedThru = (thru1 + thru2).ToString();
+
+                        var combinedPlayer = new ChampionshipLeaderboardPlayerDto
+                        {
+                            PlayerName = playerName,
+                            PlayerId = p1?.PlayerId ?? p2?.PlayerId,
+                            Par = totalParStr,
+                            R1 = p1?.Score,
+                            R2 = p2?.Score,
+                            Countback = p2?.Countback ?? p1?.Countback,
+                            Thru = combinedThru,
+                            Score = ((TryParseInt(p1?.Score) + TryParseInt(p2?.Score)).ToString()),
+                            Position = null
+                        };
+
+                        combined.Add(combinedPlayer);
+                    }
+
+                    combined = combined
+                        .OrderBy(x => ParseToPar(x.Par))
+                        .ThenBy(x => TryParseThru(x.Thru))
+                        .ThenBy(x => int.TryParse(x.R2, out var r2Score) ? r2Score : (int.TryParse(x.R1, out var r1Score) ? r1Score : int.MaxValue))
+                        .ThenBy(x => ParseCountback(x.Countback).Back9)
+                        .ThenBy(x => ParseCountback(x.Countback).Back6)
+                        .ThenBy(x => ParseCountback(x.Countback).Back3)
+                        .ThenBy(x => ParseCountback(x.Countback).Back1)
+                        .ToList();
+
+                    for (int i = 0; i < combined.Count; i++)
+                    {
+                        combined[i].Position = i + 1;
+                    }
+
+                    var retVal = new ClubChampionshipLeaderBoardDto
+                    {
+                        CompetitionDetails = competitionSettings,
+                        Round1 = r1,
+                        Round2 = r2,
+                        Total = combined
+                    };
+
+                    return retVal;
+                }
+
+                int ParseToPar(string par)
+                {
+                    if (string.IsNullOrWhiteSpace(par)) return 0;
+                    par = par.Trim().ToUpper();
+                    if (par == "LEVEL") return 0;
+                    if (par.StartsWith("+")) return int.TryParse(par.Substring(1), out var n) ? n : 0;
+                    if (par.StartsWith("-")) return int.TryParse(par, out var n) ? n : 0;
+                    return int.TryParse(par, out var x) ? x : 0;
+                }
+
+                int ParseThru(string thru)
+                {
+                    if (string.IsNullOrWhiteSpace(thru)) return 0;
+                    if (int.TryParse(thru, out var n)) return n;
+                    return 0;
+                }
+
+                int TryParseInt(string? val)
+                {
+                    if (int.TryParse(val, out var n)) return n;
+                    return 0;
+                }
+
+                int TryParseThru(string? thru)
+                {
+                    if (int.TryParse(thru, out var holes)) return holes;
+                    return 18;
+                }
+
+                (int Back9, int Back6, int Back3, int Back1) ParseCountback(string countback)
+                {
+                    var regex = new Regex(@"Back 9 - (?<b9>[\d.]+), Back 6 - (?<b6>[\d.]+), Back 3 - (?<b3>[\d.]+), Back 1 - (?<b1>[\d.]+)");
+                    var match = regex.Match(countback ?? "");
+                    if (!match.Success)
+                        return (int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue);
+                    return (
+                        (int)double.Parse(match.Groups["b9"].Value),
+                        (int)double.Parse(match.Groups["b6"].Value),
+                        (int)double.Parse(match.Groups["b3"].Value),
+                        (int)double.Parse(match.Groups["b1"].Value)
+                    );
+                }
             }
 
             return null;

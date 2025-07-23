@@ -195,7 +195,6 @@ namespace BOTGC.API.Common
                 }
                 else if (text.Contains("result"))
                 {
-                    // "Results" is often ambiguous, but in your HTML it's usually position/name/score
                     if (i == 0)
                         map[i] = "position";
                     else if (i == 1)

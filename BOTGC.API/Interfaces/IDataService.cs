@@ -17,6 +17,7 @@ namespace BOTGC.API.Interfaces
         Task<List<CompetitionDto>> GetActiveAndFutureCompetitionsAsync();
         Task<CompetitionSettingsDto> GetCompetitionSettingsAsync(string competitionId);
         Task<LeaderBoardDto> GetCompetitionLeaderboardAsync(string competitionId);
+        Task<ClubChampionshipLeaderBoardDto> GetClubChampionshipsLeaderboardAsync(string competitionId);
 
         Task<NewMemberApplicationResultDto?> SubmitNewMemberApplicationAsync(NewMemberApplicationDto newMember);
 

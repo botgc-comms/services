@@ -1,0 +1,22 @@
+{
+  "id": 7253,
+  "tags": [],
+  "comments": "---",
+  "name": "Medal #5",
+  "contact": "Peter Sumner",
+  "format": "Medal",
+  "resultsDisplay": "Nett",
+  "date": "2025-07-02T00:00:00",
+  "links": [
+    {
+      "rel": "settings",
+      "href": "/api/competitions/7253",
+      "method": "GET"
+    },
+    {
+      "rel": "leaderboard",
+      "href": "/api/competitions/7253/leaderboard",
+      "method": "GET"
+    }
+  ]
+}
