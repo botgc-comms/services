@@ -73,9 +73,9 @@ namespace BOTGC.API.Services.BackgroundServices
                         }
                         else
                         {
-                            // Lock not acquired: skip this cycle (another instance is working)
-                            _logger.LogInformation("Distributed lock not acquired, skipping this interval.");
-                            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                            // Delete or mark as completed, since another instance is working
+                            await _taskQueue.CompleteAsync(taskItem); // or DeleteAsync, depending on your queue
+                            _logger.LogInformation("Skipped stock analysis task because lock not acquired. Message deleted from queue.");
                         }
                     }
                 }
