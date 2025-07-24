@@ -10,6 +10,9 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
+using Polly;
+using Polly.Retry;
+
 namespace BOTGC.API.Services
 {
     public class MondayTaskBoardService : ITaskBoardService
@@ -31,6 +34,15 @@ namespace BOTGC.API.Services
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_apiKey);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
+
+        private static readonly Polly.Retry.AsyncRetryPolicy<HttpResponseMessage> _mondayApiPolicy =
+            Polly.Policy
+                .Handle<HttpRequestException>()
+                .OrResult<HttpResponseMessage>(r => (int)r.StatusCode == 429 || (int)r.StatusCode >= 500)
+                .WaitAndRetryAsync(
+                    3,
+                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
+                );
 
         private async Task<string?> GetUserIdByEmailAsync(string email)
         {
@@ -283,7 +295,6 @@ namespace BOTGC.API.Services
             return null;
         }
 
-
         public async Task<string> AttachFile(string itemId, byte[] fileBytes, string fileName)
         {
             _logger.LogInformation("Attaching file {FileName} to Monday item {ItemId}.", fileName, itemId);
@@ -515,8 +526,12 @@ namespace BOTGC.API.Services
             var payload = new { query, variables = new { boardId = new[] { boardId } } };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync(string.Empty, content);
+            var response = await _mondayApiPolicy.ExecuteAsync(() =>
+                _httpClient.PostAsync(string.Empty, content)
+            );
+
             response.EnsureSuccessStatusCode();
+
             var json = JsonNode.Parse(await response.Content.ReadAsStringAsync());
             var items = json?["data"]?["boards"]?[0]?["items_page"]?["items"]?.AsArray();
 
@@ -535,7 +550,11 @@ namespace BOTGC.API.Services
             {
                 string statusLabel = "OK";
 
-                if (dto.TotalQuantity.HasValue && dto.MinAlert.HasValue && dto.MinAlert.Value > 0 && dto.TotalQuantity <= dto.MinAlert)
+                if (dto.TotalQuantity.HasValue && dto.TotalQuantity <= 0)
+                {
+                    statusLabel = "Out of Stock";
+                }
+                else if (dto.TotalQuantity.HasValue && dto.MinAlert.HasValue && dto.MinAlert.Value > 0 && dto.TotalQuantity <= dto.MinAlert)
                 {
                     statusLabel = "Very Low";
                 }
@@ -586,7 +605,11 @@ namespace BOTGC.API.Services
                     };
 
                     var updateContent = new StringContent(JsonSerializer.Serialize(updatePayload), Encoding.UTF8, "application/json");
-                    var updateResponse = await _httpClient.PostAsync(string.Empty, updateContent);
+
+                    var updateResponse = await _mondayApiPolicy.ExecuteAsync(() =>
+                        _httpClient.PostAsync(string.Empty, updateContent)
+                    );
+
                     updateResponse.EnsureSuccessStatusCode();
 
                     updated.Add(dto.Id.ToString());
@@ -614,7 +637,11 @@ namespace BOTGC.API.Services
                     };
 
                     var createContent = new StringContent(JsonSerializer.Serialize(createPayload), Encoding.UTF8, "application/json");
-                    var createResponse = await _httpClient.PostAsync(string.Empty, createContent);
+
+                    var createResponse = await _mondayApiPolicy.ExecuteAsync(() =>
+                        _httpClient.PostAsync(string.Empty, createContent)
+                    );
+
                     createResponse.EnsureSuccessStatusCode();
 
                     created.Add(dto.Id.ToString());
@@ -658,7 +685,11 @@ namespace BOTGC.API.Services
                 };
 
                 var updateContent = new StringContent(JsonSerializer.Serialize(updatePayload), Encoding.UTF8, "application/json");
-                var updateResponse = await _httpClient.PostAsync(string.Empty, updateContent);
+
+                var updateResponse = await _mondayApiPolicy.ExecuteAsync(() =>
+                    _httpClient.PostAsync(string.Empty, updateContent)
+                );
+
                 updateResponse.EnsureSuccessStatusCode();
             }
 

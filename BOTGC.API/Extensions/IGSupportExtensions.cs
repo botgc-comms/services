@@ -72,6 +72,7 @@ namespace BOTGC.API.Extensions
             services.AddHostedService<MemberPropertyUpdatesQueueProcessor>();
             services.AddHostedService<NewMemberAddedQueueProcessor>();
             services.AddHostedService<StockLevelAnalysisQueueProcessor>();
+            services.AddHostedService<StockLevelEnqueueScheduler>();
 
             return services;
         }

@@ -17,16 +17,18 @@ namespace BOTGC.API.Services.BackgroundServices
         private readonly ILogger<StockLevelAnalysisQueueProcessor> _logger;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IStockAnalysisTaskQueue _taskQueue;
-        private readonly ITaskBoardService _taskBoardService;
+        private readonly IDistributedLockManager _distributedLockManager;
 
         public StockLevelAnalysisQueueProcessor(
             ILogger<StockLevelAnalysisQueueProcessor> logger,
             IServiceScopeFactory serviceScopeFactory,
-            IStockAnalysisTaskQueue taskQueue)
+            IStockAnalysisTaskQueue taskQueue,
+            IDistributedLockManager distributedLockManager)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
             _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
+            _distributedLockManager = distributedLockManager ?? throw new ArgumentNullException(nameof(distributedLockManager));
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,31 +38,45 @@ namespace BOTGC.API.Services.BackgroundServices
             {
                 try
                 {
-                    // You need to implement DequeueAsync in your IStockAnalysisTaskQueue (Azure Queue, etc)
-                    var taskItem = await _taskQueue.DequeueAsync(stoppingToken);
-
-                    if (taskItem != null)
+                    await using (var distLock = await _distributedLockManager.AcquireLockAsync("stock-level-analysis", expiry: TimeSpan.FromMinutes(5), cancellationToken: stoppingToken))
                     {
-                        using var scope = _serviceScopeFactory.CreateScope();
-                        var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
-                        var taskBoardService = scope.ServiceProvider.GetRequiredService<ITaskBoardService>();
+                        if (distLock.IsAcquired)
+                        {
+                            // You need to implement DequeueAsync in your IStockAnalysisTaskQueue (Azure Queue, etc)
+                            var taskItem = await _taskQueue.DequeueAsync(stoppingToken);
 
-                        var allStock = await dataService.GetStockLevels();
+                            if (taskItem != null)
+                            {
+                                using var scope = _serviceScopeFactory.CreateScope();
+                                var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
+                                var taskBoardService = scope.ServiceProvider.GetRequiredService<ITaskBoardService>();
 
-                        // Filter: only items with status "Running Low" or "Very Low"
-                        var ofConcern = allStock
-                            .Where(dto =>
-                                (dto.MinAlert.HasValue && dto.MinAlert.Value > 0 &&  dto.TotalQuantity.HasValue && dto.TotalQuantity <= dto.MinAlert) ||
-                                (dto.MaxAlert.HasValue && dto.MaxAlert.Value > 0 && dto.TotalQuantity.HasValue && dto.TotalQuantity <= dto.MaxAlert))
-                            .ToList();
+                                var allStock = await dataService.GetStockLevels();
 
-                        await taskBoardService.SyncStockLevelsAsync(ofConcern);
+                                // Filter: only items with status "Running Low" or "Very Low"
+                                var ofConcern = allStock
+                                    .Where(dto =>
+                                        (dto.MinAlert.HasValue && dto.MinAlert.Value > 0 && dto.TotalQuantity.HasValue && dto.TotalQuantity <= dto.MinAlert) ||
+                                        (dto.MaxAlert.HasValue && dto.MaxAlert.Value > 0 && dto.TotalQuantity.HasValue && dto.TotalQuantity <= dto.MaxAlert) ||
+                                        (dto.TotalQuantity.HasValue && dto.TotalQuantity <= 0))
+                                    .Where(dto => dto.IsActive ?? false)
+                                    .ToList();
 
-                        _logger.LogInformation("Processed stock analysis task at {Time}. Concern items: {Count}", DateTime.UtcNow, ofConcern.Count);
-                    }
-                    else
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                                await taskBoardService.SyncStockLevelsAsync(ofConcern);
+
+                                _logger.LogInformation("Processed stock analysis task at {Time}. Concern items: {Count}", DateTime.UtcNow, ofConcern.Count);
+                            }
+                            else
+                            {
+                                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                            }
+                        }
+                        else
+                        {
+                            // Lock not acquired: skip this cycle (another instance is working)
+                            _logger.LogInformation("Distributed lock not acquired, skipping this interval.");
+                            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                        }
                     }
                 }
                 catch (OperationCanceledException)
