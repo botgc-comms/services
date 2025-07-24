@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Humanizer;
 
 using Polly;
 using Polly.Retry;
@@ -563,6 +564,9 @@ namespace BOTGC.API.Services
                     statusLabel = "Running Low";
                 }
 
+                var unit = dto.Unit?.ToLowerInvariant() ?? "";
+                string unitDisplay = unit.Pluralize(); 
+
                 var columnValuesObject = new Dictionary<string, object?>
                 {
                     ["text_mkt4f493"] = dto.Id.ToString(),                                    // Stock ID (required for upsert)
@@ -572,7 +576,7 @@ namespace BOTGC.API.Services
                     ["numeric_mkt4q9cz"] = dto.MinAlert,                                      // Min Alert
                     ["numeric_mkt46r6t"] = dto.MaxAlert,                                      // Max Alert
                     ["text_mkt4tafy"] = dto.Division,                                         // Division
-                    ["text_mkt46vft"] = dto.Unit                                              // Unit
+                    ["text_mkt46vft"] = unitDisplay                                           // Unit
                 };
 
                 var columnValuesJson = JsonSerializer.Serialize(columnValuesObject, new JsonSerializerOptions
