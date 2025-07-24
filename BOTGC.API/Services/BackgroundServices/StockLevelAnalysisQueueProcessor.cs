@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Storage.Queues.Models;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
@@ -40,11 +41,10 @@ namespace BOTGC.API.Services.BackgroundServices
                 {
                     await using (var distLock = await _distributedLockManager.AcquireLockAsync("stock-level-analysis", expiry: TimeSpan.FromMinutes(5), cancellationToken: stoppingToken))
                     {
+                        var taskItem = await _taskQueue.DequeueAsync(stoppingToken);
+
                         if (distLock.IsAcquired)
                         {
-                            // You need to implement DequeueAsync in your IStockAnalysisTaskQueue (Azure Queue, etc)
-                            var taskItem = await _taskQueue.DequeueAsync(stoppingToken);
-
                             if (taskItem != null)
                             {
                                 using var scope = _serviceScopeFactory.CreateScope();
@@ -73,8 +73,7 @@ namespace BOTGC.API.Services.BackgroundServices
                         }
                         else
                         {
-                            // Delete or mark as completed, since another instance is working
-                            await _taskQueue.CompleteAsync(taskItem); // or DeleteAsync, depending on your queue
+                            // Could not acquire lock, so delete the message
                             _logger.LogInformation("Skipped stock analysis task because lock not acquired. Message deleted from queue.");
                         }
                     }

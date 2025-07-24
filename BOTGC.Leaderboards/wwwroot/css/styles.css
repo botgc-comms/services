@@ -81,42 +81,42 @@ body {
   }
 }
 .header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 0.5fr 4fr 0.5fr;
+  grid-column: 1/-1;
   justify-content: center;
   align-items: center;
-  padding: 3rem 0;
+  padding: 1rem 0 3rem;
   width: 100%;
 }
 .header .header-inner {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+  gap: 1rem;
   width: 100%;
-  max-width: 100%;
-  padding: 0 2rem;
   box-sizing: border-box;
   flex-wrap: nowrap;
   overflow: hidden;
+  width: 100%;
 }
 .header .trophy-wrapper {
   flex-shrink: 0;
 }
 .header .trophy-wrapper .trophy {
   height: 7vw;
-  min-height: 4rem;
   width: auto;
 }
 .header .text {
-  max-width: 60vw;
-  font-size: 6vw;
+  /*max-width: 60vw;*/
+  /*font-size: 6vw;*/
   font-weight: normal;
   color: white;
   white-space: nowrap;
   line-height: 1.1;
   display: flex;
   align-items: center;
-  min-width: 0;
+  /*min-width: 0;*/
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -127,6 +127,8 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: clamp(1rem, 5vw, 5.5rem);
+  max-width: 100%;
 }
 
 .content {
@@ -233,8 +235,17 @@ tr {
   height: 24vw;
 }
 
+.leaderboardQRCode {
+  position: absolute;
+  bottom: 1vw;
+  right: 1vw;
+  opacity: 0.8;
+  width: auto;
+  height: 8vw;
+}
+
 #leaderboard-table {
-  font-size: clamp(0.75rem, 2vw, 4em) !important;
+  font-size: clamp(0.5rem, 2vw, 4em) !important;
 }
 
 #leaderboard-body tr {
@@ -364,3 +375,5 @@ tr {
   color: #d32f2f; /* red */
   font-weight: bold;
 }
+
+/*# sourceMappingURL=styles.css.map */

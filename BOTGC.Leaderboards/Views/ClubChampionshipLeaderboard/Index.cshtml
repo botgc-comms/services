@@ -1,10 +1,12 @@
 ﻿@using BOTGC.Leaderboards.Models;
-@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
 
 @model ClubChampionshipLeaderboardViewModel
 
 @{
     var nonce = Context.Items["CSPNonce"] as string ?? "";
+
+    var qrUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}";
+    var encodedQrUrl = System.Net.WebUtility.UrlEncode(qrUrl);
 
     string FormatScore(string? score)
     {
@@ -49,7 +51,7 @@
 }
 
 @section Head {
-    @if (Env.IsDevelopment())
+    @if (Env?.IsDevelopment() == true)
     {
         <script nonce="@nonce" src="~/js/dist/leaderboard.bundle.js"></script>
     }
@@ -59,11 +61,14 @@
     }
 }
 
-<div class="leaderboard">
+<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@encodedQrUrl" alt="QR for @Model.CompetitionDetails.Name" class="leaderboardQRCode" >
 
+<div class="leaderboard">
+            
     <div class="flash"></div>
     <img src="~/img/club-logo.png" alt="Logo" class="logo">
     <div class="header">
+        <div></div>
         <div class="header-inner">
             <div class="trophy-wrapper">
                 <img class="trophy" src="/img/trophy.png" alt="Trophy">
@@ -72,6 +77,7 @@
                 <div id="competition-title">@Model.CompetitionDetails.Name</div>
             </div>
         </div>
+        <div></div>
     </div>
     <div class="content">
         <div class="left"></div>
@@ -84,7 +90,7 @@
                         <thead>
                             <tr class="score-header">
                                 <th style="width:calc(7%);"></th>
-                                <th style="width:calc(43%);"></th>
+                                <th style="width:calc(35%);"></th>
                                 <th style="width:calc(10%);" class="score-cell">Thru</th>
                                 <th style="width:calc(10%);" class="score-cell">R1</th>
                                 <th style="width:calc(10%);" class="score-cell">R2</th>
@@ -117,7 +123,7 @@
                     {
                         <thead>
                             <tr>
-                                <th colspan="3" class="waiting-header">Waiting for results...</th>
+                                <th colspan="6" class="waiting-header">Waiting for results...</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -158,26 +164,35 @@
         const thead = table.querySelector("thead");
         const tbody = table.querySelector("tbody");
         const rows = tbody.querySelectorAll("tr");
+        if (!rows.length) return;
 
         // Reset visibility
         rows.forEach(row => row.style.display = "");
 
-        const rowHeight = rows[0]?.getBoundingClientRect().height || 0;
+        // Measure the height of the first N rows (let's use 5 as a sample)
+        const sampleSize = Math.min(5, rows.length);
+        let totalSampleHeight = 0;
+        for (let i = 0; i < sampleSize; i++) {
+            totalSampleHeight += rows[i].getBoundingClientRect().height;
+        }
+        const avgRowHeight = totalSampleHeight / sampleSize;
+
         const headerHeight = thead?.getBoundingClientRect().height || 0;
         const tableTop = table.getBoundingClientRect().top;
         const viewportHeight = window.innerHeight;
 
         // Allow a small buffer below the table (e.g., 20px)
         const availableHeight = viewportHeight - tableTop - 20;
-        const maxVisibleRows = Math.floor((availableHeight - headerHeight) / rowHeight) - 2;
+        const maxVisibleRows = Math.floor((availableHeight - headerHeight) / avgRowHeight) - 5;
 
         rows.forEach((row, index) => {
             row.style.display = index < maxVisibleRows ? "" : "none";
         });
     }
 
+    // Call this on load and on resize:
+    window.addEventListener('resize', hideOverflowingLeaderboardRows);
     window.addEventListener("load", hideOverflowingLeaderboardRows);
-    window.addEventListener("resize", hideOverflowingLeaderboardRows);
 
     // Set the competitionId from your model
     const competitionId = @Model.CompetitionDetails.Id;

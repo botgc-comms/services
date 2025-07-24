@@ -19,8 +19,7 @@ public class HomeController : Controller
     {
         var competitions = await _leaderboardService.GetCompetitionsAsync();
         var fromDate = (date ?? DateTime.Now.Date).AddDays(-2);
-        var toDate = fromDate.AddDays(2);
-        var selectedCompetitions = competitions.Where(c => c.Date >= fromDate && c.Date <= toDate).ToList();
+        var selectedCompetitions = competitions.Where(c => c.Date >= fromDate).OrderBy(c => c.Date).Take(6).ToList();
 
         return selectedCompetitions;
     }

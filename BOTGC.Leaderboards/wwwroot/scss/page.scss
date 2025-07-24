@@ -48,23 +48,24 @@ body {
 }
 
 .header {
-    display: flex;
+    display: grid;
+    grid-template-columns: .5fr 4fr .5fr;
+    grid-column: 1 / -1;
     justify-content: center;
     align-items: center;
-    padding: 3rem 0;
+    padding: 1rem 0 3rem;
     width: 100%;
 
     .header-inner {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 2rem;
+        gap: 1rem;
         width: 100%;
-        max-width: 100%;
-        padding: 0 2rem;
         box-sizing: border-box;
         flex-wrap: nowrap;
         overflow: hidden;
+        width: 100%;
     }
 
     .trophy-wrapper {
@@ -72,21 +73,20 @@ body {
 
         .trophy {
             height: 7vw;
-            min-height: 4rem;
             width: auto;
         }
     }
 
     .text {
-        max-width: 60vw;
-        font-size: 6vw;
+        /*max-width: 60vw;*/
+        /*font-size: 6vw;*/
         font-weight: normal;
         color: variables.$white-text;
         white-space: nowrap;
         line-height: 1.1;
         display: flex;
         align-items: center;
-        min-width: 0;
+        /*min-width: 0;*/
         overflow: hidden;
         text-overflow: ellipsis;
     }
@@ -98,10 +98,10 @@ body {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        font-size: clamp(1rem, 5vw, 5.5rem);
+        max-width: 100%;
     }
 }
-
-
 
 .content {
     display: grid;
@@ -215,8 +215,17 @@ tr {
     height: 24vw;
 }
 
+.leaderboardQRCode {
+    position: absolute;
+    bottom: 1vw;
+    right: 1vw;
+    opacity: 0.8;
+    width: auto;
+    height: 8vw;
+}
+
 #leaderboard-table {
-    font-size: clamp(0.75rem, 2vw, 4em) !important;
+    font-size: clamp(0.50rem, 2vw, 4em) !important;
 }
 
 #leaderboard-body tr {
