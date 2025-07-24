@@ -56,7 +56,7 @@ resource "azurerm_linux_web_app" "services_api_app" {
     "AppSettings__IG__Urls__UpcomingCompetitionsUrl"         = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=upcoming&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20"
     "AppSettings__IG__Urls__ActiveCompetitionsUrl"           = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=active&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20"
     "AppSettings__IG__Urls__CompetitionSettingsUrl"          = "/compadmin3.php?compid={compid}&tab=settings"
-    "AppSettings__IG__Urls__LeaderBoardUrl"                  = "/competition.php?compid={compid}&preview=1"
+    "AppSettings__IG__Urls__LeaderBoardUrl"                  = "/competition.php?compid={compid}&preview=1&sort={grossOrNett}"
     "AppSettings__IG__URLS__SecurityLogMobileOrders"         = "/log.php?search=Mobile+order&person=&start={today}&starttime=&end={today}&endtime="
     "AppSettings__IG__URLS__UpdateMemberPropertiesUrl"       = "/member.php?memberid={memberid}&requestType=ajax&ajaxaction=saveparamvalue"
 
