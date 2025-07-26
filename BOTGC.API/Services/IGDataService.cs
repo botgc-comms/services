@@ -429,8 +429,17 @@ namespace BOTGC.API.Services
                         combined.Add(combinedPlayer);
                     }
 
+                    bool IsDisqualifiedOrNR(ChampionshipLeaderboardPlayerDto player)
+                    {
+                        return string.Equals(player.R1, "NR", StringComparison.OrdinalIgnoreCase) ||
+                               string.Equals(player.R2, "NR", StringComparison.OrdinalIgnoreCase) ||
+                               string.Equals(player.R1, "DQ", StringComparison.OrdinalIgnoreCase) ||
+                               string.Equals(player.R2, "DQ", StringComparison.OrdinalIgnoreCase);
+                    }
+
                     combined = combined
-                        .OrderBy(x => ParseToPar(x.Par))
+                        .OrderBy(x => IsDisqualifiedOrNR(x) ? 1 : 0)
+                        .ThenBy(x => ParseToPar(x.Par))
                         .ThenBy(x => TryParseThru(x.Thru))
                         .ThenBy(x => int.TryParse(x.R2, out var r2Score) ? r2Score : (int.TryParse(x.R1, out var r1Score) ? r1Score : int.MaxValue))
                         .ThenBy(x => ParseCountback(x.Countback).Back9)

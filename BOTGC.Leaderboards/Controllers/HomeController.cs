@@ -29,9 +29,13 @@ public class HomeController : Controller
     {
         var upcomingCompetitions = await GetCompetitions(date);
 
-        if (upcomingCompetitions.Count == 1 && upcomingCompetitions[0].Date.Date == DateTime.Today)
+        var todaysComps = upcomingCompetitions.Where(c => c.Date.Date == DateTime.Today)
+            .OrderBy(c => c.Date)
+            .ToList();
+
+        if (todaysComps.Count == 1)
         {
-            return Redirect(upcomingCompetitions[0].LeaderboardUrl);
+            return Redirect(todaysComps[0].LeaderboardUrl);
         }
         else
         {
