@@ -26,6 +26,9 @@
     <h2>Total Members by Category</h2>
     <canvas id="categoryGroupBreakdownChart"></canvas>
 
+    <h2>Waiting List by Membership Category</h2>
+    <canvas id="waitingListChart"></canvas>
+
     <h2>Daily Membership Revenue</h2>
     <canvas id="revenueVsBudgetChart"></canvas>
 
@@ -165,9 +168,7 @@
               });
             });
 
-            const labels = dataPoints.map(dp =>
-                new Date(dp.date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
-            );
+            const labels = dataPoints.map(dp => new Date(dp.date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }));
             const playingMembers = dataPoints.map(dp => dp.playingMembers || 0);
             const nonPlayingMembers = dataPoints.map(dp => dp.nonPlayingMembers || 0);
             const targetPlayingMembers = dataPoints.map(dp => dp.targetPlayingMembers !== 0 ? dp.targetPlayingMembers : undefined);
@@ -214,8 +215,68 @@
             prepareJoinerLeaverBarChart(labels, dataPoints);
             prepareRevenueChart(dataPoints, annotations);
             prepareAccRevenueChart(dataPoints, annotations);
+            prepareWaitingListChart(labels, dataPoints);
         });
-                
+
+        function prepareWaitingListChart(labels, dataPoints) {
+            const startDate = new Date("2024-10-01");
+            const endDate = new Date("2025-09-30");
+
+            const filtered = dataPoints.filter(dp => {
+                const d = new Date(dp.date);
+                return d >= startDate && d <= endDate;
+            });
+
+            const filteredLabels = filtered.map(dp =>
+                new Date(dp.date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
+            );
+
+            const allWaitingCategories = [
+                ...new Set(filtered.flatMap(dp =>
+                    dp.waitingListCategoryBreakdown ? Object.keys(dp.waitingListCategoryBreakdown) : []
+                ))
+            ];
+
+            const stackedData = {};
+            allWaitingCategories.forEach(category => {
+                stackedData[category] = filtered.map(dp =>
+                    dp.waitingListCategoryBreakdown?.[category] || 0
+                );
+            });
+
+            const colors = assignCategoryColors(allWaitingCategories);
+
+            const datasets = allWaitingCategories.map(category => ({
+                label: category,
+                data: stackedData[category],
+                backgroundColor: colors[category]
+            }));
+
+            new Chart(document.getElementById('waitingListChart'), {
+                type: 'bar',
+                data: {
+                    labels: filteredLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            title: { display: true, text: "Date" }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: { display: true, text: "Members on Waiting List" }
+                        }
+                    }
+                }
+            });
+        }
         
         function prepareRevenueChart(dataPoints, annotations) {
             const startDate = new Date("2024-10-01"); // Start of FY

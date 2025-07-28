@@ -62,6 +62,7 @@ namespace BOTGC.API.Common
                 { "^Dob$", nameof(MemberDto.DateOfBirth) },
                 { "^Join\\s*Date$", nameof(MemberDto.JoinDate) },
                 { "^Leave\\s*Date$", nameof(MemberDto.LeaveDate) },
+                { "^Application\\s*Date$", nameof(MemberDto.ApplicationDate) },
                 { "^Handicap$", nameof(MemberDto.Handicap) },
                 { "^Disabled\\s*Golfer$", nameof(MemberDto.IsDisabledGolfer) },
                 { "^Unpaid\\s*Total$", nameof(MemberDto.UnpaidTotal) },
@@ -131,6 +132,9 @@ namespace BOTGC.API.Common
 
                     if (headerIndexMap.TryGetValue(nameof(MemberDto.LeaveDate), out var leaveIndex) && leaveIndex < columns.Length)
                         member.LeaveDate = ParseDate(columns[leaveIndex]);
+
+                    if (headerIndexMap.TryGetValue(nameof(MemberDto.ApplicationDate), out var applicationDateIndex) && applicationDateIndex < columns.Length)
+                        member.ApplicationDate = ParseDate(columns[applicationDateIndex]);
 
                     if (headerIndexMap.TryGetValue(nameof(MemberDto.Handicap), out var handicapIndex) && handicapIndex < columns.Length)
                         member.Handicap = columns[handicapIndex];

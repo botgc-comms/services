@@ -15,19 +15,20 @@ public class MembershipReportController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true, 
-            IncludeFields = true
-        };
-
         var client = _httpClientFactory.CreateClient("MembershipApi");
-        var response = await client.GetAsync("/api/members/report");
 
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/members/report");
+
+        if (Request.Query.ContainsKey("no-cache"))
+        {
+            request.Headers.Add("Cache-Control", "no-cache");
+        }
+
+        var response = await client.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
         var data = await response.Content.ReadFromJsonAsync<MembershipReportDto>();
 
-        return View(data); 
+        return View(data);
     }
 }

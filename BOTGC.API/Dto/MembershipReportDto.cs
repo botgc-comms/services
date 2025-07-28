@@ -42,6 +42,7 @@
         public Dictionary<string, int> CategoryGroupBreakdown { get; set; } = new();
         public Dictionary<string, int> DailyJoinersByCategoryGroup { get; set; } = new();
         public Dictionary<string, int> DailyLeaversByCategoryGroup { get; set; } = new();
+        public Dictionary<string, int> WaitingListCategoryBreakdown { get; set; } = new();
 
         public decimal TrendPercentage { get; set; }
     }

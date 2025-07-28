@@ -30,6 +30,7 @@
         public DateTime? DateOfBirth { get; set; }
         public DateTime? JoinDate { get; set; }
         public DateTime? LeaveDate { get; set; }
+        public DateTime? ApplicationDate { get; set; }
         public string? Handicap { get; set; }
         public bool? IsDisabledGolfer { get; set; }
         public decimal? UnpaidTotal { get; set; }
