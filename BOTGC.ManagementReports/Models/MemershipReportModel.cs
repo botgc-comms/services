@@ -37,6 +37,8 @@ public class MembershipReportEntryDto
 
     public decimal ActualRevenue { get; set; }
     public decimal TargetRevenue { get; set; }
+    public decimal ReceivedRevenue { get; set; }
+    public decimal BilledRevenue { get; set; }
     public Dictionary<string, int> PlayingCategoryBreakdown { get; set; } = new();
     public Dictionary<string, int> NonPlayingCategoryBreakdown { get; set; } = new();
     public Dictionary<string, int> CategoryGroupBreakdown { get; set; } = new();

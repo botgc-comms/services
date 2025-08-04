@@ -26,6 +26,8 @@ namespace BOTGC.API.Interfaces
         Task<List<MembershipCategoryGroupDto>> GetMembershipCategories();
 
         Task<List<StockItemDto>> GetStockLevels();
+
+        Task<List<SubscriptionPaymentDto>> GetSubscriptionPayments(DateTime fromDate, DateTime toDate);
     }
 
 }

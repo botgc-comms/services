@@ -44,8 +44,9 @@ public class MembershipController : Controller
         }
 
         var channelFromQuery = Request.Query["channel"].ToString();
+
         var referrerId = _referrerService.GetReferrerId();
-        string channel;
+        string channel = "Direct";
 
         if (!string.IsNullOrWhiteSpace(referrerId))
         {
@@ -63,9 +64,26 @@ public class MembershipController : Controller
                 channel = !string.IsNullOrWhiteSpace(channelFromQuery) ? channelFromQuery : "Direct";
             }
         }
-        else
+
+        if (channel == "Direct")
         {
-            channel = !string.IsNullOrWhiteSpace(channelFromQuery) ? channelFromQuery : "Direct";
+            if (!string.IsNullOrWhiteSpace(channelFromQuery))
+            {
+                channel = channelFromQuery;
+            }
+            else
+            {
+                var referer = Request.Headers["Referer"].ToString()?.ToLower();
+
+                if (!string.IsNullOrWhiteSpace(referer))
+                {
+                    if (referer.Contains("facebook.com")) channel = "Social";
+                    else if (referer.Contains("instagram.com")) channel = "Social";
+                    else if (referer.Contains("botgc.link/application")) channel = "Social";
+                    else if (referer.Contains("botgc.link/apply")) channel = "Direct";
+                    else if (referer.Contains("botgc.co.uk")) channel = "Website";
+                }
+            }
         }
 
         newApplication.Channel = channel;
@@ -78,6 +96,21 @@ public class MembershipController : Controller
         ViewData["Channel"] = channel;
 
         return View(newApplication);
+    }
+
+    [HttpGet("{channel:regex(^fb$|^ig$|^card$|^ds$|^web$)}")]
+    public IActionResult ApplyFromChannel(string channel)
+    {
+        string mappedChannel = channel.ToLower() switch
+        {
+            "fb" or "ig" => "Social",
+            "card" => "Card",
+            "ds" => "Screens",
+            "web" => "Web",
+            _ => "Direct"
+        };
+
+        return RedirectToAction("Apply", new { channel = mappedChannel });
     }
 
     [HttpPost]

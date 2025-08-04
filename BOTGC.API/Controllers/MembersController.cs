@@ -7,6 +7,7 @@ using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services;
 using System.Runtime;
+using BOTGC.API.Common;
 
 namespace BOTGC.API.Controllers
 {
@@ -218,6 +219,45 @@ namespace BOTGC.API.Controllers
             {
                 _logger.LogError(ex, $"Error retrieving rounds for member members {memberId}.");
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving rounds for member {memberId}.");
+            }
+        }
+
+        /// <summary>
+        /// Retrieve subscription payment details
+        /// </summary>
+        /// <returns>A list of junior members with their details.</returns>
+        /// <response code="200">Returns the list of subscription payments for a given subscription year.</response>
+        /// <response code="204">No subscription payments found.</response>
+        /// <response code="500">An internal server error occurred.</response>
+        [HttpGet("subscriptionPayments")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<SubscriptionPaymentDto>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IReadOnlyCollection<SubscriptionPaymentDto>>> GetSubscriptionPayments(string? subscriptionYear = null)
+        {
+            subscriptionYear = DateHelper.GetSubscriptionYear(subscriptionYear, DateTime.Now);
+
+            _logger.LogInformation($"Fetching subscription payments for the subscription year {subscriptionYear}...");
+
+            try
+            {
+                var (startDate, endDate) = DateHelper.GetSubscriptionYearRange(subscriptionYear);
+
+                var subscriptionPayments = await _reportService.GetSubscriptionPayments(startDate, endDate);
+
+                if (subscriptionPayments == null || subscriptionPayments.Count == 0)
+                {
+                    _logger.LogWarning($"No subscription payments could be found for subscription year {subscriptionYear}.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved {subscriptionPayments.Count} subscription payments for subscription year {subscriptionPayments}.");
+                return Ok(subscriptionPayments);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving subscription payments for subscription year {subscriptionYear}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving subscription payments for subscription year {subscriptionYear}.");
             }
         }
 

@@ -15,7 +15,7 @@ namespace BOTGC.API.Services.ReportServices
         private readonly IDataService _dataService;
         private readonly ILogger<MembershipReportingService> _logger;
 
-        /// <summary>
+        /// <summary>slice
         /// Initializes a new instance of the <see cref="TrophyDataStore"/> class.
         /// </summary>
         /// <param name="logger">Logger instance.</param>
@@ -58,9 +58,25 @@ namespace BOTGC.API.Services.ReportServices
 
             // Load budget and subscription fees
             var (categoryFees, categoryFeeLookup, dailyTargetRevenue) = await LoadRevenueConfig(startOfCurrentFinancialYear, endOfCurrentFinancialYear);
-
+            
             // Get all of the events that have taken place up to the start of the last financial year
             var memberEvents = await _dataService.GetMembershipEvents(startOfPreviousSubsYear.AddDays(-1), today);
+
+            // Get Subscription Payments
+            var (previousSubscriptionYearPayments, currentSubscriptionYearPayments)
+                = await GetReportSubscriptionPaymentsAsync(
+                      startOfPreviousSubsYear,
+                      endOfPreviousSubsYear,
+                      startOfCurrentSubsYear,
+                      endOfCurrentSubsYear,
+                      startOfPreviousFinancialYear);
+
+            // You may keep them separate or merge for the daily-spread step:
+            var allPayments = previousSubscriptionYearPayments
+                                  .Concat(currentSubscriptionYearPayments);
+
+
+            var (dailyBilled, dailyReceived) = BuildDailyRevenueSpread(allPayments, members, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
 
             // Start with todays results
             var todaysResults = GetReportEntry(
@@ -68,7 +84,9 @@ namespace BOTGC.API.Services.ReportServices
                 members,
                 categoryFees,
                 categoryFeeLookup,
-                dailyTargetRevenue
+                dailyTargetRevenue,
+                dailyReceived, 
+                dailyBilled
             );
 
             dataPoints.Add(todaysResults);
@@ -76,8 +94,8 @@ namespace BOTGC.API.Services.ReportServices
             var monthlySnapshots = new Dictionary<DateTime, MembershipSnapshotDto>();
 
             var previousDayGroupings = members
-                .Where(m => m.IsActive == true && m.MemberNumber != 0)
-                .ToDictionary(m => m.MemberNumber, m => m.MembershipCategoryGroup);
+                .Where(m => m.IsActive == true && m.MemberNumber.HasValue && m.MemberNumber.Value != 0)
+                .ToDictionary(m => m.MemberNumber!.Value, m => m.MembershipCategoryGroup);
 
             // Process each day backwards from yesterday to the start of the previous financial year
             for (var currentDate = today.AddDays(-1); currentDate >= startOfPreviousSubsYear.AddDays(-1); currentDate = currentDate.AddDays(-1))
@@ -125,14 +143,13 @@ namespace BOTGC.API.Services.ReportServices
 
                 // Build today's active members with their current group
                 var todayActiveGroups = members
-                     .Where(m => m.IsActive == true)
-                     .ToDictionary(m => m.MemberNumber, m => m.MembershipCategoryGroup);
+                     .Where(m => m.IsActive == true && m.MemberNumber.HasValue && m.MemberNumber.Value != 0)
+                     .ToDictionary(m => m.MemberNumber!.Value, m => m.MembershipCategoryGroup);
 
                 var (joinersByGroup, leaversByGroup) = ComputeGroupJoinersAndLeavers(previousDayGroupings, todayActiveGroups);
 
-
                 // Compute and store the statistics for this day after applying reversals
-                var dailyReportEntry = GetReportEntry(currentDate, members, categoryFees, categoryFeeLookup, dailyTargetRevenue);
+                var dailyReportEntry = GetReportEntry(currentDate, members, categoryFees, categoryFeeLookup, dailyTargetRevenue, dailyReceived, dailyBilled);
 
                 dailyReportEntry.DailyJoinersByCategoryGroup = joinersByGroup;
                 dailyReportEntry.DailyLeaversByCategoryGroup = leaversByGroup;
@@ -157,8 +174,284 @@ namespace BOTGC.API.Services.ReportServices
             return report;
         }
 
-        private (Dictionary<string, int> Joiners, Dictionary<string, int> Leavers) ComputeGroupJoinersAndLeavers(Dictionary<int?, string> previousDayGroups,
-                                                                                                                 Dictionary<int?, string> todayGroups)
+        /// <summary>
+        /// Returns the two clean payment lists that the rest of the pipeline
+        /// expects.  Handles the Oct-23 → Mar-24 “18-month” transition
+        /// automatically, injecting the synthetic 24/25 invoices when needed.
+        /// </summary>
+        private async Task<(List<SubscriptionPaymentDto> previous,
+                            List<SubscriptionPaymentDto> current)>
+            GetReportSubscriptionPaymentsAsync(
+                DateTime startOfPreviousSubsYear,
+                DateTime endOfPreviousSubsYear,
+                DateTime startOfCurrentSubsYear,
+                DateTime endOfCurrentSubsYear,
+                DateTime startOfPreviousFinancialYear)
+        {
+            var previousTask = _dataService.GetSubscriptionPayments(
+                                    startOfPreviousSubsYear, endOfPreviousSubsYear);
+
+            var currentTask = _dataService.GetSubscriptionPayments(
+                                    startOfCurrentSubsYear, endOfCurrentSubsYear);
+
+            Task<List<SubscriptionPaymentDto>> transitionTask =
+                Task.FromResult(new List<SubscriptionPaymentDto>());
+
+            if (startOfPreviousSubsYear.Year == 2024)          // year we transitioned
+            {
+                transitionTask = _dataService.GetSubscriptionPayments(
+                                    startOfPreviousFinancialYear,
+                                    startOfPreviousSubsYear.AddDays(-1));
+            }
+
+            await Task.WhenAll(previousTask, currentTask, transitionTask);
+
+            var previousInvoices = await previousTask;        
+            var currentInvoices = await currentTask;          
+            var transitionInvoices = await transitionTask;     
+            
+            // 23/24 was a special year as we transition to a different subscription period
+            // The following code works out how to assign billed and received payyment amounts
+            // to the correct financial year and subscription year.
+            if (startOfPreviousSubsYear.Year == 2024)          
+            {
+
+                var headline18m = await BuildHeadline18mFeesAsync();
+
+                var synthetic24_25 = MakeSyntheticInvoices24_25(
+                                         transitionInvoices, headline18m);
+
+                previousInvoices.AddRange(synthetic24_25);
+            }
+
+            return (previousInvoices, currentInvoices);
+        }
+
+
+        /// <summary>
+        /// Fallback: create a synthetic invoice for Apr-24 → Mar-25 by simple
+        /// daily pro-rata when the headline-fee inference fails.
+        /// </summary>
+        private SubscriptionPaymentDto MakeDailyProrataSlice(
+                SubscriptionPaymentDto inv,
+                DateTime sliceStart,
+                DateTime sliceEnd)
+        {
+            // Work out the coverage window the club intended for this invoice
+            var coverStart = inv.DateDue.Day >= 16
+                ? new DateTime(inv.DateDue.Year, inv.DateDue.Month, 1).AddMonths(1)
+                : new DateTime(inv.DateDue.Year, inv.DateDue.Month, 1);
+
+            var coverEnd = new DateTime(2025, 3, 31);          // fixed
+            if (coverStart > coverEnd) coverEnd = coverStart;    // safety
+
+            var totalDays = (coverEnd - coverStart).Days + 1;
+            if (totalDays <= 0) totalDays = 1;                   // guard ÷0
+
+            var dailyRate = inv.BillAmount / totalDays;
+
+            // Slice to Apr-24 → Mar-25
+            var sliceCovStart = sliceStart > coverStart ? sliceStart : coverStart;
+            var sliceDays = (sliceEnd - sliceCovStart).Days + 1;
+            if (sliceDays <= 0) sliceDays = 0;
+
+            var sliceBill = Math.Round(dailyRate * sliceDays, 2,
+                                       MidpointRounding.AwayFromZero);
+
+            var paidFactor = inv.BillAmount == 0m ? 0m : sliceBill / inv.BillAmount;
+            var slicePaid = Math.Round((inv.AmountPaid ?? 0m) * paidFactor, 2,
+                                        MidpointRounding.AwayFromZero);
+
+            // First payment on/after the slice window
+            var payDate = inv.PaymentDate.HasValue && inv.PaymentDate.Value >= sliceStart
+                ? inv.PaymentDate
+                : (DateTime?)null;
+
+            return new SubscriptionPaymentDto
+            {
+                MemberId = inv.MemberId,
+                DateDue = sliceStart,          // makes it a 1-Apr-24 bill
+                BillAmount = sliceBill,
+                AmountPaid = slicePaid,
+                PaymentDate = slicePaid > 0m ? payDate : null,
+                MembershipCategory = inv.MembershipCategory?.Trim() ?? string.Empty
+            };
+        }
+
+        /// <summary>
+        /// Return the definitive “headline 18-month” prices by reading the
+        /// 23/24 subscription-fee JSON (the table you pasted earlier) and
+        /// multiplying every 12-month price by 1.5, rounding to the nearest £10.
+        /// </summary>
+        private async Task<Dictionary<string, decimal>> BuildHeadline18mFeesAsync()
+        {
+            // 23/24 subscription year runs 01-Apr-23 → 31-Mar-24.
+            // We pass the surrounding financial year to the existing helper so it
+            // loads *only* the 23/24 fee file and nothing else.
+            var (annual, _, _) = await LoadRevenueConfig(
+                                      new DateTime(2023, 4, 1),  
+                                      new DateTime(2024, 3, 31));  
+
+            // annual == Dictionary<string, List<(start, end, fee)>>    
+            return annual.ToDictionary(
+                kvp => kvp.Key.Trim(),                 // category
+                kvp =>
+                {
+                    var yearly = kvp.Value[0].fee;     // one entry per cat in that year
+                    var eighteen =
+                        Math.Round(yearly * 1.5m / 10m, 0, MidpointRounding.AwayFromZero) * 10m;
+                    return eighteen;
+                });
+        }
+
+        /// <summary>
+        /// Converts the 18-month “transition” invoices (01-Oct-23 → 31-Mar-24)
+        /// into clean 24/25-only synthetic invoices, validating the headline-fee
+        /// rule and falling back to daily pro-rata whenever an invoice cannot be
+        /// matched unambiguously.  _logger warnings are emitted for every
+        /// ambiguous or unmatched bundle so you can audit the raw data later.
+        /// </summary>
+        private IEnumerable<SubscriptionPaymentDto> MakeSyntheticInvoices24_25(
+            IEnumerable<SubscriptionPaymentDto> transitionInvoices,
+            Dictionary<string, decimal> headline18m)
+        {
+            var sliceStart = new DateTime(2024, 10, 1); 
+            var sliceEnd = new DateTime(2025, 3, 31);  
+
+            // ───────────────────── STEP 1 – bundle by (MemberId, currentCat) ─────────────────────
+            var bundles = transitionInvoices
+                .GroupBy(p => (p.MemberId,
+                               (p.MembershipCategory ?? string.Empty).Trim()));
+
+            foreach (var bundle in bundles)
+            {
+                var (memberId, currentCat) = bundle.Key;      // tuple de-construction
+                string chosenCat = null;                     // decided category
+                decimal head18m = 0m;                       // its 18-month fee
+
+                decimal totalBillAmount = 0m;
+
+                // ───────────────────── STEP 2 – try to infer the category ─────────────────────
+                foreach (var inv in bundle.OrderBy(p => p.DateDue))
+                {
+                    totalBillAmount += inv.BillAmount;
+                    if (inv.BillAmount <= 0m) continue;       // ignore zero rows
+
+                    var candidates = headline18m
+                        .Where(kv =>
+                        {
+                            if (kv.Value <= 0m) return false;
+
+                            var monthly = kv.Value / 18m;
+                            var estMonths = inv.BillAmount / monthly;
+                            var nearestMon = Math.Round(estMonths, MidpointRounding.AwayFromZero);
+
+                            // *** new guard: ignore nonsense like 300 or 600 months ***
+                            if (nearestMon < 1 || nearestMon > 18) return false;
+
+                            var reconFee = Math.Round(nearestMon * monthly / 10m, 0,
+                                                      MidpointRounding.AwayFromZero) * 10m;
+                            return Math.Abs(reconFee - inv.BillAmount) <= 1m;
+                        })
+                        .Select(kv => kv.Key)
+                        .ToList();
+
+                    if (candidates.Count == 0)
+                    {
+                        // keep looping – maybe another invoice in the bundle helps
+                        continue;
+                    }
+                    else if (candidates.Count == 1)
+                    {
+                        chosenCat = candidates[0];
+                        head18m = headline18m[chosenCat];
+                        break;
+                    }
+                    else  // 2+ matches
+                    {
+                        if (!string.IsNullOrWhiteSpace(currentCat) &&
+                            candidates.Contains(currentCat))
+                        {
+                            chosenCat = currentCat;           // tie-break with currentCat
+                            head18m = headline18m[chosenCat];
+                            break;
+                        }
+                        // still ambiguous – check next invoice
+                    }
+                }
+
+                // ───────────────────── STEP 3 – fall-back if no clear match ─────────────────────
+                if (totalBillAmount > 0 && chosenCat == null)
+                {
+                    _logger.LogWarning(
+                        $"[TRANSITION]  Member {memberId}: could not infer a unique " +
+                        $"18-month headline fee from {bundle.Count()} invoice(s).  " +
+                        $"Falling back to daily pro-rata.");
+
+                    foreach (var inv in bundle)
+                        yield return MakeDailyProrataSlice(inv, sliceStart, sliceEnd);
+
+                    continue;
+                }
+
+                decimal monthlyRate = head18m / 18m;
+
+                // ───────────────────── STEP 4 – union of all months covered ─────────────────────
+                var monthSet = new HashSet<(int year, int month)>();
+
+                foreach (var inv in bundle)
+                {
+                    var covStart = inv.DateDue.Day >= 16
+                                 ? new DateTime(inv.DateDue.Year, inv.DateDue.Month, 1).AddMonths(1)
+                                 : new DateTime(inv.DateDue.Year, inv.DateDue.Month, 1);
+
+                    for (var m = covStart; m <= sliceEnd; m = m.AddMonths(1))
+                        monthSet.Add((m.Year, m.Month));
+                }
+
+                // ─── replace the months-filter (STEP 5) ───────────────────────────────
+                var months24_25 = monthSet.Count(t =>
+                       (t.year > 2024 || (t.year == 2024 && t.month >= 10)) &&   // Oct-24+
+                       (t.year < 2025 || (t.year == 2025 && t.month <= 3)));    // …to Mar-25
+
+                if (months24_25 == 0)
+                    continue;        // nothing for this member in 24/25
+
+                var sliceBill = Math.Round(months24_25 * monthlyRate / 10m, 0,
+                                           MidpointRounding.AwayFromZero) * 10m;
+
+                var bundleBill = bundle.Sum(p => p.BillAmount);
+                var bundlePaid = bundle.Sum(p => p.AmountPaid ?? 0m);
+                var slicePaid = bundleBill == 0m ? 0m
+                                 : bundlePaid * (sliceBill / bundleBill);
+
+                var firstPayOnOrAfter = bundle
+                    .Where(p => p.PaymentDate.HasValue &&
+                                p.PaymentDate.Value >= sliceStart)
+                    .Min(p => p.PaymentDate) ?? sliceStart;
+
+                // ─────────── STEP 6 – emit synthetic invoice for Apr-24 ────────────
+                yield return new SubscriptionPaymentDto
+                {
+                    MemberId = memberId,
+                    DateDue = sliceStart,               // 01-Apr-24
+                    BillAmount = sliceBill,
+                    AmountPaid = slicePaid,
+                    PaymentDate = slicePaid > 0m ? firstPayOnOrAfter : (DateTime?)null,
+                    MembershipCategory = chosenCat
+                };
+
+                // Log success if the bundle contained more than one raw invoice
+                if (bundle.Count() > 1)
+                {
+                    _logger.LogDebug(
+                        $"[TRANSITION]  Member {memberId}: merged {bundle.Count()} " +
+                        $"transition invoices into synthetic £{sliceBill:N0} ({chosenCat}).");
+                }
+            }
+        }
+
+        private (Dictionary<string, int> Joiners, Dictionary<string, int> Leavers) ComputeGroupJoinersAndLeavers(Dictionary<int, string> previousDayGroups,  Dictionary<int, string> todayGroups)
         {
             var joiners = new Dictionary<string, int>();
             var leavers = new Dictionary<string, int>();
@@ -313,7 +606,9 @@ namespace BOTGC.API.Services.ReportServices
             List<MemberDto> members,
             Dictionary<string, List<(DateTime start, DateTime end, decimal fee)>> categoryFees,
             Dictionary<(string category, DateTime date), decimal> categoryFeeLookup,
-            Dictionary<DateTime, decimal> dailyTargetRevenue)
+            Dictionary<DateTime, decimal> dailyTargetRevenue,
+            Dictionary<DateTime, decimal> dailyReceived,
+            Dictionary<DateTime, decimal> dailyBilled)
         {
             var playingMembers = members.Where(m => m.PrimaryCategory == MembershipPrimaryCategories.PlayingMember && m.IsActive!.Value).ToList();
             var nonPlayingMembers = members.Where(m => m.PrimaryCategory == MembershipPrimaryCategories.NonPlayingMember && m.IsActive!.Value).ToList();
@@ -369,6 +664,7 @@ namespace BOTGC.API.Services.ReportServices
             }
 
             decimal targetRevenue = dailyTargetRevenue.TryGetValue(date, out var target) ? target : 0;
+            decimal receivedRevenue = dailyReceived.TryGetValue(date, out var r) ? r : 0m;
 
             return new MembershipReportEntryDto
             {
@@ -381,7 +677,9 @@ namespace BOTGC.API.Services.ReportServices
                 WaitingListCategoryBreakdown = waitingListBreakdown, 
                 CategoryGroupBreakdown = categoryGroupBreakdown,
                 ActualRevenue = actualRevenue,
-                TargetRevenue = targetRevenue
+                TargetRevenue = targetRevenue,
+                BilledRevenue = dailyBilled.GetValueOrDefault(date),
+                ReceivedRevenue = dailyReceived.GetValueOrDefault(date)
             };
         }
 
@@ -553,27 +851,240 @@ namespace BOTGC.API.Services.ReportServices
             var budgetFileName = $"Membership Subscription Budget {budgetFileKey}.json";
             var budgetPath = Path.Combine(basePath, budgetFileName);
 
-            if (!File.Exists(budgetPath))
-                throw new FileNotFoundException($"Expected budget file not found: {budgetFileName}");
-
-            var monthlyBudget = JsonSerializer.Deserialize<Dictionary<string, decimal>>(await File.ReadAllTextAsync(budgetPath))!;
             var dailyTargetRevenue = new Dictionary<DateTime, decimal>();
 
-            foreach (var month in monthlyBudget)
+            if (File.Exists(budgetPath))
             {
-                var monthStart = DateTime.ParseExact(month.Key + "-01", "yyyy-MM-dd", null);
-                int daysInMonth = DateTime.DaysInMonth(monthStart.Year, monthStart.Month);
-                decimal dailyAmount = month.Value / daysInMonth;
 
-                for (int day = 0; day < daysInMonth; day++)
+                var monthlyBudget = JsonSerializer.Deserialize<Dictionary<string, decimal>>(await File.ReadAllTextAsync(budgetPath))!;
+
+
+                foreach (var month in monthlyBudget)
                 {
-                    var current = monthStart.AddDays(day);
-                    if (current >= financialYearStart && current <= financialYearEnd)
-                        dailyTargetRevenue[current] = dailyAmount;
+                    var monthStart = DateTime.ParseExact(month.Key + "-01", "yyyy-MM-dd", null);
+                    int daysInMonth = DateTime.DaysInMonth(monthStart.Year, monthStart.Month);
+                    decimal dailyAmount = month.Value / daysInMonth;
+
+                    for (int day = 0; day < daysInMonth; day++)
+                    {
+                        var current = monthStart.AddDays(day);
+                        if (current >= financialYearStart && current <= financialYearEnd)
+                            dailyTargetRevenue[current] = dailyAmount;
+                    }
                 }
+            }
+            else
+            {
+                _logger.LogWarning("Failed to load budget file: " + budgetPath);
             }
 
             return (categoryFees, categoryFeeLookup, dailyTargetRevenue);
+        }
+
+        /// <summary>
+        /// Converts every subscription invoice / payment into daily values **only for
+        /// the part that falls inside the current financial year (fyStart → fyEnd)**.
+        /// </summary>
+        private (Dictionary<DateTime, decimal> dailyBilled,
+                 Dictionary<DateTime, decimal> dailyReceived)
+            BuildDailyRevenueSpread(IEnumerable<SubscriptionPaymentDto> payments,
+                                    List<MemberDto> members,
+                                    DateTime fyStart,
+                                    DateTime fyEnd)
+        {
+            var billed = new Dictionary<DateTime, decimal>();
+            var received = new Dictionary<DateTime, decimal>();
+
+            foreach (var p in payments)
+            {
+                if (p.BillAmount == 0m && (p.AmountPaid ?? 0m) == 0m) continue;
+
+                // ----- 1.  Determine the invoice’s *intended* coverage window ----------
+                var subStart = new DateTime(p.DateDue.Year, 4, 1);
+                var subEnd = subStart.AddYears(1).AddDays(-1);
+
+                var m = members.FirstOrDefault(x => x.MemberNumber == p.MemberId);
+                if (m == null)
+                {
+                    _logger.LogWarning($"No member found for subscription payment with ID {p.MemberId}");
+                    continue;
+                }
+
+                var coverStart = subStart > (m.JoinDate?.Date ?? subStart)
+                               ? subStart
+                               : m.JoinDate?.Date ?? subStart;
+
+                // Transition invoices dated 01-Oct-24 start exactly on the due-date
+                if (p.DateDue == new DateTime(2024, 10, 1))
+                    coverStart = p.DateDue;
+
+                var coverEnd = subEnd < (m.LeaveDate?.Date ?? subEnd)
+                             ? subEnd
+                             : m.LeaveDate?.Date ?? subEnd;
+
+                // No sensible window?
+                if (coverStart > coverEnd) continue;
+
+                // ----- 2.  Remember original window length for scaling  -----------------
+                var origDays = Math.Max((coverEnd - coverStart).Days + 1, 1);
+
+                // ----- 3.  Clip to FY window -------------------------------------------
+                if (coverStart < fyStart) coverStart = fyStart;
+                if (coverEnd > fyEnd) coverEnd = fyEnd;
+                if (coverStart > coverEnd) continue;          // fell completely outside FY
+
+                var clipDays = Math.Max((coverEnd - coverStart).Days + 1, 1);
+                var clipRatio = clipDays / (decimal)origDays;
+
+                // ----- 4.  BILLED (pro-rata slice) --------------------------------------
+                var billSlice = p.BillAmount * clipRatio;
+                var perDayBill = billSlice / clipDays;
+
+                for (var d = coverStart; d <= coverEnd; d = d.AddDays(1))
+                    billed[d] = billed.GetValueOrDefault(d) + perDayBill;
+
+                // ----- 5.  RECEIVED (pro-rata slice from PaymentDate onward) ------------
+                if (p.AmountPaid is decimal paid && paid > 0m && p.PaymentDate.HasValue)
+                {
+                    var payStart = p.PaymentDate.Value.Date;
+                    if (payStart < coverStart) payStart = coverStart;
+                    if (payStart > coverEnd) continue;      // payment after FY
+
+                    var payDays = Math.Max((coverEnd - payStart).Days + 1, 1);
+                    var payRatio = payDays / (decimal)origDays;
+                    var paidSlice = paid * payRatio;
+                    var perDayPaid = paidSlice / payDays;
+
+                    for (var d = payStart; d <= coverEnd; d = d.AddDays(1))
+                        received[d] = received.GetValueOrDefault(d) + perDayPaid;
+                }
+            }
+
+            return (billed, received);
+        }
+
+        /// <summary>
+        /// Per-member billing sanity-check for the current FY.
+        /// Walks their category history, computes what they *should* have paid,
+        /// compares with what we actually billed, and returns a list of deltas.
+        /// </summary>
+        private IEnumerable<MemberBillingCheckDto> CheckMemberBillingAccuracy(
+                IEnumerable<MemberDto> members,
+                IEnumerable<MemberEventDto> memberEvents,   // category / status change feed
+                IEnumerable<SubscriptionPaymentDto> payments,       // real + synthetic
+                Dictionary<(string, DateTime), decimal> categoryFeeLookup,
+                DateTime fyStart,
+                DateTime fyEnd,
+                decimal tolerance = 1m)                            // £1 default tolerance
+        {
+            // Build quick look-ups
+            var paymentsByMember = payments
+                .GroupBy(p => p.MemberId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var eventsByMember = memberEvents
+                .GroupBy(e => e.MemberId)
+                .ToDictionary(g => g.Key, g => g
+                    .Where(e => e.DateOfChange.HasValue)
+                    .OrderBy(e => e.DateOfChange!.Value)
+                    .ToList());
+
+            foreach (var m in members.Where(m => m.MemberNumber > 0))
+            {
+                var memberId = m.MemberNumber!.Value;
+                var expected = 0m;
+
+                // Build a timeline of (from, to, category) inside FY
+                var slices = new List<(DateTime from, DateTime to, string category)>();
+                var currentCat = m.MembershipCategory?.Trim() ?? "";
+                var cursor = fyEnd;               // rewind cursor
+
+                if (eventsByMember.TryGetValue(memberId, out var evts))
+                {
+                    // Traverse events backwards so we can build contiguous slices
+                    foreach (var ev in evts.OrderByDescending(e => e.DateOfChange!.Value))
+                    {
+                        var changeDate = ev.DateOfChange!.Value.Date;
+
+                        if (changeDate > cursor) continue;           // event after FY
+                        var sliceStart = changeDate.AddDays(1);      // day *after* change
+                        var sliceEnd = cursor;
+                        if (sliceEnd >= fyStart && sliceStart <= fyEnd)
+                        {
+                            slices.Add((sliceStart < fyStart ? fyStart : sliceStart,
+                                        sliceEnd,
+                                        currentCat));
+                        }
+                        cursor = changeDate;
+                        currentCat = ev.FromCategory?.Trim() ?? currentCat;
+                    }
+                }
+
+                // Final slice back to either join date or fyStart
+                var fySliceStart = fyStart;
+                if (m.JoinDate.HasValue && m.JoinDate.Value.Date > fySliceStart)
+                    fySliceStart = m.JoinDate.Value.Date;
+
+                if (cursor >= fySliceStart)
+                    slices.Add((fySliceStart, cursor, currentCat));
+
+                // Trim against leave-date if present
+                if (m.LeaveDate.HasValue && m.LeaveDate.Value.Date < fyEnd)
+                {
+                    slices = slices
+                             .Where(s => s.from <= m.LeaveDate.Value.Date)
+                             .Select(s =>
+                               (s.from,
+                                s.to <= m.LeaveDate.Value.Date ? s.to : m.LeaveDate.Value.Date,
+                                s.category))
+                             .ToList();
+                }
+
+                // ---------- expected = Σ daily fee over slices ----------
+                foreach (var s in slices)
+                {
+                    for (var d = s.from.Date; d <= s.to.Date; d = d.AddDays(1))
+                    {
+                        if (categoryFeeLookup.TryGetValue((s.category, d), out var annualFee))
+                            expected += annualFee / 365m;
+                        else
+                            _logger.LogWarning($"No fee for {s.category} on {d:yyyy-MM-dd}");
+                    }
+                }
+
+                // ---------- billed = Σ invoice coverage over same window ----------
+                decimal billed = 0m;
+                if (paymentsByMember.TryGetValue(memberId, out var invs))
+                {
+                    foreach (var p in invs)
+                    {
+                        var invStart = new DateTime(p.DateDue.Year, 4, 1);
+                        var invEnd = invStart.AddYears(1).AddDays(-1);
+
+                        var covStart = invStart;
+                        if (p.DateDue == new DateTime(2024, 10, 1))        // synthetic split
+                            covStart = p.DateDue;
+
+                        var from = covStart < fyStart ? fyStart : covStart;
+                        var to = invEnd > fyEnd ? fyEnd : invEnd;
+                        if (from > to) continue;
+
+                        var days = (to - from).Days + 1;
+                        billed += p.BillAmount * (days / (decimal)((invEnd - covStart).Days + 1));
+                    }
+                }
+
+                var delta = billed - expected;
+                if (Math.Abs(delta) > tolerance)
+                {
+                    yield return new MemberBillingCheckDto(
+                        memberId,
+                        $"{m.FirstName} {m.LastName}",
+                        Math.Round(expected, 2),
+                        Math.Round(billed, 2),
+                        Math.Round(delta, 2));
+                }
+            }
         }
 
         private MembershipDeltaDto ComputeMembershipDelta(MembershipSnapshotDto fromSnapshot, MembershipSnapshotDto toSnapshot, string periodDescription)

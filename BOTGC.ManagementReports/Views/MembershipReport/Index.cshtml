@@ -296,6 +296,8 @@
 
             const actuals = filtered.map(dp => dp.actualRevenue || 0);
             const targets = filtered.map(dp => dp.targetRevenue || 0);
+            const billed   = filtered.map(dp => dp.billedRevenue   || 0);  
+            const received = filtered.map(dp => dp.receivedRevenue || 0);  
 
             new Chart(document.getElementById('revenueVsBudgetChart'), {
                 type: 'line',
@@ -320,6 +322,20 @@
                             fill: false,
                             tension: 0.2,
                             pointRadius: 0
+                        },
+                        {
+                            label: "Billed (£)",
+                            data: billed,
+                            borderColor: "purple",
+                            backgroundColor: "rgba(128,0,128,.1)",
+                            tension: .2, pointRadius: 0, fill: false        // NEW
+                        },
+                        {
+                            label: "Received (£)",
+                            data: received,
+                            borderColor: "orange",
+                            backgroundColor: "rgba(255,165,0,.1)",
+                            tension: .2, pointRadius: 0, fill: false        // NEW
                         }
                     ]
                 },
@@ -362,8 +378,12 @@
 
             let actualSum = 0;
             let targetSum = 0;
+            let billSum = 0;
+            let recSum = 0;
             const actuals = filtered.map(dp => (actualSum += dp.actualRevenue || 0));
             const targets = filtered.map(dp => (targetSum += dp.targetRevenue || 0));
+            const billed   = filtered.map(dp => (billSum+= (dp.billedRevenue   || 0))); 
+            const received = filtered.map(dp => (recSum += (dp.receivedRevenue || 0)));
 
             new Chart(document.getElementById('accRevenueVsBudgetChart'), {
                 type: 'line',
@@ -388,6 +408,20 @@
                             fill: false,
                             tension: 0.2,
                             pointRadius: 0
+                        },
+                        {
+                            label: "Billed (£)",
+                            data: billed,
+                            borderColor: "purple",
+                            backgroundColor: "rgba(128,0,128,.1)",
+                            tension: .2, pointRadius: 0, fill: false         // NEW
+                        },
+                        {
+                            label: "Received (£)",
+                            data: received,
+                            borderColor: "orange",
+                            backgroundColor: "rgba(255,165,0,.1)",
+                            tension: .2, pointRadius: 0, fill: false         // NEW
                         }
                     ]
                 },

@@ -21,6 +21,7 @@ namespace BOTGC.API.Services
         private const string __CACHE_SCORECARDBYROUND = "Scorecard_By_Round_{roundId}";
         private const string __CACHE_MEMBERREPORT = "Membership_Report";
         private const string __CACHE_MEMBEREVENTHISTORYREPORT = "Membership_Event_History_{fromDate}_{toDate}";
+        private const string __CACHE_MEMBERSUBSCRIPTIONPAYMENTREPORT = "Membership_Subscriptions_{fromDate}_{toDate}";
         private const string __CACHE_TEESHEET = "TeeSheet_By_Date_{date}";
         private const string __CACHE_ACTIVECOMPETITIONS= "Active_Competitions";
         private const string __CACHE_FUTURECOMPETITIONS = "Future_Competitions";
@@ -51,6 +52,7 @@ namespace BOTGC.API.Services
         private readonly IReportParser<SecurityLogEntryDto> _securityLogEntryParser;
         private readonly IReportParser<MemberCDHLookupDto> _memberCDHLookupReportParser;
         private readonly IReportParser<NewMemberResponseDto> _newMemberResponseReportParser;
+        private readonly IReportParser<SubscriptionPaymentDto> _memberSubscriptionPaymentsReportParser;
 
         private readonly IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto> _leaderboardReportParser;
         private readonly IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto> _clubChampionshipLeaderboardReportParser;
@@ -69,7 +71,8 @@ namespace BOTGC.API.Services
                                 IReportParser<SecurityLogEntryDto> securityLogEntryParser,
                                 IReportParser<MemberCDHLookupDto> memberCDHLookupReportParser,
                                 IReportParser<NewMemberResponseDto> newMemberResponseReportParser,
-                                IReportParser<StockItemDto> stockLevelReportParser, 
+                                IReportParser<StockItemDto> stockLevelReportParser,
+                                IReportParser<SubscriptionPaymentDto> memberSubscriptionPaymentsReportParser,
                                 IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto> leaderBoardReportParser,
                                 IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto> clubChampionshipLeaderboardReportParser,
                                 ITaskBoardService taskBoardService,
@@ -96,6 +99,7 @@ namespace BOTGC.API.Services
             _memberCDHLookupReportParser = memberCDHLookupReportParser ?? throw new ArgumentNullException(nameof(memberCDHLookupReportParser));
             _newMemberResponseReportParser = newMemberResponseReportParser ?? throw new ArgumentNullException(nameof(newMemberResponseReportParser));
             _stockLevelReportParser = stockLevelReportParser ?? throw new ArgumentNullException(nameof(stockLevelReportParser));
+            _memberSubscriptionPaymentsReportParser = memberSubscriptionPaymentsReportParser ?? throw new ArgumentNullException(nameof(memberSubscriptionPaymentsReportParser));
 
             _taskBoardService = taskBoardService ?? throw new ArgumentNullException(nameof(taskBoardService));
         }
@@ -610,6 +614,36 @@ namespace BOTGC.API.Services
             }
 
             return null;
+        }
+
+        public async Task<List<SubscriptionPaymentDto>> GetSubscriptionPayments(DateTime fromDate, DateTime toDate)
+        {
+            var cacheKey = __CACHE_MEMBERSUBSCRIPTIONPAYMENTREPORT.Replace("{fromDate}", fromDate.ToString("yyyy-MM-dd")).Replace("{toDate}", toDate.ToString("yyyy-MM-dd"));
+
+            var daterange = $"{fromDate.ToString("dd/MM/yyyy")} - {toDate.ToString("dd/MM/yyyy")}";
+            var reportName = "Bills Raised";
+
+            var data = new Dictionary<string, string>
+            {
+                { "daterange", daterange },
+                { "datetouse", "bill" },
+                { "groupinstalments", "1" },
+                { "breakdown", "items" },
+                { "pdftitle", $"All bills due {daterange}" },
+                { "reportname", reportName }
+            };
+
+            var reportUrl = $"{_settings.IG.BaseUrl}/membership_reports.php?tab=chargedreport&requestType=ajax&ajaxaction=getreport";
+            var subscriptionPayments = await PostData<SubscriptionPaymentDto>(
+                reportUrl,
+                data,
+                _memberSubscriptionPaymentsReportParser,
+                cacheKey,
+                TimeSpan.FromMinutes(_settings.Cache.MediumTerm_TTL_mins));
+
+            _logger.LogInformation($"Successfully retrieved the {subscriptionPayments.Count} subscription payment records.");
+
+            return subscriptionPayments;
         }
 
         public async Task<bool> SetMemberProperty(MemberProperties property, int memberId, string value)
