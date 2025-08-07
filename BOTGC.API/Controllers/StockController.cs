@@ -1,39 +1,27 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using BOTGC.API.Dto;
-using BOTGC.API.Interfaces;
+﻿using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
-using BOTGC.API.Services;
-using System.Threading;
+using BOTGC.API.Services.Queries;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace BOTGC.API.Controllers
 {
     [ApiController]
     [Route("api/stock")]
     [Produces("application/json")]
-    public class StockController : Controller
+    public class StockController(
+        IOptions<AppSettings> settings,
+        ILogger<StockController> logger,
+        IMediator mediator,
+        IStockAnalysisTaskQueue taskQueue,
+        IServiceScopeFactory serviceScopeFactory) : Controller
     {
-        private readonly AppSettings _settings;
-        private readonly IDataService _reportService;
-        private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly ILogger<StockController> _logger;
-        private readonly IStockAnalysisTaskQueue _taskQueue;
-
-        public StockController(
-            IOptions<AppSettings> settings,
-            ILogger<StockController> logger,
-            IDataService reportService,
-            IStockAnalysisTaskQueue taskQueue,
-            IServiceScopeFactory serviceScopeFactory)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-            _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
-            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-            _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
-        }
+        private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+        private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+        private readonly ILogger<StockController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly IStockAnalysisTaskQueue _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
 
         [HttpGet("stockLevels")]
         public async Task<IActionResult> GetStockLevels()
@@ -42,7 +30,8 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var stockItems = await _reportService.GetStockLevels();
+                var query = new GetStockLevelsQuery();
+                var stockItems = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (stockItems == null || stockItems.Count == 0)
                 {

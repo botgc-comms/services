@@ -8,38 +8,30 @@ using BOTGC.API.Interfaces;
 using BOTGC.API.Services;
 using System.Runtime;
 using BOTGC.API.Common;
+using MediatR;
+using BOTGC.API.Services.Queries;
 
 namespace BOTGC.API.Controllers
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MembersController"/> class.
+    /// </summary>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="reportService">Service handling execution and retrieval of report data.</param>
     [ApiController]
     [Route("api/members")]
     [Produces("application/json")]
-    public class MembersController : Controller
+    public class MembersController(IOptions<AppSettings> settings,
+                             ILogger<MembersController> logger,
+                             IMediator mediator,
+                             IMembershipReportingService membershipReporting,
+                             IQueueService<NewMemberApplicationDto> memberApplicationQueueService) : Controller
     {
-        private readonly AppSettings _settings;
-        private readonly IMembershipReportingService _membershipReporting;
-        private readonly IDataService _reportService;
-        private readonly IQueueService<NewMemberApplicationDto> _memberApplicationQueueService;
-        private readonly ILogger<MembersController> _logger;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MembersController"/> class.
-        /// </summary>
-        /// <param name="logger">Logger instance.</param>
-        /// <param name="reportService">Service handling execution and retrieval of report data.</param>
-        public MembersController(IOptions<AppSettings> settings,
-                                 ILogger<MembersController> logger,
-                                 IDataService reportService,
-                                 IMembershipReportingService membershipReporting, 
-                                 IQueueService<NewMemberApplicationDto> memberApplicationQueueService)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-            _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
-            _membershipReporting = membershipReporting ?? throw new ArgumentNullException(nameof(membershipReporting));
-            _memberApplicationQueueService = memberApplicationQueueService ?? throw new ArgumentNullException(nameof(memberApplicationQueueService));
-
-        }
+        private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+        private readonly IMembershipReportingService _membershipReporting = membershipReporting ?? throw new ArgumentNullException(nameof(membershipReporting));
+        private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        private readonly IQueueService<NewMemberApplicationDto> _memberApplicationQueueService = memberApplicationQueueService ?? throw new ArgumentNullException(nameof(memberApplicationQueueService));
+        private readonly ILogger<MembersController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         /// <summary>
         /// Retrieves the membership report.
@@ -58,7 +50,7 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var membershipReport = await _membershipReporting.GetManagementReport();
+                var membershipReport = await _membershipReporting.GetManagementReport(HttpContext.RequestAborted);
 
                 if (membershipReport == null)
                 {
@@ -93,7 +85,8 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var juniorMembers = await _reportService.GetJuniorMembersAsync();
+                var query = new GetJuniorMembersQuery();
+                var juniorMembers = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (juniorMembers == null || juniorMembers.Count == 0)
                 {
@@ -128,7 +121,8 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var memberhipCategories = await _reportService.GetMembershipCategories();
+                var query = new GetMembershipCategoriesQuery();
+                var memberhipCategories = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (memberhipCategories == null || memberhipCategories.Count == 0)
                 {
@@ -142,7 +136,7 @@ namespace BOTGC.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving current members.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving current members.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving membership categories.");
             }
         }
 
@@ -164,16 +158,17 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var juniorMembers = await _reportService.GetCurrentMembersAsync();
+                var query = new GetCurrentMembersQuery();
+                var currentMembers = await _mediator.Send(query, HttpContext.RequestAborted);
 
-                if (juniorMembers == null || juniorMembers.Count == 0)
+                if (currentMembers == null || currentMembers.Count == 0)
                 {
                     _logger.LogWarning("No current members found.");
                     return NoContent();
                 }
 
-                _logger.LogInformation("Successfully retrieved {Count} current members.", juniorMembers.Count);
-                return Ok(juniorMembers);
+                _logger.LogInformation("Successfully retrieved {Count} current members.", currentMembers.Count);
+                return Ok(currentMembers);
             }
             catch (Exception ex)
             {
@@ -199,7 +194,8 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var memberRounds = await _reportService.GetRoundsByMemberIdAsync(memberId);
+                var query = new GetRoundsByMemberIdQuery() { MemberId = memberId };
+                var memberRounds = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (memberRounds == null || memberRounds.Count == 0)
                 {
@@ -243,7 +239,8 @@ namespace BOTGC.API.Controllers
             {
                 var (startDate, endDate) = DateHelper.GetSubscriptionYearRange(subscriptionYear);
 
-                var subscriptionPayments = await _reportService.GetSubscriptionPayments(startDate, endDate);
+                var query = new GetSubscriptionPaymentsByDateRangeQuery() { FromDate = startDate, ToDate = endDate };
+                var subscriptionPayments = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (subscriptionPayments == null || subscriptionPayments.Count == 0)
                 {

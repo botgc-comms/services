@@ -6,32 +6,27 @@ using BOTGC.API.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MediatR;
+using BOTGC.API.Services.Queries;
 
 namespace BOTGC.API.Controllers
 {
     /// <summary>
     /// Controller for handling golf round-related operations.
     /// </summary>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="RoundsController"/> class.
+    /// </remarks>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="reportService">Service for handling round reports.</param>
     [ApiController]
     [Route("api/teesheets")]
     [Produces("application/json")]
-    public class TeesheetController : ControllerBase
+    public class TeesheetController(ILogger<TeesheetController> logger, IMediator mediator, ITeeTimeUsageTaskQueue taskQueue) : ControllerBase
     {
-        private readonly IDataService _reportService;
-        private readonly ILogger<TeesheetController> _logger;
-        private readonly ITeeTimeUsageTaskQueue _taskQueue;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoundsController"/> class.
-        /// </summary>
-        /// <param name="logger">Logger instance.</param>
-        /// <param name="reportService">Service for handling round reports.</param>
-        public TeesheetController(ILogger<TeesheetController> logger, IDataService reportService, ITeeTimeUsageTaskQueue taskQueue)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
-            _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
-        }
+        private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        private readonly ILogger<TeesheetController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly ITeeTimeUsageTaskQueue _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
 
         /// <summary>
         /// Retrieves the tee sheet for the given date
@@ -51,7 +46,8 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var teesheet = await _reportService.GetTeeSheetByDateAsync(date);
+                var query = new GetTeeSheetByDateQuery() { Date = date };
+                var teesheet = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (teesheet == null)
                 {

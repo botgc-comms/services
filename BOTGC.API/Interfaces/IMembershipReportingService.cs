@@ -4,6 +4,6 @@ namespace BOTGC.API.Interfaces
 {
     public interface IMembershipReportingService
     {
-        public Task<MembershipReportDto> GetManagementReport();
+        public Task<MembershipReportDto> GetManagementReport(CancellationToken cancellationToken);
     }
 }

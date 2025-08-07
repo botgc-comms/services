@@ -26,7 +26,7 @@ namespace BOTGC.API.Extensions
 
             var httpClient = new HttpClient(httpHandler);
 
-            services.AddSingleton<IDataService, IGDataService>();
+            services.AddSingleton<IDataProvider, IGDataProvider>();
 
             services.AddSingleton(cookieContainer);
             services.AddSingleton(httpClient);
@@ -74,6 +74,14 @@ namespace BOTGC.API.Extensions
             services.AddHostedService<NewMemberAddedQueueProcessor>();
             services.AddHostedService<StockLevelAnalysisQueueProcessor>();
             services.AddHostedService<StockLevelEnqueueScheduler>();
+
+            // Register MediatR and scan for handlers in your assembly
+            services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssemblies(
+                    typeof(Program).Assembly
+                );
+            });
 
             return services;
         }

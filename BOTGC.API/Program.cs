@@ -1,13 +1,18 @@
 using BOTGC.API;
 using BOTGC.API.Common;
+using BOTGC.API.Dto;
 using BOTGC.API.Extensions;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services;
+using BOTGC.API.Services.Queries;
+using BOTGC.API.Services.QueryHandlers;
 using BOTGC.API.Services.ReportServices;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using RedLockNet.SERedis.Configuration;
 using RedLockNet.SERedis;
+using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -160,6 +165,7 @@ app.UseWhen(context =>
     !context.Request.Path.StartsWithSegments("/swagger") &&
     !context.Request.Path.StartsWithSegments("/health") &&
     !context.Request.Path.StartsWithSegments("/version") &&
+    !context.Request.Path.StartsWithSegments("/_diag") &&
     context.Request.Path != "/", 
     appBuilder =>
     {

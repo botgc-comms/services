@@ -8,37 +8,31 @@ using BOTGC.API.Models;
 using BOTGC.API.Services;
 using System.Runtime;
 using System.Threading;
+using MediatR;
+using BOTGC.API.Services.Queries;
+using BOTGC.API.Services.QueryHandlers;
 
 namespace BOTGC.API.Controllers
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CompetitionsController"/> class.
+    /// </summary>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="reportService">Service handling execution and retrieval of report data.</param>
     [ApiController]
     [Route("api/competitions")]
     [Produces("application/json")]
-    public class CompetitionsController : Controller
+    public class CompetitionsController(IOptions<AppSettings> settings,
+                                  ILogger<CompetitionsController> logger,
+                                  IMediator mediator,
+                                  ICompetitionTaskQueue taskQueue,
+                                  IServiceScopeFactory serviceScopeFactory) : Controller
     {
-        private readonly AppSettings _settings;
-        private readonly IDataService _reportService;
-        private readonly ICompetitionTaskQueue _taskQueue;
-        private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly ILogger<CompetitionsController> _logger;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CompetitionsController"/> class.
-        /// </summary>
-        /// <param name="logger">Logger instance.</param>
-        /// <param name="reportService">Service handling execution and retrieval of report data.</param>
-        public CompetitionsController(IOptions<AppSettings> settings,
-                                      ILogger<CompetitionsController> logger,
-                                      IDataService reportService,
-                                      ICompetitionTaskQueue taskQueue,
-                                      IServiceScopeFactory serviceScopeFactory)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-            _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
-            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-            _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
-        }
+        private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+        private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        private readonly ICompetitionTaskQueue _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
+        private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+        private readonly ILogger<CompetitionsController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         [HttpPost("juniorEclectic/prepare")]
         public async Task<IActionResult> PrepareJuniorEclecticResults([FromBody] DateRange dateRange)
@@ -79,7 +73,8 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var competitions = await _reportService.GetActiveAndFutureCompetitionsAsync();
+                var query = new GetActiveAndFutureCompetitionsQuery();
+                var competitions = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (competitions == null || competitions.Count == 0)
                 {
@@ -104,7 +99,8 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var settings = await _reportService.GetCompetitionSettingsAsync(competitionId);
+                var query = new GetCompetitionSettingsByCompetitionIdQuery() { CompetitionId = competitionId };
+                var settings = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (settings == null)
                 {
@@ -129,9 +125,10 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var settings = await _reportService.GetCompetitionLeaderboardAsync(competitionId);
+                var query = new GetCompetitionLeaderboardByCompetitionQuery() { CompetitionId = competitionId };
+                var leaderboard = await _mediator.Send(query, HttpContext.RequestAborted);
 
-                if (settings == null)
+                if (leaderboard == null)
                 {
                     _logger.LogWarning($"No leaderboard found for competition {competitionId}.");
                     return NoContent();
@@ -154,9 +151,10 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var settings = await _reportService.GetClubChampionshipsLeaderboardAsync(competitionId);
+                var query = new GetClubChampionshipLeaderboardByCompetitionQuery () { CompetitionId = competitionId };
+                var leaderboard = await _mediator.Send(query, HttpContext.RequestAborted);
 
-                if (settings == null)
+                if (leaderboard == null)
                 {
                     _logger.LogWarning($"No leaderboard found for competition {competitionId}.");
                     return NoContent();

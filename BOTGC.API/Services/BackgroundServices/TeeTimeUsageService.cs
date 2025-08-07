@@ -8,6 +8,9 @@ using Microsoft.Extensions.Options;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
+using MediatR;
+using BOTGC.API.Services.Queries;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BOTGC.API.Services.BackgroundServices
 {
@@ -19,7 +22,7 @@ namespace BOTGC.API.Services.BackgroundServices
         private readonly AppSettings _settings;
         private readonly ITeeTimeUsageTaskQueue _taskQueue;
         private readonly ILogger<TeeTimeUsageBackgroundService> _logger;
-        private readonly IDataService _reportService;
+        private readonly IMediator _mediator;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
         private const int BatchSize = 5; 
@@ -27,13 +30,13 @@ namespace BOTGC.API.Services.BackgroundServices
         public TeeTimeUsageBackgroundService(IOptions<AppSettings> settings,
                                              ILogger<TeeTimeUsageBackgroundService> logger,
                                              ITeeTimeUsageTaskQueue taskQueue,
-                                             IDataService reportService,
+                                             IMediator mediator,
                                              IServiceScopeFactory serviceScopeFactory)
         {
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
-            _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
         }
 
@@ -82,21 +85,28 @@ namespace BOTGC.API.Services.BackgroundServices
                                          .Select(offset => taskItem.FromDate.AddDays(offset))
                                          .ToList();
 
-                foreach (var dateBatch in allDates.Chunk(BatchSize)) // Process in batches
+                foreach (var dateBatch in allDates.Chunk(BatchSize))
                 {
-                    var tasks = dateBatch.Select(date => _reportService.GetTeeSheetByDateAsync(date)).ToList();
-                    var results = await Task.WhenAll(tasks); // Execute batch in parallel
+                    var tasks = dateBatch.Select(async date =>
+                    {
+                        var query = new GetTeeSheetByDateQuery { Date = date };
+                        var result = await _mediator.Send(query, stoppingToken);
+                        return result;
+                    }).ToList();
 
-                    teeSheets.AddRange(results.Where(sheet => sheet != null)); // Collect non-null results
+                    var results = await Task.WhenAll(tasks); 
+
+                    teeSheets.AddRange(results.Where(sheet => sheet != null).Cast<TeeSheetDto>());
                 }
 
-                var currentMembers = await _reportService.GetCurrentMembersAsync();
+                var query = new GetCurrentMembersQuery();
+                var currentMembers = await _mediator.Send(query, stoppingToken);
 
                 var currentMemberNames = currentMembers?
                     .GroupBy(m => m.FullName.ToLower())
                     .ToDictionary(g => g.Key, g => g.First());
 
-                memberStats = ProcessTeeSheetData(teeSheets, currentMemberNames);
+                memberStats = ProcessTeeSheetData(teeSheets, currentMemberNames!);
 
                 await cacheService.SetAsync(cacheKey!, memberStats, TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins)).ConfigureAwait(false);
             }

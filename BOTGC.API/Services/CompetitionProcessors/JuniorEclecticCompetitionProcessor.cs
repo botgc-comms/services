@@ -9,31 +9,25 @@ using BOTGC.API.Models;
 using System.Diagnostics;
 using System.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using MediatR;
+using BOTGC.API.Services.Queries;
 
 namespace BOTGC.API.Services.CompetitionProcessors
 {
-    public class JuniorEclecticCompetitionProcessor : ICompetitionProcessor
+    /// <summary>
+    /// Initializes a new instance of the <see cref="JuniorEclecticCompetitionProcessor"/> class.
+    /// </summary>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="reportService">Service handling execution and retrieval of report data.</param>
+    public class JuniorEclecticCompetitionProcessor(IOptions<AppSettings> settings,
+                                                    ILogger<JuniorEclecticCompetitionProcessor> logger,
+                                                    IMediator mediator,
+                                                    IServiceScopeFactory serviceScopeFactory) : ICompetitionProcessor
     {
-        private readonly AppSettings _settings;
-        private readonly IDataService _reportService;
-        private readonly ILogger<JuniorEclecticCompetitionProcessor> _logger;
-        private IServiceScopeFactory _serviceScopeFactory;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JuniorEclecticCompetitionProcessor"/> class.
-        /// </summary>
-        /// <param name="logger">Logger instance.</param>
-        /// <param name="reportService">Service handling execution and retrieval of report data.</param>
-        public JuniorEclecticCompetitionProcessor(IOptions<AppSettings> settings,
-                                                  ILogger<JuniorEclecticCompetitionProcessor> logger,
-                                                  IDataService reportService,
-                                                  IServiceScopeFactory serviceScopeFactory)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-            _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
-            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-        }
+        private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+        private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        private readonly ILogger<JuniorEclecticCompetitionProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
 
         public async Task ProcessCompetitionAsync(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken)
         {
@@ -65,7 +59,8 @@ namespace BOTGC.API.Services.CompetitionProcessors
                     return null;
                 }
 
-                var rounds = await _reportService.GetRoundsByMemberIdAsync(juniorMember.MemberNumber.ToString());
+                var query = new GetRoundsByMemberIdQuery() { MemberId = juniorMember.MemberNumber?.ToString() ?? throw new ArgumentNullException(nameof(juniorMember.MemberNumber)) };
+                var rounds = await _mediator.Send(query, cancellationToken);
 
                 #endregion
 
@@ -117,10 +112,12 @@ namespace BOTGC.API.Services.CompetitionProcessors
 
                 foreach (var competitionRound in competitionRounds)
                 {
-                    var scorecard = await _reportService.GetScorecardForRoundAsync(competitionRound.RoundId.ToString());
-                    if (scorecard != null)
+                    var compScorecardsQuery = new GetScorecardForRoundQuery() { RoundId = competitionRound.RoundId.ToString() };  
+                    var compScorecard = await _mediator.Send(compScorecardsQuery, cancellationToken);
+
+                    if (compScorecard != null)
                     {
-                        competitionScorecards.Add(scorecard);
+                        competitionScorecards.Add(compScorecard);
                     }
                 }
 
@@ -130,10 +127,12 @@ namespace BOTGC.API.Services.CompetitionProcessors
                 {
                     foreach (var generalPlayRound in validGeneralPlayRounds)
                     {
-                        var scorecard = await _reportService.GetScorecardForRoundAsync(generalPlayRound.RoundId.ToString());
-                        if (scorecard != null)
+                        var generalScorecardQuery = new GetScorecardForRoundQuery() { RoundId = generalPlayRound.RoundId.ToString() };
+                        var generalScorecard = await _mediator.Send(generalScorecardQuery, cancellationToken);
+
+                        if (generalScorecard != null)
                         {
-                            generalPlayScorecards.Add(scorecard);
+                            generalPlayScorecards.Add(generalScorecard);
                         }
                     }
                 }
@@ -489,9 +488,8 @@ namespace BOTGC.API.Services.CompetitionProcessors
         {
             var eclecticResults = new List<EclecticScoretDto>();
 
-            #region STEP 1: Get all Junior Members
-            var juniorMembers = await _reportService.GetJuniorMembersAsync();
-            #endregion
+            var query = new GetJuniorMembersQuery();
+            var juniorMembers = await _mediator.Send(query, cancellationToken);
 
             var tasks = juniorMembers
                 .Select(async juniorMember =>

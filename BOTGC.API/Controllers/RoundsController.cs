@@ -1,34 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using BOTGC.API.Dto;
-using BOTGC.API.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using BOTGC.API.Dto;
+using BOTGC.API.Services.Queries;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BOTGC.API.Controllers
 {
     /// <summary>
     /// Controller for handling golf round-related operations.
     /// </summary>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="RoundsController"/> class.
+    /// </remarks>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="mediator">Mediator to handle queries</param>
     [ApiController]
     [Route("api/rounds")]
     [Produces("application/json")]
-    public class RoundsController : ControllerBase
+    public class RoundsController(ILogger<RoundsController> logger, IMediator mediator) : ControllerBase
     {
-        private readonly IDataService _reportService;
-        private readonly ILogger<RoundsController> _logger;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoundsController"/> class.
-        /// </summary>
-        /// <param name="logger">Logger instance.</param>
-        /// <param name="reportService">Service for handling round reports.</param>
-        public RoundsController(ILogger<RoundsController> logger, IDataService reportService)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
-        }
+        private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        private readonly ILogger<RoundsController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         /// <summary>
         /// Retrieves the scorecard for a given round ID.
@@ -48,7 +39,8 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var scoreCard = await _reportService.GetScorecardForRoundAsync(roundId);
+                var query = new GetScorecardForRoundQuery() { RoundId = roundId };
+                var scoreCard = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (scoreCard == null)
                 {

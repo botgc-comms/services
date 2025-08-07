@@ -18,6 +18,8 @@
 
         public MondaySettings Monday { get; set; } = new();
 
+        public FeatureToggles FeatureToggles { get; set; } = new(); 
+
         public ApplicationInsightsSettings ApplicationInsights { get; set; } = new();
 
         public string PlayingMemberExpression { get; set; } = "^(?:5|6|7|Intermediate).*?$";
@@ -118,5 +120,10 @@
     {
         public string ConnectionString { get; set; }
         public string InstanceName { get; set; } = "BOTGC.API";
+    }
+
+    public class FeatureToggles
+    {
+        public bool EnableStockControlSchedule { get; set; } = true
     }
 }

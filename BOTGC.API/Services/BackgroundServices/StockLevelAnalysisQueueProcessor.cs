@@ -7,6 +7,8 @@ using Azure.Storage.Queues.Models;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
+using BOTGC.API.Services.Queries;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -48,10 +50,11 @@ namespace BOTGC.API.Services.BackgroundServices
                             if (taskItem != null)
                             {
                                 using var scope = _serviceScopeFactory.CreateScope();
-                                var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
+                                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
                                 var taskBoardService = scope.ServiceProvider.GetRequiredService<ITaskBoardService>();
 
-                                var allStock = await dataService.GetStockLevels();
+                                var query = new GetStockLevelsQuery();
+                                var allStock = await mediator.Send(query, stoppingToken);
 
                                 // Filter: only items with status "Running Low" or "Very Low"
                                 var ofConcern = allStock

@@ -1,37 +1,25 @@
 ﻿using Azure.Storage.Queues;
-using Azure.Storage.Queues.Models;
-using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using BOTGC.API.Services.Queries;
+using MediatR;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Extensions;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 
 namespace BOTGC.API.Services.BackgroundServices
 {
-    public class MemberPropertyUpdatesQueueProcessor : BackgroundService
+    public class MemberPropertyUpdatesQueueProcessor(IOptions<AppSettings> settings,
+                                               ILogger<MemberPropertyUpdatesQueueProcessor> logger,
+                                               IMediator mediator,
+                                               IQueueService<NewMemberPropertyUpdateDto> memberPropertyUpdateQueueService) : BackgroundService
     {
-        private readonly AppSettings _settings;
+        private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         
         private readonly QueueClient _queueClient;
         
-        private readonly ILogger<MemberPropertyUpdatesQueueProcessor> _logger;
-        private readonly IDataService _reportService;
-        private readonly IQueueService<NewMemberPropertyUpdateDto> _memberPropertyUpdateQueueService;
-
-        public MemberPropertyUpdatesQueueProcessor(IOptions<AppSettings> settings,
-                                                   ILogger<MemberPropertyUpdatesQueueProcessor> logger,
-                                                   IDataService reportService,
-                                                   IQueueService<NewMemberPropertyUpdateDto> memberPropertyUpdateQueueService)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-            _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
-            _memberPropertyUpdateQueueService = memberPropertyUpdateQueueService ?? throw new ArgumentNullException(nameof(memberPropertyUpdateQueueService));
-        }
+        private readonly ILogger<MemberPropertyUpdatesQueueProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        private readonly IQueueService<NewMemberPropertyUpdateDto> _memberPropertyUpdateQueueService = memberPropertyUpdateQueueService ?? throw new ArgumentNullException(nameof(memberPropertyUpdateQueueService));
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -64,7 +52,15 @@ namespace BOTGC.API.Services.BackgroundServices
 
                         try
                         {
-                            await _reportService.SetMemberProperty(propertyUpdate.Property, propertyUpdate.MemberId, propertyUpdate.Value);
+                            var query = new SetMemberPropertiesQuery()
+                            {
+                                Property = propertyUpdate.Property,
+                                MemberId = propertyUpdate.MemberId,
+                                Value = propertyUpdate.Value
+                            };
+
+                            await _mediator.Send(query, stoppingToken);
+
                             await _memberPropertyUpdateQueueService.DeleteMessageAsync(message.Message.MessageId, message.Message.PopReceipt, stoppingToken);
                         }
                         catch (Exception ex)

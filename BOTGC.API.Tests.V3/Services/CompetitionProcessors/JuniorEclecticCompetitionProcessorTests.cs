@@ -1,7 +1,9 @@
 ﻿using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services.CompetitionProcessors;
+using BOTGC.API.Services.Queries;
 using FakeItEasy;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
@@ -11,19 +13,19 @@ namespace BOTGC.API.Tests.Services.CompetitionProcessors
 {
     public class JuniorEclecticCompetitionProcessorTests
     {
-        private readonly IDataService _mockReportService;
+        private readonly IMediator _mockMediator;
         private readonly ILogger<JuniorEclecticCompetitionProcessor> _mockLogger;
         private readonly JuniorEclecticCompetitionProcessor _processor;
 
         public JuniorEclecticCompetitionProcessorTests()
         {
-            _mockReportService = A.Fake<IDataService>();
+            _mockMediator = A.Fake<IMediator>();
             _mockLogger = A.Fake<ILogger<JuniorEclecticCompetitionProcessor>>();
 
             var mockSettings = A.Fake<IOptions<AppSettings>>();
             A.CallTo(() => mockSettings.Value).Returns(new AppSettings());
 
-            _processor = new JuniorEclecticCompetitionProcessor(mockSettings, _mockLogger, _mockReportService, null);
+            _processor = new JuniorEclecticCompetitionProcessor(mockSettings, _mockLogger, _mockMediator, null);
         }
 
         public static IEnumerable<ITheoryDataRow> GetTestData()
@@ -50,28 +52,31 @@ namespace BOTGC.API.Tests.Services.CompetitionProcessors
         public async Task ProcessCompetitionAsync_ProducesCorrectEclecticScorecard(JuniorEclecticCompetitionProcessorTestCase testCase)
         {
             // Mock `GetJuniorMembersAsync`
-            A.CallTo(() => _mockReportService.GetJuniorMembersAsync())
-                .Returns(Task.FromResult(testCase.Mocks.GetJuniorMembersAsync.Output));
+            // Mock GetJuniorMembersQuery
+            A.CallTo(() => _mockMediator.Send(A<GetJuniorMembersQuery>._, A<CancellationToken>._))
+                .Returns(testCase.Mocks.GetJuniorMembersAsync.Output);
 
-            // Mock `GetRoundsByMemberIdAsync`
+            // Mock GetRoundsByMemberIdQuery
             foreach (var roundMock in testCase.Mocks.GetRoundsByMemberIdAsync)
             {
                 var memberId = roundMock.Input["MemberId"];
-
-                A.CallTo(() => _mockReportService.GetRoundsByMemberIdAsync(memberId))
-                    .Returns(Task.FromResult(roundMock.Output));
+                A.CallTo(() => _mockMediator.Send(
+                    A<GetRoundsByMemberIdQuery>.That.Matches(q => q.MemberId == memberId),
+                    A<CancellationToken>._))
+                    .Returns(roundMock.Output);
             }
 
-            // Mock `GetScorecardForRoundAsync`
+            // Mock GetScorecardForRoundQuery
             foreach (var scorecardMock in testCase.Mocks.GetScorecardForRoundAsync)
             {
                 var roundId = scorecardMock.Input["RoundId"];
-
-                A.CallTo(() => _mockReportService.GetScorecardForRoundAsync(roundId))
-                    .Returns(Task.FromResult(scorecardMock.Output));
+                A.CallTo(() => _mockMediator.Send(
+                    A<GetScorecardForRoundQuery>.That.Matches(q => q.RoundId == roundId),
+                    A<CancellationToken>._))
+                    .Returns(scorecardMock.Output);
             }
 
-            // ✅ Act: Run the competition processing
+            // Act
             var results = await _processor.GetCompetitionResultAsync(testCase.Input.FromDate, testCase.Input.ToDate, CancellationToken.None);
 
             Assert.NotNull(results);

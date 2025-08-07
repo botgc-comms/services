@@ -1,6 +1,8 @@
 ﻿using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
+using BOTGC.API.Services.Queries;
+using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace BOTGC.API.Services.BackgroundServices
@@ -74,8 +76,9 @@ namespace BOTGC.API.Services.BackgroundServices
 
                         using var scope = _serviceScopeFactory.CreateScope();
                         var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
-                        var reportService = scope.ServiceProvider.GetRequiredService<IDataService>();
 
+                        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                        
                         var cachedResult = await cacheService.GetAsync<NewMemberApplicationResultDto>(cacheKey);
                         if (cachedResult != null)
                         {
@@ -101,7 +104,8 @@ namespace BOTGC.API.Services.BackgroundServices
 
                         try
                         {
-                            memberCreated = await reportService.SubmitNewMemberApplicationAsync(newMember);
+                            var query = new SubmitNewMemberApplicactionQuery() { Application = newMember };
+                            memberCreated = await mediator.Send(query, stoppingToken);
                         }
                         catch (Exception ex)
                         {

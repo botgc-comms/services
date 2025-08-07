@@ -7,28 +7,33 @@ using System.Text.Json.Serialization;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Text.RegularExpressions;
+using MediatR;
+using BOTGC.API.Services.Queries;
 
 namespace BOTGC.API.Services.ReportServices
 {
     public class MembershipReportingService : IMembershipReportingService
     {
-        private readonly IDataService _dataService;
+        private readonly IMediator _mediator;
         private readonly ILogger<MembershipReportingService> _logger;
 
         /// <summary>slice
         /// Initializes a new instance of the <see cref="TrophyDataStore"/> class.
         /// </summary>
         /// <param name="logger">Logger instance.</param>
-        /// <param name="trophyFiles">File-based storage for trophy metadata.</param>
-        public MembershipReportingService(ILogger<MembershipReportingService> logger, IDataService dataService)
+        /// <param name="mediator">Mediator to handle queries</param>
+        public MembershipReportingService(ILogger<MembershipReportingService> logger, IMediator mediator)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _dataService = dataService ?? throw new ArgumentNullException(nameof(dataService));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        public async Task<MembershipReportDto> GetManagementReport()
+        public async Task<MembershipReportDto> GetManagementReport(CancellationToken cancellationToken)
         {
-            var members = (await _dataService.GetMembershipReportAsync()).Where(m => (m.MembershipStatus != "W" && m.MemberNumber != 0) || m.MembershipStatus == "W").ToList();
+            var membersQuery = new GetMembershipReportQuery();
+            var membershipReport = await _mediator.Send(membersQuery, cancellationToken);
+
+            var members = membershipReport.Where(m => (m.MembershipStatus != "W" && m.MemberNumber != 0) || m.MembershipStatus == "W").ToList();
 
             var report = new MembershipReportDto();
             var today = DateTime.UtcNow.Date;
@@ -60,7 +65,13 @@ namespace BOTGC.API.Services.ReportServices
             var (categoryFees, categoryFeeLookup, dailyTargetRevenue) = await LoadRevenueConfig(startOfCurrentFinancialYear, endOfCurrentFinancialYear);
             
             // Get all of the events that have taken place up to the start of the last financial year
-            var memberEvents = await _dataService.GetMembershipEvents(startOfPreviousSubsYear.AddDays(-1), today);
+            var memberEventsQuery = new GetMemberEventsQuery
+            {
+                FromDate = startOfPreviousSubsYear.AddDays(-1),
+                ToDate = today
+            };
+
+            var memberEvents = await _mediator.Send(memberEventsQuery);
 
             // Get Subscription Payments
             var (previousSubscriptionYearPayments, currentSubscriptionYearPayments)
@@ -69,7 +80,8 @@ namespace BOTGC.API.Services.ReportServices
                       endOfPreviousSubsYear,
                       startOfCurrentSubsYear,
                       endOfCurrentSubsYear,
-                      startOfPreviousFinancialYear);
+                      startOfPreviousFinancialYear, 
+                      cancellationToken);
 
             // You may keep them separate or merge for the daily-spread step:
             var allPayments = previousSubscriptionYearPayments
@@ -186,22 +198,22 @@ namespace BOTGC.API.Services.ReportServices
                 DateTime endOfPreviousSubsYear,
                 DateTime startOfCurrentSubsYear,
                 DateTime endOfCurrentSubsYear,
-                DateTime startOfPreviousFinancialYear)
+                DateTime startOfPreviousFinancialYear, 
+                CancellationToken cancellationToken)
         {
-            var previousTask = _dataService.GetSubscriptionPayments(
-                                    startOfPreviousSubsYear, endOfPreviousSubsYear);
+            var previousSubscriptionPaymentsQuery = new GetSubscriptionPaymentsByDateRangeQuery() { FromDate = startOfPreviousSubsYear, ToDate = endOfPreviousSubsYear };
+            var previousTask = _mediator.Send(previousSubscriptionPaymentsQuery, cancellationToken);
 
-            var currentTask = _dataService.GetSubscriptionPayments(
-                                    startOfCurrentSubsYear, endOfCurrentSubsYear);
+            var currentSubscriptionPaymentsQuery = new GetSubscriptionPaymentsByDateRangeQuery() { FromDate = startOfCurrentSubsYear, ToDate = endOfCurrentSubsYear };
+            var currentTask = _mediator.Send(currentSubscriptionPaymentsQuery, cancellationToken);
 
             Task<List<SubscriptionPaymentDto>> transitionTask =
                 Task.FromResult(new List<SubscriptionPaymentDto>());
 
             if (startOfPreviousSubsYear.Year == 2024)          // year we transitioned
             {
-                transitionTask = _dataService.GetSubscriptionPayments(
-                                    startOfPreviousFinancialYear,
-                                    startOfPreviousSubsYear.AddDays(-1));
+                var transitionSubscriptionPaymentsQuery = new GetSubscriptionPaymentsByDateRangeQuery() { FromDate = startOfPreviousFinancialYear, ToDate = startOfPreviousSubsYear.AddDays(-1) };
+                transitionTask = _mediator.Send(transitionSubscriptionPaymentsQuery, cancellationToken);
             }
 
             await Task.WhenAll(previousTask, currentTask, transitionTask);
