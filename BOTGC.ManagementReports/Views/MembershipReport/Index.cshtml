@@ -277,27 +277,29 @@
                 }
             });
         }
-        
+
         function prepareRevenueChart(dataPoints, annotations) {
-            const startDate = new Date("2024-10-01"); // Start of FY
-            const endDate = new Date("2025-09-30");   // End of FY
+            const fyStart = new Date("2024-10-01");
+            const fyEnd   = new Date("2025-09-30");
 
             const filtered = dataPoints.filter(dp => {
                 const d = new Date(dp.date);
-                return d >= startDate && d <= endDate;
+                return d >= fyStart && d <= fyEnd;
             });
 
-            const labels = filtered.map(dp => new Date(dp.date).toLocaleDateString("en-GB"));
+            const labels   = filtered.map(dp => new Date(dp.date).toLocaleDateString("en-GB"));
+            const actuals  = filtered.map(dp => dp.actualRevenue   || 0);
+            const targets  = filtered.map(dp => dp.targetRevenue   || 0);
+            const billed   = filtered.map(dp => dp.billedRevenue   || 0);
+            const received = filtered.map(dp => dp.receivedRevenue || 0);
 
-            // let actualSum = 0;
-            // let targetSum = 0;
-            // const actuals = filtered.map(dp => (actualSum += dp.actualRevenue || 0));
-            // const targets = filtered.map(dp => (targetSum += dp.targetRevenue || 0));
+            /* ──────── 1️⃣  work out lowest daily value across *all* series ──────── */
+            const minDaily = Math.min(
+                ...actuals, ...targets, ...billed, ...received
+            );
 
-            const actuals = filtered.map(dp => dp.actualRevenue || 0);
-            const targets = filtered.map(dp => dp.targetRevenue || 0);
-            const billed   = filtered.map(dp => dp.billedRevenue   || 0);  
-            const received = filtered.map(dp => dp.receivedRevenue || 0);  
+            /* 20 % below the min, but never negative */
+            const yMin = Math.max(0, Math.floor(minDaily * 0.8));
 
             new Chart(document.getElementById('revenueVsBudgetChart'), {
                 type: 'line',
@@ -308,34 +310,34 @@
                             label: "Actual Revenue (£)",
                             data: actuals,
                             borderColor: "blue",
-                            backgroundColor: "rgba(0, 0, 255, 0.1)",
+                            backgroundColor: "rgba(0,0,255,.10)",
                             fill: false,
-                            tension: 0.2,
-                            pointRadius: 0
+                            tension: .2, pointRadius: 0
                         },
                         {
                             label: "Target Revenue (£)",
                             data: targets,
                             borderColor: "green",
-                            borderDash: [4, 4],
-                            backgroundColor: "rgba(0, 128, 0, 0.1)",
+                            borderDash: [4,4],
+                            backgroundColor: "rgba(0,128,0,.10)",
                             fill: false,
-                            tension: 0.2,
-                            pointRadius: 0
+                            tension: .2, pointRadius: 0
                         },
                         {
                             label: "Billed (£)",
                             data: billed,
                             borderColor: "purple",
-                            backgroundColor: "rgba(128,0,128,.1)",
-                            tension: .2, pointRadius: 0, fill: false        // NEW
+                            backgroundColor: "rgba(128,0,128,.10)",
+                            fill: false,
+                            tension: .2, pointRadius: 0
                         },
                         {
                             label: "Received (£)",
                             data: received,
                             borderColor: "orange",
-                            backgroundColor: "rgba(255,165,0,.1)",
-                            tension: .2, pointRadius: 0, fill: false        // NEW
+                            backgroundColor: "rgba(255,165,0,.10)",
+                            fill: false,
+                            tension: .2, pointRadius: 0
                         }
                     ]
                 },
@@ -343,22 +345,19 @@
                     responsive: true,
                     plugins: {
                         legend: { position: 'top' },
-                        annotation: {
-                            annotations: annotations
-                        }
+                        annotation: { annotations }
                     },
                     scales: {
                         x: {
                             title: { display: true, text: "Date" },
                             ticks: {
-                                callback: function(value, index, ticks) {
-                                    return this.getLabelForValue(value);
-                                }
+                                callback(value) { return this.getLabelForValue(value); }
                             }
                         },
                         y: {
-                            beginAtZero: true,
-                            title: { display: true, text: "£ Revenue per Day" }
+                            title: { display: true, text: "£ Revenue per Day" },
+                            beginAtZero: false,        // ⬅︎ let min/max take control
+                            min: yMin                  // ⬅︎ start 20 % below series-min
                         }
                     }
                 }

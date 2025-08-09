@@ -45,7 +45,7 @@ namespace BOTGC.API.Services.BackgroundServices
                     {
                         var taskItem = await _taskQueue.DequeueAsync(stoppingToken);
 
-                        if (distLock.IsAcquired)
+                        if (distLock.IsAcquired || (taskItem.Force.HasValue && taskItem.Force.Value))
                         {
                             if (taskItem != null)
                             {

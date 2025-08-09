@@ -33,7 +33,9 @@ public class StockLevelEnqueueScheduler(
                 {
                     var taskItem = new StockAnalysisTaskItem
                     {
-                        RequestedAt = DateTime.UtcNow
+                        RequestedAt = DateTime.UtcNow,
+                        RequestedBy = "StockLevelEnqueueScheduler",
+                        Force = false
                     };
 
                     await _taskQueue.QueueTaskAsync(taskItem);

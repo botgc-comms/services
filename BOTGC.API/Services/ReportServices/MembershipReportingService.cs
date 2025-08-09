@@ -30,10 +30,16 @@ namespace BOTGC.API.Services.ReportServices
 
         public async Task<MembershipReportDto> GetManagementReport(CancellationToken cancellationToken)
         {
+            return await PrepareManagementReport(null, cancellationToken);
+        }
+
+        private async Task<MembershipReportDto> PrepareManagementReport(int? filterByMemberId, CancellationToken cancellationToken)
+        { 
             var membersQuery = new GetMembershipReportQuery();
             var membershipReport = await _mediator.Send(membersQuery, cancellationToken);
 
             var members = membershipReport.Where(m => (m.MembershipStatus != "W" && m.MemberNumber != 0) || m.MembershipStatus == "W").ToList();
+            if (filterByMemberId != null) members = members.Where(m => m.MemberNumber == filterByMemberId).ToList();
 
             var report = new MembershipReportDto();
             var today = DateTime.UtcNow.Date;
@@ -81,12 +87,14 @@ namespace BOTGC.API.Services.ReportServices
                       startOfCurrentSubsYear,
                       endOfCurrentSubsYear,
                       startOfPreviousFinancialYear, 
-                      cancellationToken);
+                      cancellationToken, 
+                      filterByMemberId);
 
             // You may keep them separate or merge for the daily-spread step:
             var allPayments = previousSubscriptionYearPayments
                                   .Concat(currentSubscriptionYearPayments);
 
+            if (filterByMemberId != null) allPayments = allPayments.Where(p => p.MemberId == filterByMemberId).ToList();          
 
             var (dailyBilled, dailyReceived) = BuildDailyRevenueSpread(allPayments, members, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
 
@@ -112,68 +120,76 @@ namespace BOTGC.API.Services.ReportServices
             // Process each day backwards from yesterday to the start of the previous financial year
             for (var currentDate = today.AddDays(-1); currentDate >= startOfPreviousSubsYear.AddDays(-1); currentDate = currentDate.AddDays(-1))
             {
-                // Get events that occurred on this date
-                var eventsOnThisDay = memberEvents.Where(e => e.DateOfChange.HasValue && e.DateOfChange.Value.Date == currentDate.Date).ToList();
-
-                // Reverse each event to rewind the member data
-                foreach (var memberEvent in eventsOnThisDay.OrderByDescending(me => me.ChangeIndex))
+                try
                 {
-                    var member = members.Find(m => m.MemberNumber == memberEvent.MemberId);
 
-                    if (member != null)
+                    // Get events that occurred on this date
+                    var eventsOnThisDay = memberEvents.Where(e => e.DateOfChange.HasValue && e.DateOfChange.Value.Date == currentDate.Date).ToList();
+
+                    // Reverse each event to rewind the member data
+                    foreach (var memberEvent in eventsOnThisDay.OrderByDescending(me => me.ChangeIndex))
                     {
-                        // Verify the current state before rewinding
-                        if (member.MembershipCategory == memberEvent.ToCategory)
+                        var member = members.Find(m => m.MemberNumber == memberEvent.MemberId);
+
+                        if (member != null)
                         {
-                            // Reverse the category change
-                            member.MembershipCategory = memberEvent.FromCategory;
+                            // Verify the current state before rewinding
+                            if (member.MembershipCategory == memberEvent.ToCategory)
+                            {
+                                // Reverse the category change
+                                member.MembershipCategory = memberEvent.FromCategory;
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"Expected current category to be {memberEvent.ToCategory} but found {member.MembershipCategory} for member id {member.MemberNumber} on {currentDate.ToString("yyyy-MM-dd")}");
+                            }
+
+                            // If there was a status change, reverse that too
+                            if (member.MembershipStatus == memberEvent.ToStatus)
+                            {
+                                member.MembershipStatus = memberEvent.FromStatus;
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"Expected current stauts to be {memberEvent.ToStatus} but found {member.MembershipStatus} for member id {member.MemberNumber} on {currentDate.ToString("yyyy-MM-dd")}");
+                            }
                         }
                         else
                         {
-                            _logger.LogWarning($"Expected current category to be {memberEvent.ToCategory} but found {member.MembershipCategory} for member id {member.MemberNumber} on {currentDate.ToString("yyyy-MM-dd")}");
-                        }
-
-                        // If there was a status change, reverse that too
-                        if (member.MembershipStatus == memberEvent.ToStatus)
-                        {
-                            member.MembershipStatus = memberEvent.FromStatus;
-                        }
-                        else
-                        {
-                            _logger.LogWarning($"Expected current stauts to be {memberEvent.ToStatus} but found {member.MembershipStatus} for member id {member.MemberNumber} on {currentDate.ToString("yyyy-MM-dd")}");
+                            _logger.LogWarning($"Expected to find a member with id {memberEvent.MemberId} but no member was found");
                         }
                     }
-                    else
+
+                    // Update the playing status of all members
+                    foreach (var member in members)
+                        member.SetPrimaryCategory(currentDate).SetCategoryGroup();
+
+                    // Build today's active members with their current group
+                    var todayActiveGroups = members
+                         .Where(m => m.IsActive == true && m.MemberNumber.HasValue && m.MemberNumber.Value != 0)
+                         .ToDictionary(m => m.MemberNumber!.Value, m => m.MembershipCategoryGroup);
+
+                    var (joinersByGroup, leaversByGroup) = ComputeGroupJoinersAndLeavers(previousDayGroupings, todayActiveGroups);
+
+                    // Compute and store the statistics for this day after applying reversals
+                    var dailyReportEntry = GetReportEntry(currentDate, members, categoryFees, categoryFeeLookup, dailyTargetRevenue, dailyReceived, dailyBilled);
+
+                    dailyReportEntry.DailyJoinersByCategoryGroup = joinersByGroup;
+                    dailyReportEntry.DailyLeaversByCategoryGroup = leaversByGroup;
+
+                    dataPoints.Insert(0, dailyReportEntry);
+
+                    if (IsMonthEnd(currentDate) || currentDate.Date == today.Date.AddDays(-1))
                     {
-                        _logger.LogWarning($"Expected to find a member with id {memberEvent.MemberId} but no member was found");
+                        monthlySnapshots[currentDate.Date] = CreateSnapshot(members, currentDate);
                     }
+
+                    previousDayGroupings = todayActiveGroups;
                 }
-
-                // Update the playing status of all members
-                foreach (var member in members)
-                    member.SetPrimaryCategory(currentDate).SetCategoryGroup();
-
-                // Build today's active members with their current group
-                var todayActiveGroups = members
-                     .Where(m => m.IsActive == true && m.MemberNumber.HasValue && m.MemberNumber.Value != 0)
-                     .ToDictionary(m => m.MemberNumber!.Value, m => m.MembershipCategoryGroup);
-
-                var (joinersByGroup, leaversByGroup) = ComputeGroupJoinersAndLeavers(previousDayGroupings, todayActiveGroups);
-
-                // Compute and store the statistics for this day after applying reversals
-                var dailyReportEntry = GetReportEntry(currentDate, members, categoryFees, categoryFeeLookup, dailyTargetRevenue, dailyReceived, dailyBilled);
-
-                dailyReportEntry.DailyJoinersByCategoryGroup = joinersByGroup;
-                dailyReportEntry.DailyLeaversByCategoryGroup = leaversByGroup;
-
-                dataPoints.Insert(0, dailyReportEntry);
-
-                if (IsMonthEnd(currentDate) || currentDate.Date == today.Date.AddDays(-1))
+                catch (Exception ex)
                 {
-                    monthlySnapshots[currentDate.Date] = CreateSnapshot(members, currentDate);
+                    _logger.LogError(ex, $"Error processing date {currentDate:yyyy-MM-dd}. Skipping this date.");
                 }
-
-                previousDayGroupings = todayActiveGroups;
             }
 
             EnsureMonthlyAndQuarterlyStats(report, monthlySnapshots);
@@ -182,6 +198,15 @@ namespace BOTGC.API.Services.ReportServices
 
             report.DataPoints = dataPoints.Where(dp => dp.Date >= startOfPreviousSubsYear && dp.Date <= endOfCurrentSubsYear).ToList();
             report.DataPointsCsv = ConvertToCsv(report.DataPoints);
+
+            var totalActualRevenue = report.DataPoints.Where(dp => dp.Date >= new DateTime(2024, 10, 1) && dp.Date <= new DateTime(2025, 9, 30)).Select(dp => dp.ActualRevenue).Sum();
+            var totalBilledRevenue = report.DataPoints.Where(dp => dp.Date >= new DateTime(2024, 10, 1) && dp.Date <= new DateTime(2025, 9, 30)).Select(dp => dp.BilledRevenue).Sum();
+            var totalReceivedRevenue = report.DataPoints.Where(dp => dp.Date >= new DateTime(2024, 10, 1) && dp.Date <= new DateTime(2025, 9, 30)).Select(dp => dp.ReceivedRevenue).Sum();
+
+            _logger.LogInformation(
+                $"Total Actual Revenue: {totalActualRevenue:C}, " +
+                $"Total Billed Revenue: {totalBilledRevenue:C}, " +
+                $"Total Received Revenue: {totalReceivedRevenue:C}");
 
             return report;
         }
@@ -199,7 +224,8 @@ namespace BOTGC.API.Services.ReportServices
                 DateTime startOfCurrentSubsYear,
                 DateTime endOfCurrentSubsYear,
                 DateTime startOfPreviousFinancialYear, 
-                CancellationToken cancellationToken)
+                CancellationToken cancellationToken, 
+                int? filterByMemberId = null)
         {
             var previousSubscriptionPaymentsQuery = new GetSubscriptionPaymentsByDateRangeQuery() { FromDate = startOfPreviousSubsYear, ToDate = endOfPreviousSubsYear };
             var previousTask = _mediator.Send(previousSubscriptionPaymentsQuery, cancellationToken);
@@ -221,7 +247,22 @@ namespace BOTGC.API.Services.ReportServices
             var previousInvoices = await previousTask;        
             var currentInvoices = await currentTask;          
             var transitionInvoices = await transitionTask;     
-            
+
+            if (filterByMemberId != null)
+            {
+                previousInvoices = previousInvoices
+                    .Where(p => p.MemberId == filterByMemberId)
+                    .ToList();
+
+                currentInvoices = currentInvoices
+                    .Where(p => p.MemberId == filterByMemberId)
+                    .ToList();
+
+                transitionInvoices = transitionInvoices
+                    .Where(p => p.MemberId == filterByMemberId)
+                    .ToList();  
+            }
+
             // 23/24 was a special year as we transition to a different subscription period
             // The following code works out how to assign billed and received payyment amounts
             // to the correct financial year and subscription year.
@@ -291,30 +332,33 @@ namespace BOTGC.API.Services.ReportServices
         }
 
         /// <summary>
-        /// Return the definitive “headline 18-month” prices by reading the
-        /// 23/24 subscription-fee JSON (the table you pasted earlier) and
-        /// multiplying every 12-month price by 1.5, rounding to the nearest £10.
+        /// Build the table of 18-month "headline" fees that were billed 01-Oct-23.
+        /// Key: trimmed category string   Value: £18-month rounded to nearest £10.
         /// </summary>
         private async Task<Dictionary<string, decimal>> BuildHeadline18mFeesAsync()
         {
-            // 23/24 subscription year runs 01-Apr-23 → 31-Mar-24.
-            // We pass the surrounding financial year to the existing helper so it
-            // loads *only* the 23/24 fee file and nothing else.
+            // 23/24 subscription year (01-Apr-23 → 31-Mar-24) only
             var (annual, _, _) = await LoadRevenueConfig(
-                                      new DateTime(2023, 4, 1),  
-                                      new DateTime(2024, 3, 31));  
+                                      new DateTime(2023, 4, 1),
+                                      new DateTime(2024, 3, 31));
 
-            // annual == Dictionary<string, List<(start, end, fee)>>    
-            return annual.ToDictionary(
-                kvp => kvp.Key.Trim(),                 // category
-                kvp =>
-                {
-                    var yearly = kvp.Value[0].fee;     // one entry per cat in that year
-                    var eighteen =
-                        Math.Round(yearly * 1.5m / 10m, 0, MidpointRounding.AwayFromZero) * 10m;
-                    return eighteen;
-                });
+            var result = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var kvp in annual)               // kvp.Value = List<(start,end,Fee[])>
+            {
+                // One slice per category in that year – take the first Fee in the array
+                var yearly = kvp.Value[0].fee[0].Amount;
+                if (yearly <= 0m) continue;           // skip honorary / £0 categories
+
+                var eighteen = Math.Round(yearly * 1.5m / 10m, 0,
+                                           MidpointRounding.AwayFromZero) * 10m;
+
+                result[kvp.Key.Trim()] = eighteen;
+            }
+
+            return result;
         }
+
 
         /// <summary>
         /// Converts the 18-month “transition” invoices (01-Oct-23 → 31-Mar-24)
@@ -616,9 +660,9 @@ namespace BOTGC.API.Services.ReportServices
         private MembershipReportEntryDto GetReportEntry(
             DateTime date,
             List<MemberDto> members,
-            Dictionary<string, List<(DateTime start, DateTime end, decimal fee)>> categoryFees,
-            Dictionary<(string category, DateTime date), decimal> categoryFeeLookup,
-            Dictionary<DateTime, decimal> dailyTargetRevenue,
+            Dictionary<string, List<(DateTime start, DateTime end, Fee[] fee)>> categoryFees,
+            Dictionary<(string category, DateTime date), Fee[]> categoryFeeLookup,
+            Dictionary<DateTime, Fee[]> dailyTargetRevenue,
             Dictionary<DateTime, decimal> dailyReceived,
             Dictionary<DateTime, decimal> dailyBilled)
         {
@@ -664,9 +708,40 @@ namespace BOTGC.API.Services.ReportServices
                 {
                     var trimmedCategory = member.MembershipCategory.Trim();
 
-                    if (categoryFeeLookup.TryGetValue((trimmedCategory, date.Date), out var fee))
+                    if (categoryFeeLookup.TryGetValue((trimmedCategory, date.Date), out var fees))
                     {
-                        actualRevenue += fee / 365m;
+                        Fee chosenFee = null;
+
+                        if (date.Date < new DateTime(2025, 04, 01))
+                        {
+                            // Pick based on join date: before 1-Apr-24 ⇒ 23/24 price, else 24/25
+                            chosenFee = (member.JoinDate.HasValue &&
+                                          member.JoinDate.Value.Date < new DateTime(2024, 4, 1))
+                                         ? fees.FirstOrDefault(f => f.YearStart == 23)
+                                         : fees.FirstOrDefault(f => f.YearStart == 24);
+
+                            if (chosenFee == null)
+                            {
+                                chosenFee = fees.OrderBy(f => f.YearStart).First();
+                            }
+
+                        }
+                        else
+                        {
+                            chosenFee = fees.FirstOrDefault();
+                        }
+
+                        if (chosenFee != null)
+                        {
+                            actualRevenue += chosenFee.Amount / 365m;
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Failed to find fee for category '{Category}' on {Date:yyyy-MM-dd} for member ID {MemberId}",
+                                               trimmedCategory, date, member.MemberNumber);
+                        }
+
+                        
                     }
                     else
                     {
@@ -675,7 +750,7 @@ namespace BOTGC.API.Services.ReportServices
                 }
             }
 
-            decimal targetRevenue = dailyTargetRevenue.TryGetValue(date, out var target) ? target : 0;
+            decimal targetRevenue = dailyTargetRevenue.TryGetValue(date, out var target) ? target[0].Amount : 0;
             decimal receivedRevenue = dailyReceived.TryGetValue(date, out var r) ? r : 0m;
 
             return new MembershipReportEntryDto
@@ -695,7 +770,7 @@ namespace BOTGC.API.Services.ReportServices
             };
         }
 
-        private void EnsureFullYearData(List<MembershipReportEntryDto> dataPoints, DateTime endOfCurrentFinancialYear, Dictionary<DateTime, decimal> dailyTargetRevenue)
+        private void EnsureFullYearData(List<MembershipReportEntryDto> dataPoints, DateTime endOfCurrentFinancialYear, Dictionary<DateTime, Fee[]> dailyTargetRevenue)
         {
             DateTime lastRecordedDate = dataPoints.Last().Date;
             var lastEntry = dataPoints.Last();
@@ -721,10 +796,12 @@ namespace BOTGC.API.Services.ReportServices
                     NonPlayingMembers = lastEntry.NonPlayingMembers,
                     TargetPlayingMembers = 0,
                     ActualRevenue = lastEntry.ActualRevenue,
-                    TargetRevenue = dailyTargetRevenue.TryGetValue(currentDate, out var t) ? t : 0,
+                    TargetRevenue = dailyTargetRevenue.TryGetValue(currentDate, out var t) ? t[0].Amount : 0,
                     CategoryGroupBreakdown = new Dictionary<string, int>(lastCategoryGroupBreakdown),
                     PlayingCategoryBreakdown = new Dictionary<string, int>(lastPlayingCategoryBreakdown),
-                    NonPlayingCategoryBreakdown = new Dictionary<string, int>(lastNonPlayingCategoryBreakdown)
+                    NonPlayingCategoryBreakdown = new Dictionary<string, int>(lastNonPlayingCategoryBreakdown), 
+                    ReceivedRevenue = lastEntry.ReceivedRevenue, 
+                    BilledRevenue = lastEntry.BilledRevenue
                 });
             }
         }
@@ -810,15 +887,33 @@ namespace BOTGC.API.Services.ReportServices
             }
         }
 
+        private record Fee
+        {
+            private int yearStart;
+            private int yearEnd;
+            private decimal amount;
+
+            public Fee(int yearStart, int yearEnd, decimal amount)
+            {
+                YearStart = yearStart;
+                YearEnd = yearEnd;
+                Amount = amount;
+            }
+
+            public int YearStart { get => yearStart; set => yearStart = value; }
+            public int YearEnd { get => yearEnd; set => yearEnd = value; }
+            public decimal Amount { get => amount; set => amount = value; }
+        }
+
         private async Task<(
-            Dictionary<string, List<(DateTime start, DateTime end, decimal fee)>> categoryFees,
-            Dictionary<(string category, DateTime date), decimal> categoryFeeLookup,
-            Dictionary<DateTime, decimal> dailyTargetRevenue
+            Dictionary<string, List<(DateTime start, DateTime end, Fee[] fee)>> categoryFees,
+            Dictionary<(string category, DateTime date), Fee[]> categoryFeeLookup,
+            Dictionary<DateTime, Fee[]> dailyTargetRevenue
         )> LoadRevenueConfig(DateTime financialYearStart, DateTime financialYearEnd)
         {
             string basePath = Path.Combine(AppContext.BaseDirectory, "Data");
 
-            var categoryFees = new Dictionary<string, List<(DateTime start, DateTime end, decimal fee)>>();
+            var categoryFees = new Dictionary<string, List<(DateTime start, DateTime end, Fee[] fee)>>();
 
             foreach (var file in Directory.EnumerateFiles(basePath, "MembershipFees *.json"))
             {
@@ -840,14 +935,14 @@ namespace BOTGC.API.Services.ReportServices
                 {
                     if (!categoryFees.TryGetValue(kvp.Key, out var list))
                     {
-                        list = new List<(DateTime start, DateTime end, decimal fee)>();
+                        list = new List<(DateTime start, DateTime end, Fee[] fee)>();
                         categoryFees[kvp.Key] = list;
                     }
-                    list.Add((subStart, subEnd, kvp.Value));
+                    list.Add((subStart, subEnd, [ new Fee(startYear - 2000, endYear - 2000, kvp.Value) ]));
                 }
             }
 
-            var categoryFeeLookup = new Dictionary<(string category, DateTime date), decimal>();
+            var categoryFeeLookup = new Dictionary<(string category, DateTime date), Fee[]>();
             foreach (var kvp in categoryFees)
             {
                 foreach (var (start, end, fee) in kvp.Value)
@@ -863,7 +958,10 @@ namespace BOTGC.API.Services.ReportServices
             var budgetFileName = $"Membership Subscription Budget {budgetFileKey}.json";
             var budgetPath = Path.Combine(basePath, budgetFileName);
 
-            var dailyTargetRevenue = new Dictionary<DateTime, decimal>();
+            var budgetYearStart = int.Parse($"{financialYearStart.Year % 100}");
+            var budgetYearEnd = int.Parse($"{financialYearEnd.Year % 100}");
+
+            var dailyTargetRevenue = new Dictionary<DateTime, Fee[]>();
 
             if (File.Exists(budgetPath))
             {
@@ -881,13 +979,53 @@ namespace BOTGC.API.Services.ReportServices
                     {
                         var current = monthStart.AddDays(day);
                         if (current >= financialYearStart && current <= financialYearEnd)
-                            dailyTargetRevenue[current] = dailyAmount;
+                            dailyTargetRevenue[current] = [ new Fee(budgetYearStart, budgetYearEnd, dailyAmount) ];
                     }
                 }
             }
             else
             {
                 _logger.LogWarning("Failed to load budget file: " + budgetPath);
+            }
+
+            if (financialYearStart <= new DateTime(2024, 10, 1) &&
+                financialYearEnd >= new DateTime(2025, 3, 31))
+            {
+                var legacyTblPath = Path.Combine(basePath, "MembershipFees 2324.json");
+                if (File.Exists(legacyTblPath))
+                {
+                    var legacyTbl = JsonSerializer.Deserialize<Dictionary<string, decimal>>
+                                        (await File.ReadAllTextAsync(legacyTblPath))!;
+
+                    var overlapStart = new DateTime(2024, 10, 1);
+                    var overlapEnd = new DateTime(2025, 3, 31);
+
+                    foreach (var (cat, annual) in legacyTbl)
+                    {
+                        var legacyFee = new Fee(23, 24, annual);
+
+                        for (var d = overlapStart; d <= overlapEnd; d = d.AddDays(1))
+                        {
+                            // There is already a 24/25 Fee[] there – append legacy one
+                            if (categoryFeeLookup.TryGetValue((cat, d), out var arr))
+                            {
+                                var combined = new Fee[arr.Length + 1];
+                                Array.Copy(arr, combined, arr.Length);
+                                combined[^1] = legacyFee;
+                                categoryFeeLookup[(cat, d)] = combined;
+                            }
+                            else
+                            {
+                                // Rare: category existed only in 23/24
+                                categoryFeeLookup[(cat, d)] = [legacyFee];
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"Legacy fee table missing: {legacyTblPath}");
+                }
             }
 
             return (categoryFees, categoryFeeLookup, dailyTargetRevenue);

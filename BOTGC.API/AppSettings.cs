@@ -124,6 +124,6 @@
 
     public class FeatureToggles
     {
-        public bool EnableStockControlSchedule { get; set; } = true
+        public bool EnableStockControlSchedule { get; set; } = true;
     }
 }

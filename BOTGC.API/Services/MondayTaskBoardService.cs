@@ -12,7 +12,8 @@ using System.Text.Json.Nodes;
 using Humanizer;
 
 using Polly;
-using Polly.Retry;
+using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 
 namespace BOTGC.API.Services
 {
@@ -21,15 +22,20 @@ namespace BOTGC.API.Services
         private readonly HttpClient _httpClient;
         private readonly ILogger<MondayTaskBoardService> _logger;
         private readonly string _apiKey;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+
+        private const string __BOARD_ID_CACHE_KEY = "Board_Id_{boardName}";
 
         public MondayTaskBoardService(
             HttpClient httpClient,
             IOptions<AppSettings> options,
-            ILogger<MondayTaskBoardService> logger)
+            ILogger<MondayTaskBoardService> logger,
+            IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _apiKey = options?.Value?.Monday?.APIKey ?? throw new ArgumentNullException(nameof(options), "Monday API key is missing in app settings.");
+            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
 
             _httpClient.BaseAddress = new Uri("https://api.monday.com/v2/");
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_apiKey);
@@ -75,28 +81,58 @@ namespace BOTGC.API.Services
 
         private async Task<string?> GetBoardIdByNameAsync(string boardName)
         {
-            _logger.LogDebug("Fetching Monday board ID for board name: {BoardName}", boardName);
+            ICacheService? cacheService = null;
 
-            var query = @"{ boards(limit: 40) { id name } }";
-            var payload = new { query };
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var boardId = string.Empty;
+            var cacheKey = __BOARD_ID_CACHE_KEY.Replace("{boardName}", boardName);
 
-            var response = await _httpClient.PostAsync(string.Empty, content);
-            response.EnsureSuccessStatusCode();
-
-            var json = JsonNode.Parse(await response.Content.ReadAsStringAsync());
-            var board = json?["data"]?["boards"]?.AsArray()?
-                .FirstOrDefault(b => b?["name"]?.ToString() == boardName);
-
-            if (board != null)
+            if (!string.IsNullOrEmpty(cacheKey))
             {
-                var boardId = board?["id"]?.ToString();
-                _logger.LogDebug("Creating Monday task for membership application {BoardId} for board name {BoardName}.", boardId, boardName);
-                return boardId;
+                using var scope = _serviceScopeFactory.CreateScope();
+                cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+
+                var cachedResults = await cacheService!.GetAsync<string>(cacheKey).ConfigureAwait(false);
+                if (cachedResults != null && cachedResults.Any())
+                {
+                    _logger.LogInformation("Retrieving board id from cache for board name {BoardName}...", boardName);
+                    boardId = cachedResults;
+                }
             }
 
-            _logger.LogWarning("No board found in Monday for board name: {BoardName}.", boardName);
-            return null;
+            if (String.IsNullOrEmpty(boardId))
+            {
+
+                _logger.LogDebug("Fetching Monday board ID for board name: {BoardName}", boardName);
+
+                var query = @"{ boards(limit: 40) { id name } }";
+                var payload = new { query };
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync(string.Empty, content);
+                response.EnsureSuccessStatusCode();
+
+                var json = JsonNode.Parse(await response.Content.ReadAsStringAsync());
+                var board = json?["data"]?["boards"]?.AsArray()?
+                    .FirstOrDefault(b => b?["name"]?.ToString() == boardName);
+
+                if (board != null)
+                {
+                    boardId = board?["id"]?.ToString();
+                    _logger.LogDebug("Creating Monday task for membership application {BoardId} for board name {BoardName}.", boardId, boardName);
+                }
+                else
+                {
+                    _logger.LogWarning("No board found in Monday for board name: {BoardName}.", boardName);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(boardId) && cacheService != null)
+            {
+                _logger.LogInformation("Caching board ID {BoardId} for board name {BoardName}.", boardId, boardName);
+                await cacheService.SetAsync(cacheKey, boardId, TimeSpan.FromDays(365));
+            }
+
+            return boardId;
         }
 
         private string MapMembershipCategoryToListItem(string membershipCategory, DateTime dateOfBirth)
@@ -160,10 +196,25 @@ namespace BOTGC.API.Services
                 text = $"{memberId}"
             };
 
+            var allowedChannels = new[]
+            {
+                "Direct",
+                "Social",
+                "Referral",
+                "Screens",
+                "Card",
+                "Web"
+            };
+
+            var channel = dto.Channel;
+            channel = allowedChannels
+                .FirstOrDefault(c => string.Equals(c, channel, StringComparison.OrdinalIgnoreCase))
+                ?? "Not Set";
+
             var columnValuesObject = new Dictionary<string, object?>
             {
                 ["status"] = new { label = "Working on it" },
-                ["color_mksadsjf"] = new { label = dto.Channel },
+                ["color_mksadsjf"] = new { label = channel },
                 ["color_mkq7h26c"] = new { label = MapMembershipCategoryToListItem(dto.MembershipCategory, dto.DateOfBirth) },
                 ["date4"] = new { date = dto.ApplicationDate.ToString("yyyy-MM-dd") },
                 ["text_mkq639pw"] = name,
@@ -498,22 +549,29 @@ namespace BOTGC.API.Services
 
         public async Task<StockBoardSyncResult> SyncStockLevelsAsync(List<StockItemDto> stockItems)
         {
-            var alertDate = DateTime.Now;
-
-            _logger.LogInformation("Syncing stock items to Monday Stock Levels board…");
+            var alertDate = DateTime.UtcNow;
 
             var boardId = await GetBoardIdByNameAsync("Stock Levels")
                          ?? throw new InvalidOperationException("Stock Levels board not found.");
 
-            // 1. Fetch all items from Monday with Stock ID mapping
             var query = @"
-                query GetBoardItems($boardId: [ID!]) {
+                query GetBoardItems($boardId: [ID!], $cursor: String) {
                   boards(ids: $boardId) {
-                    items_page(limit: 500) {
+                    items_page(limit: 500, cursor: $cursor) {
+                      cursor
                       items {
                         id
                         name
-                        column_values(ids: [""text_mkt4f493""]) {
+                        column_values(ids: [
+                          ""text_mkt4f493"",
+                          ""status"",
+                          ""date4"",
+                          ""numeric_mkt46h37"",
+                          ""numeric_mkt4q9cz"",
+                          ""numeric_mkt46r6t"",
+                          ""text_mkt4tafy"",
+                          ""text_mkt46vft""
+                        ]) {
                           id
                           text
                           value
@@ -523,186 +581,456 @@ namespace BOTGC.API.Services
                   }
                 }";
 
-            
-            var payload = new { query, variables = new { boardId = new[] { boardId } } };
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var mondayItems = new List<JsonNode>();
+            string? cursor = null;
 
-            var response = await _mondayApiPolicy.ExecuteAsync(() =>
-                _httpClient.PostAsync(string.Empty, content)
-            );
-
-            response.EnsureSuccessStatusCode();
-
-            var json = JsonNode.Parse(await response.Content.ReadAsStringAsync());
-            var items = json?["data"]?["boards"]?[0]?["items_page"]?["items"]?.AsArray();
-
-            // Build a lookup: Stock ID -> (itemId, name)
-            var mondayIdMap = items?
-                .Where(i => i?["column_values"]?[0]?["text"] != null)
-                .ToDictionary(
-                    i => i["column_values"][0]["text"]!.ToString(),
-                    i => i["id"]!.ToString()
-                ) ?? new Dictionary<string, string>();
-
-            var created = new List<string>();
-            var updated = new List<string>();
-
-            foreach (var dto in stockItems)
+            while (true)
             {
-                string statusLabel = "OK";
+                var payload = new { query, variables = new { boardId = new[] { boardId }, cursor } };
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                var response = await _mondayApiPolicy.ExecuteAsync(() => _httpClient.PostAsync(string.Empty, content));
+                response.EnsureSuccessStatusCode();
 
-                if (dto.TotalQuantity.HasValue && dto.TotalQuantity <= 0)
+                var json = JsonNode.Parse(await response.Content.ReadAsStringAsync());
+                var page = json?["data"]?["boards"]?[0]?["items_page"];
+                var items = page?["items"]?.AsArray();
+                if (items != null) mondayItems.AddRange(items);
+
+                cursor = page?["cursor"]?.ToString();
+                if (string.IsNullOrEmpty(cursor)) break;
+            }
+
+            static double? ParseNumber(JsonNode? cv)
+            {
+                if (cv is null) return null;
+
+                var valueStr = cv["value"]?.ToString();
+
+                if (!string.IsNullOrWhiteSpace(valueStr))
                 {
-                    statusLabel = "Out of Stock";
-                }
-                else if (dto.TotalQuantity.HasValue && dto.MinAlert.HasValue && dto.MinAlert.Value > 0 && dto.TotalQuantity <= dto.MinAlert)
-                {
-                    statusLabel = "Very Low";
-                }
-                else if (dto.TotalQuantity.HasValue && dto.MaxAlert.HasValue && dto.MaxAlert.Value > 0 && dto.TotalQuantity <= dto.MaxAlert)
-                {
-                    statusLabel = "Running Low";
-                }
-
-                var unit = dto.Unit?.ToLowerInvariant() ?? "";
-                string unitDisplay = unit.Pluralize(); 
-
-                var columnValuesObject = new Dictionary<string, object?>
-                {
-                    ["text_mkt4f493"] = dto.Id.ToString(),                                    // Stock ID (required for upsert)
-                    ["status"] = new { label = statusLabel },                                 // Status (Running Low, Very Low, OK)
-                    ["date4"] = alertDate.ToString("yyyy-MM-dd"),                             // Alert Date
-                    ["numeric_mkt46h37"] = dto.TotalQuantity,                                 // Total Stock
-                    ["numeric_mkt4q9cz"] = dto.MinAlert,                                      // Min Alert
-                    ["numeric_mkt46r6t"] = dto.MaxAlert,                                      // Max Alert
-                    ["text_mkt4tafy"] = dto.Division,                                         // Division
-                    ["text_mkt46vft"] = unitDisplay                                           // Unit
-                };
-
-                var columnValuesJson = JsonSerializer.Serialize(columnValuesObject, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = null,
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-                });
-
-                var itemName = dto.Name;
-
-                if (!string.IsNullOrEmpty(dto.Id.ToString()) && mondayIdMap.TryGetValue(dto.Id.ToString(), out var mondayItemId))
-                {
-                    // UPDATE
-                    var updateMutation = @"
-                        mutation ($boardId: ID!, $itemId: ID!, $columnValues: JSON!) {
-                            change_multiple_column_values(board_id: $boardId, item_id: $itemId, column_values: $columnValues) {
-                                id
-                            }
-                        }";
-
-                    var updatePayload = new
+                    try
                     {
-                        query = updateMutation,
-                        variables = new
+                        using var doc = JsonDocument.Parse(valueStr);
+                        var root = doc.RootElement;
+
+                        if (root.ValueKind == JsonValueKind.Object)
                         {
-                            boardId, 
-                            itemId = mondayItemId,
-                            columnValues = columnValuesJson
-                        }
-                    };
-
-                    var updateContent = new StringContent(JsonSerializer.Serialize(updatePayload), Encoding.UTF8, "application/json");
-
-                    var updateResponse = await _mondayApiPolicy.ExecuteAsync(() =>
-                        _httpClient.PostAsync(string.Empty, updateContent)
-                    );
-
-                    updateResponse.EnsureSuccessStatusCode();
-
-                    updated.Add(dto.Id.ToString());
-                    _logger.LogInformation("Updated Monday stock item {StockId} ({ItemId})", dto.Id, mondayItemId);
-                }
-                else
-                {
-                    // CREATE
-                    var createMutation = @"
-                        mutation ($boardId: ID!, $itemName: String!, $columnValues: JSON!) {
-                            create_item(board_id: $boardId, item_name: $itemName, column_values: $columnValues) {
-                                id
+                            if (root.TryGetProperty("number", out var n))
+                            {
+                                if (n.ValueKind == JsonValueKind.Number) return n.GetDouble();
+                                if (n.ValueKind == JsonValueKind.String && double.TryParse(n.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var dn)) return dn;
                             }
-                        }";
 
-                    var createPayload = new
-                    {
-                        query = createMutation,
-                        variables = new
-                        {
-                            boardId,
-                            itemName = dto.Name,
-                            columnValues = columnValuesJson
+                            if (root.TryGetProperty("amount", out var a))
+                            {
+                                if (a.ValueKind == JsonValueKind.Number) return a.GetDouble();
+                                if (a.ValueKind == JsonValueKind.String && double.TryParse(a.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var da)) return da;
+                            }
                         }
-                    };
+                        else if (root.ValueKind == JsonValueKind.Number)
+                        {
+                            return root.GetDouble();
+                        }
+                        else if (root.ValueKind == JsonValueKind.String)
+                        {
+                            var s = root.GetString();
+                            if (!string.IsNullOrWhiteSpace(s) && double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var ds)) return ds;
+                        }
+                    }
+                    catch
+                    {
+                        // ignore and fall back to 'text'
+                    }
+                }
 
-                    var createContent = new StringContent(JsonSerializer.Serialize(createPayload), Encoding.UTF8, "application/json");
+                var textStr = cv["text"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(textStr) && double.TryParse(textStr, NumberStyles.Float, CultureInfo.InvariantCulture, out var dt)) return dt;
 
-                    var createResponse = await _mondayApiPolicy.ExecuteAsync(() =>
-                        _httpClient.PostAsync(string.Empty, createContent)
-                    );
+                return null;
+            }
 
-                    createResponse.EnsureSuccessStatusCode();
+            var mondayMap = new Dictionary<string, (string ItemId, string? Status, double? Qty, double? MinAlert, double? MaxAlert)>(StringComparer.Ordinal);
 
-                    created.Add(dto.Id.ToString());
-                    _logger.LogInformation("Created new Monday stock item {StockId} ({ItemName})", dto.Id, itemName);
+            foreach (var i in mondayItems)
+            {
+                var id = i?["id"]?.ToString();
+                var cvs = i?["column_values"]?.AsArray();
+                if (string.IsNullOrWhiteSpace(id) || cvs == null) continue;
+
+                string? stockId = null;
+                string? status = null;
+                double? qty = null;
+                double? minAlert = null;
+                double? maxAlert = null;
+
+                foreach (var cv in cvs)
+                {
+                    var colId = cv?["id"]?.ToString();
+                    switch (colId)
+                    {
+                        case "text_mkt4f493":
+                            stockId = cv?["text"]?.ToString()?.Trim();
+                            break;
+                        case "status":
+                            status = cv?["text"]?.ToString();
+                            break;
+                        case "numeric_mkt46h37":
+                            qty = ParseNumber(cv);
+                            break;
+                        case "numeric_mkt4q9cz":
+                            minAlert = ParseNumber(cv);
+                            break;
+                        case "numeric_mkt46r6t":
+                            maxAlert = ParseNumber(cv);
+                            break;
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(stockId) && !mondayMap.ContainsKey(stockId))
+                {
+                    mondayMap.Add(stockId!, (id!, status, qty, minAlert, maxAlert));
                 }
             }
 
-            var idsPassedIn = new HashSet<string>(stockItems.Select(x => x.Id.ToString()));
-            var mondayUntouched = mondayIdMap.Keys.Except(idsPassedIn).ToList();
-
-            foreach (var stockId in mondayUntouched)
+            static string ComputeStatus(StockItemDto dto)
             {
-                var itemId = mondayIdMap[stockId];
+                if (dto.TotalQuantity.HasValue && dto.TotalQuantity <= 0) return "Out of Stock";
+                if (dto.TotalQuantity.HasValue && dto.MinAlert.HasValue && dto.MinAlert.Value > 0 && dto.TotalQuantity <= dto.MinAlert) return "Very Low";
+                if (dto.TotalQuantity.HasValue && dto.MaxAlert.HasValue && dto.MaxAlert.Value > 0 && dto.TotalQuantity <= dto.MaxAlert) return "Running Low";
+                return "OK";
+            }
 
-                var resetColumnValues = new Dictionary<string, object?>
-                {
-                    ["status"] = new { label = "OK" }
-                };
-                var resetJson = JsonSerializer.Serialize(resetColumnValues, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = null
-                });
+            static bool ShouldUpdate(double? prevQty, string? prevStatus, double? newQty, string desiredStatus, double? minAlert, double? maxAlert)
+            {
+                if (!newQty.HasValue) return false;
 
-                // UPDATE
-                var updateMutation = @"
-                        mutation ($boardId: ID!, $itemId: ID!, $columnValues: JSON!) {
-                            change_multiple_column_values(board_id: $boardId, item_id: $itemId, column_values: $columnValues) {
-                                id
-                            }
-                        }";
-
-                var updatePayload = new
+                if (newQty.Value <= 0)
                 {
-                    query = updateMutation,
-                    variables = new
+                    return !string.Equals(prevStatus, desiredStatus, StringComparison.Ordinal);
+                }
+
+                if (!string.Equals(prevStatus, desiredStatus, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+
+                if (!prevQty.HasValue) return true;
+
+                var decrease = prevQty.Value - newQty.Value;
+                if (decrease <= 0) return false;
+
+                double DefaultThreshold(double baseline) => Math.Max(10d, Math.Ceiling(baseline * 0.10d));
+
+                double threshold;
+                if (string.Equals(prevStatus, "Very Low", StringComparison.Ordinal))
+                {
+                    var basis = minAlert ?? 0d;
+                    threshold = Math.Max(1d, Math.Ceiling(basis * 0.10d));
+                }
+                else if (string.Equals(prevStatus, "Running Low", StringComparison.Ordinal))
+                {
+                    var basis = maxAlert ?? 0d;
+                    threshold = Math.Max(1d, Math.Ceiling(basis * 0.10d));
+                }
+                else
+                {
+                    threshold = DefaultThreshold(prevQty.Value);
+                }
+
+                return decrease >= threshold;
+            }
+
+            var createdIds = new List<string>();
+            var updatedIds = new List<string>();
+
+            var batchedUpdates = new List<(string ItemId, string ColumnValuesJson)>();
+            var batchedCreates = new List<(string ItemName, string ColumnValuesJson)>();
+
+            var activeStock = stockItems.Where(s => s.IsActive.GetValueOrDefault(false)).ToList();
+
+            foreach (var dto in activeStock)
+            {
+                var stockId = dto.Id.ToString();
+                var desiredStatus = ComputeStatus(dto);
+
+                if (mondayMap.TryGetValue(stockId, out var current))
+                {
+                    var prevQty = current.Qty;
+                    var prevStatus = current.Status;
+                    var minA = dto.MinAlert.HasValue ? (double?)dto.MinAlert.Value : current.MinAlert;
+                    var maxA = dto.MaxAlert.HasValue ? (double?)dto.MaxAlert.Value : current.MaxAlert;
+                    var newQty = dto.TotalQuantity.HasValue ? (double?)dto.TotalQuantity.Value : null;
+
+                    if (ShouldUpdate(prevQty, prevStatus, newQty, desiredStatus, minA, maxA))
                     {
-                        boardId,
-                        itemId,
-                        columnValues = resetJson
+                        var columnValuesObject = new Dictionary<string, object?>
+                        {
+                            ["text_mkt4f493"] = stockId,
+                            ["status"] = new { label = desiredStatus },
+                            ["date4"] = new { date = alertDate.ToString("yyyy-MM-dd") },
+                            ["numeric_mkt46h37"] = dto.TotalQuantity,
+                            ["numeric_mkt4q9cz"] = dto.MinAlert,
+                            ["numeric_mkt46r6t"] = dto.MaxAlert,
+                            ["text_mkt4tafy"] = dto.Division,
+                            ["text_mkt46vft"] = (dto.Unit?.ToLowerInvariant() ?? string.Empty).Pluralize()
+                        };
+
+                        var columnValuesJson = JsonSerializer.Serialize(columnValuesObject, new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = null,
+                            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                        });
+
+                        batchedUpdates.Add((current.ItemId, columnValuesJson));
+                        updatedIds.Add(stockId);
                     }
-                };
+                }
+                else
+                {
+                    if (dto.TotalQuantity.HasValue)
+                    {
+                        var columnValuesObject = new Dictionary<string, object?>
+                        {
+                            ["text_mkt4f493"] = stockId,
+                            ["status"] = new { label = desiredStatus },
+                            ["date4"] = new { date = alertDate.ToString("yyyy-MM-dd") },
+                            ["numeric_mkt46h37"] = dto.TotalQuantity,
+                            ["numeric_mkt4q9cz"] = dto.MinAlert,
+                            ["numeric_mkt46r6t"] = dto.MaxAlert,
+                            ["text_mkt4tafy"] = dto.Division,
+                            ["text_mkt46vft"] = (dto.Unit?.ToLowerInvariant() ?? string.Empty).Pluralize()
+                        };
 
-                var updateContent = new StringContent(JsonSerializer.Serialize(updatePayload), Encoding.UTF8, "application/json");
+                        var columnValuesJson = JsonSerializer.Serialize(columnValuesObject, new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = null,
+                            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                        });
 
-                var updateResponse = await _mondayApiPolicy.ExecuteAsync(() =>
-                    _httpClient.PostAsync(string.Empty, updateContent)
-                );
+                        batchedCreates.Add((dto.Name, columnValuesJson));
+                        createdIds.Add(stockId);
+                    }
+                }
+            }
 
-                updateResponse.EnsureSuccessStatusCode();
+            if (batchedUpdates.Count > 0)
+            {
+                await ExecuteBatchedUpdatesAsync(boardId, batchedUpdates, 25);
+            }
+
+            if (batchedCreates.Count > 0)
+            {
+                await ExecuteBatchedCreatesAsync(boardId, batchedCreates, 20);
+            }
+
+            var idsPassedIn = new HashSet<string>(activeStock.Select(x => x.Id.ToString()), StringComparer.Ordinal);
+            var mondayToDelete = mondayMap.Keys.Except(idsPassedIn).ToList();
+
+            if (mondayToDelete.Count > 0)
+            {
+                var deleteIds = mondayToDelete
+                    .Select(stockId => mondayMap[stockId].ItemId)
+                    .Distinct()
+                    .ToList();
+
+                await ExecuteBatchedDeletesAsync(deleteIds, 50);
             }
 
             return new StockBoardSyncResult
             {
-                Created = created,
-                Updated = updated,
-                ExistingMondayIds = mondayIdMap.Keys.ToList()
+                Created = createdIds,
+                Updated = updatedIds,
+                ExistingMondayIds = mondayMap.Keys.ToList()
             };
         }
+
+        private async Task ExecuteBatchedDeletesAsync(
+            IEnumerable<string> itemIds,
+            int batchSize = 50)
+        {
+            var batch = new List<string>(batchSize);
+
+            foreach (var id in itemIds)
+            {
+                batch.Add(id);
+                if (batch.Count == batchSize)
+                {
+                    await PostDeleteBatchAsync(batch);
+                    batch.Clear();
+                }
+            }
+
+            if (batch.Count > 0)
+            {
+                await PostDeleteBatchAsync(batch);
+            }
+        }
+
+        private async Task PostDeleteBatchAsync(List<string> batch)
+        {
+            var sb = new StringBuilder();
+            sb.Append("mutation(");
+            for (int i = 0; i < batch.Count; i++)
+            {
+                sb.Append($"$itemId{i}: ID!,");
+            }
+            sb.Length--;
+            sb.Append("){");
+
+            for (int i = 0; i < batch.Count; i++)
+            {
+                sb.Append($@"
+                    d{i}: delete_item(item_id: $itemId{i}) {{ id }}");
+            }
+
+            sb.Append("}");
+
+            var variables = new Dictionary<string, object?>();
+            for (int i = 0; i < batch.Count; i++)
+            {
+                variables[$"itemId{i}"] = batch[i];
+            }
+
+            var payload = new { query = sb.ToString(), variables };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _mondayApiPolicy.ExecuteAsync(() => _httpClient.PostAsync(string.Empty, content));
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        private async Task ExecuteBatchedUpdatesAsync(
+            string boardId,
+            IEnumerable<(string ItemId, string ColumnValuesJson)> updates,
+            int batchSize = 25)
+        {
+            var batch = new List<(string ItemId, string ColumnValuesJson)>(batchSize);
+
+            foreach (var u in updates)
+            {
+                batch.Add(u);
+                if (batch.Count == batchSize)
+                {
+                    await PostUpdateBatchAsync(boardId, batch);
+                    batch.Clear();
+                }
+            }
+
+            if (batch.Count > 0)
+            {
+                await PostUpdateBatchAsync(boardId, batch);
+            }
+        }
+
+        private async Task PostUpdateBatchAsync(
+            string boardId,
+            List<(string ItemId, string ColumnValuesJson)> batch)
+        {
+            var sb = new StringBuilder();
+            sb.Append("mutation(");
+            sb.Append("$boardId: ID!,");
+            for (int i = 0; i < batch.Count; i++)
+            {
+                sb.Append($"$itemId{i}: ID!,");
+                sb.Append($"$values{i}: JSON!,");
+            }
+            sb.Length--;
+            sb.Append("){");
+
+            for (int i = 0; i < batch.Count; i++)
+            {
+                sb.Append($@"
+                    u{i}: change_multiple_column_values(
+                      board_id: $boardId,
+                      item_id: $itemId{i},
+                      column_values: $values{i}
+                    ){{ id }}");
+            }
+
+            sb.Append("}");
+
+            var variables = new Dictionary<string, object?>
+            {
+                ["boardId"] = boardId
+            };
+
+            for (int i = 0; i < batch.Count; i++)
+            {
+                variables[$"itemId{i}"] = batch[i].ItemId;
+                variables[$"values{i}"] = batch[i].ColumnValuesJson;
+            }
+
+            var payload = new { query = sb.ToString(), variables };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _mondayApiPolicy.ExecuteAsync(() => _httpClient.PostAsync(string.Empty, content));
+            response.EnsureSuccessStatusCode();
+        }
+
+        private async Task ExecuteBatchedCreatesAsync(
+            string boardId,
+            IEnumerable<(string ItemName, string ColumnValuesJson)> creates,
+            int batchSize = 20)
+        {
+            var batch = new List<(string ItemName, string ColumnValuesJson)>(batchSize);
+
+            foreach (var c in creates)
+            {
+                batch.Add(c);
+                if (batch.Count == batchSize)
+                {
+                    await PostCreateBatchAsync(boardId, batch);
+                    batch.Clear();
+                }
+            }
+
+            if (batch.Count > 0)
+            {
+                await PostCreateBatchAsync(boardId, batch);
+            }
+        }
+
+        private async Task PostCreateBatchAsync(
+            string boardId,
+            List<(string ItemName, string ColumnValuesJson)> batch)
+        {
+            var sb = new StringBuilder();
+            sb.Append("mutation(");
+            sb.Append("$boardId: ID!,");
+            for (int i = 0; i < batch.Count; i++)
+            {
+                sb.Append($"$name{i}: String!,");
+                sb.Append($"$values{i}: JSON!,");
+            }
+            sb.Length--;
+            sb.Append("){");
+
+            for (int i = 0; i < batch.Count; i++)
+            {
+                sb.Append($@"
+                    c{i}: create_item(
+                      board_id: $boardId,
+                      item_name: $name{i},
+                      column_values: $values{i}
+                    ){{ id }}");
+            }
+
+            sb.Append("}");
+
+            var variables = new Dictionary<string, object?>
+            {
+                ["boardId"] = boardId
+            };
+
+            for (int i = 0; i < batch.Count; i++)
+            {
+                variables[$"name{i}"] = batch[i].ItemName;
+                variables[$"values{i}"] = batch[i].ColumnValuesJson;
+            }
+
+            var payload = new { query = sb.ToString(), variables };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _mondayApiPolicy.ExecuteAsync(() => _httpClient.PostAsync(string.Empty, content));
+            response.EnsureSuccessStatusCode();
+        }
+
     }
 }
