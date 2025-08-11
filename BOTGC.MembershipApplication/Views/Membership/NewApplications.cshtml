@@ -1,0 +1,99 @@
+﻿@model List<MemberModel>
+@using System.Text.RegularExpressions
+
+@{
+    ViewData["Title"] = "Recent Membership Applications";
+    var supressLogo = string.Equals(ViewData["SupressLogo"]?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
+
+    bool IsJunior(MemberModel m)
+    {
+        if (m.DateOfBirth == null) return false;
+        var today = DateTime.UtcNow.Date;
+        var dob = m.DateOfBirth.Value.Date;
+        var age = today.Year - dob.Year - (today < dob.AddYears(today.Year - dob.Year) ? 1 : 0);
+        return age < 18;
+    }
+
+    string MaskedName(MemberModel m)
+    {
+        var first = (m.FirstName ?? "").Trim();
+        var last = (m.LastName ?? "").Trim();
+        var lastInitial = string.IsNullOrEmpty(last) ? "" : $" {last[0]}.";
+        return $"{first}{lastInitial}".Trim();
+    }
+
+    string TruncatePostcode(string? pc)
+    {
+        if (string.IsNullOrWhiteSpace(pc)) return "—";
+        var p = pc.Trim().ToUpperInvariant();
+        var m = Regex.Match(p, @"^([A-Z]{1,2}\d[A-Z\d]?)\s?(\d)[A-Z]{2}$");
+        if (m.Success) return $"{m.Groups[1].Value} {m.Groups[2].Value}**";
+        return p.Length >= 4 ? p.Substring(0, 4) + "**" : "—";
+    }
+
+    string JuniorSafeDate(DateTime? dt)
+    {
+        if (dt == null) return "—";
+        return dt.Value.ToString("MMM yyyy");
+    }
+}
+
+@if (!supressLogo)
+{
+    <div class="text-center mb-4 club-logo">
+        <img src="~/img/Burton%20on%20Trent%20%20-%201894.png"
+             alt="Burton on Trent Golf Club logo"
+             class="mx-auto d-block" />
+    </div>
+}
+
+<h1 class="recent-applications-heading">Recent Membership Applications</h1>
+
+<p class="recent-applications-intro">
+    Applicants who have applied for membership in the last 14 days.
+</p>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="no-applications">
+        <p>No recent membership applications.</p>
+    </div>
+}
+else
+{
+    <div class="applications-list">
+        @foreach (var app in Model)
+        {
+            var isJunior = IsJunior(app);
+            <div class="application-card">
+                <div class="application-header">
+                    <div class="applicant-name">
+                        @(isJunior ? MaskedName(app) : $"{app.FirstName} {app.LastName}")
+                    </div>
+                    <span class="membership-category-pill">@app.MembershipCategory</span>
+                </div>
+
+                <div class="application-meta">
+                    @if (isJunior)
+                    {
+                        <span class="application-date">Applied: @JuniorSafeDate(app.ApplicationDate)</span>
+                        <span class="application-sep">•</span>
+                        <span class="application-postcode">Postcode: —</span>
+                    }
+                    else
+                    {
+                        <span class="application-date">Applied: @app.ApplicationDate?.ToString("dd MMM yyyy")</span>
+                        <span class="application-sep">•</span>
+                        <span class="application-postcode">Postcode: @TruncatePostcode(app.Postcode)</span>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(app.MembershipCategoryGroup))
+                    {
+                        <span class="application-sep">•</span>
+                        <span class="application-group">@app.MembershipCategoryGroup</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

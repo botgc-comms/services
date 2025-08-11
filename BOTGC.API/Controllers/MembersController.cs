@@ -178,6 +178,42 @@ namespace BOTGC.API.Controllers
         }
 
         /// <summary>
+        /// Retrieves a list of all members on a waiting list
+        /// </summary>
+        /// <returns>A list of waiting members with their details.</returns>
+        /// <response code="200">Returns the list of current members.</response>
+        /// <response code="204">No current members found.</response>
+        /// <response code="500">An internal server error occurred.</response>
+        [HttpGet("waiting")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<MemberDto>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IReadOnlyCollection<MemberDto>>> GetWaitingMembers()
+        {
+            _logger.LogInformation("Fetching waiting members...");
+
+            try
+            {
+                var query = new GetWaitingMembersQuery();
+                var waitingMembers = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (waitingMembers == null || waitingMembers.Count == 0)
+                {
+                    _logger.LogWarning("No waiting members found.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation("Successfully retrieved {Count} waiting members.", waitingMembers.Count);
+                return Ok(waitingMembers);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving waiting members.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving waiting members.");
+            }
+        }
+
+        /// <summary>
         /// Retrieves a list of all junior members.
         /// </summary>
         /// <returns>A list of junior members with their details.</returns>

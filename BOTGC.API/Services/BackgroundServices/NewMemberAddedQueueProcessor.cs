@@ -1,42 +1,42 @@
 ﻿using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace BOTGC.API.Services.BackgroundServices
 {
-    public class NewMemberAddedQueueProcessor : BackgroundService
+    public class NewMemberAddedQueueProcessor(
+        IOptions<AppSettings> settings,
+        ILogger<NewMemberAddedQueueProcessor> logger,
+        IDistributedLockManager distributedLockManager,
+        IMemberApplicationFormPdfGeneratorService pdfGeneratorService,
+        ITaskBoardService taskBoardService,
+        IQueueService<NewMemberApplicationResultDto> newMemberAddedQueueService) : BackgroundService
     {
-        private readonly ILogger<NewMemberAddedQueueProcessor> _logger;
-        private readonly IDistributedLockManager _distributedLockManager;
+        private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+        private readonly ILogger<NewMemberAddedQueueProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly IDistributedLockManager _distributedLockManager = distributedLockManager ?? throw new ArgumentNullException(nameof(distributedLockManager));
 
-        private readonly IMemberApplicationFormPdfGeneratorService _pdfGeneratorService;
-        private readonly ITaskBoardService _taskBoardService;
-        private readonly IQueueService<NewMemberApplicationResultDto> _newMemberAddedQueueService;
-
-        public NewMemberAddedQueueProcessor(
-            ILogger<NewMemberAddedQueueProcessor> logger,
-            IDistributedLockManager distributedLockManager,
-            IMemberApplicationFormPdfGeneratorService pdfGeneratorService,
-            ITaskBoardService taskBoardService,
-            IQueueService<NewMemberApplicationResultDto> newMemberAddedQueueService)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _distributedLockManager = distributedLockManager ?? throw new ArgumentNullException(nameof(distributedLockManager));
-
-            _pdfGeneratorService = pdfGeneratorService ?? throw new ArgumentNullException(nameof(pdfGeneratorService));
-            _taskBoardService = taskBoardService ?? throw new ArgumentNullException(nameof(taskBoardService));
-            _newMemberAddedQueueService = newMemberAddedQueueService ?? throw new ArgumentNullException(nameof(newMemberAddedQueueService));
-        }
+        private readonly IMemberApplicationFormPdfGeneratorService _pdfGeneratorService = pdfGeneratorService ?? throw new ArgumentNullException(nameof(pdfGeneratorService));
+        private readonly ITaskBoardService _taskBoardService = taskBoardService ?? throw new ArgumentNullException(nameof(taskBoardService));
+        private readonly IQueueService<NewMemberApplicationResultDto> _newMemberAddedQueueService = newMemberAddedQueueService ?? throw new ArgumentNullException(nameof(newMemberAddedQueueService));
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             const int maxAttempts = 5;
             Exception? lastError = null;
+
+            if (!_settings.FeatureToggles.ProcessMembershipApplications)
+            {
+                _logger.LogInformation("Membership application processing is disabled. Exiting background service.");
+                return;
+            }
 
             while (!stoppingToken.IsCancellationRequested)
             {

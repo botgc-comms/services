@@ -67,7 +67,7 @@ namespace BOTGC.API.Common
                 { "^Disabled\\s*Golfer$", nameof(MemberDto.IsDisabledGolfer) },
                 { "^Unpaid\\s*Total$", nameof(MemberDto.UnpaidTotal) },
                 { "^ApplicationID$", nameof(MemberDto.ApplicationId) },
-                { "^ReferrerId$", nameof(MemberDto.ReferrerId) },
+                { "^ReferrerId$", nameof(MemberDto.ReferrerId) }
             };
 
             // Build a dictionary to track the index of each column
@@ -132,6 +132,9 @@ namespace BOTGC.API.Common
 
                     if (headerIndexMap.TryGetValue(nameof(MemberDto.LeaveDate), out var leaveIndex) && leaveIndex < columns.Length)
                         member.LeaveDate = ParseDate(columns[leaveIndex]);
+
+                    if (headerIndexMap.TryGetValue(nameof(MemberDto.Postcode), out var postcodeIndex) && postcodeIndex < columns.Length)
+                        member.Postcode = columns[postcodeIndex];
 
                     if (headerIndexMap.TryGetValue(nameof(MemberDto.ApplicationDate), out var applicationDateIndex) && applicationDateIndex < columns.Length)
                         member.ApplicationDate = ParseDate(columns[applicationDateIndex]);

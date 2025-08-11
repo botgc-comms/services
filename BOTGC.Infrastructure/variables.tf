@@ -49,3 +49,24 @@ variable "monday_com_apikey" {
   default = ""
 }
 
+variable "recent_applicants_shared_secret" {
+  type      = string
+  sensitive = true
+}
+
+variable "recent_applicants_allowed_referrer_host" {
+  type    = string
+  default = "www.botgc.co.uk"
+}
+
+variable "recent_applicants_token_ttl_minutes" {
+  type    = number
+  default = 10
+}
+
+variable "recent_applicants_cookie_name" {
+  type    = string
+  default = "ra_tok"
+}
+
+

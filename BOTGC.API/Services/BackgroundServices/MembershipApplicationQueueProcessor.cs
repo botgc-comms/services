@@ -7,42 +7,36 @@ using Microsoft.Extensions.Options;
 
 namespace BOTGC.API.Services.BackgroundServices
 {
-    public class MembershipApplicationQueueProcessor : BackgroundService
+    public class MembershipApplicationQueueProcessor(
+        IOptions<AppSettings> settings,
+        ILogger<MembershipApplicationQueueProcessor> logger,
+        IServiceScopeFactory serviceScopeFactory,
+        IDistributedLockManager distributedLockManager,
+        IQueueService<NewMemberApplicationDto> newMemberApplicationQueueService,
+        IQueueService<NewMemberApplicationResultDto> membershipApplicationQueueService,
+        IQueueService<NewMemberPropertyUpdateDto> memberPropertyUpdateQueueService) : BackgroundService
     {
         private const string __CACHE_NEWMEMBERAPPLICATION = "NewMemberApplication_{applicationId}";
 
-        private readonly AppSettings _settings;
-        private readonly ILogger<MembershipApplicationQueueProcessor> _logger;
-        private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly IQueueService<NewMemberApplicationResultDto> _membershipApplicationQueueService;
-        private readonly IQueueService<NewMemberPropertyUpdateDto> _memberPropertyUpdateQueueService;
-        private readonly IQueueService<NewMemberApplicationDto> _newMemberApplicationQueueService;
+        private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+        private readonly ILogger<MembershipApplicationQueueProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+        private readonly IQueueService<NewMemberApplicationResultDto> _membershipApplicationQueueService = membershipApplicationQueueService ?? throw new ArgumentNullException(nameof(membershipApplicationQueueService));
+        private readonly IQueueService<NewMemberPropertyUpdateDto> _memberPropertyUpdateQueueService = memberPropertyUpdateQueueService ?? throw new ArgumentNullException(nameof(memberPropertyUpdateQueueService));
+        private readonly IQueueService<NewMemberApplicationDto> _newMemberApplicationQueueService = newMemberApplicationQueueService ?? throw new ArgumentNullException(nameof(newMemberApplicationQueueService));
 
-        private readonly IDistributedLockManager _distributedLockManager;
-
-        public MembershipApplicationQueueProcessor(
-            IOptions<AppSettings> settings,
-            ILogger<MembershipApplicationQueueProcessor> logger,
-            IServiceScopeFactory serviceScopeFactory,
-            IDistributedLockManager distributedLockManager,
-            IQueueService<NewMemberApplicationDto> newMemberApplicationQueueService,
-            IQueueService<NewMemberApplicationResultDto> membershipApplicationQueueService,
-            IQueueService<NewMemberPropertyUpdateDto> memberPropertyUpdateQueueService)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-            _distributedLockManager = distributedLockManager ?? throw new ArgumentNullException(nameof(distributedLockManager));
-
-            _newMemberApplicationQueueService = newMemberApplicationQueueService ?? throw new ArgumentNullException(nameof(newMemberApplicationQueueService));
-            _membershipApplicationQueueService = membershipApplicationQueueService ?? throw new ArgumentNullException(nameof(membershipApplicationQueueService));
-            _memberPropertyUpdateQueueService = memberPropertyUpdateQueueService ?? throw new ArgumentNullException(nameof(memberPropertyUpdateQueueService));
-        }
+        private readonly IDistributedLockManager _distributedLockManager = distributedLockManager ?? throw new ArgumentNullException(nameof(distributedLockManager));
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             const int maxAttempts = 5;
             Exception? lastError = null; 
+
+            if (!_settings.FeatureToggles.ProcessMembershipApplications)
+            {
+                _logger.LogInformation("Membership application processing is disabled. Exiting background service.");
+                return;
+            }
 
             while (!stoppingToken.IsCancellationRequested)
             {

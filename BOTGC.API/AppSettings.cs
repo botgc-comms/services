@@ -93,6 +93,7 @@
     {
         public string JuniorMembershipReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=b52f6bd4cf74cc5dbfd84dec616ceb42";
         public string AllCurrentMembersReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=5d71e7119d780dba4850506f622c1cfb";
+        public string AllWaitingMembersReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=6da7bd30935f3f5f2374aa8206cd80ec";
         public string MemberRoundsReportUrl { get; set; } = "/roundmgmt.php?playerid={playerId}";
         public string PlayerIdLookupReportUrl { get; set; } = "/membership_reports.php?tab=status";
         public string RoundReportUrl { get; set; } = "/viewround.php?roundid={roundId}";
@@ -125,5 +126,6 @@
     public class FeatureToggles
     {
         public bool EnableStockControlSchedule { get; set; } = true;
+        public bool ProcessMembershipApplications { get; set; } = true;
     }
 }

@@ -133,6 +133,11 @@ resource "azurerm_linux_web_app" "services_application_form" {
     "AppSettings__Monday__APIKey"                            = var.monday_com_apikey
     
     "AppSettings__AllowedCorsOrigins"                        = "https://externaldomain1.com,https://externaldomain2.com"
+
+     "AppSettings__RecentApplicants__SharedSecret"           = var.recent_applicants_shared_secret
+     "AppSettings__RecentApplicants__AllowedReferrerHost"    = var.recent_applicants_allowed_referrer_host
+     "AppSettings__RecentApplicants__TokenTtlMinutes"        = var.recent_applicants_token_ttl_minutes
+     "AppSettings__RecentApplicants__CookieName"             = var.recent_applicants_cookie_name
   }
 
   identity {

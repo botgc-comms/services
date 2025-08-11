@@ -2,6 +2,7 @@
 const concat = require('gulp-concat');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
+const gulpSass = require('gulp-sass')(require('sass'));
 
 const paths = {
     vendor: [
@@ -54,6 +55,13 @@ function distScripts() {
         .pipe(gulp.dest(outputPath));
 }
 
-const build = gulp.series(clean, gulp.parallel(vendorScripts, appScripts, distScripts));
+function sassTask() {
+    return gulp.src('./wwwroot/scss/index.scss')
+        .pipe(gulpSass({ outputStyle: 'compressed' }).on('error', gulpSass.logError))
+        .pipe(rename('styles.css'))
+        .pipe(gulp.dest('./wwwroot/css/'));
+}
+
+const build = gulp.series(clean, gulp.parallel(vendorScripts, appScripts, distScripts, sassTask));
 
 exports.default = build;

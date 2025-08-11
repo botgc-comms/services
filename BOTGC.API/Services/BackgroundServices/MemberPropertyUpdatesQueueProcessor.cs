@@ -9,13 +9,11 @@ using Microsoft.OpenApi.Extensions;
 namespace BOTGC.API.Services.BackgroundServices
 {
     public class MemberPropertyUpdatesQueueProcessor(IOptions<AppSettings> settings,
-                                               ILogger<MemberPropertyUpdatesQueueProcessor> logger,
-                                               IMediator mediator,
-                                               IQueueService<NewMemberPropertyUpdateDto> memberPropertyUpdateQueueService) : BackgroundService
+                                                     ILogger<MemberPropertyUpdatesQueueProcessor> logger,
+                                                     IMediator mediator,
+                                                     IQueueService<NewMemberPropertyUpdateDto> memberPropertyUpdateQueueService) : BackgroundService
     {
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-        
-        private readonly QueueClient _queueClient;
         
         private readonly ILogger<MemberPropertyUpdatesQueueProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
@@ -25,6 +23,12 @@ namespace BOTGC.API.Services.BackgroundServices
         {
             const int maxAttempts = 5;
             Exception lastError = default;
+
+            if (!_settings.FeatureToggles.ProcessMembershipApplications)
+            {
+                _logger.LogInformation("Membership application processing is disabled. Exiting background service.");
+                return;
+            }
 
             while (!stoppingToken.IsCancellationRequested)
             {

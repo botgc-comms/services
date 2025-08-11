@@ -56,6 +56,7 @@ jobs:
         TF_VAR_member_pin: ${{ secrets.MEMBER_PIN }}
         TF_VAR_get_address_io_apikey: ${{ secrets.GETADDR_IO_APIKEY }}
         TF_VAR_monday_com_apikey: ${{ secrets.MONDAY_COM_APIKEY }}
+        TF_VAR_recent_applications_shared_secret: ${{ secrets.RECENT_APPLICATIONS_SHARED_SECRET }}
         TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
         TF_VAR_azure_face_api_key: ${{ secrets.AZURE_FACE_API_KEY }}
         TF_VAR_x_api_key: ${{ secrets.X_API_KEY }}

@@ -7,6 +7,7 @@ public class AppSettings
     public GetAddressIOSettings GetAddressIOSettings { get; set; } = new();
     public GrowSurfSettings GrowSurfSettings { get; set; } = new();
     public ApplicationInsightsSettings ApplicationInsights { get; set; } = new();
+    public RecentApplicantsSettings RecentApplicants { get; set; } = new();     
 }
 
 public class ApplicationInsightsSettings
@@ -29,4 +30,12 @@ public class GrowSurfSettings
     public string CampaignId { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
     public string ParticipantAuthSecret { get; set; } = String.Empty;
+}
+
+public class RecentApplicantsSettings
+{
+    public string SharedSecret { get; set; }
+    public string AllowedReferrerHost { get; set; }
+    public int? TokenTtlMinutes { get; set; }
+    public string CookieName { get; set; }
 }
