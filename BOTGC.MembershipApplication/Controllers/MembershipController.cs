@@ -210,40 +210,105 @@ public class MembershipController : Controller
     [HttpGet("/access/recent-applications")]
     public IActionResult GateRecentApplications()
     {
-        var secret = _settings.RecentApplicants.SharedSecret;
-        var allowedHost = _settings.RecentApplicants.AllowedReferrerHost;
-        var ttl = _settings.RecentApplicants.TokenTtlMinutes ?? 10;
-        var cookieName = _settings.RecentApplicants.CookieName ?? "ra_tok";
+        var diag = new Dictionary<string, string?>();
+        var debug = Request.Query.ContainsKey("debug");
 
-        if (string.IsNullOrWhiteSpace(secret)) return Forbid();
-
-        var referer = Request.Headers.Referer.ToString();
-        if (!Uri.TryCreate(referer, UriKind.Absolute, out var refUri) ||
-            !string.Equals(refUri.Host, allowedHost, StringComparison.OrdinalIgnoreCase))
+        try
         {
-            return Forbid();
+            diag["Environment"] = _env.EnvironmentName;
+            var secret = _settings.RecentApplicants.SharedSecret;
+            var allowedHost = _settings.RecentApplicants.AllowedReferrerHost;
+            var ttl = (_settings.RecentApplicants.TokenTtlMinutes ?? 10) > 0 ? (_settings.RecentApplicants.TokenTtlMinutes ?? 10) : 10;
+            var cookieName = string.IsNullOrWhiteSpace(_settings.RecentApplicants.CookieName) ? "ra_tok" : _settings.RecentApplicants.CookieName;
+
+            diag["AllowedReferrerHost"] = allowedHost;
+            diag["TTL_Min"] = ttl.ToString();
+            diag["CookieName"] = cookieName;
+
+            if (string.IsNullOrWhiteSpace(secret))
+                return DebugFail("Missing SharedSecret.", diag, debug);
+
+            var refererRaw = Request.Headers.Referer.ToString();
+            diag["RefererRaw"] = refererRaw;
+
+            if (!Uri.TryCreate(refererRaw, UriKind.Absolute, out var refUri))
+                return DebugFail("Invalid or missing Referer header.", diag, debug);
+
+            diag["RefererHost"] = refUri.Host;
+
+            if (!string.Equals(refUri.Host, allowedHost, StringComparison.OrdinalIgnoreCase))
+                return DebugFail("Referer host does not match AllowedReferrerHost.", diag, debug);
+
+            var targetPath = "/members/recent-applications";
+            diag["TargetPath"] = targetPath;
+
+            var ua = Request.Headers.TryGetValue("User-Agent", out var headerVal) ? headerVal.ToString() : string.Empty;
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+            diag["UserAgent"] = string.IsNullOrEmpty(ua) ? "(empty)" : ua.Substring(0, Math.Min(120, ua.Length));
+            diag["ClientIP"] = ip;
+
+            var token = AccessToken.Issue(targetPath, DateTimeOffset.UtcNow.AddMinutes(ttl), secret, ua, ip);
+            diag["TokenIssued"] = $"yes (length {token.Length})";
+
+            var cookieDomain = _env.IsDevelopment() ? null : "apply.botgc.co.uk";
+            diag["CookieDomain"] = cookieDomain ?? "(host-only)";
+
+            Response.Cookies.Append(cookieName, token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Path = targetPath,
+                MaxAge = TimeSpan.FromMinutes(ttl),
+                Domain = cookieDomain
+            });
+
+            if (debug)
+            {
+                var html = BuildDebugPage("Gate succeeded", diag, targetPath);
+                return Content(html, "text/html");
+            }
+
+            return Redirect(targetPath);
         }
-
-        var targetPath = "/members/recent-applications";
-        var ua = Request.Headers.TryGetValue("User-Agent", out var headerVal) ? headerVal.ToString() : string.Empty;
-        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
-
-        var token = AccessToken.Issue(targetPath, DateTimeOffset.UtcNow.AddMinutes(ttl), secret, ua, ip);
-
-        var cookieDomain = _env.IsDevelopment() ? null : "apply.botgc.co.uk";
-
-        Response.Cookies.Append(cookieName, token, new CookieOptions
+        catch (Exception ex)
         {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Lax,
-            Path = targetPath,
-            MaxAge = TimeSpan.FromMinutes(ttl),
-            Domain = cookieDomain
-        });
-
-        return Redirect(targetPath);
+            diag["Exception"] = ex.GetType().FullName;
+            diag["Message"] = ex.Message;
+            diag["Stack"] = ex.StackTrace;
+            var html = BuildDebugPage("Unhandled exception", diag, null);
+            return StatusCode(500, html);
+        }
     }
+
+    private IActionResult DebugFail(string reason, IDictionary<string, string?> diag, bool debug)
+    {
+        if (!debug) return Forbid();
+        var html = BuildDebugPage(reason, diag, null);
+        return Content(html, "text/html");
+    }
+
+    private string BuildDebugPage(string title, IDictionary<string, string?> diag, string? continueUrl)
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append("<!doctype html><html><head><meta charset='utf-8'><title>Recent Applications – Debug</title>");
+        sb.Append("<style>body{font-family:Arial,Helvetica,sans-serif;margin:20px;}h1{margin:0 0 12px;}pre{background:#f6f8fa;padding:12px;border:1px solid #ddd;border-radius:6px;overflow:auto;}a.btn{display:inline-block;margin-top:10px;padding:8px 12px;border-radius:6px;border:1px solid #007bff;text-decoration:none}</style>");
+        sb.Append("</head><body>");
+        sb.Append("<h1>").Append(System.Net.WebUtility.HtmlEncode(title)).Append("</h1>");
+        sb.Append("<pre>");
+        foreach (var kv in diag)
+        {
+            sb.Append(System.Net.WebUtility.HtmlEncode($"{kv.Key}: {kv.Value}")).Append("\n");
+        }
+        sb.Append("</pre>");
+        if (!string.IsNullOrEmpty(continueUrl))
+        {
+            sb.Append("<a class='btn' href='").Append(continueUrl).Append("'>Continue</a>");
+        }
+        sb.Append("</body></html>");
+        return sb.ToString();
+    }
+
 
     [HttpGet("/members/recent-applications")]
     public async Task<IActionResult> NewApplications()
