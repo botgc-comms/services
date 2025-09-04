@@ -15,34 +15,58 @@ namespace BOTGC.API.Common
             _nonPlayingMembersExpression = new Regex(settings.NonPlayingMemberExpression, RegexOptions.Compiled);
         }
 
+        public static string ResolveCategoryGroup(string? categoryCode)
+        {
+            if (string.IsNullOrWhiteSpace(categoryCode)) return "Unknown";
+
+            var code = categoryCode.Trim().ToUpperInvariant();
+
+            if (code.StartsWith("7")) return "Full Membership";
+            if (code.StartsWith("6")) return "6 Day Membership";
+            if (code.StartsWith("5")) return "5 Day Membership";
+            if (code.Contains("INTERMEDIATE")) return "Affordable Membership";
+            if (code.Contains("STUDENT")) return "Student Membership";
+            if (code.Contains("FLEXI")) return "Off Peak Playing Membership";
+            if (code.Contains("JUNIOR")) return "Junior Membership";
+            if (code.Contains("SOCIAL")) return "Social Membership";
+            if (code.Contains("CLUBHOUSE")) return "Clubhouse Only";
+            if (code.Contains("FAMILY")) return "Family";
+            if (code.Contains("CORP")) return "Corporate";
+
+            return "Other";
+        }
+
         public static MembershipPrimaryCategories GetPrimaryCategory(MemberDto member, DateTime? date = null)
         {
             if (member == null) return MembershipPrimaryCategories.None;
+            return GetPrimaryCategory(member!.MembershipStatus ?? "", member!.MembershipCategory ?? "", member.LeaveDate, member.LeaveDate, date);
+        }
 
+        public static MembershipPrimaryCategories GetPrimaryCategory(string membershipStatus, string membershipCategory, DateTime? leftMembershipOn, DateTime? joinedOn, DateTime? date = null)
+        {
             var checkDate = date ?? DateTime.UtcNow.Date;
 
             // Suspended members are excluded from all categories
-            if (member.MembershipStatus.Equals("S", StringComparison.OrdinalIgnoreCase))
+            if (membershipStatus.Equals("S", StringComparison.OrdinalIgnoreCase))
                 return MembershipPrimaryCategories.None;
 
             // Determine if LeaveDate should be considered
-            var leaveDate = (member.LeaveDate.HasValue && member.LeaveDate.Value >= member.JoinDate)
-                ? member.LeaveDate.Value
+            var leaveDate = (leftMembershipOn.HasValue && leftMembershipOn.Value >= joinedOn)
+                ? joinedOn.Value
                 : DateTime.MaxValue;
 
             // Determine if the member is active based on the refined LeaveDate logic
-            bool isActive = member.MembershipStatus.Equals("R", StringComparison.OrdinalIgnoreCase) &&
-                            member.JoinDate <= checkDate &&
-                            (leaveDate == DateTime.MinValue || leaveDate > checkDate || leaveDate < member.JoinDate);
+            bool isActive = membershipStatus.Equals("R", StringComparison.OrdinalIgnoreCase) &&
+                            joinedOn <= checkDate &&
+                            (leaveDate == DateTime.MinValue || leaveDate > checkDate || leaveDate < joinedOn);
 
             if (!isActive) return MembershipPrimaryCategories.None;
 
             // Determine if the member is playing or non-playing
-            bool isPlaying = _playingMembersExpression!.IsMatch(member.MembershipCategory);
-            bool isNonPlaying = _nonPlayingMembersExpression!.IsMatch(member.MembershipCategory);
+            bool isPlaying = _playingMembersExpression!.IsMatch(membershipCategory);
+            bool isNonPlaying = _nonPlayingMembersExpression!.IsMatch(membershipCategory);
 
             return isPlaying ? MembershipPrimaryCategories.PlayingMember : isNonPlaying ? MembershipPrimaryCategories.NonPlayingMember : MembershipPrimaryCategories.None;
-
         }
 
         public static MemberDto SetPrimaryCategory(this MemberDto member, DateTime? date = null)
@@ -56,24 +80,7 @@ namespace BOTGC.API.Common
 
         public static MemberDto SetCategoryGroup(this MemberDto member)
         {
-            var categoryCode = member.MembershipCategory;
-
-            if (string.IsNullOrWhiteSpace(categoryCode))
-                member.MembershipCategoryGroup = "Unknown";
-
-            var code = categoryCode.Trim().ToUpperInvariant();
-
-            if (code.StartsWith("7")) member.MembershipCategoryGroup = "Full Membership";
-            if (code.StartsWith("6")) member.MembershipCategoryGroup = "6 Day Membership";
-            if (code.StartsWith("5")) member.MembershipCategoryGroup = "5 Day Membership";
-            if (code.Contains("INTERMEDIATE")) member.MembershipCategoryGroup = "Affordable Membership";
-            if (code.Contains("STUDENT")) member.MembershipCategoryGroup = "Student Membership";
-            if (code.Contains("FLEXI")) member.MembershipCategoryGroup = "Off Peak Playing Membership";
-            if (code.Contains("JUNIOR")) member.MembershipCategoryGroup = "Junior Membership";
-            if (code.Contains("SOCIAL")) member.MembershipCategoryGroup = "Social Membership";
-            if (code.Contains("CLUBHOUSE")) member.MembershipCategoryGroup = "Clubhouse Only";
-            if (code.Contains("FAMILY")) member.MembershipCategoryGroup = "Family";
-            if (code.Contains("CORP")) member.MembershipCategoryGroup = "Corporate";
+            member.MembershipCategoryGroup = ResolveCategoryGroup(member.MembershipCategory);
 
             return member;
         }

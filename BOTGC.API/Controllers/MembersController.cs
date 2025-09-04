@@ -214,6 +214,42 @@ namespace BOTGC.API.Controllers
         }
 
         /// <summary>
+        /// Retrieves a list of all members on a waiting list
+        /// </summary>
+        /// <returns>A list of waiting members with their details.</returns>
+        /// <response code="200">Returns the list of current members.</response>
+        /// <response code="204">No current members found.</response>
+        /// <response code="500">An internal server error occurred.</response>
+        [HttpGet("new")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<MemberDetailsDto>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IReadOnlyCollection<MemberDetailsDto>>> GetNewMembers()
+        {
+            _logger.LogInformation("Fetching new members...");
+
+            try
+            {
+                var query = new GetNewMembersQuery();
+                var newMembers = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (newMembers == null || newMembers.Count == 0)
+                {
+                    _logger.LogWarning("No new members found.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation("Successfully retrieved {Count} new members.", newMembers.Count);
+                return Ok(newMembers);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving new members.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving new members.");
+            }
+        }
+
+        /// <summary>
         /// Retrieves a list of all junior members.
         /// </summary>
         /// <returns>A list of junior members with their details.</returns>
@@ -303,6 +339,74 @@ namespace BOTGC.API.Controllers
             await _memberApplicationQueueService.EnqueueAsync(newMember);
 
             return Ok(newMember);
+        }
+
+        [HttpGet("{memberId}/competitionResults")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<PlayerCompetitionResultsDto>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetCompetitionResultsByPlayer(string memberId, DateTime? fromDate, DateTime? toDate, int? maxFinishingPosition)
+        {
+            _logger.LogInformation($"Fetching competition results for player {memberId}...");
+
+            try
+            {
+                var query = new GetCompetitionResultsByMemberIdQuery() { MemberId = memberId };
+
+                if (fromDate.HasValue) query.FromDate = fromDate.Value; 
+                if (toDate.HasValue) query.ToDate = toDate.Value;
+                if (maxFinishingPosition.HasValue) query.MaxFinishingPosition = maxFinishingPosition.Value;
+
+                var playerResults = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (playerResults == null)
+                {
+                    _logger.LogWarning($"No competition results found for member {memberId}.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved competition results for member {memberId}.");
+                return Ok(playerResults);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving competition results for member id {memberId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving competition results for member {memberId}.");
+            }
+        }
+
+        [HttpGet("juniors/competitionResults")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<PlayerCompetitionResultsDto>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetCompetitionResultsForJuniors(DateTime? fromDate, DateTime? toDate, int? maxFinishingPosition)
+        {
+            _logger.LogInformation($"Fetching competition results for all juniors...");
+
+            try
+            {
+                var query = new GetCompetitionResultsForJuniorsQuery();
+
+                if (fromDate.HasValue) query.FromDate = fromDate.Value;
+                if (toDate.HasValue) query.ToDate = toDate.Value;
+                if (maxFinishingPosition.HasValue) query.MaxFinishingPosition = maxFinishingPosition.Value;
+
+                var playerResults = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (playerResults == null)
+                {
+                    _logger.LogWarning($"No competition results found for member juniors.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved competition results for {playerResults.Count} Juniors.");
+                return Ok(playerResults);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving competition results for all juniors.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving competition results for all juniors.");
+            }
         }
     }
 }

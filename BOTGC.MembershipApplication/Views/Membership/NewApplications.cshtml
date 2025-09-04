@@ -14,6 +14,11 @@
         return age < 18;
     }
 
+    bool IsJoined(MemberModel m)
+    {
+        return string.Equals(m.MembershipStatus, "R", StringComparison.OrdinalIgnoreCase);
+    }
+
     string MaskedName(MemberModel m)
     {
         var first = (m.FirstName ?? "").Trim();
@@ -50,8 +55,9 @@
 <h1 class="recent-applications-heading">Recent Membership Applications</h1>
 
 <p class="recent-applications-intro">
-    Applicants who have applied for membership in the last 14 days.
+    Applicants and new members from the last 14 days.
 </p>
+
 
 @if (Model == null || !Model.Any())
 {
@@ -65,27 +71,31 @@ else
         @foreach (var app in Model)
         {
             var isJunior = IsJunior(app);
-            <div class="application-card">
+            var isJoined = IsJoined(app);
+            var cardClass = isJoined ? "application-card joined" : "application-card applicant";
+            var statusText = isJoined ? "" : "Applicant";
+            var dateLabel = isJoined ? "Joined" : "Applied";
+            var dateValue = isJoined
+            ? (isJunior ? JuniorSafeDate(app.JoinDate) : app.JoinDate?.ToString("dd MMM yyyy"))
+            : (isJunior ? JuniorSafeDate(app.ApplicationDate) : app.ApplicationDate?.ToString("dd MMM yyyy"));
+            var displayName = isJunior ? MaskedName(app) : $"{app.FirstName} {app.LastName}".Trim();
+
+            <div class="@cardClass">
                 <div class="application-header">
-                    <div class="applicant-name">
-                        @(isJunior ? MaskedName(app) : $"{app.FirstName} {app.LastName}")
+                    <div class="applicant-name">@displayName</div>
+                    <div class="badge-row">
+                        <span class=" @(isJoined ? "" : "status-pill status-applicant")">@statusText</span>
+                        @if (!string.IsNullOrWhiteSpace(app.MembershipCategory))
+                        {
+                            <span class="membership-category-pill">@app.MembershipCategory</span>
+                        }
                     </div>
-                    <span class="membership-category-pill">@app.MembershipCategory</span>
                 </div>
 
                 <div class="application-meta">
-                    @if (isJunior)
-                    {
-                        <span class="application-date">Applied: @JuniorSafeDate(app.ApplicationDate)</span>
-                        <span class="application-sep">•</span>
-                        <span class="application-postcode">Postcode: —</span>
-                    }
-                    else
-                    {
-                        <span class="application-date">Applied: @app.ApplicationDate?.ToString("dd MMM yyyy")</span>
-                        <span class="application-sep">•</span>
-                        <span class="application-postcode">Postcode: @TruncatePostcode(app.Postcode)</span>
-                    }
+                    <span class="application-date">@dateLabel: @dateValue</span>
+                    <span class="application-sep">•</span>
+                    <span class="application-postcode">Postcode: @(isJunior ? "—" : TruncatePostcode(app.Postcode))</span>
 
                     @if (!string.IsNullOrWhiteSpace(app.MembershipCategoryGroup))
                     {

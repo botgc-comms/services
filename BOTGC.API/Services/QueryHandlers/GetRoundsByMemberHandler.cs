@@ -39,6 +39,18 @@ namespace BOTGC.API.Services.QueryHandlers
             var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.MemberRoundsReportUrl.Replace("{playerId}", playerLookupId.PlayerId.ToString())}";
             var memberRounds = await _dataProvider.GetData<RoundDto>(reportUrl, _reportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins), HateOASLinks.GetRoundLinks);
 
+            if (request.FromDate.HasValue)
+            {
+                var from = request.FromDate.Value.Date; // Start of day
+                memberRounds = memberRounds.Where(r => r.DatePlayed >= from).ToList();
+            }
+
+            if (request.ToDate.HasValue)
+            {
+                var to = request.ToDate.Value.Date.AddDays(1).AddTicks(-1); // End of day
+                memberRounds = memberRounds.Where(r => r.DatePlayed <= to).ToList();
+            }
+
             _logger.LogInformation($"Retrieved {memberRounds.Count()} rounds for member {request.MemberId}");
 
             return memberRounds;

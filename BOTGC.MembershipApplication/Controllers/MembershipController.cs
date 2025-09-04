@@ -231,13 +231,22 @@ public class MembershipController : Controller
             var refererRaw = Request.Headers.Referer.ToString();
             diag["RefererRaw"] = refererRaw;
 
-            if (!Uri.TryCreate(refererRaw, UriKind.Absolute, out var refUri))
-                return DebugFail("Invalid or missing Referer header.", diag, debug);
+            if (_env.IsDevelopment())
+            {
+                // Accept missing or invalid referer in development
+                diag["RefererRaw"] = refererRaw;
+                diag["RefererHost"] = "(skipped in development)";
+            }
+            else
+            {
+                if (!Uri.TryCreate(refererRaw, UriKind.Absolute, out var refUri))
+                    return DebugFail("Invalid or missing Referer header.", diag, debug);
 
-            diag["RefererHost"] = refUri.Host;
+                diag["RefererHost"] = refUri.Host;
 
-            if (!string.Equals(refUri.Host, allowedHost, StringComparison.OrdinalIgnoreCase))
-                return DebugFail("Referer host does not match AllowedReferrerHost.", diag, debug);
+                if (!string.Equals(refUri.Host, allowedHost, StringComparison.OrdinalIgnoreCase))
+                    return DebugFail("Referer host does not match AllowedReferrerHost.", diag, debug);
+            }
 
             var targetPath = "/members/recent-applications";
             diag["TargetPath"] = targetPath;
@@ -326,7 +335,9 @@ public class MembershipController : Controller
 
         // Pass the application data to the API
         var client = _httpClientFactory.CreateClient("MembershipApi");
-        var response = await client.GetFromJsonAsync<List<MemberModel>>("api/members/waiting");
+
+        var applicants = await client.GetFromJsonAsync<List<MemberModel>>("api/members/waiting") ?? new List<MemberModel>();
+        var joinedRaw = await client.GetFromJsonAsync<List<RecentMemberApiModel>>("api/members/new") ?? new List<RecentMemberApiModel>();
 
         static string NormaliseName(MemberModel m)
         {
@@ -342,15 +353,45 @@ public class MembershipController : Controller
 
         var cutoff = DateTime.Now.Date.AddDays(-14);
 
-        var newApplications = (response ?? new List<MemberModel>())
+        var recentJoiners = joinedRaw
+           .Where(j => (j.ApplicationDate ?? j.JoinDate) != null && (j.ApplicationDate ?? j.JoinDate) >= cutoff)
+           .Select(j => new MemberModel
+       {
+           MemberNumber = j.MemberNumber,
+           Title = null,
+           FirstName = j.Forename,
+           LastName = j.Surname,
+           FullName = $"{j.Forename} {j.Surname}".Trim(),
+           Gender = null,
+           MembershipCategory = j.MembershipCategory,
+           MembershipCategoryGroup = null,
+           MembershipStatus = j.MembershipStatus,
+           PrimaryCategory = (MembershipPrimaryCategories)j.PrimaryCategory,
+           Postcode = j.Postcode,
+           Email = j.Email,
+           DateOfBirth = j.DateOfBirth,
+           JoinDate = j.JoinDate,
+           LeaveDate = null,
+           ApplicationDate = j.ApplicationDate
+       })
+       .ToList();
+
+        var newApplications = applicants
             .Where(m => m.ApplicationDate.HasValue && m.ApplicationDate.Value.Date >= cutoff)
-            .GroupBy(m => new
-            {
-                Name = NormaliseName(m),
-                Postcode = NormalisePostcode(m.Postcode)
-            })
+            .GroupBy(m => new { Name = NormaliseName(m), Postcode = NormalisePostcode(m.Postcode) })
             .Select(g => g.OrderByDescending(m => m.ApplicationDate ?? DateTime.MinValue).First())
-            .OrderByDescending(m => m.ApplicationDate)
+            .ToList();
+
+        var joinedKey = recentJoiners
+            .ToDictionary(m => (Name: NormaliseName(m), Postcode: NormalisePostcode(m.Postcode)));
+
+        var applicantsOnly = newApplications
+            .Where(a => !joinedKey.ContainsKey((NormaliseName(a), NormalisePostcode(a.Postcode))))
+            .ToList();
+
+        var combined = recentJoiners
+            .Concat(applicantsOnly)
+            .OrderByDescending(m => m.JoinDate ?? m.ApplicationDate ?? DateTime.MinValue)
             .ToList();
 
         var supressLogo = "false";
@@ -362,6 +403,6 @@ public class MembershipController : Controller
 
         ViewData["SupressLogo"] = supressLogo;
 
-        return View(newApplications);
+        return View(combined);
     }
 }

@@ -6,6 +6,8 @@
 
         public string TrophyFilePath { get; set; }
 
+        public int ConcurrentRequestThrottle { get; set; } = 5;
+
         public AzureFaceApi AzureFaceApi { get; set; } = new();
 
         public GitHub GitHub { get; set; } = new();
@@ -93,6 +95,7 @@
     {
         public string JuniorMembershipReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=b52f6bd4cf74cc5dbfd84dec616ceb42";
         public string AllCurrentMembersReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=5d71e7119d780dba4850506f622c1cfb";
+        public string NewMemberLookupReportUrl { get; set; } = "/membership_reports.php?tab=newmembers";
         public string AllWaitingMembersReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=6da7bd30935f3f5f2374aa8206cd80ec";
         public string MemberRoundsReportUrl { get; set; } = "/roundmgmt.php?playerid={playerId}";
         public string PlayerIdLookupReportUrl { get; set; } = "/membership_reports.php?tab=status";
@@ -109,6 +112,7 @@
         public string LeaderBoardUrl { get; set; } = "/competition.php?compid={compid}&preview=1&sort={grossOrNett}";
         public string SecurityLogMobileOrders { get; set; } = "/log.php?search=Mobile+order&person=&start={today}&starttime=&end={today}&endtime=";
         public string UpdateMemberPropertiesUrl { get; set; } = "/member.php?memberid={memberid}&requestType=ajax&ajaxaction=saveparamvalue";
+        public string MemberDetailsUrl { get; set; } = "/member.php?memberid={memberid}";
         public string StockItemsUrl { get; set; } = "/tillstockcontrol.php";
     }
 

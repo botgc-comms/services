@@ -75,3 +75,121 @@ th {
     background-color: #f0f0f0;
     font-weight: 600;
 }
+
+/* Expand/print controls */
+.controls {
+    margin: 1rem 0;
+}
+
+.controls label {
+    margin-left: .5rem;
+    font-weight: 600;
+}
+
+/* When "Show all quarters" is enabled */
+.expand-all .tabs {
+    display: none !important;
+}
+
+.expand-all .tab-panel {
+    display: block !important;
+}
+
+/* Print: always show all panels, hide tabs and the control */
+@media print {
+    .tabs, .controls {
+        display: none !important;
+    }
+
+    .tab-panel {
+        display: block !important;
+    }
+}
+
+.print-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* On screen */
+.chart {
+    width: 100%;
+    height: 420px; /* choose what looks right on desktop */
+}
+
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 12mm;
+    }
+
+    html, body {
+        width: auto;
+        margin: 0;
+    }
+
+    /* Show all quarters; hide UI chrome */
+    .tabs, .controls {
+        display: none !important;
+    }
+
+    .tab-panel {
+        display: block !important;
+    }
+
+    /* Constrain and centre printable content only when printing */
+    .print-wrap {
+        max-width: 180mm;
+        margin: 0 auto;
+    }
+
+    .chart {
+        height: 90mm !important; /* e.g. 80–110mm to taste */
+    }
+
+    /* Keep charts/tables within the page and avoid splits */
+    canvas, table {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    canvas, .chart, .tab-panel table {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        margin-bottom: 12mm;
+    }
+
+    canvas {
+        width: 100% !important;
+        height: 90mm !important; /* pick 80–110mm to taste */
+    }
+
+    /* Preserve chart colours */
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* force a new page before this element */
+    .page-break-before {
+        break-before: page;
+        page-break-before: always; /* fallback */
+    }
+    /* force a new page after this element */
+    .page-break-after {
+        break-after: page;
+        page-break-after: always; /* fallback */
+    }
+    /* keep a block together (use on tables/charts/sections) */
+    .avoid-break {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    /* keep headings with the next block (prevents orphan headings) */
+    .keep-with-next {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+}
+

@@ -3,10 +3,10 @@ using BOTGC.API.Dto;
 
 namespace BOTGC.API.Dto
 {
-    public class CompetitionDto: HateoasResource
+    public class CompetitionDto : HateoasResource
     {
         public int? Id { get; set; }
-        public string Name { get; set; } 
+        public string Name { get; set; }
         public DateTime? Date { get; set; }
         public Gender? Gender { get; set; }
         public bool AvailableForHandicaping { get; set; }
@@ -16,9 +16,9 @@ namespace BOTGC.API.Dto
     public enum Gender
     {
         Unknown,
-        Ladies, 
-        Juniors, 
-        Gents, 
+        Ladies,
+        Juniors,
+        Gents,
         Mixed
     }
 }

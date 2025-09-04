@@ -8,9 +8,9 @@ using Microsoft.Extensions.Options;
 namespace BOTGC.API.Services.QueryHandlers
 {
     public class GetMobileOrdersForDateHandler(IOptions<AppSettings> settings,
-                                                ILogger<GetMobileOrdersForDateHandler> logger,
-                                                IDataProvider dataProvider,
-                                                IReportParser<SecurityLogEntryDto> reportParser) : QueryHandlerBase<GetMobileOrdersForDateQuery, List<SecurityLogEntryDto>?>
+                                               ILogger<GetMobileOrdersForDateHandler> logger,
+                                               IDataProvider dataProvider,
+                                               IReportParser<SecurityLogEntryDto> reportParser) : QueryHandlerBase<GetMobileOrdersForDateQuery, List<SecurityLogEntryDto>?>
     {
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly ILogger<GetMobileOrdersForDateHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));

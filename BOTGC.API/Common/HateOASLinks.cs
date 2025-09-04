@@ -23,6 +23,19 @@ namespace BOTGC.API.Common
             };
         }
 
+        public static List<HateoasLink> GetNewMemberLookupLinks(NewMemberLookupDto member)
+        {
+            return new List<HateoasLink>
+            {
+                new HateoasLink
+                {
+                    Rel = "self",
+                    Href = $"/api/members/{member.MemberNumber}",
+                    Method = "GET"
+                }
+            };
+        }
+
         public static List<HateoasLink> GetCompetitionLinks(CompetitionDto competition)
         {
             return new List<HateoasLink>

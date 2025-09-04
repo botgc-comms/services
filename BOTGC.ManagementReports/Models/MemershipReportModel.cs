@@ -71,6 +71,14 @@ public class MembershipDeltaDto
     public Dictionary<string, int> CategoryChanges { get; set; } = new();
     public Dictionary<string, int> CategoryGroupTotals { get; set; } = new();
 
+    public int WaitingListApplications { get; set; }
+    public int WaitingListConversions { get; set; }
+    public int WaitingListDropouts { get; set; }
+
+    public Dictionary<string, int>? WaitingListApplicationsByGroup { get; set; }
+    public Dictionary<string, int>? WaitingListConversionsByAppliedGroup { get; set; }
+    public Dictionary<string, int>? WaitingListDropoutsByAppliedGroup { get; set; }
+
 }
 
 public class MembershipSnapshotDto

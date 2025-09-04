@@ -7,7 +7,6 @@
         NonPlayingMember
     }
 
-
     public class MemberDto : HateoasResource
     {
         public int? PlayerId { get; set; }

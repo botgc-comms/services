@@ -46,6 +46,8 @@ namespace BOTGC.API.Common
             var columnMapping = new Dictionary<string, string>
             {
                 { "^Forename$", nameof(PlayerIdLookupDto.PlayerId) },
+                { "^Forename.*?$", nameof(PlayerIdLookupDto.Forename) },
+                { "^Surname$", nameof(PlayerIdLookupDto.Surname) },
                 { "^Member\\sID$", nameof(PlayerIdLookupDto.MemberId) },
             };
 
@@ -59,7 +61,6 @@ namespace BOTGC.API.Common
                     if (Regex.IsMatch(header.text, pattern, RegexOptions.IgnoreCase))
                     {
                         headerIndexMap[columnMapping[pattern]] = header.index;
-                        break; // Stop checking once a match is found
                     }
                 }
             }
@@ -82,6 +83,12 @@ namespace BOTGC.API.Common
                     if (headerIndexMap.TryGetValue(nameof(PlayerIdLookupDto.MemberId), out var memberIdIndex) && memberIdIndex < columns.Length)
                         playerIdLookup.MemberId = int.TryParse(columns[memberIdIndex], out var id) ? id : 0;
 
+                    if (headerIndexMap.TryGetValue(nameof(PlayerIdLookupDto.Forename), out var forenameIndex) && forenameIndex < columns.Length)
+                        playerIdLookup.Forename = ExtractPlayerName(columns[forenameIndex]);
+
+                    if (headerIndexMap.TryGetValue(nameof(PlayerIdLookupDto.Surname), out var surnameIndex) && surnameIndex < columns.Length)
+                        playerIdLookup.Surname = ExtractPlayerName(columns[surnameIndex]);
+
                     playerIdsLookup.Add(playerIdLookup);
                 }
                 catch (Exception ex)
@@ -101,6 +108,15 @@ namespace BOTGC.API.Common
         {
             var match = Regex.Match(html, @"member\.php\?memberid=(\d+)");
             return match.Success ? int.Parse(match.Groups[1].Value) : null;
+        }
+
+        /// <summary>
+        /// Extracts the competition ID from the hyperlink if available.
+        /// </summary>
+        private static string? ExtractPlayerName(string html)
+        {
+            var match = Regex.Match(html, @">\s*([^<]+)\s*<");
+            return match.Success ? match.Groups[1].Value.Trim() : null;
         }
     }
 }

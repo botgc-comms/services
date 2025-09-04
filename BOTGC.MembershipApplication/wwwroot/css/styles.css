@@ -437,6 +437,7 @@ h1, h2 {
 .club-logo img {
   width: 23vw;
   max-width: 18em;
+  filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.25));
 }
 
 .membership-info {
@@ -650,7 +651,10 @@ h1, h2 {
   background-color: #fafafa;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
-
+.application-card.applicant {
+  border-left: 6px solid #9a6b00;
+  background-color: #fff9f0;
+}
 .application-header {
   display: flex;
   justify-content: space-between;
@@ -693,6 +697,38 @@ h1, h2 {
 
 .application-sep {
   opacity: 0.5;
+}
+
+.status-legend {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0 0 1rem 0;
+}
+
+.badge-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.status-pill {
+  display: inline-block;
+  background-color: #1d3557;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.status-joined {
+  background: #16803d;
+}
+
+.status-applicant {
+  background: #9a6b00;
 }
 
 @supports (-webkit-touch-callout: none) {

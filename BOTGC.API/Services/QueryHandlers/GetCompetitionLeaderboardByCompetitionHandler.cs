@@ -31,9 +31,26 @@ namespace BOTGC.API.Services.QueryHandlers
 
             var competitionSettings = await _mediator.Send(competitionSettingsQuery, cancellationToken);
 
+            TimeSpan cacheTTL;
+            var today = DateTime.Today;
+            var compDate = competitionSettings?.Date.Date ?? today;
+
+            if (compDate == today)
+            {
+                cacheTTL = TimeSpan.FromSeconds(15);
+            }
+            else if (compDate >= today.AddDays(-7) && compDate < today)
+            {
+                cacheTTL = TimeSpan.FromHours(2);
+            }
+            else
+            {
+                cacheTTL = TimeSpan.FromMinutes(_settings.Cache.Forever_TTL_Mins);
+            }
+
             var grossOrNett = competitionSettings!.ResultsDisplay.ToLower().Contains("net") ? "1" : "2";
             var leaderboardUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.LeaderBoardUrl}".Replace("{compid}", competitionId).Replace("{grossOrNett}", grossOrNett);
-            var leaderboard = await _dataProvider.GetData<LeaderBoardDto, CompetitionSettingsDto>(leaderboardUrl, _reportParser, competitionSettings, __CACHE_KEY.Replace("{compid}", competitionId), TimeSpan.FromMinutes(_settings.Cache.VeryShortTerm_TTL_mins));
+            var leaderboard = await _dataProvider.GetData<LeaderBoardDto, CompetitionSettingsDto>(leaderboardUrl, _reportParser, competitionSettings, __CACHE_KEY.Replace("{compid}", competitionId), cacheTTL);
 
             if (leaderboard != null && leaderboard.Any())
             {

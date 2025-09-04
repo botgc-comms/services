@@ -14,159 +14,240 @@
 
     <script>
         Chart.register(window['chartjs-plugin-annotation']);
+        Chart.defaults.maintainAspectRatio = true;
     </script>
 
 </head>
 <body>
-    <h1>Membership Report</h1>
+    <div class="print-wrap">
+        <h1>Membership Report</h1>
 
-    <h2>Playing vs Non-Playing Members</h2>
-    <canvas id="membershipChart"></canvas>
+        <h2 class="keep-with-next">Playing vs Non-Playing Members</h2>
+        <canvas class="chart" id="membershipChart"></canvas>
 
-    <h2>Total Members by Category</h2>
-    <canvas id="categoryGroupBreakdownChart"></canvas>
+        <h2> Total Members by Category</h2>
+        <canvas class="chart" id="categoryGroupBreakdownChart"></canvas>
 
-    <h2>Waiting List by Membership Category</h2>
-    <canvas id="waitingListChart"></canvas>
+        <div class="page-break-after"></div>
 
-    <h2>Daily Membership Revenue</h2>
-    <canvas id="revenueVsBudgetChart"></canvas>
+        <h2 class="keep-with-next">Waiting List by Membership Category</h2>
+        <canvas class="chart" id="waitingListChart"></canvas>
 
-    <h2>Accumulated Membership Revenue</h2>
-    <canvas id="accRevenueVsBudgetChart"></canvas>
+        <canvas class="chart" id="dailyJoinLeaveChart"></canvas>
 
-    <canvas id="dailyJoinLeaveChart"></canvas>
+        <div class="page-break-after"></div>
 
-    <nav class="tabs" role="tablist" aria-label="Quarterly Membership Reports">
+        <h2>Daily Membership Revenue</h2>
+        <canvas class="chart" id="revenueVsBudgetChart"></canvas>
+
+        <h2 class="keep-with-next">Accumulated Membership Revenue</h2>
+        <canvas class="chart" id="accRevenueVsBudgetChart"></canvas>
+        
+        <div class="page-break-after"></div>
+
+        <div class="controls">
+            <input type="checkbox" id="toggleAll" aria-controls="quarters-region" />
+            <label for="toggleAll">Show all quarters (print-friendly)</label>
+        </div>
+
+        <nav id="quarters-region" class="tabs" role="tablist" aria-label="Quarterly Membership Reports">
+            @for (int i = 0; i < Model.QuarterlyStats.Count; i++)
+            {
+                var quarter = Model.QuarterlyStats[i];
+                <button
+                    class="tab-button"
+                    role="tab"
+                    aria-selected="@(i == 0 ? "true" : "false")"
+                    aria-controls="panel-@i"
+                    id="tab-@i"
+                    tabindex="@(i == 0 ? "0" : "-1")"
+                >
+                    @quarter.PeriodDescription
+                </button>
+            }
+        </nav>
+
         @for (int i = 0; i < Model.QuarterlyStats.Count; i++)
         {
             var quarter = Model.QuarterlyStats[i];
-            <button
-                class="tab-button"
-                role="tab"
-                aria-selected="@(i == 0 ? "true" : "false")"
-                aria-controls="panel-@i"
-                id="tab-@i"
-                tabindex="@(i == 0 ? "0" : "-1")"
-            >
-                @quarter.PeriodDescription
-            </button>
+            <section class="tab-panel"
+                     role="tabpanel"
+                     tabindex="0"
+                     aria-labelledby="tab-@i"
+                     id="panel-@i"
+                     aria-hidden="@(i == 0 ? "false" : "true")">
+                <h2>@quarter.PeriodDescription</h2>
+                <h4>@quarter.FromDate.ToString("dd MMMM yyyy") - @quarter.ToDate.ToString("dd MMMM yyyy")</h4>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>New Members</td><td>@quarter.NewMembers</td></tr>
+                        <tr><td>Leavers</td><td>@quarter.Leavers</td></tr>
+                        <tr><td>Deaths</td><td>@quarter.Deaths</td></tr>
+                    </tbody>
+                </table>
+
+                @if (quarter.CategoryChanges?.Any() == true)
+                {
+                    <h3>Category Changes</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>From → To</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var change in quarter.CategoryChanges
+                           .OrderByDescending(kv => kv.Value)
+                           .ThenBy(kv => kv.Key))
+                            {
+                                <tr>
+                                    <td>@change.Key</td>
+                                    <td>@change.Value</td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                }
+
+                @if (quarter.CategoryGroupTotals?.Any() == true)
+                {
+                    <h3>Category Group Totals</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Group</th>
+                                <th>Total Members</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var group in quarter.CategoryGroupTotals
+                           .OrderByDescending(g => g.Value)
+                           .ThenBy(g => g.Key))
+                            {
+                                <tr>
+                                    <td>@group.Key</td>
+                                    <td>@group.Value</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                @if ((quarter.WaitingListApplicationsByGroup?.Any() ?? false) ||
+                    (quarter.WaitingListConversionsByAppliedGroup?.Any() ?? false) ||
+                    (quarter.WaitingListDropoutsByAppliedGroup?.Any() ?? false))
+                {
+                    <h3>Waiting List – Applications & Outcomes</h3>
+
+                    <p>
+                        Applications: @quarter.WaitingListApplications
+                        Converted: @quarter.WaitingListConversions
+                        Did not proceed: @quarter.WaitingListDropouts
+                        Conversion rate:
+                        @(quarter.WaitingListApplications> 0
+                            ? ((decimal)quarter.WaitingListConversions / quarter.WaitingListApplications).ToString("P0")
+                            : "0%")
+                    </p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Applied Category</th>
+                                <th>Applications</th>
+                                <th>Converted</th>
+                                <th>Did Not Proceed</th>
+                                <th>Conversion Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var cats = quarter.WaitingListApplicationsByGroup?.Keys
+                                .Union(quarter.WaitingListConversionsByAppliedGroup?.Keys ?? Enumerable.Empty<string>())
+                                .Union(quarter.WaitingListDropoutsByAppliedGroup?.Keys ?? Enumerable.Empty<string>())
+                                .OrderBy(k => k) ?? Enumerable.Empty<string>();
+                            }
+                            @foreach (var cat in cats)
+                            {
+                                var a = quarter.WaitingListApplicationsByGroup?.GetValueOrDefault(cat) ?? 0;
+                                var c = quarter.WaitingListConversionsByAppliedGroup?.GetValueOrDefault(cat) ?? 0;
+                                var d = quarter.WaitingListDropoutsByAppliedGroup?.GetValueOrDefault(cat) ?? 0;
+                                var r = a > 0 ? (decimal)c / a : 0m;
+                                <tr>
+                                    <td>@cat</td>
+                                    <td>@a</td>
+                                    <td>@c</td>
+                                    <td>@d</td>
+                                    <td>@r:P0</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </section>
         }
-    </nav>
-
-    @for (int i = 0; i < Model.QuarterlyStats.Count; i++)
-    {
-        var quarter = Model.QuarterlyStats[i];
-        <section class="tab-panel"
-                 role="tabpanel"
-                 tabindex="0"
-                 aria-labelledby="tab-@i"
-                 id="panel-@i"
-                 aria-hidden="@(i == 0 ? "false" : "true")">
-            <h2>@quarter.PeriodDescription</h2>
-            <h4>@quarter.FromDate.ToString("dd MMMM yyyy") - @quarter.ToDate.ToString("dd MMMM yyyy")</h4>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Metric</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>New Members</td><td>@quarter.NewMembers</td></tr>
-                    <tr><td>Leavers</td><td>@quarter.Leavers</td></tr>
-                    <tr><td>Deaths</td><td>@quarter.Deaths</td></tr>
-                </tbody>
-            </table>
-
-            @if (quarter.CategoryChanges?.Any() == true)
-            {
-                <h3>Category Changes</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>From → To</th>
-                            <th>Count</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var change in quarter.CategoryChanges
-                       .OrderByDescending(kv => kv.Value)
-                       .ThenBy(kv => kv.Key))
-                        {
-                            <tr>
-                                <td>@change.Key</td>
-                                <td>@change.Value</td>
-                            </tr>
-                        }
-
-                    </tbody>
-                </table>
-            }
-
-            @if (quarter.CategoryGroupTotals?.Any() == true)
-            {
-                <h3>Category Group Totals</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Group</th>
-                            <th>Total Members</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var group in quarter.CategoryGroupTotals
-                       .OrderByDescending(g => g.Value)
-                       .ThenBy(g => g.Key))
-                        {
-                            <tr>
-                                <td>@group.Key</td>
-                                <td>@group.Value</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-        </section>
-    }
+    </div>
 
     <script>
+
+        const __charts = [];
+
         document.addEventListener("DOMContentLoaded", function () {
             const dataPoints = @Html.Raw(Json.Serialize(Model.DataPoints));
 
-            console.log("Raw DataPoints:", dataPoints);
-
             const tabs = document.querySelectorAll('.tab-button');
             const panels = document.querySelectorAll('.tab-panel');
+            const toggleAll = document.getElementById('toggleAll');
+
+            let activeIndex = [...tabs].findIndex(t => t.getAttribute('aria-selected') === 'true');
+            if (activeIndex < 0) { activeIndex = 0; }
 
             tabs.forEach((tab, i) => {
               tab.addEventListener('click', () => {
-                // Deselect all tabs and hide all panels
-                tabs.forEach(t => {
-                  t.setAttribute('aria-selected', 'false');
-                  t.setAttribute('tabindex', '-1');
-                });
+                if (document.body.classList.contains('expand-all')) { return; }
+                tabs.forEach(t => { t.setAttribute('aria-selected', 'false'); t.setAttribute('tabindex', '-1'); });
                 panels.forEach(p => p.setAttribute('aria-hidden', 'true'));
-
-                // Select the clicked tab and show corresponding panel
                 tab.setAttribute('aria-selected', 'true');
                 tab.setAttribute('tabindex', '0');
                 panels[i].setAttribute('aria-hidden', 'false');
                 panels[i].focus();
+                activeIndex = i;
               });
 
-              // Allow keyboard navigation with arrow keys
               tab.addEventListener('keydown', (e) => {
+                if (document.body.classList.contains('expand-all')) { return; }
                 let newIndex = null;
                 if (e.key === 'ArrowRight') newIndex = (i + 1) % tabs.length;
                 if (e.key === 'ArrowLeft') newIndex = (i - 1 + tabs.length) % tabs.length;
-                if (newIndex !== null) {
-                  tabs[newIndex].focus();
-                  e.preventDefault();
-                }
+                if (newIndex !== null) { tabs[newIndex].focus(); e.preventDefault(); }
               });
             });
+
+            function applyExpandAll(on) {
+              if (on) {
+                document.body.classList.add('expand-all');
+                tabs.forEach(t => { t.setAttribute('tabindex', '-1'); t.setAttribute('aria-selected', 'false'); });
+                panels.forEach(p => p.setAttribute('aria-hidden', 'false'));
+              } else {
+                document.body.classList.remove('expand-all');
+                tabs.forEach((t, i) => {
+                  const selected = i === activeIndex ? 'true' : 'false';
+                  t.setAttribute('aria-selected', selected);
+                  t.setAttribute('tabindex', i === activeIndex ? '0' : '-1');
+                });
+                panels.forEach((p, i) => p.setAttribute('aria-hidden', i === activeIndex ? 'false' : 'true'));
+              }
+            }
+
+            toggleAll.addEventListener('change', e => applyExpandAll(e.target.checked));
 
             const labels = dataPoints.map(dp => new Date(dp.date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }));
             const playingMembers = dataPoints.map(dp => dp.playingMembers || 0);
@@ -252,7 +333,7 @@
                 backgroundColor: colors[category]
             }));
 
-            new Chart(document.getElementById('waitingListChart'), {
+            const chart = new Chart(document.getElementById('waitingListChart'), {
                 type: 'bar',
                 data: {
                     labels: filteredLabels,
@@ -276,6 +357,8 @@
                     }
                 }
             });
+
+            __charts.push(chart);
         }
 
         function prepareRevenueChart(dataPoints, annotations) {
@@ -301,7 +384,7 @@
             /* 20 % below the min, but never negative */
             const yMin = Math.max(0, Math.floor(minDaily * 0.8));
 
-            new Chart(document.getElementById('revenueVsBudgetChart'), {
+            const chart = new Chart(document.getElementById('revenueVsBudgetChart'), {
                 type: 'line',
                 data: {
                     labels,
@@ -362,6 +445,8 @@
                     }
                 }
             });
+
+            __charts.push(chart);
         }
 
         function prepareAccRevenueChart(dataPoints, annotations) {
@@ -384,7 +469,7 @@
             const billed   = filtered.map(dp => (billSum+= (dp.billedRevenue   || 0))); 
             const received = filtered.map(dp => (recSum += (dp.receivedRevenue || 0)));
 
-            new Chart(document.getElementById('accRevenueVsBudgetChart'), {
+            const chart = new Chart(document.getElementById('accRevenueVsBudgetChart'), {
                 type: 'line',
                 data: {
                     labels,
@@ -448,6 +533,8 @@
                     }
                 }
             });
+
+            __charts.push(chart);
         }
 
         function prepareJoinerLeaverBarChart(labels, dataPoints) {
@@ -477,7 +564,7 @@
 
             const ctx = document.getElementById('dailyJoinLeaveChart');
 
-            new Chart(ctx, {
+            const chart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels,
@@ -507,6 +594,8 @@
                     }
                 }
             });
+
+            __charts.push(chart);
         }
 
         function prepareCategoryGroupBreakdownChart(labels, dataPoints) {
@@ -540,7 +629,7 @@
                 borderWidth: 1
             }));
 
-            new Chart(document.getElementById('categoryGroupBreakdownChart'), {
+            const chart = new Chart(document.getElementById('categoryGroupBreakdownChart'), {
                 type: 'line',
                 data: {
                     labels: labels,
@@ -561,6 +650,8 @@
                     }
                 }
             });
+
+            __charts.push(chart);
         }
 
         function prepareMembershipChart(labels, playingMembers, nonPlayingMembers, targetPlayingMembers, annotations) {
@@ -594,7 +685,7 @@
 
             const combinedAnnotations = [...(annotations || []), ...redDotAnnotations];
 
-            new Chart(document.getElementById('membershipChart'), {
+            const chart = new Chart(document.getElementById('membershipChart'), {
                 type: 'line',
                 data: {
                     labels: labels,
@@ -645,6 +736,8 @@
                     }
                 }
             });
+
+            __charts.push(chart);
         }
 
         function sortPlayingCategories(dataPoints) {
@@ -742,6 +835,7 @@
             ];
             return colors[index % colors.length];
         }
+
     </script>
 
 </body>

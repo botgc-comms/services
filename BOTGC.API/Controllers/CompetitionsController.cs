@@ -39,8 +39,8 @@ namespace BOTGC.API.Controllers
         {
             var taskItem = new CompetitionTaskItem
             {
-                FromDate = dateRange.Start, 
-                ToDate = dateRange.End, 
+                FromDate = dateRange.Start,
+                ToDate = dateRange.End,
                 CompetitionType = "JuniorEclectic"
             };
 
@@ -60,7 +60,7 @@ namespace BOTGC.API.Controllers
             {
                 return Ok(results);
             }
-            else                                                                           
+            else
             {
                 return NotFound();
             }
@@ -135,7 +135,7 @@ namespace BOTGC.API.Controllers
                 }
 
                 _logger.LogInformation($"Successfully retrieved leaderboard for competition {competitionId}.");
-                return Ok(settings);
+                return Ok(leaderboard);
             }
             catch (Exception ex)
             {
@@ -151,7 +151,7 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var query = new GetClubChampionshipLeaderboardByCompetitionQuery () { CompetitionId = competitionId };
+                var query = new GetClubChampionshipLeaderboardByCompetitionQuery() { CompetitionId = competitionId };
                 var leaderboard = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (leaderboard == null)
@@ -161,7 +161,7 @@ namespace BOTGC.API.Controllers
                 }
 
                 _logger.LogInformation($"Successfully retrieved leaderboard for competition {competitionId}.");
-                return Ok(settings);
+                return Ok(leaderboard);
             }
             catch (Exception ex)
             {

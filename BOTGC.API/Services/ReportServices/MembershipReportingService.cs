@@ -79,6 +79,31 @@ namespace BOTGC.API.Services.ReportServices
 
             var memberEvents = await _mediator.Send(memberEventsQuery);
 
+            // First time a member appears on the waiting list (by event or ApplicationDate)
+            var firstAppliedAt = new Dictionary<int, DateTime>();
+
+            // From events: first non-W -> W
+            foreach (var ev in memberEvents.Where(e => e.DateOfChange.HasValue)
+                                           .OrderBy(e => e.DateOfChange!.Value))
+            {
+                var fromW = string.Equals((ev.FromStatus ?? "").Trim(), "W", StringComparison.OrdinalIgnoreCase);
+                var toW = string.Equals((ev.ToStatus ?? "").Trim(), "W", StringComparison.OrdinalIgnoreCase);
+                if (!fromW && toW)
+                {
+                    if (!firstAppliedAt.ContainsKey(ev.MemberId))
+                        firstAppliedAt[ev.MemberId] = ev.DateOfChange!.Value.Date;
+                }
+            }
+
+            // From data: ApplicationDate present (covers members created directly as W)
+            foreach (var m in members.Where(m => m.MemberNumber.HasValue && m.MemberNumber.Value != 0 && m.ApplicationDate.HasValue))
+            {
+                var id = m.MemberNumber!.Value;
+                var d = m.ApplicationDate!.Value.Date;
+                if (!firstAppliedAt.TryGetValue(id, out var existing) || d < existing)
+                    firstAppliedAt[id] = d;
+            }
+
             // Get Subscription Payments
             var (previousSubscriptionYearPayments, currentSubscriptionYearPayments)
                 = await GetReportSubscriptionPaymentsAsync(
@@ -122,42 +147,130 @@ namespace BOTGC.API.Services.ReportServices
             {
                 try
                 {
+                    var appliedByEventToday = new HashSet<int>();
 
-                    // Get events that occurred on this date
-                    var eventsOnThisDay = memberEvents.Where(e => e.DateOfChange.HasValue && e.DateOfChange.Value.Date == currentDate.Date).ToList();
+                    var eventsOnThisDay = memberEvents
+                        .Where(e => e.DateOfChange.HasValue && e.DateOfChange.Value.Date == currentDate.Date)
+                        .ToList();
 
-                    // Reverse each event to rewind the member data
-                    foreach (var memberEvent in eventsOnThisDay.OrderByDescending(me => me.ChangeIndex))
+                    var wlApps = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                    var wlConv = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                    var wlDrop = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                    static string T(string? s) => (s ?? string.Empty).Trim();
+                    static bool Eq(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+
+                    foreach (var byMember in eventsOnThisDay.GroupBy(e => e.MemberId))
                     {
-                        var member = members.Find(m => m.MemberNumber == memberEvent.MemberId);
+                        var memberId = byMember.Key;
 
-                        if (member != null)
+                        // Sort once (chronological for counting; we’ll use the same array reversed for rewinding)
+                        var ordered = byMember
+                            .OrderBy(e => e.DateOfChange!.Value)
+                            .ThenBy(e => e.ChangeIndex)
+                            .ToList();
+
+                        if (ordered.Count == 0) continue;
+
+                        // Have they *ever* applied (by event or ApplicationDate) on/before today?
+                        bool everApplied = firstAppliedAt.TryGetValue(memberId, out var firstAppDate)
+                                           && firstAppDate <= currentDate.Date;
+
+                        // ── 1) Build reduced path of (Status, Category) with loop-collapsing ──
+                        var path = new List<(string S, string C)>();
+                        var seen = new Dictionary<(string S, string C), int>();
+
+                        var start = (T(ordered[0].FromStatus), T(ordered[0].FromCategory));
+                        path.Add(start);
+                        seen[start] = 0;
+
+                        foreach (var e in ordered)
                         {
-                            // Verify the current state before rewinding
-                            if (member.MembershipCategory == memberEvent.ToCategory)
+                            var prev = path[^1];
+                            var next = (
+                                S: !Eq(T(e.ToStatus), T(e.FromStatus)) ? T(e.ToStatus) : prev.S,
+                                C: !Eq(T(e.ToCategory), T(e.FromCategory)) ? T(e.ToCategory) : prev.C
+                            );
+
+                            if (Eq(prev.S, next.S) && Eq(prev.C, next.C)) continue;
+
+                            if (seen.TryGetValue(next, out var idx))
                             {
-                                // Reverse the category change
-                                member.MembershipCategory = memberEvent.FromCategory;
+                                for (int i = path.Count - 1; i > idx; i--) seen.Remove(path[i]);
+                                path.RemoveRange(idx + 1, path.Count - (idx + 1));
                             }
                             else
                             {
-                                _logger.LogWarning($"Expected current category to be {memberEvent.ToCategory} but found {member.MembershipCategory} for member id {member.MemberNumber} on {currentDate.ToString("yyyy-MM-dd")}");
+                                seen[next] = path.Count;
+                                path.Add(next);
+                            }
+                        }
+
+                        // Net no-op → ignore for WL counts
+                        if (!(path.Count < 2 || (Eq(path[0].S, path[^1].S) && Eq(path[0].C, path[^1].C))))
+                        {
+                            // ── Count WL crossings on reduced path (keys = raw category strings) ──
+                            for (int i = 1; i < path.Count; i++)
+                            {
+                                var prev = path[i - 1];
+                                var next = path[i];
+
+                                // non-W → W  = application (attribute to next category)
+                                if (!Eq(prev.S, "W") && Eq(next.S, "W"))
+                                {
+                                    var key = MembershipHelper.ResolveCategoryGroup(next.C);
+                                    wlApps[key] = wlApps.GetValueOrDefault(key) + 1;
+                                    appliedByEventToday.Add(memberId);
+                                    continue;
+                                }
+
+                                // W → non-W outcome (only if they have a recorded application on/before today)
+                                if (Eq(prev.S, "W") && !Eq(next.S, "W") && everApplied)
+                                {
+                                    var key = MembershipHelper.ResolveCategoryGroup(prev.C);
+                                    if (Eq(next.S, "L"))
+                                        wlDrop[key] = wlDrop.GetValueOrDefault(key) + 1;
+                                    else
+                                        wlConv[key] = wlConv.GetValueOrDefault(key) + 1;
+                                }
+                            }
+                        }
+
+                        // ── 2) Rewind this member’s state using the same list, reversed ──
+                        for (int i = ordered.Count - 1; i >= 0; i--)
+                        {
+                            var ev = ordered[i];
+                            var member = members.Find(m => m.MemberNumber == ev.MemberId);
+                            if (member == null)
+                            {
+                                _logger.LogWarning($"Expected to find a member with id {ev.MemberId} but no member was found");
+                                continue;
                             }
 
-                            // If there was a status change, reverse that too
-                            if (member.MembershipStatus == memberEvent.ToStatus)
-                            {
-                                member.MembershipStatus = memberEvent.FromStatus;
-                            }
+                            // Reverse category
+                            if (member.MembershipCategory == ev.ToCategory)
+                                member.MembershipCategory = ev.FromCategory;
                             else
-                            {
-                                _logger.LogWarning($"Expected current stauts to be {memberEvent.ToStatus} but found {member.MembershipStatus} for member id {member.MemberNumber} on {currentDate.ToString("yyyy-MM-dd")}");
-                            }
+                                _logger.LogWarning($"Expected current category to be {ev.ToCategory} but found {member.MembershipCategory} for member id {member.MemberNumber} on {currentDate:yyyy-MM-dd}");
+
+                            // Reverse status
+                            if (member.MembershipStatus == ev.ToStatus)
+                                member.MembershipStatus = ev.FromStatus;
+                            else
+                                _logger.LogWarning($"Expected current status to be {ev.ToStatus} but found {member.MembershipStatus} for member id {member.MemberNumber} on {currentDate:yyyy-MM-dd}");
                         }
-                        else
-                        {
-                            _logger.LogWarning($"Expected to find a member with id {memberEvent.MemberId} but no member was found");
-                        }
+                    }
+
+                    // Add apps that arrived today via ApplicationDate but had no W-event today
+                    foreach (var m in members.Where(m =>
+                                 m.MemberNumber.HasValue &&
+                                 m.MemberNumber.Value != 0 &&
+                                 m.ApplicationDate.HasValue &&
+                                 m.ApplicationDate.Value.Date == currentDate.Date))
+                    {
+                        if (appliedByEventToday.Contains(m.MemberNumber!.Value)) continue;
+                        var g = string.IsNullOrWhiteSpace(m.MembershipCategoryGroup) ? "Unknown" : m.MembershipCategoryGroup;
+                        wlApps[g] = wlApps.GetValueOrDefault(g) + 1;
                     }
 
                     // Update the playing status of all members
@@ -177,6 +290,14 @@ namespace BOTGC.API.Services.ReportServices
                     dailyReportEntry.DailyJoinersByCategoryGroup = joinersByGroup;
                     dailyReportEntry.DailyLeaversByCategoryGroup = leaversByGroup;
 
+                    // Attach to the daily entry (as you already do after building dailyReportEntry)
+                    dailyReportEntry.WaitingListApplicationsByGroup = wlApps;
+                    dailyReportEntry.WaitingListConversionsByAppliedGroup = wlConv;
+                    dailyReportEntry.WaitingListDropoutsByAppliedGroup = wlDrop;
+                    dailyReportEntry.WaitingListApplicationsTotal = wlApps.Values.Sum();
+                    dailyReportEntry.WaitingListConversionsTotal = wlConv.Values.Sum();
+                    dailyReportEntry.WaitingListDropoutsTotal = wlDrop.Values.Sum();
+
                     dataPoints.Insert(0, dailyReportEntry);
 
                     if (IsMonthEnd(currentDate) || currentDate.Date == today.Date.AddDays(-1))
@@ -192,12 +313,20 @@ namespace BOTGC.API.Services.ReportServices
                 }
             }
 
-            EnsureMonthlyAndQuarterlyStats(report, monthlySnapshots);
+            // Fill future days + targets first
             EnsureFullYearData(dataPoints, endOfCurrentSubsYear, dailyTargetRevenue);
             ApplyGrowthTargets(dataPoints, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
 
-            report.DataPoints = dataPoints.Where(dp => dp.Date >= startOfPreviousSubsYear && dp.Date <= endOfCurrentSubsYear).ToList();
+            // Then pin the output list for this report window
+            report.DataPoints = dataPoints
+                .Where(dp => dp.Date >= startOfPreviousSubsYear && dp.Date <= endOfCurrentSubsYear)
+                .ToList();
             report.DataPointsCsv = ConvertToCsv(report.DataPoints);
+
+            // Build month/quarter snapshots, then aggregate WL into them
+            EnsureMonthlyAndQuarterlyStats(report, monthlySnapshots);
+            PopulateWaitingListAggregatesForPeriods(report.MonthlyStats, report.DataPoints);
+            PopulateWaitingListAggregatesForPeriods(report.QuarterlyStats, report.DataPoints);
 
             var totalActualRevenue = report.DataPoints.Where(dp => dp.Date >= new DateTime(2024, 10, 1) && dp.Date <= new DateTime(2025, 9, 30)).Select(dp => dp.ActualRevenue).Sum();
             var totalBilledRevenue = report.DataPoints.Where(dp => dp.Date >= new DateTime(2024, 10, 1) && dp.Date <= new DateTime(2025, 9, 30)).Select(dp => dp.BilledRevenue).Sum();
@@ -209,6 +338,7 @@ namespace BOTGC.API.Services.ReportServices
                 $"Total Received Revenue: {totalReceivedRevenue:C}");
 
             return report;
+
         }
 
         /// <summary>
@@ -769,6 +899,44 @@ namespace BOTGC.API.Services.ReportServices
                 ReceivedRevenue = dailyReceived.GetValueOrDefault(date)
             };
         }
+
+        private static void PopulateWaitingListAggregatesForPeriods(
+            IEnumerable<MembershipDeltaDto> periods,
+            IEnumerable<MembershipReportEntryDto> dataPoints)
+        {
+            foreach (var p in periods)
+            {
+                var window = dataPoints.Where(dp => dp.Date >= p.FromDate && dp.Date <= p.ToDate);
+
+                p.WaitingListApplications = window.Sum(dp => dp.WaitingListApplicationsTotal);
+                p.WaitingListConversions = window.Sum(dp => dp.WaitingListConversionsTotal);
+                p.WaitingListDropouts = window.Sum(dp => dp.WaitingListDropoutsTotal);
+
+                var apps = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                var conv = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                var drop = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var dp in window)
+                {
+                    if (dp.WaitingListApplicationsByGroup != null)
+                        foreach (var kv in dp.WaitingListApplicationsByGroup)
+                            apps[kv.Key] = apps.GetValueOrDefault(kv.Key) + kv.Value;
+
+                    if (dp.WaitingListConversionsByAppliedGroup != null)
+                        foreach (var kv in dp.WaitingListConversionsByAppliedGroup)
+                            conv[kv.Key] = conv.GetValueOrDefault(kv.Key) + kv.Value;
+
+                    if (dp.WaitingListDropoutsByAppliedGroup != null)
+                        foreach (var kv in dp.WaitingListDropoutsByAppliedGroup)
+                            drop[kv.Key] = drop.GetValueOrDefault(kv.Key) + kv.Value;
+                }
+
+                p.WaitingListApplicationsByGroup = apps;
+                p.WaitingListConversionsByAppliedGroup = conv;
+                p.WaitingListDropoutsByAppliedGroup = drop;
+            }
+        }
+
 
         private void EnsureFullYearData(List<MembershipReportEntryDto> dataPoints, DateTime endOfCurrentFinancialYear, Dictionary<DateTime, Fee[]> dailyTargetRevenue)
         {
