@@ -98,6 +98,7 @@
         public string NewMemberLookupReportUrl { get; set; } = "/membership_reports.php?tab=newmembers";
         public string AllWaitingMembersReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=6da7bd30935f3f5f2374aa8206cd80ec";
         public string MemberRoundsReportUrl { get; set; } = "/roundmgmt.php?playerid={playerId}";
+        public string HandicapIndexHistoryReportUrl { get; set; } = "/roundmgmt.php?playerid={playerId}";
         public string PlayerIdLookupReportUrl { get; set; } = "/membership_reports.php?tab=status";
         public string RoundReportUrl { get; set; } = "/viewround.php?roundid={roundId}";
         public string MembershipReportingUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=9be9f71c8988351887840f3826a552da";

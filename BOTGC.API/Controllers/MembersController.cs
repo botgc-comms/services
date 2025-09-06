@@ -285,7 +285,51 @@ namespace BOTGC.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error retrieving rounds for member members {memberId}.");
+                _logger.LogError(ex, $"Error retrieving rounds for member {memberId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving rounds for member {memberId}.");
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the handicap history for a specific member.
+        /// </summary>
+        /// <returns> Returns the handicap history for the specified member </returns>
+        /// <response code="200">Returns the list of junior members.</response>
+        /// <response code="204">No junior members found.</response>
+        /// <response code="500">An internal server error occurred.</response>
+        [HttpGet("{memberId}/handicapHistory")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlayerHandicapSummaryDto))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<PlayerHandicapSummaryDto>> GetHandicapHisotryByMember(int memberId, DateTime? fromDate, DateTime? toDate)
+        {
+            _logger.LogInformation($"Fetching handicap history for member {memberId}...");
+
+            try
+            {
+                var query = new GetHandicapHistoryByMemberQuery() { MemberId = memberId };
+                if (fromDate.HasValue) query.FromDate = fromDate.Value;
+                if (toDate.HasValue) query.ToDate = toDate.Value;
+
+                var handicapHistory = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (handicapHistory == null || handicapHistory.HandicapIndexPoints == null || !handicapHistory.HandicapIndexPoints.Any())
+                {
+                    _logger.LogWarning($"No handicap history was found for member {memberId}.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved {handicapHistory.HandicapIndexPoints.Count} handicap entries for member {memberId}.");
+                return Ok(handicapHistory);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "No player found for member ID {MemberId}", memberId);
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving handicap history for member {memberId}.");
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving rounds for member {memberId}.");
             }
         }
@@ -293,7 +337,7 @@ namespace BOTGC.API.Controllers
         /// <summary>
         /// Retrieve subscription payment details
         /// </summary>
-        /// <returns>A list of junior members with their details.</returns>
+        /// <returns>Retrieve subscription payment details</returns>
         /// <response code="200">Returns the list of subscription payments for a given subscription year.</response>
         /// <response code="204">No subscription payments found.</response>
         /// <response code="500">An internal server error occurred.</response>
@@ -391,6 +435,36 @@ namespace BOTGC.API.Controllers
                 if (toDate.HasValue) query.ToDate = toDate.Value;
                 if (maxFinishingPosition.HasValue) query.MaxFinishingPosition = maxFinishingPosition.Value;
 
+                var playerResults = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (playerResults == null)
+                {
+                    _logger.LogWarning($"No competition results found for member juniors.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved competition results for {playerResults.Count} Juniors.");
+                return Ok(playerResults);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving competition results for all juniors.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving competition results for all juniors.");
+            }
+        }
+
+        [HttpGet("juniors/handicaps")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<PlayerHandicapSummaryDto>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetHandicapDataForJuniors()
+        {
+            _logger.LogInformation($"Fetching competition results for all juniors...");
+
+            try
+            {
+                var query = new GetHandicapSummaryForJuniorsQuery();
+                
                 var playerResults = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (playerResults == null)

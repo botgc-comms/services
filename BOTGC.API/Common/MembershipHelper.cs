@@ -39,7 +39,7 @@ namespace BOTGC.API.Common
         public static MembershipPrimaryCategories GetPrimaryCategory(MemberDto member, DateTime? date = null)
         {
             if (member == null) return MembershipPrimaryCategories.None;
-            return GetPrimaryCategory(member!.MembershipStatus ?? "", member!.MembershipCategory ?? "", member.LeaveDate, member.LeaveDate, date);
+            return GetPrimaryCategory(member!.MembershipStatus ?? "", member!.MembershipCategory ?? "", member.LeaveDate, member.JoinDate, date);
         }
 
         public static MembershipPrimaryCategories GetPrimaryCategory(string membershipStatus, string membershipCategory, DateTime? leftMembershipOn, DateTime? joinedOn, DateTime? date = null)
