@@ -143,7 +143,7 @@ namespace BOTGC.API.Services.ReportServices
                 .ToDictionary(m => m.MemberNumber!.Value, m => m.MembershipCategoryGroup);
 
             // Process each day backwards from yesterday to the start of the previous financial year
-            for (var currentDate = today.AddDays(-1); currentDate >= startOfPreviousSubsYear.AddDays(-1); currentDate = currentDate.AddDays(-1))
+            for (var currentDate = today.AddDays(-1); currentDate >= startOfPreviousSubsYear; currentDate = currentDate.AddDays(-1))
             {
                 try
                 {
@@ -240,10 +240,26 @@ namespace BOTGC.API.Services.ReportServices
                         for (int i = ordered.Count - 1; i >= 0; i--)
                         {
                             var ev = ordered[i];
-                            var member = members.Find(m => m.MemberNumber == ev.MemberId);
+                            MemberDto member = null;
+
+                            // First, try to match by MemberNumber
+                            if (ev.MemberId != 0)
+                            {
+                                member = members.SingleOrDefault(m => m.MemberNumber == ev.MemberId);
+                            }
+
+                            // Fallback: match by Forename, Surname, and MembershipCategory == ToCategory
                             if (member == null)
                             {
-                                _logger.LogWarning($"Expected to find a member with id {ev.MemberId} but no member was found");
+                                member = members.SingleOrDefault(m =>
+                                    string.Equals(m.FirstName, ev.Forename, StringComparison.OrdinalIgnoreCase) &&
+                                    string.Equals(m.LastName, ev.Surname, StringComparison.OrdinalIgnoreCase) &&
+                                    string.Equals(m.MembershipCategory, ev.ToCategory, StringComparison.OrdinalIgnoreCase));
+                            }
+
+                            if (member == null)
+                            {
+                                _logger.LogWarning($"Could not find member for event: MemberId={ev.MemberId}, Forename={ev.Forename}, Surname={ev.Surname}, ToCategory={ev.ToCategory}");
                                 continue;
                             }
 

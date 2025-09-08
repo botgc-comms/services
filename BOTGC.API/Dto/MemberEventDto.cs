@@ -4,6 +4,9 @@
     {
         public int ChangeIndex { get; set; }
         public int MemberId { get; set; } 
+        public int AccountId { get; set; }
+        public string Forename { get; set; }    
+        public string Surname { get; set; } 
         public DateTime? DateOfChange { get; set; }
         public DateTime? DateCreated { get; set; }
         public string FromCategory { get; set; }

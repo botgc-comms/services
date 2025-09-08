@@ -29,7 +29,7 @@ namespace BOTGC.API.Common
             if (code.Contains("FLEXI")) return "Off Peak Playing Membership";
             if (code.Contains("JUNIOR")) return "Junior Membership";
             if (code.Contains("SOCIAL")) return "Social Membership";
-            if (code.Contains("CLUBHOUSE")) return "Clubhouse Only";
+            if (code.Contains("HOUSE")) return "Clubhouse Only";
             if (code.Contains("FAMILY")) return "Family";
             if (code.Contains("CORP")) return "Corporate";
 
@@ -52,7 +52,7 @@ namespace BOTGC.API.Common
 
             // Determine if LeaveDate should be considered
             var leaveDate = (leftMembershipOn.HasValue && leftMembershipOn.Value >= joinedOn)
-                ? joinedOn.Value
+                ? leftMembershipOn.Value
                 : DateTime.MaxValue;
 
             // Determine if the member is active based on the refined LeaveDate logic

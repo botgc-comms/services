@@ -27,6 +27,8 @@ namespace BOTGC.API.Services.QueryHandlers
 
             _logger.LogInformation($"Successfully retrieved the {members.Count} member records.");
 
+            members = members.Where(m => m.MembershipCategory?.ToLower() != "tests").ToList();
+
             return members;
         }
     }

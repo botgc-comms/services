@@ -39,6 +39,9 @@ namespace BOTGC.API.Common
             // Define regex patterns to match headers with DTO properties
             var columnMapping = new Dictionary<string, string>
             {
+                { "^Forename$", nameof(MemberEventDto.Forename) },
+                { "^Surname$", nameof(MemberEventDto.Surname) },
+                { "^Surname\\s*?$", nameof(MemberEventDto.AccountId) },
                 { "^Date\\s*of\\s*Change$", nameof(MemberEventDto.DateOfChange) },
                 { "^Date\\s*Created$", nameof(MemberEventDto.DateCreated) },
                 { "^From\\s*Category$", nameof(MemberEventDto.FromCategory) },
@@ -58,7 +61,6 @@ namespace BOTGC.API.Common
                     if (Regex.IsMatch(header.text, pattern, RegexOptions.IgnoreCase))
                     {
                         headerIndexMap[columnMapping[pattern]] = header.index;
-                        break; // Stop checking once a match is found
                     }
                 }
             }
@@ -70,7 +72,7 @@ namespace BOTGC.API.Common
             {
                 var row = rows[rowIdx];
 ;
-                var columns = row.SelectNodes(".//td")?.Select(td => td.InnerText.Trim()).ToArray();
+                var columns = row.SelectNodes(".//td")?.Select(td => new { text = td.InnerText.Trim(), html = td.InnerHtml.Trim() }).ToArray();
                 if (columns == null || columns.Length == 0) continue;
 
                 try
@@ -80,34 +82,46 @@ namespace BOTGC.API.Common
                         ChangeIndex = rowIdx
                     };
 
+                    if (headerIndexMap.TryGetValue(nameof(MemberEventDto.Forename), out var forenameIndex) && forenameIndex < columns.Length)
+                        memberEvent.Forename = columns[forenameIndex].text;
+
+                    if (headerIndexMap.TryGetValue(nameof(MemberEventDto.Surname), out var surenameIndex) && surenameIndex < columns.Length)
+                        memberEvent.Surname = columns[surenameIndex].text;
+
+                    if (headerIndexMap.TryGetValue(nameof(MemberEventDto.AccountId), out var accountNumberIndex) && accountNumberIndex < columns.Length)
+                        memberEvent.AccountId = ParseAccountId(columns[accountNumberIndex].html);
+
                     if (headerIndexMap.TryGetValue(nameof(MemberEventDto.MemberId), out var memberIdIndex) && memberIdIndex < columns.Length)
-                        memberEvent.MemberId = int.TryParse(columns[memberIdIndex], out var id) ? id : 0;
+                        memberEvent.MemberId = int.TryParse(columns[memberIdIndex].text, out var id) ? id : 0;
 
                     if (headerIndexMap.TryGetValue(nameof(MemberEventDto.DateOfChange), out var dateOfChangeIndex) && dateOfChangeIndex < columns.Length)
-                        memberEvent.DateOfChange = ParseDate(columns[dateOfChangeIndex])
+                        memberEvent.DateOfChange = ParseDate(columns[dateOfChangeIndex].text)
 ;
                     if (headerIndexMap.TryGetValue(nameof(MemberEventDto.DateCreated), out var dateCreaatedIndex) && dateCreaatedIndex < columns.Length)
-                        memberEvent.DateCreated = ParseDate(columns[dateCreaatedIndex]);
+                        memberEvent.DateCreated = ParseDate(columns[dateCreaatedIndex].text);
 
                     if (headerIndexMap.TryGetValue(nameof(MemberEventDto.FromCategory), out var fromCatIndex) && fromCatIndex < columns.Length)
-                        memberEvent.FromCategory = columns[fromCatIndex];
+                        memberEvent.FromCategory = columns[fromCatIndex].text;
 
                     if (headerIndexMap.TryGetValue(nameof(MemberEventDto.ToCategory), out var toCatIndex) && toCatIndex < columns.Length)
-                        memberEvent.ToCategory = columns[toCatIndex];
+                        memberEvent.ToCategory = columns[toCatIndex].text;
 
                     if (headerIndexMap.TryGetValue(nameof(MemberEventDto.FromStatus), out var fromStatusIndex) && fromStatusIndex < columns.Length)
-                        memberEvent.FromStatus = columns[fromStatusIndex];
+                        memberEvent.FromStatus = columns[fromStatusIndex].text;
 
                     if (headerIndexMap.TryGetValue(nameof(MemberEventDto.ToStatus), out var toStatusIndex) && toStatusIndex < columns.Length)
-                        memberEvent.ToStatus = columns[toStatusIndex];
+                        memberEvent.ToStatus = columns[toStatusIndex].text;
 
                     memberEvents.Add(memberEvent);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error processing row: {RowData}", string.Join(", ", columns));
+                    _logger.LogError(ex, "Error processing row: {RowData}", string.Join(", ", columns.Select(c => c.text)));
                 }
             }
+            
+            var testAccounts = memberEvents.Where(me => me.FromCategory.ToLower() == "tests" || me.ToCategory.ToLower() != "tests").Select(me => me.AccountId).Distinct().ToList();
+            memberEvents = memberEvents.Where(me => !testAccounts.Any(accountId => accountId == me.AccountId)).Where(me => me.AccountId != 0 && !String.IsNullOrEmpty(me.Forename) && !String.IsNullOrEmpty(me.Surname)).ToList();
 
             _logger.LogInformation("Successfully parsed {Count} member events.", memberEvents.Count);
             return memberEvents;
@@ -120,6 +134,17 @@ namespace BOTGC.API.Common
                 return parsedDate;
             }
             return null;
+        }
+
+        private int ParseAccountId(string html)
+        {
+            // Example: <a href="/member.php?memberid=98770">Wyatt</a>
+            var match = Regex.Match(html, @"memberid=(\d+)", RegexOptions.IgnoreCase);
+            if (match.Success && int.TryParse(match.Groups[1].Value, out var memberId))
+            {
+                return memberId;
+            }
+            return 0;
         }
     }
 }

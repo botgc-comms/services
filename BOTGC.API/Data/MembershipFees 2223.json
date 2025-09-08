@@ -1,0 +1,60 @@
+{
+  "Admin": 0,
+  "1894": 0,
+  "3 Month Trial": 0,
+
+  "5FA - Lady 5 Day (A)": 1140,
+  "5FAS - Lady 5 Day (A)(S)": 1080,
+  "5FN - Lady 5 Day (N)": 1180,
+  "5FS - Lady 5 Day (S)": 1150,
+
+  "6FC - Lady 6 Day (C)": 1340,
+  "6FAC - Lady 6 Day (A)(C)": 1215,
+  "6FASC - Lady 6 Day (A)(S)(C)": 1190,
+  "6FN - Lady 6 Day (N)": 1280,
+  "6FSC - Lady 6 Day (S)(C)": 1250,
+
+  "7FAS - Lady 7 Day (A)(S)": 1280,
+  "7FLT - Lady 7 Day Lifetime": 0,
+  "7FN - Lady 7 Day (N)": 1380,
+  "7FS - Lady 7 Day (S)": 1350,
+
+  "5MA - Gent 5 Day (A)": 1115,
+  "5MN - Gent 5 Day (N)": 1180,
+
+  "6MA - Gent 6 Day (A)": 1250,
+  "6MN - Gent 6 Day (N)": 1280,
+
+  "7MA - Gent 7 Day (A)": 1315,
+  "7MC - Gent 7 Day (C)": 1380,
+  "7MLT - Gent 7 Day Lifetime": 0,
+  "7MN - Gent 7 Day (N)": 1380,
+
+  "Intermediate 22": 890,
+  "Intermediate 23": 955,
+  "Intermediate 24": 1020,
+  "Intermediate 25": 1085,
+  "Intermediate 26": 1150,
+  "Intermediate 27": 1210,
+  "Intermediate 28": 1270,
+  "Intermediate 29": 1335,
+
+  "Junior 12-18": 100,
+  "Junior 8-11": 40,
+
+  "Burton Flexi Corporate": 2750,
+
+  "FSH - Lady Social Honorary": 0,
+  "House": 50,
+  "Clubhouse": 0,
+  "Family Clubhouse": 0,
+
+  "MSH - Gent Social Honorary": 0,
+  "MX - Student": 675,
+  "Pathway Membership": 200,
+  "Professional Player": 1252.50,
+  "SOCL - Social Members": 100,
+  "STAFF - Member of Staff": 0,
+  "Burton Flexi 20/40": 500,
+  "Medical Exemption": 0
+}
