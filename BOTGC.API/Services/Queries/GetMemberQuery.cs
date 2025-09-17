@@ -4,6 +4,7 @@ namespace BOTGC.API.Services.Queries
 {
     public record GetMemberQuery : QueryBase<MemberDetailsDto?>
     {
-        public required int MemberNumber { get; init; }
+        public int? MemberNumber { get; set; }
+        public int? PlayerId { get; set; }
     }
 }

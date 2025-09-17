@@ -120,7 +120,7 @@ namespace BOTGC.API.Common
                 }
             }
             
-            var testAccounts = memberEvents.Where(me => me.FromCategory.ToLower() == "tests" || me.ToCategory.ToLower() != "tests").Select(me => me.AccountId).Distinct().ToList();
+            var testAccounts = memberEvents.Where(me => me.FromCategory.ToLower() == "tests" || me.ToCategory.ToLower() == "tests").Select(me => me.AccountId).Distinct().ToList();
             memberEvents = memberEvents.Where(me => !testAccounts.Any(accountId => accountId == me.AccountId)).Where(me => me.AccountId != 0 && !String.IsNullOrEmpty(me.Forename) && !String.IsNullOrEmpty(me.Surname)).ToList();
 
             _logger.LogInformation("Successfully parsed {Count} member events.", memberEvents.Count);

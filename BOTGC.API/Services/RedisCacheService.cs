@@ -1,14 +1,15 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Options;
+using System.Collections.Concurrent;
 using System.Text.Json;
 using BOTGC.API.Interfaces;
-using System;
-using System.Threading.Tasks;
 
 namespace BOTGC.API.Services
 {
     public class RedisCacheService : ICacheService
     {
+        private const string WarmedKeysItemsKey = "__Cache_WarmedKeys";
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> KeyLocks = new(StringComparer.Ordinal);
+
         private readonly IDistributedCache _cache;
         private readonly ILogger<RedisCacheService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -24,38 +25,61 @@ namespace BOTGC.API.Services
 
         public async Task<T?> GetAsync<T>(string key) where T : class
         {
-            if (ShouldSkipCache())
+            var gate = KeyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
+            await gate.WaitAsync().ConfigureAwait(false);
+            try
             {
-                _logger.LogInformation("Skipping cache retrieval due to 'Cache-Control: no-cache' header.");
-                return null;
-            }
+                if (ShouldSkipCache() && !IsKeyWarmedForThisRequest(key))
+                {
+                    _logger.LogInformation("Skipping cache GET for key '{Key}' due to 'Cache-Control: no-cache' (first request in this context).", key);
+                    return null;
+                }
 
-            var data = await _cache.GetStringAsync(key);
-            if (string.IsNullOrEmpty(data))
-                return null;
+                var data = await _cache.GetStringAsync(key).ConfigureAwait(false);
+                if (string.IsNullOrEmpty(data)) return null;
 
-            if (data != null)
-            {
                 return JsonSerializer.Deserialize<T>(data);
             }
-
-            return null;
+            finally
+            {
+                gate.Release();
+            }
         }
 
         public async Task SetAsync<T>(string key, T value, TimeSpan expiration) where T : class
         {
-            var json = JsonSerializer.Serialize(value, new JsonSerializerOptions { WriteIndented = true });
-            var options = new DistributedCacheEntryOptions
+            var gate = KeyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
+            await gate.WaitAsync().ConfigureAwait(false);
+            try
             {
-                AbsoluteExpirationRelativeToNow = expiration
-            };
+                var json = JsonSerializer.Serialize(value, new JsonSerializerOptions { WriteIndented = true });
+                var options = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = expiration
+                };
 
-            await _cache.SetStringAsync(key, json, options);
+                await _cache.SetStringAsync(key, json, options).ConfigureAwait(false);
+                MarkKeyWarmedForThisRequest(key);
+            }
+            finally
+            {
+                gate.Release();
+            }
         }
 
         public async Task RemoveAsync(string key)
         {
-            await _cache.RemoveAsync(key);
+            var gate = KeyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
+            await gate.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                await _cache.RemoveAsync(key).ConfigureAwait(false);
+                UnmarkKeyWarmedForThisRequest(key);
+            }
+            finally
+            {
+                gate.Release();
+            }
         }
 
         private bool ShouldSkipCache()
@@ -66,6 +90,50 @@ namespace BOTGC.API.Services
                 return cacheControl.ToString().Contains("no-cache", StringComparison.OrdinalIgnoreCase);
             }
             return false;
+        }
+
+        private bool IsKeyWarmedForThisRequest(string key)
+        {
+            var set = GetWarmedSetForThisRequest();
+            return set != null && set.Contains(key);
+        }
+
+        private void MarkKeyWarmedForThisRequest(string key)
+        {
+            var set = GetOrCreateWarmedSetForThisRequest();
+            set.Add(key);
+        }
+
+        private void UnmarkKeyWarmedForThisRequest(string key)
+        {
+            var set = GetWarmedSetForThisRequest();
+            set?.Remove(key);
+        }
+
+        private HashSet<string>? GetWarmedSetForThisRequest()
+        {
+            var ctx = _httpContextAccessor.HttpContext;
+            if (ctx == null) return null;
+
+            if (ctx.Items.TryGetValue(WarmedKeysItemsKey, out var obj) && obj is HashSet<string> set)
+            {
+                return set;
+            }
+
+            return null;
+        }
+
+        private HashSet<string> GetOrCreateWarmedSetForThisRequest()
+        {
+            var ctx = _httpContextAccessor.HttpContext ?? throw new InvalidOperationException("No active HttpContext.");
+            if (ctx.Items.TryGetValue(WarmedKeysItemsKey, out var obj) && obj is HashSet<string> set)
+            {
+                return set;
+            }
+
+            var newSet = new HashSet<string>(StringComparer.Ordinal);
+            ctx.Items[WarmedKeysItemsKey] = newSet;
+            return newSet;
         }
     }
 }

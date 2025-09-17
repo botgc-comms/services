@@ -5,7 +5,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Membership Report</title>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,7 +14,10 @@
 
     <script>
         Chart.register(window['chartjs-plugin-annotation']);
+        // Chart.defaults.responsive = true;
         Chart.defaults.maintainAspectRatio = true;
+        Chart.defaults.aspectRatio = 1.7;
+        // Chart.defaults.resizeDelay = 0;
     </script>
 
 </head>
@@ -685,7 +688,9 @@
 
             const combinedAnnotations = [...(annotations || []), ...redDotAnnotations];
 
-            const chart = new Chart(document.getElementById('membershipChart'), {
+            var ctx = document.getElementById('membershipChart').getContext('2d');
+
+            const chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
@@ -722,6 +727,8 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 1.6,
                     plugins: {
                         legend: { position: 'top' },
                         annotation: { annotations: combinedAnnotations } 
@@ -836,6 +843,17 @@
             return colors[index % colors.length];
         }
 
+        //window.addEventListener('load', () => { __charts.forEach(c => c.resize()); });
+    </script>
+
+    <script>
+        // window.addEventListener('load', () => {
+        //   document.querySelectorAll('canvas.chart').forEach(c => {
+        //     c.removeAttribute('width');
+        //     c.removeAttribute('height');
+        //   });
+        //   __charts.forEach(c => c.resize());
+        // });
     </script>
 
 </body>

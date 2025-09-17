@@ -28,7 +28,7 @@ namespace BOTGC.API.Services.QueryHandlers
             var playerIdsQuery = new GetPlayerIdsByMemberQuery();
             var playerIdLookup = await _mediator.Send(playerIdsQuery, cancellationToken);
 
-            var playerLookupId = playerIdLookup.Where(id => id.MemberId == request.MemberNumber || id.PlayerId == request.MemberNumber).SingleOrDefault();
+            var playerLookupId = playerIdLookup.Where(id => (request.MemberNumber.HasValue && id.MemberId == request.MemberNumber) || (request.PlayerId.HasValue && id.PlayerId == request.PlayerId)).SingleOrDefault();
 
             if (playerLookupId == null)
             {
@@ -36,13 +36,14 @@ namespace BOTGC.API.Services.QueryHandlers
                 throw new KeyNotFoundException($"No player found for member ID {request.MemberNumber}");
             }
 
-            var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.MemberDetailsUrl}".Replace("{memberid}", request.MemberNumber.ToString());
+            var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.MemberDetailsUrl}".Replace("{memberid}", playerLookupId.MemberId.ToString());
             var response = await _dataProvider.GetData<MemberDetailsDto>(reportUrl, _reportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins));
 
             if (response.Any())
             {
                 var member = response.First();
-                member.ID = request.MemberNumber;
+                member.ID = playerLookupId.PlayerId;
+                member.MemberNumber = playerLookupId.MemberId;
 
                 member.Forename = playerLookupId.Forename;
                 member.Surname = playerLookupId.Surname;

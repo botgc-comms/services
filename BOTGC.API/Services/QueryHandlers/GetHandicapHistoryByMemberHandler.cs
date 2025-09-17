@@ -43,7 +43,7 @@ namespace BOTGC.API.Services.QueryHandlers
 
                 var playerDetailsQuery = new GetMemberQuery
                 {
-                    MemberNumber = playerLookupId.PlayerId
+                    PlayerId = playerLookupId.PlayerId
                 };
 
                 var playerDetails = await _mediator.Send(playerDetailsQuery, cancellationToken);

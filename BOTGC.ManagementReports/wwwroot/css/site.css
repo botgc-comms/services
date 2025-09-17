@@ -1,4 +1,4 @@
-html {
+﻿html {
   font-size: 14px;
 }
 
@@ -6,6 +6,82 @@ html {
   html {
     font-size: 16px;
   }
+}
+
+/* iOS/Safari baselines */
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+input, select, textarea {
+    font-size: 16px;
+}
+/* stops iOS zooming inputs */
+.page-fullheight {
+    min-height: 100dvh;
+}
+/* use on your main wrapper */
+
+/* Flex shrink fixes (prevents odd wrapping/clipping on iPad) */
+.flex-col {
+    min-height: 0;
+}
+
+.flex-item {
+    min-width: 0;
+}
+
+/* Mobile (≤ 899px) — iPad mini normal portrait ~744px */
+@media (max-width: 899px) {
+    .print-wrap {
+        max-width: 720px;
+        padding: 0 16px;
+    }
+
+    .tabs {
+        overflow: auto;
+    }
+
+/*    .chart {
+        height: 52dvh;
+        max-height: 460px;
+    }*/
+}
+
+/* Tablet–desktop band (900–1100px) — iPad portrait in Desktop Website mode ~1005px */
+@media (min-width: 900px) and (max-width: 1100px) {
+    .print-wrap {
+        max-width: 980px;
+    }
+
+    .tabs {
+        gap: 0.75rem;
+    }
+
+    .tab-button {
+        padding: 0.5rem 0.75rem;
+    }
+
+    table {
+        font-size: 0.95rem;
+    }
+
+/*    .chart {
+        height: 56dvh;
+        max-height: 520px;
+    }*/
+}
+
+/* Full desktop (≥ 1101px) */
+@media (min-width: 1101px) {
+    .print-wrap {
+        max-width: 1200px;
+    }
+}
+
+/* If you use sticky headers/footers, ensure ancestors don't block them */
+body, .print-wrap {
+    overflow: visible;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
@@ -112,12 +188,6 @@ th {
     padding: 0 16px;
 }
 
-/* On screen */
-.chart {
-    width: 100%;
-    height: 420px; /* choose what looks right on desktop */
-}
-
 @media print {
     @page {
         size: A4 portrait;
@@ -145,7 +215,7 @@ th {
     }
 
     .chart {
-        height: 90mm !important; /* e.g. 80�110mm to taste */
+        height: 90mm !important; /* e.g. 80–110mm to taste */
     }
 
     /* Keep charts/tables within the page and avoid splits */
@@ -162,7 +232,7 @@ th {
 
     canvas {
         width: 100% !important;
-        height: 90mm !important; /* pick 80�110mm to taste */
+        height: 90mm !important; /* pick 80–110mm to taste */
     }
 
     /* Preserve chart colours */
@@ -193,3 +263,20 @@ th {
     }
 }
 
+/*.chart {
+    display: block;
+    width: 100%;
+    height: 480px;
+}
+
+@media (max-width: 899px) {
+    .chart {
+        height: 400px;
+    }
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+    .chart {
+        height: 460px;
+    }
+}*/

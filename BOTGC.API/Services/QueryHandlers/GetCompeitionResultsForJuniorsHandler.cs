@@ -9,8 +9,7 @@ namespace BOTGC.API.Services.QueryHandlers
 {
     public class GetCompeitionResultsForJuniorsHandler(IOptions<AppSettings> settings,
                                                        IMediator mediator,
-                                                       ILogger<GetCompeitionResultsForJuniorsHandler> logger, 
-                                                       IServiceProvider serviceProvider) : QueryHandlerBase<GetCompetitionResultsForJuniorsQuery, List<PlayerCompetitionResultsDto>>
+                                                       ILogger<GetCompeitionResultsForJuniorsHandler> logger) : QueryHandlerBase<GetCompetitionResultsForJuniorsQuery, List<PlayerCompetitionResultsDto>>
     {
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));

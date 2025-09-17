@@ -24,8 +24,8 @@
 
         public ApplicationInsightsSettings ApplicationInsights { get; set; } = new();
 
-        public string PlayingMemberExpression { get; set; } = "^(?:5|6|7|Intermediate).*?$";
-        public string NonPlayingMemberExpression { get; set; } = "^(?!5|6|7|Intermediate|1894|Corporate|Staff|Professional|Test).+$";
+        public string PlayingMemberExpression { get; set; } = "^(?:5|6|7|Intermediate|MX).*?$";
+        public string NonPlayingMemberExpression { get; set; } = "^(?!5|6|7|Intermediate|MX|1894|Corporate|Staff|Professional|Test).+$";
 
     }
 
@@ -94,6 +94,7 @@
     public class IGEndpoints
     {
         public string JuniorMembershipReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=b52f6bd4cf74cc5dbfd84dec616ceb42";
+        public string LadyMembersReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=5d71e7119d780dba4850506f622c1cfb";
         public string AllCurrentMembersReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=5d71e7119d780dba4850506f622c1cfb";
         public string NewMemberLookupReportUrl { get; set; } = "/membership_reports.php?tab=newmembers";
         public string AllWaitingMembersReportUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=6da7bd30935f3f5f2374aa8206cd80ec";

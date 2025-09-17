@@ -11,7 +11,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                             IDataProvider dataProvider,
                                             IReportParser<MemberDto> reportParser) : QueryHandlerBase<GetMembershipReportQuery, List<MemberDto>>
     {
-        private const string __CACHE_KEY = "Membership_Report";
+        private const string __CACHE_KEY = "Management_Report";
 
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly ILogger<GetMembershipReportHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -23,7 +23,18 @@ namespace BOTGC.API.Services.QueryHandlers
             var cacheKey = __CACHE_KEY;
 
             var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.MembershipReportingUrl}";
-            var members = await _dataProvider.GetData<MemberDto>(reportUrl, _reportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.LongTerm_TTL_mins));
+
+            // Calculate the time remaining until midnight
+            var now = DateTime.Now;
+            var midnight = now.Date.AddDays(1);
+            var timeUntilMidnight = midnight - now;
+
+            var members = await _dataProvider.GetData<MemberDto>(
+                reportUrl,
+                _reportParser,
+                cacheKey,
+                timeUntilMidnight
+            );
 
             _logger.LogInformation($"Successfully retrieved the {members.Count} member records.");
 
