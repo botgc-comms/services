@@ -47,7 +47,7 @@ function appScripts() {
     return gulp.src(paths.app)
         .pipe(concat('reporting.bundle.js'))
         .pipe(gulp.dest(outputPath))
-        .pipe(uglify({ mangle: { toplevel: true } }))
+        .pipe(uglify({ mangle: { toplevel: false } }))
         .pipe(rename({ suffix: '.min' }))
         .pipe(gulp.dest(outputPath));
 }
