@@ -242,7 +242,7 @@ namespace BOTGC.API.Services.ReportServices
                             var ev = ordered[i];
                             MemberDto member = null;
 
-                            // First, try to match by MemberNumber
+                            // First, try to match by PlayerId
                             if (ev.MemberId != 0)
                             {
                                 member = members.SingleOrDefault(m => m.MemberNumber == ev.MemberId);

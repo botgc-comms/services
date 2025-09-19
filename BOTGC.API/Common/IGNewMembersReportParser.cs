@@ -45,7 +45,7 @@ namespace BOTGC.API.Common
             var columnMapping = new Dictionary<string, string>
             {
                 { "^Forename$", nameof(NewMemberLookupDto.Forename) },
-                { "^Forename.*?$", nameof(NewMemberLookupDto.MemberNumber) },
+                { "^Forename.*?$", nameof(NewMemberLookupDto.PlayerId) },
                 { "^Surname$", nameof(NewMemberLookupDto.Surname) },
                 { "^Join\\s*Date$", nameof(NewMemberLookupDto.JoinDate) },
             };
@@ -76,8 +76,8 @@ namespace BOTGC.API.Common
                 {
                     var member = new NewMemberLookupDto();
 
-                    if (headerIndexMap.TryGetValue(nameof(NewMemberLookupDto.MemberNumber), out var memberIdIndex) && memberIdIndex < columns.Length)
-                        member.MemberNumber = ParseMemberNumber(columns[memberIdIndex].html) ?? 0;
+                    if (headerIndexMap.TryGetValue(nameof(NewMemberLookupDto.PlayerId), out var memberIdIndex) && memberIdIndex < columns.Length)
+                        member.PlayerId = ParseMemberNumber(columns[memberIdIndex].html) ?? 0;
 
                     if (headerIndexMap.TryGetValue(nameof(NewMemberLookupDto.Forename), out var firstNameIndex) && firstNameIndex < columns.Length)
                         member.Forename = columns[firstNameIndex].text;

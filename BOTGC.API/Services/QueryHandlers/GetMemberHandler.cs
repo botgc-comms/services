@@ -36,7 +36,7 @@ namespace BOTGC.API.Services.QueryHandlers
                 throw new KeyNotFoundException($"No player found for member ID {request.MemberNumber}");
             }
 
-            var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.MemberDetailsUrl}".Replace("{memberid}", playerLookupId.MemberId.ToString());
+            var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.MemberDetailsUrl}".Replace("{memberid}", playerLookupId.PlayerId.ToString());
             var response = await _dataProvider.GetData<MemberDetailsDto>(reportUrl, _reportParser, cacheKey, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins));
 
             if (response.Any())

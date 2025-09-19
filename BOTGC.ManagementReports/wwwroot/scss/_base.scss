@@ -1,0 +1,21 @@
+html {
+    font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+    position: relative;
+    min-height: 100%;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    margin-bottom: 60px;
+    overflow: visible;
+}
+
+.page-fullheight {
+    min-height: 100dvh;
+}

@@ -34,13 +34,19 @@ namespace BOTGC.API.Services.QueryHandlers
             var today = DateTime.Now.Date;
             var newMembersLookup = members
                 .Where(m => m.JoinDate.HasValue && m.JoinDate.Value.Date >= cutoff && m.JoinDate.Value.Date <= today)
-                .Where(m => m.MemberNumber != 0)
+                .Where(m => m.PlayerId != 0)
                 .ToList();
+
+            if (newMembersLookup.Count == 0)
+            {
+                _logger.LogInformation("No new members found.");
+                return new List<MemberDetailsDto>();
+            }   
 
             var newMemberQueries = newMembersLookup
                   .Select(r => new GetMemberQuery
                   {
-                      MemberNumber = r.MemberNumber
+                      PlayerId = r.PlayerId
                   })
                   .ToList();
 
@@ -65,7 +71,7 @@ namespace BOTGC.API.Services.QueryHandlers
             {
                 var md = nm;
 
-                var member = members.FirstOrDefault(m => m.MemberNumber == nm.ID);
+                var member = members.FirstOrDefault(m => m.PlayerId == nm.ID);
                 if (member != null)
                 {
                     md.Forename = member.Forename;

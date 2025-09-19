@@ -1,0 +1,69 @@
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 12mm;
+    }
+
+    html, body {
+        width: auto;
+        margin: 0;
+    }
+
+    .tabs, .controls {
+        display: none !important;
+    }
+
+    .tab-panel {
+        display: block !important;
+    }
+
+    .print-wrap {
+        max-width: 180mm;
+        margin: 0 auto;
+    }
+
+    .chart {
+        height: 90mm !important;
+    }
+
+    canvas, table {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    canvas, .chart, .tab-panel table {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        margin-bottom: 12mm;
+    }
+
+    canvas {
+        width: 100% !important;
+        height: 90mm !important;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .page-break-before {
+        break-before: page;
+        page-break-before: always;
+    }
+
+    .page-break-after {
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .avoid-break {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .keep-with-next {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+}

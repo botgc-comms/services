@@ -1,0 +1,64 @@
+.print-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+.flex-col {
+    min-height: 0;
+}
+
+.flex-item {
+    min-width: 0;
+}
+
+body, .print-wrap {
+    overflow: visible;
+}
+
+@media (max-width: 899px) {
+    .print-wrap {
+        max-width: 720px;
+        padding: 0 16px;
+    }
+
+    .tabs {
+        overflow: auto;
+    }
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+    .print-wrap {
+        max-width: 980px;
+    }
+
+    .tabs {
+        gap: 0.75rem;
+    }
+
+    .tab-button {
+        padding: 0.5rem 0.75rem;
+    }
+
+    table {
+        font-size: 0.95rem;
+    }
+}
+
+@media (min-width: 1101px) {
+    .print-wrap {
+        max-width: 1200px;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 744px;
+    }
+}
+
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+    }
+}

@@ -30,7 +30,7 @@ namespace BOTGC.API.Common
                 new HateoasLink
                 {
                     Rel = "self",
-                    Href = $"/api/members/{member.MemberNumber}",
+                    Href = $"/api/members/{member.PlayerId}",
                     Method = "GET"
                 }
             };

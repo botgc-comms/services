@@ -1,0 +1,198 @@
+html {
+  font-size: 14px;
+  -webkit-text-size-adjust: 100%;
+  position: relative;
+  min-height: 100%;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+body {
+  margin-bottom: 60px;
+  overflow: visible;
+}
+
+.page-fullheight {
+  min-height: 100dvh;
+}
+
+input, select, textarea {
+  font-size: 16px;
+}
+
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+.print-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.flex-col {
+  min-height: 0;
+}
+
+.flex-item {
+  min-width: 0;
+}
+
+body, .print-wrap {
+  overflow: visible;
+}
+
+@media (max-width: 899px) {
+  .print-wrap {
+    max-width: 720px;
+    padding: 0 16px;
+  }
+  .tabs {
+    overflow: auto;
+  }
+}
+@media (min-width: 900px) and (max-width: 1100px) {
+  .print-wrap {
+    max-width: 980px;
+  }
+  .tabs {
+    gap: 0.75rem;
+  }
+  .tab-button {
+    padding: 0.5rem 0.75rem;
+  }
+  table {
+    font-size: 0.95rem;
+  }
+}
+@media (min-width: 1101px) {
+  .print-wrap {
+    max-width: 1200px;
+  }
+}
+@media (min-width: 768px) {
+  .container {
+    max-width: 744px;
+  }
+}
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+th, td {
+  border: 1px solid #aaa;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+th, td {
+  border: 1px solid #aaa;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+}
+
+.controls {
+  margin: 1rem 0;
+}
+.controls label {
+  margin-left: 0.5rem;
+  font-weight: 600;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+  html, body {
+    width: auto;
+    margin: 0;
+  }
+  .tabs, .controls {
+    display: none !important;
+  }
+  .tab-panel {
+    display: block !important;
+  }
+  .print-wrap {
+    max-width: 180mm;
+    margin: 0 auto;
+  }
+  .chart {
+    height: 90mm !important;
+  }
+  canvas, table {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  canvas, .chart, .tab-panel table {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 12mm;
+  }
+  canvas {
+    width: 100% !important;
+    height: 90mm !important;
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page-break-before {
+    break-before: page;
+    page-break-before: always;
+  }
+  .page-break-after {
+    break-after: page;
+    page-break-after: always;
+  }
+  .avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .keep-with-next {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
