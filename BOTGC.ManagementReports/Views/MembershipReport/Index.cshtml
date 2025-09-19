@@ -270,23 +270,27 @@
             const nonPlayingMembers = dataPoints.map(dp => dp.nonPlayingMembers || 0);
             const targetPlayingMembers = dataPoints.map(dp => dp.targetPlayingMembers !== 0 ? dp.targetPlayingMembers : undefined);
 
+            const fyStart = new Date("@Model.FinancialYearStart.ToString("yyyy-MM-dd")");
+            const fyEnd = new Date("@Model.FinancialYearEnd.ToString("yyyy-MM-dd")");
+            const today = new Date("@Model.Today.ToString("yyyy-MM-dd")");
+
             // Restore key dates (e.g., start of financial year)
             const keyDates = [
                 {
                     label: "Start of Financial Year",
-                    date: "@Model.FinancialYearStart.ToString("dd/MM/yyyy")",
+                    date: fyStart,
                     color: "black",
                     dashed: false
                 },
                 {
                     label: "End of Financial Year",
-                    date: "@Model.FinancialYearEnd.ToString("dd/MM/yyyy")",
+                    date: fyEnd,
                     color: "black",
                     dashed: false
                 },
                 {
                     label: "Today",
-                    date: "@Model.Today.ToString("dd/MM/yyyy")",
+                        date: today,
                     color: "orange",
                     dashed: false
                 }
@@ -310,9 +314,10 @@
             prepareMembershipChart(labels, playingMembers, nonPlayingMembers, targetPlayingMembers, annotations);
             prepareCategoryGroupBreakdownChart(labels, dataPoints);
             prepareJoinerLeaverBarChart(labels, dataPoints);
-            prepareRevenueChart(dataPoints, annotations);
-            prepareAccRevenueChart(dataPoints, annotations);
-            prepareWaitingListChart(labels, dataPoints);
+            prepareRevenueChart(dataPoints, annotations, fyStart, fyEnd);
+            prepareAccRevenueChart(dataPoints, annotations, fyStart, fyEnd);
+            prepareWaitingListChart(labels, dataPoints, fyStart, fyEnd);
+
         });
         
      </script>
