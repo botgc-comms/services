@@ -20,7 +20,7 @@ namespace BOTGC.API.Services.QueryHandlers
 
         public async override Task<List<MemberDto>> Handle(GetMembershipReportQuery request, CancellationToken cancellationToken)
         {
-            var cacheKey = __CACHE_KEY;
+            var cacheKey = __CACHE_KEY + "_" + DateTime.Now.ToString("yyyy-MM-dd");
 
             var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.MembershipReportingUrl}";
 

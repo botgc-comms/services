@@ -98,21 +98,38 @@ body, .print-wrap {
     max-width: 960px;
   }
 }
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1.5rem;
+.tabs {
+  border-bottom: 2px solid #ccc;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-th, td {
-  border: 1px solid #aaa;
-  padding: 0.5rem;
-  text-align: left;
+.tab-button {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 1rem;
+  border-bottom: 4px solid transparent;
 }
-
-th {
-  background-color: #f0f0f0;
+.tab-button[aria-selected=true] {
+  border-color: #005ea5;
   font-weight: 600;
+}
+
+.tab-panel {
+  display: none;
+}
+.tab-panel[aria-hidden=false] {
+  display: block;
+}
+
+.expand-all .tabs {
+  display: none !important;
+}
+.expand-all .tab-panel {
+  display: block !important;
 }
 
 table {
