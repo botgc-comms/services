@@ -164,7 +164,7 @@ namespace BOTGC.API.Services
                 }
             }
 
-            if (!string.IsNullOrEmpty(cacheKey) && cacheTTL != null)
+            if (!string.IsNullOrEmpty(cacheKey) && cacheTTL != null && items.Any())
             {
                 await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
             }

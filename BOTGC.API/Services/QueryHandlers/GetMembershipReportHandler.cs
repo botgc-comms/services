@@ -3,6 +3,8 @@ using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services.Queries;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace BOTGC.API.Services.QueryHandlers
 {
@@ -18,16 +20,53 @@ namespace BOTGC.API.Services.QueryHandlers
         private readonly IDataProvider _dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
         private readonly IReportParser<MemberDto> _reportParser = reportParser ?? throw new ArgumentNullException(nameof(reportParser));
 
+        private static string NormaliseUrl(string raw)
+        {
+            var u = new Uri(raw, UriKind.Absolute);
+            var b = new UriBuilder(u)
+            {
+                Scheme = u.Scheme.ToLowerInvariant(),
+                Host = u.Host.ToLowerInvariant(),
+                Port = (u.Scheme == "https" && u.Port == 443) || (u.Scheme == "http" && u.Port == 80) ? -1 : u.Port,
+                Path = string.IsNullOrEmpty(u.AbsolutePath) ? "/" : u.AbsolutePath.TrimEnd('/'),
+                Query = string.Join("&",
+                    u.Query.TrimStart('?')
+                     .Split('&', StringSplitOptions.RemoveEmptyEntries)
+                     .Select(p => p.Split('=', 2))
+                     .OrderBy(kv => kv[0], StringComparer.OrdinalIgnoreCase)
+                     .Select(kv => kv.Length == 2 ? $"{kv[0]}={kv[1]}" : kv[0]))
+            };
+            return b.Uri.ToString();
+
+        }
+        private static string BuildCacheKey(string prefix, string url, DateTime now)
+        {
+            var urlHash = Sha256Hex(Encoding.UTF8.GetBytes(url)).Substring(0, 16);
+            return $"{prefix}:{now:yyyy-MM-dd}:{urlHash}";
+        }
+
+        private static string Sha256Hex(ReadOnlySpan<byte> data)
+        {
+            Span<byte> hash = stackalloc byte[32];
+            SHA256.HashData(data, hash);
+            var sb = new StringBuilder(64);
+            foreach (var b in hash) sb.Append(b.ToString("x2"));
+            return sb.ToString();
+        }
+
         public async override Task<List<MemberDto>> Handle(GetMembershipReportQuery request, CancellationToken cancellationToken)
         {
-            var cacheKey = __CACHE_KEY + "_" + DateTime.Now.ToString("yyyy-MM-dd");
+            var baseUrl = _settings.IG.BaseUrl;
+            var rel = _settings.IG.Urls.MembershipReportingUrl;
+            var reportUrl = NormaliseUrl($"{baseUrl}{rel}");
 
-            var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.MembershipReportingUrl}";
-
-            // Calculate the time remaining until midnight
             var now = DateTime.Now;
             var midnight = now.Date.AddDays(1);
             var timeUntilMidnight = midnight - now;
+
+            var cacheKey = BuildCacheKey("Management_Report", reportUrl, now);
+
+            _logger.LogInformation("MembershipReport: Url={Url} CacheKey={CacheKey} TTL={TTL}", reportUrl, cacheKey, timeUntilMidnight);
 
             var members = await _dataProvider.GetData<MemberDto>(
                 reportUrl,
@@ -36,7 +75,7 @@ namespace BOTGC.API.Services.QueryHandlers
                 timeUntilMidnight
             );
 
-            _logger.LogInformation($"Successfully retrieved the {members.Count} member records.");
+            _logger.LogInformation("MembershipReport: Retrieved {Count} rows.", members.Count);
 
             members = members.Where(m => m.MembershipCategory?.ToLower() != "tests").ToList();
 

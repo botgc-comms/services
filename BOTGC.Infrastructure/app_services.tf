@@ -30,7 +30,7 @@ resource "azurerm_linux_web_app" "services_api_app" {
     "AppSettings__AzureFaceApi__SubscriptionKey"             = var.azure_face_api_key
 
     "AppSettings__Cache__Type"                               = "Redis"
-    "AppSettings__Cache__ShortTerm_TTL_mins"                 = "10080"
+    "AppSettings__Cache__ShortTerm_TTL_mins"                 = "15"
     "AppSettings__Cache__LongTerm_TTL_mins"                  = "10080"
     "AppSettings__Cache__RedisCache__ConnectionString"       = data.azurerm_redis_cache.redis.primary_connection_string
 
@@ -57,8 +57,18 @@ resource "azurerm_linux_web_app" "services_api_app" {
     "AppSettings__IG__Urls__ActiveCompetitionsUrl"           = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=active&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20"
     "AppSettings__IG__Urls__CompetitionSettingsUrl"          = "/compadmin3.php?compid={compid}&tab=settings"
     "AppSettings__IG__Urls__LeaderBoardUrl"                  = "/competition.php?compid={compid}&preview=1&sort={grossOrNett}"
-    "AppSettings__IG__URLS__SecurityLogMobileOrders"         = "/log.php?search=Mobile+order&person=&start={today}&starttime=&end={today}&endtime="
-    "AppSettings__IG__URLS__UpdateMemberPropertiesUrl"       = "/member.php?memberid={memberid}&requestType=ajax&ajaxaction=saveparamvalue"
+    "AppSettings__IG__Urls__SecurityLogMobileOrders"         = "/log.php?search=Mobile+order&person=&start={today}&starttime=&end={today}&endtime="
+    "AppSettings__IG__Urls__UpdateMemberPropertiesUrl"       = "/member.php?memberid={memberid}&requestType=ajax&ajaxaction=saveparamvalue"
+    "AppSettings__IG__Urls__LadyMembersReportUrl"            = "/membership_reports.php?tab=report&section=viewreport&md=5d71e7119d780dba4850506f622c1cfb"
+    "AppSettings__IG__Urls__AllWaitingMembersReportUrl"      = "/membership_reports.php?tab=report&section=viewreport&md=6da7bd30935f3f5f2374aa8206cd80ec"
+    "AppSettings__IG__Urls__NewMemberLookupReportUrl"        = "/membership_reports.php?tab=newmembers"
+    "AppSettings__IG__Urls__HandicapIndexHistoryReportUrl"   = "/roundmgmt.php?playerid={playerId}"
+    "AppSettings__IG__Urls__MembershipEventHistoryReportUrl" = "/membership_reports.php?tab=categorychanges&requestType=ajax&ajaxaction=getreport"
+    "AppSettings__IG__Urls__MemberCDHLookupUrl"              = "/membership_addmember.php?&requestType=ajax&ajaxaction=cdhidlookup"
+    "AppSettings__IG__Urls__CompetitionSummaryUrl"           = "/compadmin3.php?compid={compid}&tab=summary"
+    "AppSettings__IG__Urls__MemberDetailsUrl"                = "/member.php?memberid={memberid}"
+    "AppSettings__IG__Urls__StockItemsUrl"                   = "/tillstockcontrol.php"
+
 
     "AppSettings__Queue__ConnectionString" = data.azurerm_storage_account.services_api_sa.primary_connection_string
     "AppSettings__Queue__Name"             = azurerm_storage_queue.membership_applications_queue.name

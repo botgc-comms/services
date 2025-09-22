@@ -23,7 +23,7 @@ namespace BOTGC.API.Services.QueryHandlers
 
         public async override Task<MemberDetailsDto?> Handle(GetMemberQuery request, CancellationToken cancellationToken)
         {
-            var cacheKey = __CACHE_KEY.Replace("{memberid}", request.MemberNumber.ToString());
+            var cacheKey = __CACHE_KEY.Replace("{memberid}", request.MemberNumber.HasValue ? "mn_" + request.MemberNumber.ToString() : "pid" + request.PlayerId.Value.ToString());
 
             var playerIdsQuery = new GetPlayerIdsByMemberQuery();
             var playerIdLookup = await _mediator.Send(playerIdsQuery, cancellationToken);

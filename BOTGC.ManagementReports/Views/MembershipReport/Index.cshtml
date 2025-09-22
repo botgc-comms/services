@@ -274,41 +274,43 @@
             const fyEnd = new Date("@Model.FinancialYearEnd.ToString("yyyy-MM-dd")");
             const today = new Date("@Model.Today.ToString("yyyy-MM-dd")");
 
-            // Restore key dates (e.g., start of financial year)
+            const fmt = d => new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
+
             const keyDates = [
-                {
-                    label: "Start of Financial Year",
-                    date: fyStart,
-                    color: "black",
-                    dashed: false
-                },
-                {
-                    label: "End of Financial Year",
-                    date: fyEnd,
-                    color: "black",
-                    dashed: false
-                },
-                {
-                    label: "Today",
-                        date: today,
-                    color: "orange",
-                    dashed: false
-                }
+              { label: "Start of Financial Year", date: fyStart, color: "black",  dashed: false },
+              { label: "End of Financial Year",   date: fyEnd,   color: "black",  dashed: false },
+              { label: "Today",                   date: today,   color: "orange", dashed: false }
             ];
 
-            const annotations = keyDates.map(kd => ({
+            const annotationsObj = {
+              fyStart: {
                 type: "line",
-                xMin: kd.date,
-                xMax: kd.date,
-                borderColor: kd.color,
+                scaleID: "x",
+                value: fmt(fyStart),         
+                borderColor: "black",
                 borderWidth: 1,
-                borderDash: kd.dashed ? [5, 5] : undefined,
-                label: {
-                    content: kd.label,
-                    enabled: true,
-                    position: "start"
-                }
-            }));
+                borderDash: undefined,
+                label: { content: "Start of Financial Year", enabled: true, position: "start" }
+              },
+              fyEnd: {
+                type: "line",
+                scaleID: "x",
+                value: fmt(fyEnd),
+                borderColor: "black",
+                borderWidth: 1,
+                label: { content: "End of Financial Year", enabled: true, position: "start" }
+              },
+              today: {
+                type: "line",
+                scaleID: "x",
+                value: fmt(today),
+                borderColor: "orange",
+                borderWidth: 1,
+                label: { content: "Today", enabled: true, position: "start" }
+              }
+            };
+
+            const annotations = Object.entries(annotationsObj).map(([_, v]) => v);
 
             // Prepare datasets for the first chart
             prepareMembershipChart(labels, playingMembers, nonPlayingMembers, targetPlayingMembers, annotations);
