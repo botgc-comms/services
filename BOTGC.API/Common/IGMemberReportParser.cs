@@ -7,6 +7,7 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Dto;
+using System.Globalization;
 
 namespace BOTGC.API.Common
 {
@@ -172,12 +173,26 @@ namespace BOTGC.API.Common
             return members;
         }
 
-        private DateTime? ParseDate(string date)
+        private static DateTime? ParseDate(string? s)
         {
-            if (DateTime.TryParse(date, out var parsedDate))
+            if (string.IsNullOrWhiteSpace(s)) return null;
+
+            s = s.Trim();
+
+            var gb = CultureInfo.GetCultureInfo("en-GB");
+
+            var formats = new[]
             {
-                return parsedDate;
-            }
+                "dd/MM/yyyy", "d/M/yyyy", "dd/MM/yy", "d/M/yy",
+                "yyyy-MM-dd", "yyyy-M-d", "yyyy/MM/dd", "yyyy/M/d"
+            };
+
+            if (DateTime.TryParseExact(s, formats, gb, DateTimeStyles.None, out var dt))
+                return dt;
+
+            if (DateTime.TryParse(s, gb, DateTimeStyles.None, out dt))
+                return dt;
+
             return null;
         }
     }
