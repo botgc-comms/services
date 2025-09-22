@@ -36,9 +36,9 @@ namespace BOTGC.API.Services
 
         private string GetFilePath(string key) => Path.Combine(_cacheDirectory, $"{key}.json");
 
-        public async Task<T?> GetAsync<T>(string key) where T : class
+        public async Task<T?> GetAsync<T>(string key, bool force = false) where T : class
         {
-            if (ShouldSkipCache())
+            if (!force && ShouldSkipCache())
             {
                 _logger.LogInformation("Skipping cache retrieval due to 'Cache-Control: no-cache' header.");
                 return null;

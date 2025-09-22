@@ -1,20 +1,22 @@
 using BOTGC.API;
 using BOTGC.API.Common;
-using BOTGC.API.Dto;
 using BOTGC.API.Extensions;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services;
-using BOTGC.API.Services.Queries;
-using BOTGC.API.Services.QueryHandlers;
 using BOTGC.API.Services.ReportServices;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.OpenApi.Models;
 using RedLockNet.SERedis;
 using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
-using System.Reflection;
+using System.Globalization;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+var gb = CultureInfo.GetCultureInfo("en-GB");
+CultureInfo.DefaultThreadCurrentCulture = gb;
+CultureInfo.DefaultThreadCurrentUICulture = gb;
 
 builder.Services.AddControllers();
 
@@ -145,6 +147,14 @@ else
 builder.Services.AddIGSupport();
 
 var app = builder.Build();
+
+var locOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(gb),
+    SupportedCultures = new List<CultureInfo> { gb },
+    SupportedUICultures = new List<CultureInfo> { gb }
+};
+app.UseRequestLocalization(locOptions);
 
 app.MapGet("/", () => Results.Ok("Service is running"))
    .AllowAnonymous()

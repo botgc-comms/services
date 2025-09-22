@@ -17,9 +17,9 @@ namespace BOTGC.API.Services
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         }
 
-        public Task<T?> GetAsync<T>(string key) where T : class
+        public Task<T?> GetAsync<T>(string key, bool force = false) where T : class
         {
-            if (ShouldSkipCache())
+            if (!force && ShouldSkipCache())
             {
                 _logger.LogInformation("Skipping cache retrieval due to 'Cache-Control: no-cache' header.");
                 return Task.FromResult<T?>(null);

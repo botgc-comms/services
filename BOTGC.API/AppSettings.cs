@@ -4,6 +4,8 @@
     {
         public AuthSettings Auth { get; set; } = new();
 
+        public bool LoadCachedHTML { get; set; } = false;
+
         public string TrophyFilePath { get; set; }
 
         public int ConcurrentRequestThrottle { get; set; } = 5;

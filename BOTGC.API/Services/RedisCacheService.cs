@@ -23,13 +23,13 @@ namespace BOTGC.API.Services
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         }
 
-        public async Task<T?> GetAsync<T>(string key) where T : class
+        public async Task<T?> GetAsync<T>(string key, bool force = false) where T : class
         {
             var gate = KeyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
             await gate.WaitAsync().ConfigureAwait(false);
             try
             {
-                if (ShouldSkipCache() && !IsKeyWarmedForThisRequest(key))
+                if (!force && ShouldSkipCache() && !IsKeyWarmedForThisRequest(key))
                 {
                     _logger.LogInformation("Skipping cache GET for key '{Key}' due to 'Cache-Control: no-cache' (first request in this context).", key);
                     return null;
