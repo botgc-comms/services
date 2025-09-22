@@ -7,6 +7,8 @@ namespace BOTGC.API.Services
 {
     public class IGDataProvider : IDataProvider
     {
+        private const string RawSuffix = "__raw";
+
         private readonly AppSettings _settings;
         private readonly ILogger<IGDataProvider> _logger;
         private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -14,7 +16,7 @@ namespace BOTGC.API.Services
 
         public IGDataProvider(IOptions<AppSettings> settings,
                               ILogger<IGDataProvider> logger,
-                              IGSessionService igSessionManagementService,                
+                              IGSessionService igSessionManagementService,
                               IServiceScopeFactory serviceScopeFactory)
         {
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
@@ -22,14 +24,12 @@ namespace BOTGC.API.Services
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
             _igSessionManagementService = igSessionManagementService ?? throw new ArgumentNullException(nameof(igSessionManagementService));
         }
-        
+
         public async Task<string?> PostData(string reportUrl,
-                                             Dictionary<string, string> data) 
+                                            Dictionary<string, string> data)
         {
-            // Step 1: Log in
             await _igSessionManagementService.WaitForLoginAsync();
 
-            // Step 2: Fetch the report page
             _logger.LogInformation("Sending data to {Url}", reportUrl);
             var response = await _igSessionManagementService.PostPageContentRaw(reportUrl, data);
 
@@ -37,11 +37,11 @@ namespace BOTGC.API.Services
         }
 
         public async Task<List<T>> PostData<T>(string reportUrl,
-                                                Dictionary<string, string> data, 
-                                                IReportParser<T> parser,
-                                                string? cacheKey = null,
-                                                TimeSpan? cacheTTL = null,
-                                                Func<T, List<HateoasLink>>? linkBuilder = null) where T : HateoasResource, new()
+                                               Dictionary<string, string> data,
+                                               IReportParser<T> parser,
+                                               string? cacheKey = null,
+                                               TimeSpan? cacheTTL = null,
+                                               Func<T, List<HateoasLink>>? linkBuilder = null) where T : HateoasResource, new()
         {
             ICacheService? cacheService = null;
 
@@ -60,19 +60,15 @@ namespace BOTGC.API.Services
 
             _logger.LogInformation("Starting report retrieval for {ReportType}...", typeof(T).Name);
 
-            // Step 1: Log in
             await _igSessionManagementService.WaitForLoginAsync();
 
-            // Step 2: Fetch the report page
             _logger.LogInformation("Fetching {ReportType} report from {Url}", typeof(T).Name, reportUrl);
             var doc = await _igSessionManagementService.PostPageContent(reportUrl, data);
 
             if (doc != null)
             {
-
                 var items = await parser.ParseReport(doc);
 
-                // Step 4: Add Hateoas Links
                 if (linkBuilder != null)
                 {
                     foreach (var item in items)
@@ -83,7 +79,14 @@ namespace BOTGC.API.Services
 
                 if (!string.IsNullOrEmpty(cacheKey))
                 {
-                    await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
+                    var ttl = cacheTTL ?? TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins);
+                    var rawTtl = TimeSpan.FromHours(1);
+
+                    await cacheService!.SetAsync(cacheKey!, items, ttl).ConfigureAwait(false);
+
+                    var rawKey = cacheKey + RawSuffix;
+                    var rawHtml = doc.DocumentNode.OuterHtml;
+                    await cacheService.SetAsync(rawKey, rawHtml, rawTtl).ConfigureAwait(false);
                 }
 
                 return items;
@@ -91,8 +94,7 @@ namespace BOTGC.API.Services
             else
             {
                 _logger.LogError("Failed to retrieve data from {Url} for {ReportType}", reportUrl, typeof(T).Name);
-
-                return null;
+                return null!;
             }
         }
 
@@ -146,16 +148,13 @@ namespace BOTGC.API.Services
 
             _logger.LogInformation("Starting report retrieval for {ReportType}...", typeof(T).Name);
 
-            // Step 1: Log in
             await _igSessionManagementService.WaitForLoginAsync();
 
-            // Step 2: Fetch the report page
             _logger.LogInformation("Fetching {ReportType} report from {Url}", typeof(T).Name, reportUrl);
             var doc = await _igSessionManagementService.GetPageContent(reportUrl);
 
             var items = await parse(doc);
 
-            // Step 4: Add Hateoas Links
             if (linkBuilder != null)
             {
                 foreach (var item in items)
@@ -166,7 +165,13 @@ namespace BOTGC.API.Services
 
             if (!string.IsNullOrEmpty(cacheKey) && cacheTTL != null && items.Any())
             {
-                await cacheService.SetAsync(cacheKey!, items, cacheTTL!.Value).ConfigureAwait(false);
+                var rawTtl = TimeSpan.FromHours(1);
+
+                await cacheService!.SetAsync(cacheKey!, items, cacheTTL.Value).ConfigureAwait(false);
+
+                var rawKey = cacheKey + RawSuffix;
+                var rawHtml = doc.DocumentNode.OuterHtml;
+                await cacheService.SetAsync(rawKey, rawHtml, rawTtl).ConfigureAwait(false);
             }
 
             return items;
