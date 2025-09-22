@@ -4,7 +4,7 @@
     {
         public AuthSettings Auth { get; set; } = new();
 
-        public bool LoadCachedHTML { get; set; } = false;
+        public bool UseCachedHtml { get; set; } = false;
 
         public string TrophyFilePath { get; set; }
 
