@@ -100,12 +100,18 @@ namespace BOTGC.API.Services
 
         private void MarkKeyWarmedForThisRequest(string key)
         {
+            var ctx = _httpContextAccessor.HttpContext;
+            if (ctx == null) return; // background context: no-op
+
             var set = GetOrCreateWarmedSetForThisRequest();
             set.Add(key);
         }
 
         private void UnmarkKeyWarmedForThisRequest(string key)
         {
+            var ctx = _httpContextAccessor.HttpContext;
+            if (ctx == null) return; // background context: no-op
+
             var set = GetWarmedSetForThisRequest();
             set?.Remove(key);
         }
@@ -125,10 +131,17 @@ namespace BOTGC.API.Services
 
         private HashSet<string> GetOrCreateWarmedSetForThisRequest()
         {
-            var ctx = _httpContextAccessor.HttpContext ?? throw new InvalidOperationException("No active HttpContext.");
-            if (ctx.Items.TryGetValue(WarmedKeysItemsKey, out var obj) && obj is HashSet<string> set)
+            var ctx = _httpContextAccessor.HttpContext;
+            if (ctx == null)
             {
-                return set;
+                // In non-HTTP execution (background services), we do not track per-request warmed keys.
+                // Return a throwaway set to satisfy callers without throwing or leaking state.
+                return new HashSet<string>(StringComparer.Ordinal);
+            }
+
+            if (ctx.Items.TryGetValue(WarmedKeysItemsKey, out var obj) && obj is HashSet<string> existing)
+            {
+                return existing;
             }
 
             var newSet = new HashSet<string>(StringComparer.Ordinal);
