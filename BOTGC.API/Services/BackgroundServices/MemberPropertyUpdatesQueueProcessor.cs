@@ -56,7 +56,7 @@ namespace BOTGC.API.Services.BackgroundServices
 
                         try
                         {
-                            var query = new SetMemberPropertiesQuery()
+                            var query = new SetMemberPropertiesCommand()
                             {
                                 Property = propertyUpdate.Property,
                                 MemberId = propertyUpdate.MemberId,

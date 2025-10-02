@@ -3,7 +3,7 @@ using MediatR;
 
 namespace BOTGC.API.Services.Queries
 {
-    public record SubmitNewMemberApplicactionQuery : QueryBase<NewMemberApplicationResultDto?>
+    public record SubmitNewMemberApplicactionCommand : QueryBase<NewMemberApplicationResultDto?>
     {
         public required NewMemberApplicationDto Application { get; init; }
     }

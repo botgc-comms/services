@@ -1,0 +1,320 @@
+﻿// ------ Variables ------
+$app-max: 1100px;
+$radius: 12px;
+$shadow: 0 1px 3px rgba(0,0,0,.15);
+$muted: #6b7280;
+
+// Category colour tokens (roughly matching your till palette)
+$cat-cola: #d54b4b;
+$cat-lemonade: #b9c033;
+$cat-ciders: #e37ea0;
+$cat-water: #f4f4f4;
+$cat-j2o: #efe27b;
+$cat-cans: #f05f5f;
+$cat-cordials: #98d27d;
+$cat-orange-juice: #ffa54f;
+$cat-ginger-beer: #9a7ce6;
+
+// ------ Base ------
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    line-height: 1.4;
+    background: #fafafa;
+    color: #111;
+}
+
+.app-wrap {
+    max-width: $app-max;
+    margin: 1rem auto;
+    padding: 0 1rem 2rem;
+}
+
+// ------ Utilities ------
+.muted {
+    color: $muted;
+}
+
+.inline {
+    display: inline-block;
+}
+
+.tag {
+    display: inline-block;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    background: #eee;
+    font-size: .875rem;
+}
+
+// ------ Buttons & actions ------
+button {
+    appearance: none;
+    border: 1px solid #ddd;
+    background: #fff;
+    padding: .6rem .9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 1px 0 rgba(0,0,0,.06);
+
+    &:hover {
+        background: #f6f6f6;
+    }
+
+    &:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+}
+
+.actions {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin-bottom: .75rem;
+}
+
+// ------ Tiles (till-style) ------
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.tile {
+    border-radius: $radius;
+    padding: 12px 10px;
+    min-height: 86px;
+    box-shadow: $shadow;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 600;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,.06);
+
+    .tile__name {
+        margin-bottom: 4px;
+    }
+
+    small {
+        display: block;
+        font-weight: 400;
+        opacity: .85;
+    }
+}
+
+.tile--search {
+    background: #ffffff;
+}
+
+// Category colourisation
+.cat-cola {
+    background: $cat-cola;
+    color: #fff;
+}
+
+.cat-lemonade {
+    background: $cat-lemonade;
+    color: #222;
+}
+
+.cat-ciders {
+    background: $cat-ciders;
+    color: #222;
+}
+
+.cat-water {
+    background: $cat-water;
+    color: #111;
+}
+
+.cat-j2o {
+    background: $cat-j2o;
+    color: #222;
+}
+
+.cat-cans {
+    background: $cat-cans;
+    color: #fff;
+}
+
+.cat-cordials {
+    background: $cat-cordials;
+    color: #222;
+}
+
+.cat-orange-juice {
+    background: $cat-orange-juice;
+    color: #222;
+}
+
+.cat-ginger-beer {
+    background: $cat-ginger-beer;
+    color: #fff;
+}
+
+// ------ Sheet ------
+.sheet {
+    margin-top: 1rem;
+
+    summary {
+        font-weight: 700;
+        cursor: pointer;
+        margin: .25rem 0 .5rem 0;
+    }
+
+    &__table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: $radius;
+        overflow: hidden;
+        box-shadow: $shadow;
+
+        th, td {
+            padding: .6rem .7rem;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            font-size: .95rem;
+        }
+
+        thead th {
+            background: #f6f6f6;
+            font-weight: 700;
+        }
+
+        tbody tr:hover {
+            background: #fafafa;
+        }
+    }
+}
+
+// ------ Dialogs ------
+dialog {
+    border: none;
+    border-radius: 14px;
+    padding: 0;
+
+    &::backdrop {
+        background: rgba(0,0,0,.35);
+    }
+
+    article {
+        padding: 1rem 1rem 1rem 1rem;
+        width: min(640px, 92vw);
+
+        header {
+            margin-bottom: .5rem;
+        }
+
+        footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: .5rem;
+            margin-top: .75rem;
+        }
+    }
+}
+
+// ------ Reasons grid ------
+.reasons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+    margin: .5rem 0 1rem 0;
+}
+
+.reason-btn {
+    padding: .6rem .8rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+
+    &:hover {
+        background: #f0f0f0;
+    }
+}
+
+// ------ Forms ------
+input[type="search"],
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: .55rem .6rem;
+    border-radius: 8px;
+    border: 1px solid #d9d9d9;
+    background: #fff;
+
+    &:focus {
+        outline: 2px solid #9ecbff;
+        border-color: #9ecbff;
+    }
+}
+
+label {
+    display: block;
+    margin: .5rem 0;
+}
+
+
+/* --- Add/adjust these in site.scss --- */
+
+/* New palette for current categories */
+$cat-beer: #ffd166;
+$cat-cider: #c8f7c5;
+$cat-wine: #e9c4c4;
+$cat-soft-drink: #cfe3ff;
+
+/* Category colourisation for new categories */
+.cat-beer {
+    background: $cat-beer;
+    color: #222;
+}
+
+.cat-cider {
+    background: $cat-cider;
+    color: #222;
+}
+
+.cat-wine {
+    background: $cat-wine;
+    color: #222;
+}
+
+.cat-soft-drink {
+    background: $cat-soft-drink;
+    color: #222;
+}
+
+/* Optional: specific “can” styling if you want them to pop like till buttons */
+.cat-can, .cat-cans {
+    background: #f05f5f;
+    color: #fff;
+}
+
+.qty-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.qty-quick {
+    display: flex;
+    gap: 6px;
+}
+
+.qty-quick button {
+    padding: .45rem .6rem;
+}

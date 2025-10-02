@@ -6,5 +6,4 @@
         public List<string> Updated { get; set; } = new();
         public List<string> ExistingMondayIds { get; set; } = new();
     }
-
 }

@@ -2,6 +2,7 @@
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services.Queries;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Extensions;
 
@@ -9,13 +10,13 @@ namespace BOTGC.API.Services.QueryHandlers
 {
     public class SetMemberPropertiesHandler(IOptions<AppSettings> settings,
                                             ILogger<SetMemberPropertiesHandler> logger,
-                                            IDataProvider dataProvider) : QueryHandlerBase<SetMemberPropertiesQuery, bool>
+                                            IDataProvider dataProvider) : QueryHandlerBase<SetMemberPropertiesCommand, bool>
     {
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly ILogger<SetMemberPropertiesHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         private readonly IDataProvider _dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
 
-        public async override Task<bool> Handle(SetMemberPropertiesQuery request, CancellationToken cancellationToken)
+        public async override Task<bool> Handle(SetMemberPropertiesCommand request, CancellationToken cancellationToken)
         {
             try
             {

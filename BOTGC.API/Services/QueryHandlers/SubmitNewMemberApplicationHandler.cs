@@ -11,7 +11,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                                    IMediator mediator,
                                                    ILogger<SubmitNewMemberApplicationHandler> logger,
                                                    IDataProvider dataProvider,
-                                                   IReportParser<NewMemberResponseDto> reportParser) : QueryHandlerBase<SubmitNewMemberApplicactionQuery, NewMemberApplicationResultDto?>
+                                                   IReportParser<NewMemberResponseDto> reportParser) : QueryHandlerBase<SubmitNewMemberApplicactionCommand, NewMemberApplicationResultDto?>
     {
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
@@ -19,7 +19,7 @@ namespace BOTGC.API.Services.QueryHandlers
         private readonly IDataProvider _dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
         private readonly IReportParser<NewMemberResponseDto> _reportParser = reportParser ?? throw new ArgumentNullException(nameof(reportParser));
 
-        public async override Task<NewMemberApplicationResultDto?> Handle(SubmitNewMemberApplicactionQuery request, CancellationToken cancellationToken)
+        public async override Task<NewMemberApplicationResultDto?> Handle(SubmitNewMemberApplicactionCommand request, CancellationToken cancellationToken)
         {
             var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.NewMembershipApplicationUrl}";
             MemberCDHLookupDto? cdhLookup = null;

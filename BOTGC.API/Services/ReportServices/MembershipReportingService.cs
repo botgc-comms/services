@@ -67,8 +67,15 @@ namespace BOTGC.API.Services.ReportServices
             report.FinancialYearStart = startOfCurrentFinancialYear;
             report.FinancialYearEnd = endOfCurrentFinancialYear;
 
-            // Load budget and subscription fees
-            var (categoryFees, categoryFeeLookup, dailyTargetRevenue) = await LoadRevenueConfig(startOfCurrentFinancialYear, endOfCurrentFinancialYear);
+            var feeCoverageStart = startOfPreviousSubsYear;
+            var feeCoverageEnd = endOfCurrentFinancialYear;
+
+            var (categoryFees, categoryFeeLookup, dailyTargetRevenue) =
+                await LoadRevenueConfig(feeCoverageStart, feeCoverageEnd, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
+
+
+            //// Load budget and subscription fees
+            //var (categoryFees, categoryFeeLookup, dailyTargetRevenue) = await LoadRevenueConfig(startOfCurrentFinancialYear, endOfCurrentFinancialYear);
             
             // Get all of the events that have taken place up to the start of the last financial year
             var memberEventsQuery = new GetMemberEventsQuery
@@ -329,13 +336,16 @@ namespace BOTGC.API.Services.ReportServices
                 }
             }
 
-            // Fill future days + targets first
-            EnsureFullYearData(dataPoints, endOfCurrentSubsYear, dailyTargetRevenue);
-            ApplyGrowthTargets(dataPoints, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
+            // Pad forward to cover the entire plotting window
+            var plotFrom = startOfCurrentFinancialYear.AddMonths(-6).AddDays(-1); 
+            var plotTo = endOfCurrentFinancialYear.AddMonths(6);                
 
-            // Then pin the output list for this report window
+            EnsureFullYearData(dataPoints, plotTo, dailyTargetRevenue);
+            ApplyGrowthTargets(dataPoints, startOfCurrentFinancialYear, plotTo);
+
+            // Use the explicit plotting window
             report.DataPoints = dataPoints
-                .Where(dp => dp.Date >= startOfPreviousSubsYear && dp.Date <= endOfCurrentSubsYear)
+                .Where(dp => dp.Date >= plotFrom && dp.Date <= plotTo)
                 .ToList();
             report.DataPointsCsv = ConvertToCsv(report.DataPoints);
 
@@ -414,7 +424,6 @@ namespace BOTGC.API.Services.ReportServices
             // to the correct financial year and subscription year.
             if (startOfPreviousSubsYear.Year == 2024)          
             {
-
                 var headline18m = await BuildHeadline18mFeesAsync();
 
                 var synthetic24_25 = MakeSyntheticInvoices24_25(
@@ -485,8 +494,10 @@ namespace BOTGC.API.Services.ReportServices
         {
             // 23/24 subscription year (01-Apr-23 → 31-Mar-24) only
             var (annual, _, _) = await LoadRevenueConfig(
-                                      new DateTime(2023, 4, 1),
-                                      new DateTime(2024, 3, 31));
+                                    new DateTime(2023, 4, 1),    // fee coverage start (23/24 subs year)
+                                    new DateTime(2024, 3, 31),   // fee coverage end
+                                    new DateTime(2023, 10, 1),   // budget FY start (23/24 FY)
+                                    new DateTime(2024, 9, 30));  // budget FY end);
 
             var result = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
 
@@ -1093,7 +1104,8 @@ namespace BOTGC.API.Services.ReportServices
             Dictionary<string, List<(DateTime start, DateTime end, Fee[] fee)>> categoryFees,
             Dictionary<(string category, DateTime date), Fee[]> categoryFeeLookup,
             Dictionary<DateTime, Fee[]> dailyTargetRevenue
-        )> LoadRevenueConfig(DateTime financialYearStart, DateTime financialYearEnd)
+        )> LoadRevenueConfig(DateTime feeCoverageStart, DateTime feeCoverageEnd,
+                  DateTime budgetFinancialYearStart, DateTime budgetFinancialYearEnd)
         {
             string basePath = Path.Combine(AppContext.BaseDirectory, "Data");
 
@@ -1112,7 +1124,7 @@ namespace BOTGC.API.Services.ReportServices
                 var subStart = new DateTime(startYear, 4, 1);
                 var subEnd = new DateTime(endYear, 3, 31);
 
-                if (subEnd < financialYearStart || subStart > financialYearEnd) continue;
+                if (subEnd < feeCoverageStart || subStart > feeCoverageEnd) continue;
 
                 var feeData = JsonSerializer.Deserialize<Dictionary<string, decimal>>(await File.ReadAllTextAsync(file))!;
                 foreach (var kvp in feeData)
@@ -1138,12 +1150,12 @@ namespace BOTGC.API.Services.ReportServices
                 }
             }
 
-            var budgetFileKey = $"{financialYearStart.Year % 100}{financialYearEnd.Year % 100:D2}";
+            var budgetFileKey = $"{budgetFinancialYearStart.Year % 100}{budgetFinancialYearEnd.Year % 100:D2}";
             var budgetFileName = $"Membership Subscription Budget {budgetFileKey}.json";
             var budgetPath = Path.Combine(basePath, budgetFileName);
 
-            var budgetYearStart = int.Parse($"{financialYearStart.Year % 100}");
-            var budgetYearEnd = int.Parse($"{financialYearEnd.Year % 100}");
+            var budgetYearStart = int.Parse($"{budgetFinancialYearStart.Year % 100}");
+            var budgetYearEnd = int.Parse($"{budgetFinancialYearEnd.Year % 100}");
 
             var dailyTargetRevenue = new Dictionary<DateTime, Fee[]>();
 
@@ -1162,8 +1174,8 @@ namespace BOTGC.API.Services.ReportServices
                     for (int day = 0; day < daysInMonth; day++)
                     {
                         var current = monthStart.AddDays(day);
-                        if (current >= financialYearStart && current <= financialYearEnd)
-                            dailyTargetRevenue[current] = [ new Fee(budgetYearStart, budgetYearEnd, dailyAmount) ];
+                        if (current >= budgetFinancialYearStart && current <= budgetFinancialYearEnd)
+                            dailyTargetRevenue[current] = [new Fee(budgetYearStart, budgetYearEnd, dailyAmount)];
                     }
                 }
             }
@@ -1172,8 +1184,8 @@ namespace BOTGC.API.Services.ReportServices
                 _logger.LogWarning("Failed to load budget file: " + budgetPath);
             }
 
-            if (financialYearStart <= new DateTime(2024, 10, 1) &&
-                financialYearEnd >= new DateTime(2025, 3, 31))
+            if (feeCoverageStart <= new DateTime(2024, 10, 1) &&
+                feeCoverageEnd >= new DateTime(2025, 3, 31))    
             {
                 var legacyTblPath = Path.Combine(basePath, "MembershipFees 2324.json");
                 if (File.Exists(legacyTblPath))

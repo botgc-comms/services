@@ -118,6 +118,7 @@
         public string UpdateMemberPropertiesUrl { get; set; } = "/member.php?memberid={memberid}&requestType=ajax&ajaxaction=saveparamvalue";
         public string MemberDetailsUrl { get; set; } = "/member.php?memberid={memberid}";
         public string StockItemsUrl { get; set; } = "/tillstockcontrol.php";
+        public string TillOperatorsReportUrl { get; set; } = "/tilladmin.php?tab=operators";
     }
 
     public class FileCacheStorage

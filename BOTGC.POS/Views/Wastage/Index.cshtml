@@ -1,0 +1,368 @@
+﻿@model BOTGC.POS.Models.WastageViewModel
+@{
+    ViewData["Title"] = "Wastage";
+    var ops = Model.Operators.ToDictionary(o => o.Id, o => o.DisplayName);
+}
+
+<h2>Today’s Wastage Sheet <span class="tag">@DateTime.UtcNow.ToString("dddd, dd MMM yyyy")</span></h2>
+
+<p class="muted" id="operatorStatus">No operator selected.</p>
+
+<article class="sheet">
+    <details open>
+        <summary>Top items</summary>
+        <div class="tiles" id="topTiles">
+            @foreach (var p in Model.TopProducts)
+            {
+                var cls = p.Category.ToLowerInvariant().Replace(" ", "-").Replace("/", "-");
+                <div class="tile cat-@cls" data-id="@p.Id" data-name="@p.Name">
+                    <div class="tile__name">@p.Name</div>
+                    <small>@p.Category</small>
+                </div>
+            }
+            <div class="tile tile--search" id="openSearch">
+                <div class="tile__name">Find another item…</div>
+                <small>Search all products</small>
+            </div>
+        </div>
+    </details>
+
+    <details open>
+        <summary>Logged items</summary>
+        <table class="sheet__table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Operator</th>
+                    <th>Product</th>
+                    <th>Reason</th>
+                    <th>Qty</th>
+                </tr>
+            </thead>
+            <tbody id="sheetBody">
+                @foreach (var e in Model.Sheet.Entries.OrderByDescending(x => x.At))
+                {
+                    <tr data-id="@e.Id">
+                        <td>@e.At.ToLocalTime().ToString("HH:mm")</td>
+                        <td>@Model.Operators.FirstOrDefault(o => o.Id == e.OperatorId)?.DisplayName ?? "Unknown"</td>
+                        <td>@e.ProductName</td>
+                        <td>@e.Reason</td>
+                        <td>@e.Quantity</td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </details>
+</article>
+
+<dialog id="operatorModal">
+    <article>
+        <header><strong>Select operator</strong></header>
+        <div class="tiles" id="operatorTiles">
+            @foreach (var op in Model.Operators)
+            {
+                <div class="tile" data-opid="@op.Id">@op.DisplayName</div>
+            }
+        </div>
+        <footer>
+            <button type="button" onclick="document.getElementById('operatorModal').close()">Close</button>
+        </footer>
+    </article>
+</dialog>
+
+<dialog id="searchModal">
+    <article>
+        <header><strong>Find a product</strong></header>
+        <input type="search" id="searchInput" placeholder="Type to search…" />
+        <div id="searchResults" class="tiles tiles--search"></div>
+        <footer>
+            <button type="button" onclick="document.getElementById('searchModal').close()">Close</button>
+        </footer>
+    </article>
+</dialog>
+
+<dialog id="reasonModal">
+    <article>
+        <header><strong id="reasonTitle">Reason</strong></header>
+        <div class="reasons" id="reasonButtons">
+            @foreach (var r in Model.Reasons)
+            {
+                <button class="reason-btn" data-reasonid="@r.Id" data-defaultqty="@((r.DefaultQuantity?.ToString("0.##")) ?? "")">
+                    @r.Name @if (r.DefaultQuantity.HasValue)
+                    {
+                        <small class="muted">&nbsp;(Default: @r.DefaultQuantity)</small>
+                    }
+                </button>
+            }
+        </div>
+
+        <div class="qty-row">
+            <label>
+                Quantity
+                <input type="number" id="qty" min="0" step="0.01" />
+            </label>
+            <div class="qty-quick">
+                <button type="button" data-add="0.5">+0.5</button>
+                <button type="button" data-add="1">+1</button>
+                <button type="button" data-add="5">+5</button>
+            </div>
+        </div>
+
+        <label>
+            Or enter a custom reason
+            <input type="text" id="customReason" />
+        </label>
+
+        <footer class="actions">
+            <button id="logBtn" type="button">Log waste</button>
+            <button type="button" onclick="document.getElementById('reasonModal').close()">Cancel</button>
+        </footer>
+    </article>
+</dialog>
+
+@section Scripts {
+    <script>
+        const OP_COOKIE = "wastage_operator_id";
+        let selectedProduct = null;
+        let selectedReasonId = null;
+        let pollTimer = null;
+
+        function guid(){
+          return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+          );
+        }
+
+        function existingIds(){
+          return new Set(Array.from(document.querySelectorAll("#sheetBody tr")).map(tr => tr.dataset.id));
+        }
+
+        async function fetchSheet(){
+          const res = await fetch("/wastage/sheet");
+          if(!res.ok) return null;
+          return await res.json();
+        }
+
+        function addRow(operatorName, productName, reason, qty, id, atIso){
+          const tr=document.createElement("tr");
+          tr.dataset.id = id;
+          const at = atIso ? new Date(atIso) : new Date();
+          const hh=at.getHours().toString().padStart(2,"0");
+          const mm=at.getMinutes().toString().padStart(2,"0");
+          tr.innerHTML = `<td>${hh}:${mm}</td>
+                          <td>${operatorName}</td>
+                          <td>${productName}</td>
+                          <td>${reason}</td>
+                          <td>${qty}</td>`;
+          document.getElementById("sheetBody").prepend(tr);
+        }
+
+        async function pollSheet(){
+          try{
+            const sheet = await fetchSheet();
+            if(!sheet) return;
+            const have = existingIds();
+            const opLookup = {};
+            document.querySelectorAll("#operatorTiles .tile").forEach(t => opLookup[t.dataset.opid] = t.textContent);
+
+            sheet.entries.sort((a,b)=> new Date(b.at) - new Date(a.at));
+            sheet.entries.forEach(e => {
+              if(!have.has(e.id)){
+                const opName = opLookup[e.operatorId] || "Unknown";
+                addRow(opName, e.productName, e.reason, e.quantity, e.id, e.at);
+              }
+            });
+          }catch{}
+        }
+
+        function startPolling(){
+          if(pollTimer) clearInterval(pollTimer);
+          pollTimer = setInterval(pollSheet, 7000);
+        }
+
+        function getCookie(n){
+          const v = ("; "+document.cookie).split("; "+n+"=");
+          if(v.length===2) return v.pop().split(";").shift();
+          return null;
+        }
+        function deleteCookie(n){ document.cookie = `${n}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`; }
+
+        function setOperatorStatus(){
+          const id = getCookie(OP_COOKIE);
+          const el = document.getElementById("operatorStatus");
+          if(!id){ el.textContent = "No operator selected."; return; }
+          const tile = document.querySelector(`#operatorTiles .tile[data-opid='${id}']`);
+          if(!tile){
+            deleteCookie(OP_COOKIE);
+            el.textContent = "No operator selected.";
+            ensureOperatorSelected();
+            return;
+          }
+          el.textContent = `Operator: ${tile.textContent}`;
+        }
+
+        function orderOperatorsByLocalPopularity(){
+          const key="op_popularity";
+          const map = JSON.parse(localStorage.getItem(key) || "{}");
+          const tiles = Array.from(document.querySelectorAll("#operatorTiles .tile"));
+          tiles.sort((a,b)=>(map[b.dataset.opid]||0)-(map[a.dataset.opid]||0));
+          const host=document.getElementById("operatorTiles"); host.innerHTML=""; tiles.forEach(t=>host.appendChild(t));
+        }
+        function recordOperatorPopularity(opId){
+          const key="op_popularity";
+          const map = JSON.parse(localStorage.getItem(key) || "{}");
+          map[opId] = (map[opId] || 0) + 1;
+          localStorage.setItem(key, JSON.stringify(map));
+        }
+
+        function ensureOperatorSelected(){
+          if(!getCookie(OP_COOKIE)){
+            orderOperatorsByLocalPopularity();
+            document.getElementById("operatorModal").showModal();
+          }
+        }
+
+        Array.from(document.querySelectorAll("#operatorTiles .tile")).forEach(t=>{
+          t.addEventListener("click", async ()=>{
+            const id=t.dataset.opid;
+            const fd=new FormData(); fd.append("id",id);
+            const res = await fetch("/wastage/select-operator", { method:"POST", body:fd });
+            if(res.ok){
+              recordOperatorPopularity(id);
+              document.getElementById("operatorModal").close();
+              setOperatorStatus();
+            }
+          });
+        });
+
+        function productChosen(id,name){
+          if(!getCookie(OP_COOKIE)){ ensureOperatorSelected(); return; }
+          selectedProduct={id, name};
+          selectedReasonId=null;
+          document.getElementById("reasonTitle").textContent=`Reason for: ${name}`;
+          document.getElementById("customReason").value="";
+          document.getElementById("qty").value="";
+          document.getElementById("reasonModal").showModal();
+        }
+
+        Array.from(document.querySelectorAll("#topTiles .tile")).forEach(t=>{
+          if (t.id==="openSearch") return;
+          t.addEventListener("click", ()=>productChosen(t.dataset.id, t.dataset.name));
+        });
+
+        document.getElementById("openSearch").addEventListener("click", ()=>{
+          if(!getCookie(OP_COOKIE)){ ensureOperatorSelected(); return; }
+          document.getElementById("searchResults").innerHTML="";
+          document.getElementById("searchInput").value="";
+          document.getElementById("searchModal").showModal();
+          document.getElementById("searchInput").focus();
+        });
+
+        document.getElementById("searchInput").addEventListener("input", async (e)=>{
+          const q=e.target.value.trim();
+          const host=document.getElementById("searchResults");
+          host.innerHTML="";
+          if(q.length<2) return;
+          const res=await fetch(`/wastage/search?q=${encodeURIComponent(q)}`);
+          const data=await res.json();
+          data.forEach(p=>{
+            const div=document.createElement("div");
+            div.className="tile";
+            div.textContent=p.name;
+            div.dataset.id=p.id; div.dataset.name=p.name;
+            div.addEventListener("click", ()=>{
+              document.getElementById("searchModal").close();
+              productChosen(p.id, p.name);
+            });
+            host.appendChild(div);
+          });
+        });
+
+        Array.from(document.querySelectorAll(".reason-btn")).forEach(b=>{
+          b.addEventListener("click", ()=>{
+            selectedReasonId=b.dataset.reasonid;
+            const d=b.dataset.defaultqty;
+            if(d) document.getElementById("qty").value=d;
+          });
+        });
+
+        document.getElementById("logBtn").addEventListener("click", async ()=>{
+          if(!selectedProduct) return;
+          const qty=parseFloat(document.getElementById("qty").value || "0");
+          if(!(qty>0)){ alert("Enter a quantity greater than zero."); return; }
+          const custom=document.getElementById("customReason").value.trim();
+
+          const fd=new FormData();
+          fd.append("productId", selectedProduct.id);
+          fd.append("productName", selectedProduct.name);
+          if(selectedReasonId) fd.append("reasonId", selectedReasonId);
+          if(custom) fd.append("customReason", custom);
+          fd.append("quantity", qty.toString());
+          fd.append("clientId", guid());
+
+          const res=await fetch("/wastage/log", { method:"POST", body:fd });
+          if(res.status===401){ ensureOperatorSelected(); return; }
+          if(res.ok){
+            const opTile = document.querySelector(`#operatorTiles .tile[data-opid='${getCookie(OP_COOKIE)}']`);
+            const opName = opTile ? opTile.textContent : "Unknown";
+            const id = Array.from(fd.entries()).find(kv => kv[0]==="clientId")[1];
+            addRow(opName, selectedProduct.name, custom || getReasonName(selectedReasonId), qty, id, null);
+            selectedProduct=null; selectedReasonId=null;
+            document.getElementById("reasonModal").close();
+          }
+        });
+
+        function getReasonName(id){
+          if(!id) return "Unspecified";
+          const btn=document.querySelector(`.reason-btn[data-reasonid='${id}']`);
+          return btn ? btn.firstChild.textContent.trim() : "Unspecified";
+        }
+
+        setOperatorStatus();
+        ensureOperatorSelected();
+        startPolling();
+
+        // --- SignalR connection ---
+        let connection = null;
+
+        function startSignalR(){
+          connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/wastage")
+            .withAutomaticReconnect()
+            .build();
+
+          connection.on("EntryAdded", e => {
+            // Ignore if we already have this row
+            const have = new Set(Array.from(document.querySelectorAll("#sheetBody tr")).map(tr => tr.dataset.id));
+            if (have.has(e.id)) return;
+            addRow(e.operatorName, e.productName, e.reason, e.quantity, e.id, e.atIso);
+          });
+
+          connection.on("SheetSubmitted", e => {
+            // Optional: clear UI or show a banner
+            // location.reload();
+          });
+
+          connection.start().catch(err => console.error(err));
+        }
+
+        // Update your existing addRow to accept an id and ISO timestamp (already done in prior code)
+        function addRow(operatorName, productName, reason, qty, id, atIso){
+          const tr=document.createElement("tr");
+          tr.dataset.id = id;
+          const at = atIso ? new Date(atIso) : new Date();
+          const hh=at.getHours().toString().padStart(2,"0");
+          const mm=at.getMinutes().toString().padStart(2,"0");
+          tr.innerHTML=`<td>${hh}:${mm}</td>
+                        <td>${operatorName}</td>
+                        <td>${productName}</td>
+                        <td>${reason}</td>
+                        <td>${qty}</td>`;
+          document.getElementById("sheetBody").prepend(tr);
+        }
+
+        // Start everything
+        startSignalR();
+    </script>
+}

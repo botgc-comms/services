@@ -63,4 +63,5 @@ namespace BOTGC.API.Dto
         /// </summary>
         public int? StablefordPoints { get; set; }
     }
+
 }

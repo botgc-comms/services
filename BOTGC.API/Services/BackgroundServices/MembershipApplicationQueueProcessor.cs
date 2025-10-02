@@ -98,7 +98,7 @@ namespace BOTGC.API.Services.BackgroundServices
 
                         try
                         {
-                            var query = new SubmitNewMemberApplicactionQuery() { Application = newMember };
+                            var query = new SubmitNewMemberApplicactionCommand() { Application = newMember };
                             memberCreated = await mediator.Send(query, stoppingToken);
                         }
                         catch (Exception ex)
