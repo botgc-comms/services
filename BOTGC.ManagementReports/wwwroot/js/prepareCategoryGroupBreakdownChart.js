@@ -1,6 +1,8 @@
-function prepareCategoryGroupBreakdownChart(labels, dataPoints) {
+function prepareCategoryGroupBreakdownChart(labels, dataPoints, annotations) {
     const allGroups = [...new Set(dataPoints.flatMap(dp => dp.categoryGroupBreakdown ? Object.keys(dp.categoryGroupBreakdown) : []
     ))];
+
+    const combinedAnnotations = [...(annotations || [])];
 
     // Sort groups by average ascending
     const categoryAverages = {};
@@ -39,7 +41,8 @@ function prepareCategoryGroupBreakdownChart(labels, dataPoints) {
             maintainAspectRatio: true,
             aspectRatio: 1.7,
             plugins: {
-                legend: { position: 'top' }
+                legend: { position: 'top' },
+                annotation: { annotations: combinedAnnotations }
             },
             scales: {
                 x: { title: { display: true, text: "Date" } },
