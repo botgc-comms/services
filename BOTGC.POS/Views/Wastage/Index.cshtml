@@ -1,33 +1,55 @@
-﻿@model BOTGC.POS.Models.WastageViewModel
+﻿@using System.Globalization
+@model BOTGC.POS.Models.WastageViewModel
 @{
     ViewData["Title"] = "Wastage";
     var ops = Model.Operators.ToDictionary(o => o.Id, o => o.DisplayName);
 }
 
-<h2>Today’s Wastage Sheet <span class="tag">@DateTime.UtcNow.ToString("dddd, dd MMM yyyy")</span></h2>
+@functions {
+    public static string TextColourFor(string? hex)
+    {
+        if (string.IsNullOrWhiteSpace(hex)) return "#111";
 
-<p class="muted" id="operatorStatus">No operator selected.</p>
+        var c = hex.Trim().TrimStart('#');
+        if (c.Length == 3)
+            c = string.Concat(c.Select(ch => $"{ch}{ch}"));
+        if (c.Length != 6)
+            return "#111";
+
+        var r = int.Parse(c.Substring(0, 2), NumberStyles.HexNumber);
+        var g = int.Parse(c.Substring(2, 2), NumberStyles.HexNumber);
+        var b = int.Parse(c.Substring(4, 2), NumberStyles.HexNumber);
+
+        var yiq = (r * 299 + g * 587 + b * 114) / 1000;
+        return yiq >= 150 ? "#111" : "#fff";
+    }
+}
+
+<h2 class="mt-4 mt-sm-5 mt-md-5">Today’s Wastage Sheet <span class="tag">@DateTime.UtcNow.ToString("dddd, dd MMM yyyy")</span></h2>
+
+<div class="tiles" id="operatorStatus">
+    <span class="muted">No operator selected.</span>
+</div>
 
 <article class="sheet">
-    <details open>
+    <details open class="mt-4 mt-sm-5 mt-md-5">
         <summary>Top items</summary>
         <div class="tiles" id="topTiles">
             @foreach (var p in Model.TopProducts)
             {
                 var cls = p.Category.ToLowerInvariant().Replace(" ", "-").Replace("/", "-");
-                <div class="tile cat-@cls" data-id="@p.Id" data-name="@p.Name">
+                <div class="tile cat-@cls" data-id="@p.Id" data-name="@p.Name" data-igid="@p.igProductId" data-unit="@p.unit">
                     <div class="tile__name">@p.Name</div>
-                    <small>@p.Category</small>
+                    <small class="tile__division">@p.Category</small>
                 </div>
             }
             <div class="tile tile--search" id="openSearch">
                 <div class="tile__name">Find another item…</div>
-                <small>Search all products</small>
             </div>
         </div>
     </details>
 
-    <details open>
+    <details open class="mt-4 mt-sm-5 mt-md-5">
         <summary>Logged items</summary>
         <table class="sheet__table">
             <thead>
@@ -37,6 +59,7 @@
                     <th>Product</th>
                     <th>Reason</th>
                     <th>Qty</th>
+                    <th></th
                 </tr>
             </thead>
             <tbody id="sheetBody">
@@ -44,14 +67,20 @@
                 {
                     <tr data-id="@e.Id">
                         <td>@e.At.ToLocalTime().ToString("HH:mm")</td>
-                        <td>@Model.Operators.FirstOrDefault(o => o.Id == e.OperatorId)?.DisplayName ?? "Unknown"</td>
+                        <td>@(Model.Operators.FirstOrDefault(o => o.Id == e.OperatorId)?.DisplayName ?? "Unknown")</td>
                         <td>@e.ProductName</td>
                         <td>@e.Reason</td>
                         <td>@e.Quantity</td>
+                        <td>
+                            <button class="btn btn-link text-danger p-0 delete-btn"
+                                    data-id="@e.Id"
+                                    title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                 }
             </tbody>
-
         </table>
     </details>
 </article>
@@ -62,12 +91,17 @@
         <div class="tiles" id="operatorTiles">
             @foreach (var op in Model.Operators)
             {
-                <div class="tile" data-opid="@op.Id">@op.DisplayName</div>
+                var bg = string.IsNullOrWhiteSpace(op.ColorHex) ? "#cccccc" : op.ColorHex!;
+                var fg = TextColourFor(bg);
+                <div class="tile"
+                     style="background:@bg; color:@fg;"
+                     data-opid="@op.Id"
+                     data-color="@bg">
+                    @op.DisplayName
+                </div>
             }
         </div>
-        <footer>
-            <button type="button" onclick="document.getElementById('operatorModal').close()">Close</button>
-        </footer>
+        @* No close button *@
     </article>
 </dialog>
 
@@ -75,11 +109,22 @@
     <article>
         <header><strong>Find a product</strong></header>
         <input type="search" id="searchInput" placeholder="Type to search…" />
-        <div id="searchResults" class="tiles tiles--search"></div>
+        <div id="searchResults" class="tiles tiles--search  mt-4 mt-sm-5 mt-md-5"></div>
         <footer>
             <button type="button" onclick="document.getElementById('searchModal').close()">Close</button>
         </footer>
     </article>
+</dialog>
+
+<dialog id="confirmDeleteDialog">
+  <article>
+    <header><strong>Confirm delete</strong></header>
+    <p>Are you sure you want to delete this entry?</p>
+    <footer class="actions">
+      <button type="button" id="confirmDeleteYes" class="btn btn-danger">Delete</button>
+      <button type="button" id="confirmDeleteNo" class="btn btn-secondary">Cancel</button>
+    </footer>
+  </article>
 </dialog>
 
 <dialog id="reasonModal">
@@ -123,246 +168,475 @@
 
 @section Scripts {
     <script>
+        // ===== Config =====
         const OP_COOKIE = "wastage_operator_id";
+        const OP_TS_COOKIE = "wastage_operator_ts";
+        const ACTIVITY_KEY = "wastage_last_activity";
+        const OP_TIMEOUT_MINUTES = 10; // change if you want a different timeout
+
+        // ===== Auto Refresh at Midnight =====
+        let dayStamp = (new Date()).toDateString();
+
+        // ===== State =====
         let selectedProduct = null;
         let selectedReasonId = null;
         let pollTimer = null;
+        let timeoutTimer = null;
 
-        function guid(){
-          return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-          );
-        }
+       let deleteTargetId = null;
 
-        function existingIds(){
-          return new Set(Array.from(document.querySelectorAll("#sheetBody tr")).map(tr => tr.dataset.id));
-        }
+        document.addEventListener("click", e => {
+            const btn = e.target.closest(".delete-btn");
+            if (!btn) return;
 
-        async function fetchSheet(){
-          const res = await fetch("/wastage/sheet");
-          if(!res.ok) return null;
-          return await res.json();
-        }
+            deleteTargetId = btn.dataset.id;
+            if (!deleteTargetId) return;
 
-        function addRow(operatorName, productName, reason, qty, id, atIso){
-          const tr=document.createElement("tr");
-          tr.dataset.id = id;
-          const at = atIso ? new Date(atIso) : new Date();
-          const hh=at.getHours().toString().padStart(2,"0");
-          const mm=at.getMinutes().toString().padStart(2,"0");
-          tr.innerHTML = `<td>${hh}:${mm}</td>
-                          <td>${operatorName}</td>
-                          <td>${productName}</td>
-                          <td>${reason}</td>
-                          <td>${qty}</td>`;
-          document.getElementById("sheetBody").prepend(tr);
-        }
+            document.getElementById("confirmDeleteDialog").showModal();
+        });
 
-        async function pollSheet(){
-          try{
-            const sheet = await fetchSheet();
-            if(!sheet) return;
-            const have = existingIds();
-            const opLookup = {};
-            document.querySelectorAll("#operatorTiles .tile").forEach(t => opLookup[t.dataset.opid] = t.textContent);
-
-            sheet.entries.sort((a,b)=> new Date(b.at) - new Date(a.at));
-            sheet.entries.forEach(e => {
-              if(!have.has(e.id)){
-                const opName = opLookup[e.operatorId] || "Unknown";
-                addRow(opName, e.productName, e.reason, e.quantity, e.id, e.at);
-              }
-            });
-          }catch{}
-        }
-
-        function startPolling(){
-          if(pollTimer) clearInterval(pollTimer);
-          pollTimer = setInterval(pollSheet, 7000);
-        }
-
-        function getCookie(n){
-          const v = ("; "+document.cookie).split("; "+n+"=");
-          if(v.length===2) return v.pop().split(";").shift();
-          return null;
-        }
-        function deleteCookie(n){ document.cookie = `${n}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`; }
-
-        function setOperatorStatus(){
-          const id = getCookie(OP_COOKIE);
-          const el = document.getElementById("operatorStatus");
-          if(!id){ el.textContent = "No operator selected."; return; }
-          const tile = document.querySelector(`#operatorTiles .tile[data-opid='${id}']`);
-          if(!tile){
-            deleteCookie(OP_COOKIE);
-            el.textContent = "No operator selected.";
-            ensureOperatorSelected();
-            return;
-          }
-          el.textContent = `Operator: ${tile.textContent}`;
-        }
-
-        function orderOperatorsByLocalPopularity(){
-          const key="op_popularity";
-          const map = JSON.parse(localStorage.getItem(key) || "{}");
-          const tiles = Array.from(document.querySelectorAll("#operatorTiles .tile"));
-          tiles.sort((a,b)=>(map[b.dataset.opid]||0)-(map[a.dataset.opid]||0));
-          const host=document.getElementById("operatorTiles"); host.innerHTML=""; tiles.forEach(t=>host.appendChild(t));
-        }
-        function recordOperatorPopularity(opId){
-          const key="op_popularity";
-          const map = JSON.parse(localStorage.getItem(key) || "{}");
-          map[opId] = (map[opId] || 0) + 1;
-          localStorage.setItem(key, JSON.stringify(map));
-        }
-
-        function ensureOperatorSelected(){
-          if(!getCookie(OP_COOKIE)){
-            orderOperatorsByLocalPopularity();
-            document.getElementById("operatorModal").showModal();
-          }
-        }
-
-        Array.from(document.querySelectorAll("#operatorTiles .tile")).forEach(t=>{
-          t.addEventListener("click", async ()=>{
-            const id=t.dataset.opid;
-            const fd=new FormData(); fd.append("id",id);
-            const res = await fetch("/wastage/select-operator", { method:"POST", body:fd });
-            if(res.ok){
-              recordOperatorPopularity(id);
-              document.getElementById("operatorModal").close();
-              setOperatorStatus();
+        document.getElementById("confirmDeleteYes").addEventListener("click", async () => {
+            if (!deleteTargetId) return;
+            const res = await fetch(`/wastage/entry/${deleteTargetId}`, { method: "DELETE" });
+            if (res.ok) {
+                document.querySelector(`#sheetBody tr[data-id='${deleteTargetId}']`)?.remove();
+            } else {
+                alert("Failed to delete entry.");
             }
-          });
+            document.getElementById("confirmDeleteDialog").close();
+            deleteTargetId = null;
         });
 
-        function productChosen(id,name){
-          if(!getCookie(OP_COOKIE)){ ensureOperatorSelected(); return; }
-          selectedProduct={id, name};
-          selectedReasonId=null;
-          document.getElementById("reasonTitle").textContent=`Reason for: ${name}`;
-          document.getElementById("customReason").value="";
-          document.getElementById("qty").value="";
-          document.getElementById("reasonModal").showModal();
+        document.getElementById("confirmDeleteNo").addEventListener("click", () => {
+            deleteTargetId = null;
+            document.getElementById("confirmDeleteDialog").close();
+        });
+
+        // ===== Utils =====
+        function guid() {
+            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
         }
 
-        Array.from(document.querySelectorAll("#topTiles .tile")).forEach(t=>{
-          if (t.id==="openSearch") return;
-          t.addEventListener("click", ()=>productChosen(t.dataset.id, t.dataset.name));
-        });
+        function existingIds() {
+            return new Set(Array.from(document.querySelectorAll("#sheetBody tr")).map(tr => tr.dataset.id));
+        }
 
-        document.getElementById("openSearch").addEventListener("click", ()=>{
-          if(!getCookie(OP_COOKIE)){ ensureOperatorSelected(); return; }
-          document.getElementById("searchResults").innerHTML="";
-          document.getElementById("searchInput").value="";
-          document.getElementById("searchModal").showModal();
-          document.getElementById("searchInput").focus();
-        });
+        function getCookie(n) {
+            const v = ("; " + document.cookie).split("; " + n + "=");
+            if (v.length === 2) return v.pop().split(";").shift();
+            return null;
+        }
 
-        document.getElementById("searchInput").addEventListener("input", async (e)=>{
-          const q=e.target.value.trim();
-          const host=document.getElementById("searchResults");
-          host.innerHTML="";
-          if(q.length<2) return;
-          const res=await fetch(`/wastage/search?q=${encodeURIComponent(q)}`);
-          const data=await res.json();
-          data.forEach(p=>{
-            const div=document.createElement("div");
-            div.className="tile";
-            div.textContent=p.name;
-            div.dataset.id=p.id; div.dataset.name=p.name;
-            div.addEventListener("click", ()=>{
-              document.getElementById("searchModal").close();
-              productChosen(p.id, p.name);
+        function setCookie(n, val, days) {
+            let exp = "";
+            if (typeof days === "number") {
+                const d = new Date();
+                d.setTime(d.getTime() + days*24*60*60*1000);
+                exp = "; expires=" + d.toUTCString();
+            }
+            document.cookie = `${n}=${val}; path=/; SameSite=Lax${exp}`;
+        }
+
+        function deleteCookie(n) {
+            document.cookie = `${n}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+        }
+
+        function nowUtcMs() { return Date.now(); }
+
+        function markOperatorActivity() {
+            const now = String(nowUtcMs());
+            setCookie(OP_TS_COOKIE, now, 365);
+            try { localStorage.setItem(ACTIVITY_KEY, now); } catch {}
+        }
+
+        function operatorExpired() {
+            const ts = parseInt(getCookie(OP_TS_COOKIE) || "0", 10);
+            if (!ts) return true;
+            const elapsed = nowUtcMs() - ts;
+            return elapsed > OP_TIMEOUT_MINUTES * 60 * 1000;
+        }
+
+        function clearOperatorSelection() {
+            deleteCookie(OP_COOKIE);
+            deleteCookie(OP_TS_COOKIE);
+            const el = document.getElementById("operatorStatus");
+            if (el) el.innerHTML = '<span class="muted">No operator selected.</span>';
+        }
+
+        function enforceOperatorTimeout() {
+            if (!getCookie(OP_COOKIE)) return; // nothing selected
+            if (operatorExpired()) {
+                clearOperatorSelection();
+                ensureOperatorSelected();
+            }
+        }
+
+        function startTimeoutEnforcer() {
+            if (timeoutTimer) clearInterval(timeoutTimer);
+
+            let lastTick = nowUtcMs();
+            const INTERVAL_MS = 15000;
+
+            const tick = () => {
+                const now = nowUtcMs();
+                // If the page slept (big drift), enforce immediately
+                if (now - lastTick > INTERVAL_MS * 2) {
+                    enforceOperatorTimeout();
+                }
+                enforceOperatorTimeout();
+                lastTick = now;
+            };
+
+            timeoutTimer = setInterval(tick, INTERVAL_MS);
+
+            // Re-check when the page becomes active/visible again
+            window.addEventListener("focus", enforceOperatorTimeout);
+            window.addEventListener("pageshow", enforceOperatorTimeout);
+            document.addEventListener("visibilitychange", () => {
+                if (!document.hidden) enforceOperatorTimeout();
             });
-            host.appendChild(div);
-          });
-        });
 
-        Array.from(document.querySelectorAll(".reason-btn")).forEach(b=>{
-          b.addEventListener("click", ()=>{
-            selectedReasonId=b.dataset.reasonid;
-            const d=b.dataset.defaultqty;
-            if(d) document.getElementById("qty").value=d;
-          });
-        });
-
-        document.getElementById("logBtn").addEventListener("click", async ()=>{
-          if(!selectedProduct) return;
-          const qty=parseFloat(document.getElementById("qty").value || "0");
-          if(!(qty>0)){ alert("Enter a quantity greater than zero."); return; }
-          const custom=document.getElementById("customReason").value.trim();
-
-          const fd=new FormData();
-          fd.append("productId", selectedProduct.id);
-          fd.append("productName", selectedProduct.name);
-          if(selectedReasonId) fd.append("reasonId", selectedReasonId);
-          if(custom) fd.append("customReason", custom);
-          fd.append("quantity", qty.toString());
-          fd.append("clientId", guid());
-
-          const res=await fetch("/wastage/log", { method:"POST", body:fd });
-          if(res.status===401){ ensureOperatorSelected(); return; }
-          if(res.ok){
-            const opTile = document.querySelector(`#operatorTiles .tile[data-opid='${getCookie(OP_COOKIE)}']`);
-            const opName = opTile ? opTile.textContent : "Unknown";
-            const id = Array.from(fd.entries()).find(kv => kv[0]==="clientId")[1];
-            addRow(opName, selectedProduct.name, custom || getReasonName(selectedReasonId), qty, id, null);
-            selectedProduct=null; selectedReasonId=null;
-            document.getElementById("reasonModal").close();
-          }
-        });
-
-        function getReasonName(id){
-          if(!id) return "Unspecified";
-          const btn=document.querySelector(`.reason-btn[data-reasonid='${id}']`);
-          return btn ? btn.firstChild.textContent.trim() : "Unspecified";
+            // Cross-tab sync: if another tab updates activity, re-check here
+            window.addEventListener("storage", (e) => {
+                if (e.key === ACTIVITY_KEY) enforceOperatorTimeout();
+            });
         }
 
+        async function fetchSheet() {
+            const res = await fetch("/wastage/sheet");
+            if (!res.ok) return null;
+            return await res.json();
+        }
+
+        function addRow(operatorName, productName, reason, qty, id, atIso) {
+            const tr = document.createElement("tr");
+            tr.dataset.id = id;
+
+            const at = atIso ? new Date(atIso) : new Date();
+            const hh = at.getHours().toString().padStart(2, "0");
+            const mm = at.getMinutes().toString().padStart(2, "0");
+
+            tr.innerHTML =
+                `<td>${hh}:${mm}</td>
+                 <td>${operatorName}</td>
+                 <td>${productName}</td>
+                 <td>${reason}</td>
+                 <td>${qty}</td>
+                 <td>
+                    <button class="btn btn-link text-danger p-0 delete-btn" data-id="${id}" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                 </td>`;
+
+            document.getElementById("sheetBody").prepend(tr);
+        }
+
+        function attachActivityListeners() {
+            let lastMark = 0;
+            const THROTTLE_MS = 5000;
+
+            const maybeMark = () => {
+                if (!getCookie(OP_COOKIE)) return; // only while an operator is selected
+                const now = nowUtcMs();
+                if (now - lastMark >= THROTTLE_MS) {
+                    markOperatorActivity();
+                    lastMark = now;
+                }
+            };
+
+            document.addEventListener("click", maybeMark, { passive: true, capture: true });
+            document.addEventListener("keydown", maybeMark, { passive: true, capture: true });
+            document.addEventListener("pointerdown", maybeMark, { passive: true, capture: true });
+            document.addEventListener("touchstart", maybeMark, { passive: true, capture: true });
+        }
+
+        async function pollSheet() {
+            try {
+                const sheet = await fetchSheet();
+                if (!sheet) return;
+                const have = existingIds();
+                const opLookup = {};
+                document.querySelectorAll("#operatorTiles .tile").forEach(t => opLookup[t.dataset.opid] = t.textContent);
+
+                sheet.entries.sort((a,b)=> new Date(b.at) - new Date(a.at));
+                sheet.entries.forEach(e => {
+                    if (!have.has(e.id)) {
+                        const opName = opLookup[e.operatorId] || "Unknown";
+                        addRow(opName, e.productName, e.reason, e.quantity, e.id, e.at);
+                    }
+                });
+            } catch {}
+        }
+
+        function startPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = setInterval(pollSheet, 7000);
+        }
+
+        function getContrast(hex) {
+            if (!hex) return "#111";
+            var c = hex.replace(/^#/, "");
+            if (c.length === 3) c = c.split("").map(x => x + x).join("");
+            if (c.length !== 6) return "#111";
+            var r = parseInt(c.substr(0,2), 16);
+            var g = parseInt(c.substr(2,2), 16);
+            var b = parseInt(c.substr(4,2), 16);
+            var yiq = (r*299 + g*587 + b*114) / 1000;
+            return yiq >= 150 ? "#111" : "#fff";
+        }
+
+        function orderOperatorsByLocalPopularity() {
+            const key = "op_popularity";
+            const map = JSON.parse(localStorage.getItem(key) || "{}");
+            const tiles = Array.from(document.querySelectorAll("#operatorTiles .tile"));
+            tiles.sort((a,b)=> (map[b.dataset.opid]||0) - (map[a.dataset.opid]||0));
+            const host = document.getElementById("operatorTiles"); host.innerHTML = ""; tiles.forEach(t => host.appendChild(t));
+        }
+
+        function recordOperatorPopularity(opId) {
+            const key = "op_popularity";
+            const map = JSON.parse(localStorage.getItem(key) || "{}");
+            map[opId] = (map[opId] || 0) + 1;
+            localStorage.setItem(key, JSON.stringify(map));
+        }
+
+        function openOperatorDialog() {
+            orderOperatorsByLocalPopularity();
+            const dlg = document.getElementById("operatorModal");
+            dlg.addEventListener("cancel", e => e.preventDefault());
+            dlg.showModal();
+        }
+
+        function bindOperatorPillClick() {
+            const el = document.querySelector("#operatorStatus .tile--op");
+            if (!el) return;
+            el.style.cursor = "pointer";
+            el.addEventListener("click", openOperatorDialog);
+        }
+
+        function renderOperatorPill(name, color) {
+            const el = document.getElementById("operatorStatus");
+            const fg = getContrast(color);
+            el.innerHTML =
+                `<div class="tile tile--op" style="background:${color}; color:${fg};">
+                    <span class="pill-dot" style="background:${fg};"></span>
+                    <span class="tile__name">${name}</span>
+                </div>`;
+            bindOperatorPillClick();
+        }
+
+        function ensureOperatorSelected() {
+            const opId = getCookie(OP_COOKIE);
+            if (!opId) {
+                openOperatorDialog();
+                return;
+            }
+            if (operatorExpired()) {
+                clearOperatorSelection();
+                openOperatorDialog();
+            }
+        }
+
+        function setOperatorStatus() {
+            const id = getCookie(OP_COOKIE);
+            const el = document.getElementById("operatorStatus");
+            if (!id) { el.innerHTML = '<span class="muted">No operator selected.</span>'; return; }
+            const tile = document.querySelector(`#operatorTiles .tile[data-opid='${id}']`);
+            if (!tile) {
+                clearOperatorSelection();
+                ensureOperatorSelected();
+                return;
+            }
+            renderOperatorPill(tile.textContent.trim(), tile.dataset.color || "#555555");
+        }
+
+        // ===== Bindings =====
+        Array.from(document.querySelectorAll("#operatorTiles .tile")).forEach(t => {
+            t.addEventListener("click", async () => {
+                const id = t.dataset.opid;
+                const fd = new FormData(); fd.append("id", id);
+                const res = await fetch("/wastage/select-operator", { method: "POST", body: fd });
+                if (res.ok) {
+                    // Server sets OP_COOKIE; we ensure/refresh the timestamp on the client.
+                    recordOperatorPopularity(id);
+                    markOperatorActivity();
+                    document.getElementById("operatorModal").close();
+                    setOperatorStatus();
+                }
+            });
+        });
+
+        function productChosen(id, name, igid, unit) {
+            if (!getCookie(OP_COOKIE)) { ensureOperatorSelected(); return; }
+            if (operatorExpired()) { clearOperatorSelection(); ensureOperatorSelected(); return; }
+            selectedProduct = { id, name, igid, unit };
+            selectedReasonId = null;
+            document.getElementById("reasonTitle").textContent = `Reason for: ${name}`;
+            document.getElementById("customReason").value = "";
+            document.getElementById("qty").value = "";
+            document.getElementById("reasonModal").showModal();
+        }
+
+        Array.from(document.querySelectorAll("#topTiles .tile")).forEach(t => {
+            if (t.id === "openSearch") return;
+            t.addEventListener("click", () => productChosen(t.dataset.id, t.dataset.name, t.dataset.igid, t.dataset.unit));
+        });
+
+        document.getElementById("openSearch").addEventListener("click", () => {
+            if (!getCookie(OP_COOKIE)) { ensureOperatorSelected(); return; }
+            if (operatorExpired()) { clearOperatorSelection(); ensureOperatorSelected(); return; }
+            document.getElementById("searchResults").innerHTML = "";
+            document.getElementById("searchInput").value = "";
+            document.getElementById("searchModal").showModal();
+            document.getElementById("searchInput").focus();
+        });
+
+        document.getElementById("searchInput").addEventListener("input", async (e) => {
+            const q = e.target.value.trim();
+            const host = document.getElementById("searchResults");
+            host.innerHTML = "";
+            if (q.length < 2) return;
+
+            const res = await fetch(`/wastage/search?q=${encodeURIComponent(q)}`);
+            if (!res.ok) return;
+            const data = await res.json();
+
+            const catSlug = (s) =>
+                (s || "uncategorised")
+                    .toLowerCase()
+                    .replace(/\s+/g, "-")
+                    .replace(/\//g, "-");
+
+            data.forEach(p => {
+                const slug = catSlug(p.category);
+                const div = document.createElement("div");
+                div.className = `tile cat-${slug}`;
+
+                // datasets
+                div.dataset.id = p.id;
+                div.dataset.name = p.name;
+                div.dataset.igid = p.igProductId;
+                div.dataset.unit = p.unit;
+
+                // content (name + bottom-right category label)
+                div.innerHTML = `
+                    <div class="tile__name">${p.name}</div>
+                    <small class="tile__division">${p.category || ""}</small>
+                `;
+
+                div.addEventListener("click", () => {
+                    document.getElementById("searchModal").close();
+                    productChosen(p.id, p.name, p.igProductId, p.unit);
+                });
+
+                host.appendChild(div);
+            });
+        });
+
+
+        Array.from(document.querySelectorAll(".reason-btn")).forEach(b => {
+            b.addEventListener("click", () => {
+                selectedReasonId = b.dataset.reasonid;
+                const d = b.dataset.defaultqty;
+                if (d) document.getElementById("qty").value = d;
+            });
+        });
+
+        document.getElementById("logBtn").addEventListener("click", async () => {
+            if (!selectedProduct) return;
+
+            if (operatorExpired()) { clearOperatorSelection(); ensureOperatorSelected(); return; }
+
+            const qty = parseFloat(document.getElementById("qty").value || "0");
+            if (!(qty > 0)) { alert("Enter a quantity greater than zero."); return; }
+            const custom = document.getElementById("customReason").value.trim();
+
+            const fd = new FormData();
+            fd.append("productId", selectedProduct.id);
+            fd.append("igProductId", selectedProduct.igProductId);
+            fd.append("unit", selectedProduct.unit);
+            fd.append("productName", selectedProduct.name);
+            if (selectedReasonId) fd.append("reasonId", selectedReasonId);
+            if (custom) fd.append("customReason", custom);
+            fd.append("quantity", qty.toString());
+            fd.append("clientId", guid());
+
+            const res = await fetch("/wastage/log", { method: "POST", body: fd });
+            if (res.status === 401) { clearOperatorSelection(); ensureOperatorSelected(); return; }
+            if (res.ok) {
+                // Successful action = operator activity; refresh the timeout.
+                markOperatorActivity();
+
+                const opTile = document.querySelector(`#operatorTiles .tile[data-opid='${getCookie(OP_COOKIE)}']`);
+                const opName = opTile ? opTile.textContent : "Unknown";
+                const id = Array.from(fd.entries()).find(kv => kv[0] === "clientId")[1];
+                addRow(opName, selectedProduct.name, custom || getReasonName(selectedReasonId), qty, id, null);
+                selectedProduct = null; selectedReasonId = null;
+                document.getElementById("reasonModal").close();
+            }
+        });
+
+        function getReasonName(id) {
+            if (!id) return "Unspecified";
+            const btn = document.querySelector(`.reason-btn[data-reasonid='${id}']`);
+            return btn ? btn.firstChild.textContent.trim() : "Unspecified";
+        }
+
+        // ===== SignalR (existing) =====
+        let connection = null;
+        function startSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/wastage")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("EntryAdded", async () => {
+                await pollSheet();
+            });
+
+            connection.on("EntryDeleted", async () => {
+                await pollSheet();
+            });
+
+            connection.on("SheetSubmitted", e => { /* optional */ });
+
+            connection.start().catch(err => console.error(err));
+        }
+
+        function startDayGuard() {
+            function checkDay() {
+                const nowStamp = new Date().toDateString();
+                if (nowStamp !== dayStamp) {
+                    location.reload();
+                }
+            }
+
+            // Periodic check
+            setInterval(checkDay, 15000);
+
+            // Also check when the tab becomes visible
+            document.addEventListener("visibilitychange", () => {
+                if (!document.hidden) checkDay();
+            });
+
+            // Belt-and-braces: run once just after midnight
+            const now = new Date();
+            const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1, 0);
+            setTimeout(checkDay, next.getTime() - now.getTime());
+        }
+
+        // ===== Boot =====
         setOperatorStatus();
         ensureOperatorSelected();
         startPolling();
-
-        // --- SignalR connection ---
-        let connection = null;
-
-        function startSignalR(){
-          connection = new signalR.HubConnectionBuilder()
-            .withUrl("/hubs/wastage")
-            .withAutomaticReconnect()
-            .build();
-
-          connection.on("EntryAdded", e => {
-            // Ignore if we already have this row
-            const have = new Set(Array.from(document.querySelectorAll("#sheetBody tr")).map(tr => tr.dataset.id));
-            if (have.has(e.id)) return;
-            addRow(e.operatorName, e.productName, e.reason, e.quantity, e.id, e.atIso);
-          });
-
-          connection.on("SheetSubmitted", e => {
-            // Optional: clear UI or show a banner
-            // location.reload();
-          });
-
-          connection.start().catch(err => console.error(err));
-        }
-
-        // Update your existing addRow to accept an id and ISO timestamp (already done in prior code)
-        function addRow(operatorName, productName, reason, qty, id, atIso){
-          const tr=document.createElement("tr");
-          tr.dataset.id = id;
-          const at = atIso ? new Date(atIso) : new Date();
-          const hh=at.getHours().toString().padStart(2,"0");
-          const mm=at.getMinutes().toString().padStart(2,"0");
-          tr.innerHTML=`<td>${hh}:${mm}</td>
-                        <td>${operatorName}</td>
-                        <td>${productName}</td>
-                        <td>${reason}</td>
-                        <td>${qty}</td>`;
-          document.getElementById("sheetBody").prepend(tr);
-        }
-
-        // Start everything
         startSignalR();
+        startTimeoutEnforcer();
+        startDayGuard();
+        attachActivityListeners();
+
+        // If an operator is already selected, (re)start the timeout window now.
+        if (getCookie(OP_COOKIE)) markOperatorActivity();
     </script>
 }

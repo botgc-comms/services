@@ -42,4 +42,4 @@ namespace BOTGC.API.Services.QueryHandlers
             return true;
         }
     }
-}
+    }

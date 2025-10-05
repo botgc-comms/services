@@ -21,9 +21,7 @@ public partial class GetWasteSheetHandler
             using var scope = _serviceScopeFactory.CreateScope();
             var cache = scope.ServiceProvider.GetRequiredService<ICacheService>();
 
-
             var CacheKey = (DateTime d) => $"WasteSheet:{d:yyyyMMdd}";
-
 
             var date = request.Date.Date;
             var key = CacheKey(date);
@@ -47,7 +45,9 @@ public partial class GetWasteSheetHandler
                     request.ClientEntryId,
                     now,
                     request.OperatorId,
-                    request.ProductId,
+                    request.ProductId, 
+                    request.IGProductId, 
+                    request.Unit, 
                     request.ProductName,
                     request.Reason,
                     request.Quantity,
@@ -75,4 +75,5 @@ public partial class GetWasteSheetHandler
             return new AddResultDto(request.ClientEntryId, false);
         }
     }
+
 }

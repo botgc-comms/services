@@ -1,4 +1,75 @@
-@charset "UTF-8";
+.tile.cat-minerals, .operator-pill .cat-minerals.tile--op {
+  --bg: #cfe3ff;
+  --fg: #111;
+  --badge: rgb(182.16, 199.76, 224.4);
+  background: #cfe3ff !important;
+  color: #111 !important;
+}
+
+.tile.cat-wines, .operator-pill .cat-wines.tile--op {
+  --bg: #e9c4c4;
+  --fg: #111;
+  --badge: rgb(205.04, 172.48, 172.48);
+  background: #e9c4c4 !important;
+  color: #111 !important;
+}
+
+.tile.cat-draught-beer, .operator-pill .cat-draught-beer.tile--op {
+  --bg: #ffd166;
+  --fg: #111;
+  --badge: rgb(224.4, 183.92, 89.76);
+  background: #ffd166 !important;
+  color: #111 !important;
+}
+
+.tile.cat-spirits, .operator-pill .cat-spirits.tile--op {
+  --bg: #d6ccff;
+  --fg: #111;
+  --badge: rgb(188.32, 179.52, 224.4);
+  background: #d6ccff !important;
+  color: #111 !important;
+}
+
+.tile.cat-snacks, .operator-pill .cat-snacks.tile--op {
+  --bg: #ffe7c2;
+  --fg: #111;
+  --badge: rgb(224.4, 203.28, 170.72);
+  background: #ffe7c2 !important;
+  color: #111 !important;
+}
+
+.tile.cat-bottled-beer, .operator-pill .cat-bottled-beer.tile--op {
+  --bg: #ffe9a3;
+  --fg: #111;
+  --badge: rgb(224.4, 205.04, 143.44);
+  background: #ffe9a3 !important;
+  color: #111 !important;
+}
+
+.tile.cat-beer-cans, .operator-pill .cat-beer-cans.tile--op {
+  --bg: #ffd0d0;
+  --fg: #111;
+  --badge: rgb(224.4, 183.04, 183.04);
+  background: #ffd0d0 !important;
+  color: #111 !important;
+}
+
+.tile.cat-fortified-wines, .operator-pill .cat-fortified-wines.tile--op {
+  --bg: #f0b3c1;
+  --fg: #111;
+  --badge: rgb(211.2, 157.52, 169.84);
+  background: #f0b3c1 !important;
+  color: #111 !important;
+}
+
+.tile.cat-pantry, .operator-pill .cat-pantry.tile--op {
+  --bg: #f4f4f4;
+  --fg: #111;
+  --badge: rgb(214.72, 214.72, 214.72);
+  background: #f4f4f4 !important;
+  color: #111 !important;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -67,10 +138,11 @@ button:disabled {
   gap: 12px;
 }
 
-.tile {
+.tile, .operator-pill .tile--op {
+  position: relative;
   border-radius: 12px;
-  padding: 12px 10px;
-  min-height: 86px;
+  padding: 14px 10px;
+  min-height: 101px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   display: flex;
@@ -78,65 +150,26 @@ button:disabled {
   justify-content: center;
   text-align: center;
   font-weight: 600;
-  background: #ffffff;
+  background: var(--bg, #ffffff);
+  color: var(--fg, #111);
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
-.tile .tile__name {
+.tile .tile__name, .operator-pill .tile--op .tile__name {
   margin-bottom: 4px;
 }
-.tile small {
-  display: block;
-  font-weight: 400;
-  opacity: 0.85;
+.tile .tile__division, .operator-pill .tile--op .tile__division {
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--badge, #666);
+  opacity: 0.95;
+  pointer-events: none;
 }
 
 .tile--search {
   background: #ffffff;
-}
-
-.cat-cola {
-  background: #d54b4b;
-  color: #fff;
-}
-
-.cat-lemonade {
-  background: #b9c033;
-  color: #222;
-}
-
-.cat-ciders {
-  background: #e37ea0;
-  color: #222;
-}
-
-.cat-water {
-  background: #f4f4f4;
-  color: #111;
-}
-
-.cat-j2o {
-  background: #efe27b;
-  color: #222;
-}
-
-.cat-cans {
-  background: #f05f5f;
-  color: #fff;
-}
-
-.cat-cordials {
-  background: #98d27d;
-  color: #222;
-}
-
-.cat-orange-juice {
-  background: #ffa54f;
-  color: #222;
-}
-
-.cat-ginger-beer {
-  background: #9a7ce6;
-  color: #fff;
 }
 
 .sheet {
@@ -178,7 +211,7 @@ dialog::backdrop {
   background: rgba(0, 0, 0, 0.35);
 }
 dialog article {
-  padding: 1rem 1rem 1rem 1rem;
+  padding: 1rem;
   width: min(640px, 92vw);
 }
 dialog article header {
@@ -230,35 +263,6 @@ label {
   margin: 0.5rem 0;
 }
 
-/* --- Add/adjust these in site.scss --- */
-/* New palette for current categories */
-/* Category colourisation for new categories */
-.cat-beer {
-  background: #ffd166;
-  color: #222;
-}
-
-.cat-cider {
-  background: #c8f7c5;
-  color: #222;
-}
-
-.cat-wine {
-  background: #e9c4c4;
-  color: #222;
-}
-
-.cat-soft-drink {
-  background: #cfe3ff;
-  color: #222;
-}
-
-/* Optional: specific “can” styling if you want them to pop like till buttons */
-.cat-can, .cat-cans {
-  background: #f05f5f;
-  color: #fff;
-}
-
 .qty-row {
   display: flex;
   gap: 12px;
@@ -272,4 +276,71 @@ label {
 
 .qty-quick button {
   padding: 0.45rem 0.6rem;
+}
+
+.qr-block {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.qr-block img {
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+.qr-block .qr-url {
+  font-size: 0.9rem;
+  max-width: 420px;
+  word-break: break-all;
+}
+
+.operator-pill .tile--op {
+  display: inline-flex;
+  min-height: 44px;
+  padding: 12px 14px;
+}
+.operator-pill .pill-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--fg, #111);
+  opacity: 0.9;
+  margin-right: 0.5rem;
+}
+
+:root {
+  --modal-gutter: 20px;
+}
+
+#operatorModal {
+  inset: 0;
+  margin: auto;
+  padding: 0;
+}
+
+#operatorModal article {
+  width: min(560px, 100vw - 2 * var(--modal-gutter) - env(safe-area-inset-left) - env(safe-area-inset-right));
+  max-height: calc(100vh - 2 * var(--modal-gutter) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow: auto;
+  padding: 12px;
+  border-radius: 16px;
+}
+
+#operatorModal #operatorTiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+#operatorModal #operatorTiles .tile, #operatorModal #operatorTiles .operator-pill .tile--op, .operator-pill #operatorModal #operatorTiles .tile--op {
+  width: 100%;
+  height: 68px;
+  margin: 0;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }

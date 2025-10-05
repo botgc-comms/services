@@ -38,7 +38,7 @@ public sealed class HttpOperatorService : IOperatorService
 
         var ops = api
             .Where(o => o.IsActive)
-            .Select(o => new Operator(StableGuidFor(o.Id.ToString()), o.Name))
+            .Select(o => new Operator(StableGuidFor(o.Id.ToString()), o.Name, o.ColorHex))
             .OrderBy(o => o.DisplayName)
             .ToList();
 
@@ -55,7 +55,7 @@ public sealed class HttpOperatorService : IOperatorService
         return new Guid(hash);
     }
 
-    private sealed record ApiTillOperator(long Id, string Name, bool IsActive);
+    private sealed record ApiTillOperator(long Id, string Name, bool IsActive, string? ColorHex);
 }
 
 

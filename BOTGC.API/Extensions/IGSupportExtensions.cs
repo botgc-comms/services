@@ -8,6 +8,7 @@ using System.Net;
 using RedLockNet.SERedis.Configuration;
 using RedLockNet.SERedis;
 using StackExchange.Redis;
+using BOTGC.API.Models;
 
 namespace BOTGC.API.Extensions
 {
@@ -58,6 +59,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IQueueService<NewMemberApplicationDto>, MembershipApplicationQueueService>();
             services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, NewMemberAddedQueueService>();
             services.AddSingleton<IQueueService<NewMemberPropertyUpdateDto>, MemberPropertyUpdateQueueService>();
+            services.AddSingleton<IQueueService<WasteEntryCommandDto>, StockWastageQueueService>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 
@@ -77,6 +79,7 @@ namespace BOTGC.API.Extensions
             services.AddHostedService<MemberPropertyUpdatesQueueProcessor>();
             services.AddHostedService<NewMemberAddedQueueProcessor>();
             services.AddHostedService<StockLevelAnalysisQueueProcessor>();
+            services.AddHostedService<StockWastageQueueProcessor>();
             services.AddHostedService<StockLevelEnqueueScheduler>();
 
             // Register MediatR and scan for handlers in your assembly

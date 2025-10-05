@@ -7,22 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\js\assignCategoryColors.js" />
-    <None Include="wwwroot\js\getDistinctColor.js" />
-    <None Include="wwwroot\js\prepareAccRevenueChart.js" />
-    <None Include="wwwroot\js\prepareCategoryBreakdownChart.js" />
-    <None Include="wwwroot\js\prepareCategoryGroupBreakdownChart.js" />
-    <None Include="wwwroot\js\prepareJoinerLeaverBarChart.js" />
-    <None Include="wwwroot\js\prepareMembershipChart.js" />
-    <None Include="wwwroot\js\prepareRevenueChart.js" />
-    <None Include="wwwroot\js\prepareStackedData.js" />
-    <None Include="wwwroot\js\prepareWaitingListChar.js" />
-    <None Include="wwwroot\js\sortPlayingCategories.js" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.4" />
+    <PackageReference Include="QRCoder" Version="1.6.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.4" />
+    <Folder Include="wwwroot\js\dist\" />
   </ItemGroup>
 
   <Target Name="RunGulpTasks" BeforeTargets="Build">

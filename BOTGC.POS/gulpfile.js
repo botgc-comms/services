@@ -13,17 +13,7 @@ const paths = {
         './wwwroot/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js'
     ],
     app: [
-        './wwwroot/js/prepareCategoryGroupBreakdownChart.js',
-        './wwwroot/js/prepareCategoryBreakdownChart.js',
-        './wwwroot/js/prepareJoinerLeaverBarChart.js',
-        './wwwroot/js/prepareMembershipChart.js',
-        './wwwroot/js/prepareAccRevenueChart.js',
-        './wwwroot/js/prepareWaitingListChar.js',
-        './wwwroot/js/sortPlayingCategories.js',
-        './wwwroot/js/assignCategoryColors.js',
-        './wwwroot/js/prepareRevenueChart.js',
-        './wwwroot/js/prepareStackedData.js',
-        './wwwroot/js/getDistinctColor.js',
+        './wwwroot/js/site.js',
     ]
 };
 

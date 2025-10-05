@@ -1,6 +1,8 @@
-﻿using BOTGC.POS.Models;
+﻿using BOTGC.POS.Hubs;
+using BOTGC.POS.Models;
 using BOTGC.POS.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BOTGC.POS.Controllers;
 
@@ -12,13 +14,20 @@ public class WastageController : Controller
     private readonly IProductService _products;
     private readonly IReasonService _reasons;
     private readonly IWasteService _waste;
+    private readonly IHubContext<WastageHub> _hub;
 
-    public WastageController(IOperatorService operators, IProductService products, IReasonService reasons, IWasteService waste)
+    public WastageController(
+        IOperatorService operators,
+        IProductService products,
+        IReasonService reasons,
+        IWasteService waste,
+        IHubContext<WastageHub> hub)
     {
         _operators = operators;
         _products = products;
         _reasons = reasons;
         _waste = waste;
+        _hub = hub;
     }
 
     public async Task<IActionResult> Index()
@@ -65,6 +74,8 @@ public class WastageController : Controller
     [HttpPost("/wastage/log")]
     public async Task<IActionResult> Log(
         [FromForm] Guid productId,
+        [FromForm] long igProductId,
+        [FromForm] string unit, 
         [FromForm] string productName,
         [FromForm] Guid? reasonId,
         [FromForm] string? customReason,
@@ -88,14 +99,47 @@ public class WastageController : Controller
             DateTimeOffset.UtcNow,
             operatorId,
             productId,
+            igProductId, 
+            unit, 
             productName,
             reasonText ?? "Unspecified",
             quantity
         );
 
         await _waste.AddAsync(entry);
+
+        // Broadcast to all connected clients
+        await _hub.Clients.All.SendAsync("EntryAdded", new
+        {
+            id = entry.Id,
+            atIso = entry.At.ToString("o"),
+            operatorId = entry.OperatorId,
+            productId = entry.ProductId,
+            igProductId = entry.IGProductId, 
+            unit = entry.Unit, 
+            productName = entry.ProductName,
+            reason = entry.Reason,
+            quantity = entry.Quantity
+        });
+
         return Ok(new { ok = true });
     }
+
+    [HttpDelete("/wastage/entry/{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var result = await _waste.DeleteAsync(id);
+
+        if (!result)
+        {
+            return NotFound(new { ok = false, message = "Entry not found" });
+        }
+
+        await _hub.Clients.All.SendAsync("EntryDeleted", new { id });
+
+        return Ok(new { ok = true });
+    }
+
 
     [HttpPost("/wastage/submit")]
     public async Task<IActionResult> Submit()

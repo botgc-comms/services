@@ -13,9 +13,10 @@ builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSet
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<AppSettings>>().Value);
 
 builder.Services.AddSingleton<IOperatorService, HttpOperatorService>();
-builder.Services.AddSingleton<IProductService, InMemoryProductService>();
+builder.Services.AddSingleton<IProductService, HttpProductService>();
 builder.Services.AddSingleton<IReasonService, InMemoryReasonService>();
 builder.Services.AddSingleton<IWasteService, HttpWasteService>();
+builder.Services.AddSingleton<NgrokState>();
 
 builder.Services.AddPosApiClients(builder.Configuration);
 
@@ -30,12 +31,12 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.Configure<ForwardedHeadersOptions>(o =>
 {
-    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                       | ForwardedHeaders.XForwardedProto
+                       | ForwardedHeaders.XForwardedHost;
     o.KnownNetworks.Clear();
     o.KnownProxies.Clear();
 });
-
-builder.Services.AddSingleton<NgrokState>();
 
 var app = builder.Build();
 
@@ -44,6 +45,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapHub<WastageHub>("/hubs/wastage");
+app.MapHub<NgrokHub>("/hubs/ngrok");
 
 app.MapControllerRoute(
     name: "default",

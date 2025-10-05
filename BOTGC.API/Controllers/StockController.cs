@@ -117,6 +117,8 @@ namespace BOTGC.API.Controllers
                     request.ClientEntryId,
                     request.OperatorId,
                     request.ProductId,
+                    request.IGProductId,
+                    request.Unit,
                     request.ProductName,
                     request.Reason,
                     request.Quantity,
@@ -137,6 +139,31 @@ namespace BOTGC.API.Controllers
             {
                 _logger.LogError(ex, "Error adding waste entry for {SheetDate}.", sheetDate.ToString("yyyy-MM-dd"));
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding the waste entry.");
+            }
+        }
+
+        [HttpDelete("wasteSheet/entry/{id}")]
+        public async Task<IActionResult> DeleteFromWasteSheet(Guid id, [FromQuery] DateTime? day = null)
+        {
+            var sheetDate = (day?.Date ?? DateTime.UtcNow.Date);
+            _logger.LogInformation("Deleting waste entry {EntryId} from sheet {SheetDate}.", id, sheetDate.ToString("yyyy-MM-dd"));
+
+            try
+            {
+                var cmd = new DeleteFromWasteSheetCommand(sheetDate, id);
+                var result = await _mediator.Send(cmd, HttpContext.RequestAborted);
+
+                if (!result.Found)
+                {
+                    return NotFound(new { ok = false, message = "Entry not found" });
+                }
+
+                return Ok(new { ok = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting waste entry {EntryId} for {SheetDate}.", id, sheetDate.ToString("yyyy-MM-dd"));
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the waste entry.");
             }
         }
 

@@ -5,6 +5,8 @@
         DateTimeOffset CreatedAtUtc,
         Guid OperatorId,
         Guid ProductId,
+        long IGProductId, 
+        string Unit, 
         string ProductName,
         string Reason,
         decimal Quantity,

@@ -1,4 +1,5 @@
-﻿using BOTGC.API.Interfaces;
+﻿using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
 using System.Collections.Concurrent;
 

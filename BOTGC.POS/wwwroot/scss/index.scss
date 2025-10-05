@@ -1,21 +1,38 @@
-﻿// ------ Variables ------
+﻿@use "sass:math";
+
+// ===== Variables =====
 $app-max: 1100px;
 $radius: 12px;
 $shadow: 0 1px 3px rgba(0,0,0,.15);
 $muted: #6b7280;
 
-// Category colour tokens (roughly matching your till palette)
-$cat-cola: #d54b4b;
-$cat-lemonade: #b9c033;
-$cat-ciders: #e37ea0;
-$cat-water: #f4f4f4;
-$cat-j2o: #efe27b;
-$cat-cans: #f05f5f;
-$cat-cordials: #98d27d;
-$cat-orange-juice: #ffa54f;
-$cat-ginger-beer: #9a7ce6;
+// Category palette (till-style)
+$categories: ( minerals: #cfe3ff, wines: #e9c4c4, draught-beer: #ffd166, spirits: #d6ccff, snacks: #ffe7c2, bottled-beer: #ffe9a3, beer-cans: #ffd0d0, fortified-wines: #f0b3c1, pantry: #f4f4f4 );
 
-// ------ Base ------
+// ===== Helpers =====
+@function text-on($color) {
+    $r: red($color);
+    $g: green($color);
+    $b: blue($color);
+    $yiq: math.div(($r * 299) + ($g * 587) + ($b * 114), 1000);
+    @return if($yiq >= 150, #111, #fff);
+}
+
+@mixin cat($name, $bg) {
+    .tile.cat-#{$name} {
+        --bg: #{$bg};
+        --fg: #{text-on($bg)};
+        --badge: #{mix(#000, $bg, 12%)};
+        background: #{$bg} !important;
+        color: #{text-on($bg)} !important;
+    }
+}
+
+@each $name, $bg in $categories {
+    @include cat($name, $bg);
+}
+
+// ===== Base =====
 * {
     box-sizing: border-box;
 }
@@ -38,7 +55,7 @@ body {
     padding: 0 1rem 2rem;
 }
 
-// ------ Utilities ------
+// ===== Utilities =====
 .muted {
     color: $muted;
 }
@@ -55,7 +72,7 @@ body {
     font-size: .875rem;
 }
 
-// ------ Buttons & actions ------
+// ===== Buttons & Actions =====
 button {
     appearance: none;
     border: 1px solid #ddd;
@@ -82,7 +99,7 @@ button {
     margin-bottom: .75rem;
 }
 
-// ------ Tiles (till-style) ------
+// ===== Tiles (till-style) =====
 .tiles {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -90,9 +107,10 @@ button {
 }
 
 .tile {
+    position: relative;
     border-radius: $radius;
-    padding: 12px 10px;
-    min-height: 86px;
+    padding: 14px 10px;
+    min-height: 101px;
     box-shadow: $shadow;
     cursor: pointer;
     display: flex;
@@ -100,17 +118,23 @@ button {
     justify-content: center;
     text-align: center;
     font-weight: 600;
-    background: #ffffff;
+    background: var(--bg, #ffffff);
+    color: var(--fg, #111);
     border: 1px solid rgba(0,0,0,.06);
 
     .tile__name {
         margin-bottom: 4px;
     }
 
-    small {
-        display: block;
-        font-weight: 400;
-        opacity: .85;
+    .tile__division {
+        position: absolute;
+        right: 10px;
+        bottom: 6px;
+        font-size: .75rem;
+        line-height: 1;
+        color: var(--badge, #666);
+        opacity: .95;
+        pointer-events: none;
     }
 }
 
@@ -118,53 +142,7 @@ button {
     background: #ffffff;
 }
 
-// Category colourisation
-.cat-cola {
-    background: $cat-cola;
-    color: #fff;
-}
-
-.cat-lemonade {
-    background: $cat-lemonade;
-    color: #222;
-}
-
-.cat-ciders {
-    background: $cat-ciders;
-    color: #222;
-}
-
-.cat-water {
-    background: $cat-water;
-    color: #111;
-}
-
-.cat-j2o {
-    background: $cat-j2o;
-    color: #222;
-}
-
-.cat-cans {
-    background: $cat-cans;
-    color: #fff;
-}
-
-.cat-cordials {
-    background: $cat-cordials;
-    color: #222;
-}
-
-.cat-orange-juice {
-    background: $cat-orange-juice;
-    color: #222;
-}
-
-.cat-ginger-beer {
-    background: $cat-ginger-beer;
-    color: #fff;
-}
-
-// ------ Sheet ------
+// ===== Sheet =====
 .sheet {
     margin-top: 1rem;
 
@@ -200,7 +178,7 @@ button {
     }
 }
 
-// ------ Dialogs ------
+// ===== Dialogs =====
 dialog {
     border: none;
     border-radius: 14px;
@@ -211,7 +189,7 @@ dialog {
     }
 
     article {
-        padding: 1rem 1rem 1rem 1rem;
+        padding: 1rem;
         width: min(640px, 92vw);
 
         header {
@@ -227,7 +205,7 @@ dialog {
     }
 }
 
-// ------ Reasons grid ------
+// ===== Reasons grid =====
 .reasons {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -247,7 +225,7 @@ dialog {
     }
 }
 
-// ------ Forms ------
+// ===== Forms =====
 input[type="search"],
 input[type="text"],
 input[type="number"] {
@@ -268,42 +246,7 @@ label {
     margin: .5rem 0;
 }
 
-
-/* --- Add/adjust these in site.scss --- */
-
-/* New palette for current categories */
-$cat-beer: #ffd166;
-$cat-cider: #c8f7c5;
-$cat-wine: #e9c4c4;
-$cat-soft-drink: #cfe3ff;
-
-/* Category colourisation for new categories */
-.cat-beer {
-    background: $cat-beer;
-    color: #222;
-}
-
-.cat-cider {
-    background: $cat-cider;
-    color: #222;
-}
-
-.cat-wine {
-    background: $cat-wine;
-    color: #222;
-}
-
-.cat-soft-drink {
-    background: $cat-soft-drink;
-    color: #222;
-}
-
-/* Optional: specific “can” styling if you want them to pop like till buttons */
-.cat-can, .cat-cans {
-    background: #f05f5f;
-    color: #fff;
-}
-
+// ===== Quantity row =====
 .qty-row {
     display: flex;
     gap: 12px;
@@ -317,4 +260,79 @@ $cat-soft-drink: #cfe3ff;
 
 .qty-quick button {
     padding: .45rem .6rem;
+}
+
+// ===== Footer / QR =====
+.qr-block {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+
+    img {
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    }
+
+    .qr-url {
+        font-size: .9rem;
+        max-width: 420px;
+        word-break: break-all;
+    }
+}
+
+// ===== Operator pill (identical to tile) =====
+.operator-pill {
+    .tile--op {
+        @extend .tile;
+        display: inline-flex;
+        min-height: 44px;
+        padding: 12px 14px;
+    }
+
+    .pill-dot {
+        width: .55rem;
+        height: .55rem;
+        border-radius: 50%;
+        background: var(--fg, #111);
+        opacity: .9;
+        margin-right: .5rem;
+    }
+}
+
+:root {
+    --modal-gutter: 20px;
+}
+
+#operatorModal {
+    inset: 0;
+    margin: auto;
+    padding: 0;
+}
+
+#operatorModal article {
+    width: min( 560px, calc(100vw - 2 * var(--modal-gutter) - env(safe-area-inset-left) - env(safe-area-inset-right)) );
+    max-height: calc(100vh - 2 * var(--modal-gutter) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow: auto;
+    padding: 12px;
+    border-radius: 16px;
+}
+
+#operatorModal #operatorTiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+#operatorModal #operatorTiles .tile {
+    width: 100%;
+    height: 68px;
+    margin: 0;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }

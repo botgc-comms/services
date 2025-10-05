@@ -25,7 +25,9 @@ public sealed class HttpWasteService : IWasteService
                 e.ClientEntryId,
                 e.CreatedAtUtc,
                 e.OperatorId,
-                e.ProductId,
+                e.ProductId, 
+                e.IgProductId,
+                e.Unit, 
                 e.ProductName,
                 e.Reason,
                 e.Quantity))
@@ -33,6 +35,12 @@ public sealed class HttpWasteService : IWasteService
             .ToList();
 
         return sheet;
+    }
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        var client = _factory.CreateClient("Api");
+        var res = await client.DeleteAsync($"/api/stock/wasteSheet/entry/{id}");
+        return res.IsSuccessStatusCode;
     }
 
     public async Task AddAsync(WasteEntry entry)
@@ -74,6 +82,8 @@ public sealed class HttpWasteService : IWasteService
         DateTimeOffset CreatedAtUtc,
         Guid OperatorId,
         Guid ProductId,
+        long IgProductId,
+        string Unit, 
         string ProductName,
         string Reason,
         decimal Quantity,
