@@ -5,14 +5,15 @@
 @{
     var pathAndQuery = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
 
-    // Absolute URL helper (handles spaces in your filenames)
-    string Abs(string appRelative) => $"{Context.Request.Scheme}://{Context.Request.Host}{Url.Content(appRelative)}";
+    string Abs(string appRelative)
+    {
+        var baseUri = new Uri($"{Context.Request.Scheme}://{Context.Request.Host}");
+        return new Uri(baseUri, Url.Content(appRelative)).ToString();
+    }
 
-    // Current page URL (for og:url)
     var pageUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
-
-    var ogLandscape = Abs("~/img/Burton on Trent  - 1894.png"); 
-    var ogSquare = ogLandscape; 
+    var ogLandscape = Abs("~/img/Burton on Trent  - 1894.png");
+    var ogSquare = ogLandscape;
 }
 
 <!DOCTYPE html>
@@ -55,7 +56,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.0/dist/browser/signalr.min.js"></script>
     
-
     @RenderSection("Head", required: false)
 </head>
 <body>
@@ -82,6 +82,7 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/dist/site.bundle.min.js" asp-append-version="true" defer></script>
 
     <script>
         (function () {
@@ -132,8 +133,10 @@
             connection.start().catch(function () { });
           }
         })();
+        
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

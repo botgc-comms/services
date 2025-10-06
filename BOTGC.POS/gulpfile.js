@@ -1,7 +1,6 @@
-﻿
-const gulp = require('gulp');
+﻿const gulp = require('gulp');
 const concat = require('gulp-concat');
-const uglify = require('gulp-uglify');
+const terser = require('gulp-terser');
 const rename = require('gulp-rename');
 const gulpSass = require('gulp-sass')(require('sass'));
 
@@ -9,11 +8,12 @@ const paths = {
     vendor: [
         './wwwroot/lib/jquery/dist/jquery.min.js',
         './wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js',
-        './wwwroot/lib/jquery-validation/dist/jquery.validate.min.js',
-        './wwwroot/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js'
     ],
     app: [
         './wwwroot/js/site.js',
+    ],
+    wastage: [
+        './wwwroot/js/wastage-sheet.js'
     ]
 };
 
@@ -28,16 +28,24 @@ function vendorScripts() {
     return gulp.src(paths.vendor)
         .pipe(concat('vendor.bundle.js'))
         .pipe(gulp.dest(outputPath))
-        .pipe(uglify())
+        .pipe(terser())
         .pipe(rename({ suffix: '.min' }))
         .pipe(gulp.dest(outputPath));
 }
 
 function appScripts() {
     return gulp.src(paths.app)
-        .pipe(concat('reporting.bundle.js'))
+        .pipe(concat('site.bundle.js'))
         .pipe(gulp.dest(outputPath))
-        .pipe(uglify({ mangle: { toplevel: false } }))
+        .pipe(terser({ ecma: 2018 }))
+        .pipe(rename({ suffix: '.min' }))
+        .pipe(gulp.dest(outputPath));
+}
+function wastageScripts() {
+    return gulp.src(paths.wastage)
+        .pipe(concat('wastage.bundle.js'))
+        .pipe(gulp.dest(outputPath))
+        .pipe(terser({ ecma: 2018 }))
         .pipe(rename({ suffix: '.min' }))
         .pipe(gulp.dest(outputPath));
 }
@@ -51,7 +59,7 @@ function sassTask() {
 
 const build = gulp.series(
     clean,
-    gulp.parallel(vendorScripts, appScripts, sassTask)
+    gulp.parallel(vendorScripts, appScripts, wastageScripts, sassTask) // ⬅️ include wastage
 );
 
 exports.default = build;

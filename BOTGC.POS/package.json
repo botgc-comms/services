@@ -13,5 +13,9 @@
     "sass:build": "sass wwwroot/scss/index.scss:wwwroot/css/styles.css --no-source-map --style=compressed",
     "sass:watch": "sass --watch wwwroot/scss/index.scss:wwwroot/css/styles.css",
     "start": "concurrently \"npm run sass:watch\" \"dotnet watch run\""
+  },
+  "devDependencies": {
+    "gulp-terser": "^2.1.0",
+    "merge-stream": "^2.0.0"
   }
 }
