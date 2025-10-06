@@ -187,8 +187,8 @@
         let selectedReasonId = null;
         let pollTimer = null;
         let timeoutTimer = null;
-
-       let deleteTargetId = null;
+        let isLogging = false;
+        let deleteTargetId = null;
 
         document.addEventListener("click", e => {
             const btn = e.target.closest(".delete-btn");
@@ -650,6 +650,7 @@
 
 
         document.getElementById("logBtn").addEventListener("click", async () => {
+            if (isLogging) return;
             if (!selectedProduct) return;
 
             if (operatorExpired()) { clearOperatorSelection(); ensureOperatorSelected(); return; }
@@ -667,7 +668,9 @@
             fd.append("unit", selectedProduct.unit);
             fd.append("productName", selectedProduct.name);
             fd.append("quantity", qty.toString());
-            fd.append("clientId", guid());
+
+            const clientId = guid();
+            fd.append("clientId", clientId);
 
             if (selectedReasonId && isAuto) {
                 fd.append("reasonId", selectedReasonId);
@@ -680,18 +683,36 @@
                 alert("Please pick a reason or enter one."); return;
             }
 
-            const res = await fetch("/wastage/log", { method: "POST", body: fd });
-            if (res.status === 401) { clearOperatorSelection(); ensureOperatorSelected(); return; }
-            if (res.ok) {
+            const btn = document.getElementById("logBtn");
+            isLogging = true;
+            btn.disabled = true;
+            const oldText = btn.textContent;
+            btn.textContent = "Logging…";
+
+            try {
+                const res = await fetch("/wastage/log", { method: "POST", body: fd });
+                if (res.status === 401) { clearOperatorSelection(); ensureOperatorSelected(); return; }
+                if (!res.ok) { alert("Failed to log waste."); return; }
+
                 // Successful action = operator activity; refresh the timeout.
                 markOperatorActivity();
-
-                const opTile = document.querySelector(`#operatorTiles .tile[data-opid='${getCookie(OP_COOKIE)}']`);
-                const opName = opTile ? opTile.textContent : "Unknown";
-                const id = Array.from(fd.entries()).find(kv => kv[0] === "clientId")[1];
-                addRow(opName, selectedProduct.name, custom || getReasonName(selectedReasonId), qty, id, null);
-                selectedProduct = null; selectedReasonId = null;
                 document.getElementById("reasonModal").close();
+
+                selectedProduct = null;
+                selectedReasonId = null;
+                document.getElementById("qty").value = "";
+
+                const customEl = document.getElementById("customReason");
+                customEl.value = "";
+                customEl.dataset.autofill = "0";
+                document.querySelectorAll(".reason-btn.is-selected").forEach(x => x.classList.remove("is-selected"));
+
+                await pollSheet();
+
+            } finally {
+                isLogging = false;
+                btn.disabled = false;
+                btn.textContent = oldText;
             }
         });
 
