@@ -214,14 +214,31 @@ dialog {
 }
 
 .reason-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
     padding: .6rem .8rem;
     border-radius: 8px;
     border: 1px solid #ddd;
     background: #fafafa;
+    font-weight: 600;
     cursor: pointer;
 
     &:hover {
         background: #f0f0f0;
+    }
+
+    &.is-selected {
+        outline: 2px solid #111;
+        outline-offset: -2px;
+    }
+
+    &:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        filter: grayscale(.2);
     }
 }
 
@@ -261,16 +278,22 @@ label {
 .qty-row {
     display: flex;
     gap: 12px;
-    align-items: flex-end;
+    align-items: center;
+}
+
+#qty {
+    height: 44px;
 }
 
 .qty-quick {
     display: flex;
-    gap: 6px;
+    gap: 8px;
+    align-items: center;
 }
 
 .qty-quick button {
-    padding: .45rem .6rem;
+    height: 44px;
+    padding: 0 .8rem;
 }
 
 // ===== Footer / QR =====

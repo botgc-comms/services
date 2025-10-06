@@ -232,14 +232,29 @@ dialog article footer {
 }
 
 .reason-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
   padding: 0.6rem 0.8rem;
   border-radius: 8px;
   border: 1px solid #ddd;
   background: #fafafa;
+  font-weight: 600;
   cursor: pointer;
 }
 .reason-btn:hover {
   background: #f0f0f0;
+}
+.reason-btn.is-selected {
+  outline: 2px solid #111;
+  outline-offset: -2px;
+}
+.reason-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.2);
 }
 
 .reason__default {
@@ -277,16 +292,22 @@ label {
 .qty-row {
   display: flex;
   gap: 12px;
-  align-items: flex-end;
+  align-items: center;
+}
+
+#qty {
+  height: 44px;
 }
 
 .qty-quick {
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  align-items: center;
 }
 
 .qty-quick button {
-  padding: 0.45rem 0.6rem;
+  height: 44px;
+  padding: 0 0.8rem;
 }
 
 .qr-block {

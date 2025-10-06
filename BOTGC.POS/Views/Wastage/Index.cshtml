@@ -133,8 +133,12 @@
         <div class="reasons" id="reasonButtons">
             @foreach (var r in Model.Reasons)
             {
-                <button class="reason-btn" data-reasonid="@r.Id" data-defaultqty="@((r.DefaultQuantity?.ToString("0.##")) ?? "")">
-                    @r.Name @if (r.DefaultQuantity.HasValue)
+                <button class="reason-btn"
+                        data-reasonid="@r.Id"
+                        data-defaultqty="@((r.DefaultQuantity?.ToString("0.##")) ?? "")"
+                        data-excludedunits="@(r.ExcludedUnits is null ? "" : string.Join("|", r.ExcludedUnits))">
+                    @r.Name
+                    @if (r.DefaultQuantity.HasValue)
                     {
                         <small class="reason__default">Default: @r.DefaultQuantity</small>
                     }
@@ -494,9 +498,12 @@
             // Unit badge + step tuning
             const u = (unit || "").trim();
             document.getElementById("qtyUnit").textContent = u ? `(${u})` : "";
+
             const qtyInput = document.getElementById("qty");
             if (/pint|half|ml|ltr|liter|litre/i.test(u)) qtyInput.step = "0.25";
             else qtyInput.step = "1";
+
+            applyUnitConstraints(unit);
 
             document.getElementById("reasonModal").showModal();
         }
@@ -560,11 +567,59 @@
 
         Array.from(document.querySelectorAll(".reason-btn")).forEach(b => {
             b.addEventListener("click", () => {
+                if (b.disabled) return;
                 selectedReasonId = b.dataset.reasonid;
+
+                // visual selection
+                document.querySelectorAll(".reason-btn.is-selected").forEach(x => x.classList.remove("is-selected"));
+                b.classList.add("is-selected");
+
                 const d = b.dataset.defaultqty;
                 if (d) document.getElementById("qty").value = d;
             });
         });
+
+        // Map 'unit' strings to a canonical key
+        function unitKey(u) {
+            if (!u) return "";
+            const s = u.trim().toLowerCase();
+            if (s.includes("can")) return "can";
+            if (s.includes("bottle")) return "bottle";
+            if (s.includes("pint")) return "pint";
+            if (s.includes("half")) return "half";
+            if (s.includes("ml") || s.includes("shot") || s.includes("measure")) return "ml";
+            return s;
+        }
+
+        // Fallback exclusions if server doesn't send data-excludedunits on buttons
+        const defaultExclusions = {
+            "drip tray":        ["can", "bottle", "ml"],
+            "barrel change":    ["can", "bottle", "ml"],
+            "pipe clean":       ["can", "bottle", "ml"],
+            "bar pull through": ["can", "bottle", "ml"]
+        };
+
+        function applyUnitConstraints(unit) {
+            const ukey = unitKey(unit);
+            const buttons = document.querySelectorAll(".reason-btn");
+
+            buttons.forEach(btn => {
+                // read exclusions from data attribute or fallback by name
+                let ex = (btn.dataset.excludedunits || "").toLowerCase();
+                if (!ex) {
+                    const name = btn.firstChild.textContent.trim().toLowerCase();
+                    ex = (defaultExclusions[name] || []).join("|");
+                }
+                const excludes = ex.split("|").map(x => x.trim()).filter(Boolean);
+                const blocked = ukey && excludes.includes(ukey);
+
+                btn.disabled = !!blocked;
+                btn.classList.toggle("is-selected", false);
+            });
+
+            // clear any previously selected reason if it is now disabled
+            selectedReasonId = null;
+        }
 
         document.getElementById("logBtn").addEventListener("click", async () => {
             if (!selectedProduct) return;

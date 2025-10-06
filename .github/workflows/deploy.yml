@@ -335,6 +335,14 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+    - name: Install Node Modules
+      run: npm install
+      working-directory: BOTGC.MembershipApplication
+
+    - name: Build SCSS → CSS
+      run: npm run sass:build
+      working-directory: BOTGC.MembershipApplication
+
     - name: Publish Wastage (BOTGC.POS)
       run: |
         dotnet publish BOTGC.POS/BOTGC.POS.csproj \

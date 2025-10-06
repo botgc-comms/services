@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "chartjs-plugin-annotation": "^3.1.0",
     "concurrently": "^9.1.2",
     "del": "^8.0.0",
     "gulp": "^5.0.0",
@@ -9,5 +8,10 @@
     "gulp-sass": "^6.0.1",
     "gulp-uglify": "^3.0.2",
     "sass": "^1.89.2"
+  },
+  "scripts": {
+    "sass:build": "sass wwwroot/scss/index.scss:wwwroot/css/styles.css --no-source-map --style=compressed",
+    "sass:watch": "sass --watch wwwroot/scss/index.scss:wwwroot/css/styles.css",
+    "start": "concurrently \"npm run sass:watch\" \"dotnet watch run\""
   }
 }
