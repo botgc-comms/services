@@ -144,16 +144,13 @@ button {
 
 // ===== Sheet =====
 .sheet {
-    margin-top: 1rem;
-
-    summary {
-        font-weight: 700;
-        cursor: pointer;
-        margin: .25rem 0 .5rem 0;
-    }
+    // …your existing styles…
 
     &__table {
+        // keep table inside its container
         width: 100%;
+        max-width: 100%;
+        table-layout: fixed; // stops columns auto-growing past 100%
         border-collapse: collapse;
         background: #fff;
         border-radius: $radius;
@@ -165,6 +162,10 @@ button {
             border-bottom: 1px solid #eee;
             text-align: left;
             font-size: .95rem;
+            vertical-align: top;
+            overflow-wrap: anywhere; // modern wrap
+            word-break: break-word; // fallback wrap
+            white-space: normal;
         }
 
         thead th {
@@ -175,8 +176,47 @@ button {
         tbody tr:hover {
             background: #fafafa;
         }
+        /* Make narrow columns explicitly narrow so Product/Reason get the space */
+        th:nth-child(1), td:nth-child(1) { // Time
+            width: 4.75rem; // ~ “HH:mm”
+            white-space: nowrap;
+        }
+
+        th:nth-child(5), td:nth-child(5) { // Qty
+            width: 3.75rem;
+            white-space: nowrap;
+        }
+
+        th:nth-child(6), td:nth-child(6) { // Trash icon
+            width: 2.5rem;
+            white-space: nowrap;
+        }
+        /* Let these cells wrap as needed */
+        td.cell--product,
+        td.cell--reason {
+            overflow-wrap: anywhere;
+            word-break: normal;
+            hyphens: auto;
+        }
     }
 }
+
+/* Optional: tighten spacing on small screens */
+@media (max-width: 640px) {
+    .sheet__table th, .sheet__table td {
+        padding: .45rem .5rem;
+        font-size: .9rem;
+    }
+
+    .sheet__table th:nth-child(1), .sheet__table td:nth-child(1) {
+        width: 4.25rem;
+    }
+
+    .sheet__table th:nth-child(5), .sheet__table td:nth-child(5) {
+        width: 3.25rem;
+    }
+}
+
 
 // ===== Dialogs =====
 dialog {

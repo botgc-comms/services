@@ -68,8 +68,8 @@
                     <tr data-id="@e.Id">
                         <td>@e.At.ToLocalTime().ToString("HH:mm")</td>
                         <td>@(Model.Operators.FirstOrDefault(o => o.Id == e.OperatorId)?.DisplayName ?? "Unknown")</td>
-                        <td>@e.ProductName</td>
-                        <td>@e.Reason</td>
+                        <td class="cell--product">@e.ProductName</td>
+                        <td class="cell--reason">@((e.Reason ?? "").Replace("/", "/\u200b"))</td>
                         <td>@e.Quantity</td>
                         <td>
                             <button class="btn btn-link text-danger p-0 delete-btn"
@@ -332,6 +332,18 @@
             return await res.json();
         }
 
+        function escapeHtml(s) {
+          return String(s ?? "")
+            .replace(/&/g,"&amp;")
+            .replace(/</g,"&lt;")
+            .replace(/>/g,"&gt;")
+            .replace(/"/g,"&quot;")
+            .replace(/'/g,"&#39;");
+        }
+        function softBreakSlash(s) {
+          return String(s ?? "").replace(/\//g, "/\u200b");
+        }
+
         function addRow(operatorName, productName, reason, qty, id, atIso) {
             const tr = document.createElement("tr");
             tr.dataset.id = id;
@@ -342,13 +354,13 @@
 
             tr.innerHTML =
                 `<td>${hh}:${mm}</td>
-                 <td>${operatorName}</td>
-                 <td>${productName}</td>
-                 <td>${reason}</td>
-                 <td>${qty}</td>
+                 <td>${escapeHtml(operatorName)}</td>
+                 <td class="cell--product" title="${escapeHtml(productName)}">${escapeHtml(productName)}</td>
+                 <td class="cell--reason"  title="${escapeHtml(reason)}">${escapeHtml(softBreakSlash(reason))}</td>
+                 <td>${escapeHtml(qty)}</td>
                  <td>
                     <button class="btn btn-link text-danger p-0 delete-btn" data-id="${id}" title="Delete">
-                        <i class="bi bi-trash"></i>
+                      <i class="bi bi-trash"></i>
                     </button>
                  </td>`;
 
