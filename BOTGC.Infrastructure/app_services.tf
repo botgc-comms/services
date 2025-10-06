@@ -142,12 +142,10 @@ resource "azurerm_linux_web_app" "services_application_form" {
 
     "AppSettings__Monday__APIKey"                            = var.monday_com_apikey
     
-    "AppSettings__AllowedCorsOrigins"                        = "https://externaldomain1.com,https://externaldomain2.com"
-
-     "AppSettings__RecentApplicants__SharedSecret"           = var.recent_applicants_shared_secret
-     "AppSettings__RecentApplicants__AllowedReferrerHost"    = var.recent_applicants_allowed_referrer_host
-     "AppSettings__RecentApplicants__TokenTtlMinutes"        = var.recent_applicants_token_ttl_minutes
-     "AppSettings__RecentApplicants__CookieName"             = var.recent_applicants_cookie_name
+    "AppSettings__RecentApplicants__SharedSecret"           = var.recent_applicants_shared_secret
+    "AppSettings__RecentApplicants__AllowedReferrerHost"    = var.recent_applicants_allowed_referrer_host
+    "AppSettings__RecentApplicants__TokenTtlMinutes"        = var.recent_applicants_token_ttl_minutes
+    "AppSettings__RecentApplicants__CookieName"             = var.recent_applicants_cookie_name
   }
 
   identity {
@@ -179,8 +177,6 @@ resource "azurerm_linux_web_app" "services_mgntreports_form" {
 
     "AppSettings__API__XApiKey"                              = var.x_api_key
     "AppSettings__API__Url"                                  = "https://${azurerm_linux_web_app.services_api_app.default_hostname}"
-
-    "AppSettings__AllowedCorsOrigins"                        = "https://externaldomain1.com,https://externaldomain2.com"
   }
 
   identity {
@@ -219,8 +215,6 @@ resource "azurerm_linux_web_app" "services_wastage_app" {
     "AppSettings__Ngrok__Port"                            = tostring(var.ngrok_port)
     "AppSettings__Ngrok__Region"                          = var.ngrok_region
     "AppSettings__Ngrok__ApiToken"                        = var.ngrok_api_token
-
-    "AppSettings__AllowedCorsOrigins"                     = join(",", var.allowed_cors_origins)
   }
 
   identity {
