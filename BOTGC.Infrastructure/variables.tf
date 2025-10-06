@@ -69,4 +69,23 @@ variable "recent_applicants_cookie_name" {
   default = "ra_tok"
 }
 
+variable "ngrok_enable" {
+  type    = bool
+  default = false
+}
 
+variable "ngrok_port" {
+  type    = number
+  default = 0
+}
+
+variable "ngrok_region" {
+  type    = string
+  default = ""
+}
+
+variable "ngrok_api_token" {
+  type      = string
+  sensitive = true
+  default   = ""
+}

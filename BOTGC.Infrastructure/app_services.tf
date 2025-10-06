@@ -170,17 +170,57 @@ resource "azurerm_linux_web_app" "services_mgntreports_form" {
   app_settings = {
     "APPINSIGHTS_INSTRUMENTATIONKEY"                         = azurerm_application_insights.app_insights.instrumentation_key
     "APPLICATIONINSIGHTS_CONNECTION_STRING"                  = azurerm_application_insights.app_insights.connection_string
+    "AppSettings__ApplicationInsights__ConnectionString"     = azurerm_application_insights.app_insights.connection_string
+
     "SCM_DO_BUILD_DURING_DEPLOYMENT"                         = true
     "WEBSITE_RUN_FROM_PACKAGE"                               = "1"
     "DATA_CONTAINER_CONNECTION_STRING"                       = data.azurerm_storage_account.services_api_sa.primary_connection_string
     "ASPNETCORE_ENVIRONMENT"                                 = "Production"
 
-    "AppSettings__ApplicationInsights__ConnectionString"     = azurerm_application_insights.app_insights.connection_string
-
     "AppSettings__API__XApiKey"                              = var.x_api_key
     "AppSettings__API__Url"                                  = "https://${azurerm_linux_web_app.services_api_app.default_hostname}"
 
     "AppSettings__AllowedCorsOrigins"                        = "https://externaldomain1.com,https://externaldomain2.com"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+resource "azurerm_linux_web_app" "services_wastage_app" {
+  name                = "wastage-${var.project_name}-${var.environment}"
+  location            = azurerm_resource_group.services_api_rg.location
+  resource_group_name = azurerm_resource_group.services_api_rg.name
+  service_plan_id     = azurerm_service_plan.services_api_asp.id
+
+  site_config {
+    application_stack {
+      dotnet_version = "8.0"
+    }
+  }
+
+  app_settings = {
+    "APPINSIGHTS_INSTRUMENTATIONKEY""                     = azurerm_application_insights.app_insights.instrumentation_key
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"               = azurerm_application_insights.app_insights.connection_string
+    "AppSettings__ApplicationInsights__ConnectionString"  = azurerm_application_insights.app_insights.connection_string
+
+    "SCM_DO_BUILD_DURING_DEPLOYMENT"                      = true
+    "WEBSITE_RUN_FROM_PACKAGE"                            = "1"
+    "DATA_CONTAINER_CONNECTION_STRING"                       = data.azurerm_storage_account.services_api_sa.primary_connection_string
+    "ASPNETCORE_ENVIRONMENT"                              = "Production"
+
+    "AppSettings__Redis__ConnectionString"                = data.azurerm_redis_cache.redis.primary_connection_string
+
+    "AppSettings__API__XApiKey"                           = var.x_api_key
+    "AppSettings__API__Url"                               = "https://${azurerm_linux_web_app.services_api_app.default_hostname}/"
+
+    "AppSettings__Ngrok__Enable"                          = tostring(var.ngrok_enable)
+    "AppSettings__Ngrok__Port"                            = tostring(var.ngrok_port)
+    "AppSettings__Ngrok__Region"                          = var.ngrok_region
+    "AppSettings__Ngrok__ApiToken"                        = var.ngrok_api_token
+
+    "AppSettings__AllowedCorsOrigins"                     = join(",", var.allowed_cors_origins)
   }
 
   identity {

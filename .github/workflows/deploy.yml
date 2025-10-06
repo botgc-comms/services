@@ -23,6 +23,7 @@ jobs:
       leaderboards_app_name: ${{ steps.get_leaderboards_app_name.outputs.leaderboards_app_name }}
       applicationform_app_name: ${{ steps.get_applicationform_app_name.outputs.applicationform_app_name }}
       managementreports_app_name: ${{ steps.get_managementreports_app_name.outputs.managementreports_app_name }}
+      wastage_app_name: ${{ steps.get_wastage_app_name.outputs.wastage_app_name }}
 
     steps:
     - name: Checkout code
@@ -115,6 +116,19 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
+    - name: Get Wastage App Name
+      id: get_wastage_app_name
+      run: |
+        wastage_app_name=$(terraform output -raw wastage_app_name)
+        echo "wastage_app_name=${wastage_app_name}"
+        echo "wastage_app_name=${wastage_app_name}" >> "$GITHUB_OUTPUT"
+      working-directory: BOTGC.Infrastructure
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        
   deploy-api:
     runs-on: ubuntu-latest
     needs: terraform
@@ -307,4 +321,43 @@ jobs:
       with:
         app-name: ${{ needs.terraform.outputs.managementreports_app_name }}
         package: ./published/managementreports.zip
+
+   deploy-wastage:
+    runs-on: ubuntu-latest
+    needs: terraform
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Publish Wastage (BOTGC.POS)
+      run: |
+        dotnet publish BOTGC.POS/BOTGC.POS.csproj \
+        -c Release \
+        -r linux-x64 \
+        --self-contained true \
+        -o published
+
+    - name: Zip Wastage for Deployment
+      run: zip -r wastage.zip . -x '*.git*'
+      working-directory: published
+
+    - name: Azure CLI Login
+      run: |
+        az login --service-principal \
+        -u ${{ secrets.AZURE_CLIENT_ID }} \
+        -p ${{ secrets.AZURE_CLIENT_SECRET }} \
+        --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+    - name: Deploy to App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ needs.terraform.outputs.wastage_app_name }}
+        package: ./published/wastage.zip
+
         

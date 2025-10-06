@@ -14,6 +14,10 @@ output "managementreports_app_name" {
   value = azurerm_linux_web_app.services_mgntreports_form.name
 }
 
+output "wastage_app_name" {
+  value = azurerm_linux_web_app.services_wastage_app.name
+}
+
 output "cdn_base_url" {
   value = "https://${azurerm_cdn_endpoint.js_delivery.fqdn}"
 }

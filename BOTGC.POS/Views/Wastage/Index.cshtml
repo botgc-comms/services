@@ -144,10 +144,11 @@
 
         <div class="qty-row">
             <label>
-                Quantity
+                Quantity <span id="qtyUnit" class="muted"></span>
                 <input type="number" id="qty" min="0" step="0.01" />
             </label>
             <div class="qty-quick">
+                <button type="button" data-add="0.25">+0.25</button>
                 <button type="button" data-add="0.5">+0.5</button>
                 <button type="button" data-add="1">+1</button>
                 <button type="button" data-add="5">+5</button>
@@ -193,6 +194,17 @@
             if (!deleteTargetId) return;
 
             document.getElementById("confirmDeleteDialog").showModal();
+        });
+
+        document.querySelectorAll(".qty-quick button").forEach(b => {
+            b.addEventListener("click", () => {
+                const inc = parseFloat(b.dataset.add || "0");
+                const input = document.getElementById("qty");
+                const cur = parseFloat(input.value || "0");
+                const next = (isNaN(cur) ? 0 : cur) + inc;
+                input.value = (Math.round(next * 100) / 100).toString();
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+            });
         });
 
         document.getElementById("confirmDeleteYes").addEventListener("click", async () => {
@@ -471,11 +483,21 @@
         function productChosen(id, name, igid, unit) {
             if (!getCookie(OP_COOKIE)) { ensureOperatorSelected(); return; }
             if (operatorExpired()) { clearOperatorSelection(); ensureOperatorSelected(); return; }
+
             selectedProduct = { id, name, igid, unit };
             selectedReasonId = null;
+
             document.getElementById("reasonTitle").textContent = `Reason for: ${name}`;
             document.getElementById("customReason").value = "";
             document.getElementById("qty").value = "";
+
+            // Unit badge + step tuning
+            const u = (unit || "").trim();
+            document.getElementById("qtyUnit").textContent = u ? `(${u})` : "";
+            const qtyInput = document.getElementById("qty");
+            if (/pint|half|ml|ltr|liter|litre/i.test(u)) qtyInput.step = "0.25";
+            else qtyInput.step = "1";
+
             document.getElementById("reasonModal").showModal();
         }
 
