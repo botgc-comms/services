@@ -215,6 +215,10 @@ resource "azurerm_linux_web_app" "services_wastage_app" {
     "AppSettings__API__XApiKey"                           = var.x_api_key
     "AppSettings__API__Url"                               = "https://${azurerm_linux_web_app.services_api_app.default_hostname}/"
 
+    "AppSettings__Access__SharedSecret"                   = var.wastage_secret
+    "AppSettings__Access__CookieName"                     = "post_access"
+    "AppSettings__Access__CookieTtlDays"                  = "30"
+
     "AppSettings__Ngrok__Enable"                          = tostring(var.ngrok_enable)
     "AppSettings__Ngrok__Port"                            = tostring(var.ngrok_port)
     "AppSettings__Ngrok__Region"                          = var.ngrok_region

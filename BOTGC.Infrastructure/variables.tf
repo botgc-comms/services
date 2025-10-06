@@ -89,3 +89,9 @@ variable "ngrok_api_token" {
   sensitive = true
   default   = ""
 }
+
+variable "wastage_secret" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
