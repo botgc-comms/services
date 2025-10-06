@@ -492,7 +492,11 @@
             selectedReasonId = null;
 
             document.getElementById("reasonTitle").textContent = `Reason for: ${name}`;
-            document.getElementById("customReason").value = "";
+
+            const customEl = document.getElementById("customReason");
+            customEl.value = "";
+            customEl.dataset.autofill = "0";
+
             document.getElementById("qty").value = "";
 
             // Unit badge + step tuning
@@ -564,20 +568,29 @@
             });
         });
 
+        const customEl = document.getElementById("customReason");
 
         Array.from(document.querySelectorAll(".reason-btn")).forEach(b => {
             b.addEventListener("click", () => {
-                if (b.disabled) return;
+                if (b.style.display === "none" || b.disabled) return;
+
                 selectedReasonId = b.dataset.reasonid;
 
-                // visual selection
                 document.querySelectorAll(".reason-btn.is-selected").forEach(x => x.classList.remove("is-selected"));
                 b.classList.add("is-selected");
 
                 const d = b.dataset.defaultqty;
                 if (d) document.getElementById("qty").value = d;
+
+                const name = (b.firstChild?.textContent || b.textContent || "").trim();
+                customEl.value = name;
+                customEl.dataset.autofill = "1";
             });
         });
+
+        // when the user edits the text, treat it as a true custom reason
+        customEl.addEventListener("input", () => { customEl.dataset.autofill = "0"; });
+
 
         // Map 'unit' strings to a canonical key
         function unitKey(u) {
@@ -640,10 +653,19 @@
             fd.append("igProductId", selectedProduct.igProductId);
             fd.append("unit", selectedProduct.unit);
             fd.append("productName", selectedProduct.name);
-            if (selectedReasonId) fd.append("reasonId", selectedReasonId);
-            if (custom) fd.append("customReason", custom);
             fd.append("quantity", qty.toString());
             fd.append("clientId", guid());
+
+            if (selectedReasonId && isAuto) {
+                fd.append("reasonId", selectedReasonId);
+            } else if (custom) {
+                fd.append("customReason", custom);
+                selectedReasonId = null;
+            } else if (selectedReasonId) {
+                fd.append("reasonId", selectedReasonId);
+            } else {
+                alert("Please pick a reason or enter one."); return;
+            }
 
             const res = await fetch("/wastage/log", { method: "POST", body: fd });
             if (res.status === 401) { clearOperatorSelection(); ensureOperatorSelected(); return; }
