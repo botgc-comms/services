@@ -646,7 +646,10 @@
 
             const qty = parseFloat(document.getElementById("qty").value || "0");
             if (!(qty > 0)) { alert("Enter a quantity greater than zero."); return; }
-            const custom = document.getElementById("customReason").value.trim();
+
+            const customEl = document.getElementById("customReason");
+            const custom = customEl.value.trim();
+            const isAuto = customEl.dataset.autofill === "1";
 
             const fd = new FormData();
             fd.append("productId", selectedProduct.id);
