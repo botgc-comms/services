@@ -1,5 +1,6 @@
 ﻿@using BOTGC.POS
 @inject BOTGC.POS.NgrokState Ngrok
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
 
 @{
     var pathAndQuery = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
@@ -37,7 +38,11 @@
             <div>
                 &copy; @DateTime.UtcNow.Year - Burton on Trent Golf Club
             </div>
-            <div id="qr-block" class="qr-block d-flex align-items-center gap-2" data-path="@pathAndQuery" style="display:none"></div>
+            <div id="qr-block"
+                 class="qr-block d-flex align-items-center gap-2"
+                 data-path="@pathAndQuery"
+                 data-access-key="@Config["AppSettings:Access:SharedSecret"]"
+                 style="display:none"></div>
         </div>
     </footer>
 
@@ -46,52 +51,52 @@
 
     <script>
         (function () {
-            var block = document.getElementById("qr-block");
-            if (!block) return;
+          var block = document.getElementById("qr-block");
+          if (!block) return;
 
-            var path = block.getAttribute("data-path") || "";
-            var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+          var path = block.getAttribute("data-path") || "/";
+          var key  = block.getAttribute("data-access-key") || "";
+          var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
 
-            function render(baseUrl) {
-                if (!baseUrl) return;
+          function render(baseUrl) {
+            if (!baseUrl || !key) return;
 
-                var effective = baseUrl.replace(/\/+$/, "") + path;
+            // Build /access?k=<key>&returnUrl=<original path+query>
+            var accessPath = "/access?k=" + encodeURIComponent(key) +
+                             "&returnUrl=" + encodeURIComponent(path);
 
-                block.innerHTML = '<img class="qr-img" width="84" height="84" loading="lazy" decoding="async" alt="Open this page on your phone" />';
-                var img = block.querySelector(".qr-img");
-                img.src = "/qr/page.png?pathAndQuery=" + encodeURIComponent(path);
+            // Use your existing QR endpoint; it expects a path+query
+            block.innerHTML = '<img class="qr-img" width="84" height="84" loading="lazy" decoding="async" alt="Open this page on your phone" />';
+            var img = block.querySelector(".qr-img");
+            img.src = "/qr/page.png?pathAndQuery=" + encodeURIComponent(accessPath);
 
-                block.style.display = "";
-            }
+            block.style.display = "";
+          }
 
-            fetch("/ngrok/status", { credentials: "same-origin" })
-                .then(function (r) { return r.ok ? r.json() : { url: null }; })
-                .then(function (j) {
-                    if (j && j.url) {
-                        render(j.url);
-                    } else if (!isLocal) {
-                        render(location.origin);
-                    } else {
-                        startSignalR();
-                    }
-                })
-                .catch(function () {
-                    if (!isLocal) render(location.origin);
-                });
+          fetch("/ngrok/status", { credentials: "same-origin" })
+            .then(function (r) { return r.ok ? r.json() : { url: null }; })
+            .then(function (j) {
+              if (j && j.url) render(j.url);
+              else if (!isLocal) render(location.origin);
+              else startSignalR();
+            })
+            .catch(function () {
+              if (!isLocal) render(location.origin);
+            });
 
-            function startSignalR() {
-                if (typeof signalR === "undefined" || !signalR.HubConnectionBuilder) return;
-                var connection = new signalR.HubConnectionBuilder()
-                    .withUrl("/hubs/ngrok")
-                    .withAutomaticReconnect()
-                    .build();
+          function startSignalR() {
+            if (typeof signalR === "undefined" || !signalR.HubConnectionBuilder) return;
+            var connection = new signalR.HubConnectionBuilder()
+              .withUrl("/hubs/ngrok")
+              .withAutomaticReconnect()
+              .build();
 
-                connection.on("NgrokUrlAvailable", function (url) {
-                    if (url) render(url);
-                });
+            connection.on("NgrokUrlAvailable", function (url) {
+              if (url) render(url);
+            });
 
-                connection.start().catch(function () {  });
-            }
+            connection.start().catch(function () { });
+          }
         })();
     </script>
 
