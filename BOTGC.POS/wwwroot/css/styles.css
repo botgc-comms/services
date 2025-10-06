@@ -242,6 +242,17 @@ dialog article footer {
   background: #f0f0f0;
 }
 
+.reason__default {
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--badge, #666);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
 input[type=search],
 input[type=text],
 input[type=number] {

@@ -225,6 +225,17 @@ dialog {
     }
 }
 
+.reason__default {
+    position: absolute;
+    right: 10px;
+    bottom: 6px;
+    font-size: .75rem;
+    line-height: 1;
+    color: var(--badge, #666);
+    opacity: .95;
+    pointer-events: none;
+}
+
 // ===== Forms =====
 input[type="search"],
 input[type="text"],

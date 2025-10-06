@@ -136,7 +136,7 @@
                 <button class="reason-btn" data-reasonid="@r.Id" data-defaultqty="@((r.DefaultQuantity?.ToString("0.##")) ?? "")">
                     @r.Name @if (r.DefaultQuantity.HasValue)
                     {
-                        <small class="muted">&nbsp;(Default: @r.DefaultQuantity)</small>
+                        <small class="reason__default">Default: @r.DefaultQuantity</small>
                     }
                 </button>
             }
