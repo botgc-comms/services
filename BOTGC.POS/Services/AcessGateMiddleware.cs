@@ -19,16 +19,47 @@ public sealed class GatekeeperMiddleware
     private readonly RequestDelegate _next;
     private readonly GatekeeperOptions _opts;
 
+    private static readonly string[] PreviewBots = new[]
+    {
+        "facebookexternalhit", "Facebot",
+        "WhatsApp", "Twitterbot", "Slackbot-LinkExpanding",
+        "LinkedInBot", "Discordbot"
+    };
+
     public GatekeeperMiddleware(RequestDelegate next, GatekeeperOptions opts)
     {
         _next = next;
         _opts = opts;
+    }
+    private static bool IsPreviewCrawler(HttpContext ctx)
+    {
+        var ua = ctx.Request.Headers.UserAgent.ToString();
+        if (string.IsNullOrEmpty(ua)) return false;
+        foreach (var b in PreviewBots)
+            if (ua.Contains(b, StringComparison.OrdinalIgnoreCase)) return true;
+        return false;
     }
 
     public async Task Invoke(HttpContext ctx)
     {
         // BYPASS: allow the access endpoint (and its static assets if any)
         if (ctx.Request.Path.StartsWithSegments("/access", StringComparison.OrdinalIgnoreCase))
+        {
+            await _next(ctx);
+            return;
+        }
+
+        // Let link-preview crawlers see the page + images so previews aren't blurry
+        if (IsPreviewCrawler(ctx) && (HttpMethods.IsGet(ctx.Request.Method) || HttpMethods.IsHead(ctx.Request.Method)))
+        {
+            await _next(ctx);
+            return;
+        }
+
+        // (optional) Always allow static images/css/js to load without a key
+        if (ctx.Request.Path.StartsWithSegments("/img", StringComparison.OrdinalIgnoreCase) ||
+            ctx.Request.Path.StartsWithSegments("/css", StringComparison.OrdinalIgnoreCase) ||
+            ctx.Request.Path.StartsWithSegments("/js", StringComparison.OrdinalIgnoreCase))
         {
             await _next(ctx);
             return;
