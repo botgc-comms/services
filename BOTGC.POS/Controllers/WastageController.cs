@@ -54,7 +54,7 @@ public class WastageController : Controller
     {
         if (string.IsNullOrWhiteSpace(q)) return Ok(Array.Empty<object>());
         var results = await _products.SearchAsync(q);
-        return Ok(results.Select(p => new { p.Id, p.Name, p.Category }));
+        return Ok(results.Select(p => new { p.Id, p.Name, p.Category, p.igProductId, p.unit}));
     }
 
     [HttpPost("/wastage/select-operator")]

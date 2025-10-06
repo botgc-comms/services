@@ -177,7 +177,7 @@
         const OP_COOKIE = "wastage_operator_id";
         const OP_TS_COOKIE = "wastage_operator_ts";
         const ACTIVITY_KEY = "wastage_last_activity";
-        const OP_TIMEOUT_MINUTES = 10; // change if you want a different timeout
+        const OP_TIMEOUT_MINUTES = 3; // change if you want a different timeout
 
         // ===== Auto Refresh at Midnight =====
         let dayStamp = (new Date()).toDateString();
@@ -265,6 +265,7 @@
             const now = String(nowUtcMs());
             setCookie(OP_TS_COOKIE, now, 365);
             try { localStorage.setItem(ACTIVITY_KEY, now); } catch {}
+            updateOpTtlOnce();
         }
 
         function operatorExpired() {
@@ -277,6 +278,7 @@
         function clearOperatorSelection() {
             deleteCookie(OP_COOKIE);
             deleteCookie(OP_TS_COOKIE);
+            stopOpTtlTimer();
             const el = document.getElementById("operatorStatus");
             if (el) el.innerHTML = '<span class="muted">No operator selected.</span>';
         }
@@ -439,12 +441,16 @@
         function renderOperatorPill(name, color) {
             const el = document.getElementById("operatorStatus");
             const fg = getContrast(color);
+            const badge = mixWithBlack(color, 0.12);
+
             el.innerHTML =
-                `<div class="tile tile--op" style="background:${color}; color:${fg};">
+                `<div class="tile tile--op" style="background:${color}; color:${fg}; --badge:${badge};">
                     <span class="pill-dot" style="background:${fg};"></span>
                     <span class="tile__name">${name}</span>
+                    <small class="tile__division"><span id="opTtl"></span></small>
                 </div>`;
             bindOperatorPillClick();
+            startOpTtlTimer();
         }
 
         function ensureOperatorSelected() {
@@ -716,6 +722,18 @@
             connection.start().catch(err => console.error(err));
         }
 
+        function mixWithBlack(hex, amount = 0.12) {
+          let c = (hex || "#999").replace(/^#/, "");
+          if (c.length === 3) c = c.split("").map(x => x + x).join("");
+          const r = parseInt(c.slice(0,2),16);
+          const g = parseInt(c.slice(2,4),16);
+          const b = parseInt(c.slice(4,6),16);
+          const rr = Math.round((1 - amount) * r).toString(16).padStart(2,"0");
+          const gg = Math.round((1 - amount) * g).toString(16).padStart(2,"0");
+          const bb = Math.round((1 - amount) * b).toString(16).padStart(2,"0");
+          return `#${rr}${gg}${bb}`;
+        }
+
         function startDayGuard() {
             function checkDay() {
                 const nowStamp = new Date().toDateString();
@@ -741,6 +759,45 @@
         function closeNonOperatorDialogs() {
             document.getElementById("reasonModal")?.open && document.getElementById("reasonModal").close();
             document.getElementById("searchModal")?.open && document.getElementById("searchModal").close();
+        }
+
+        let opTtlTimer = null;
+
+        function formatTtl(ms) {
+          const s = Math.max(0, Math.floor(ms / 1000));
+          const m = Math.floor(s / 60);
+          const r = s % 60;
+          return `${m}:${r.toString().padStart(2, "0")}`;
+        }
+
+        function updateOpTtlOnce() {
+          const ttlEl = document.getElementById("opTtl");
+          if (!ttlEl) return;
+
+          const id = getCookie(OP_COOKIE);
+          if (!id) { ttlEl.textContent = ""; stopOpTtlTimer(); return; }
+
+          const ts = parseInt(getCookie(OP_TS_COOKIE) || "0", 10);
+          const expiresAt = ts + OP_TIMEOUT_MINUTES * 60 * 1000;
+          const remaining = expiresAt - nowUtcMs();
+
+          if (remaining <= 0) {
+            ttlEl.textContent = "0:00";
+            enforceOperatorTimeout(); // will clear pill & show dialog
+            return;
+          }
+
+          ttlEl.textContent = formatTtl(remaining);
+        }
+
+        function startOpTtlTimer() {
+          stopOpTtlTimer();
+          updateOpTtlOnce();
+          opTtlTimer = setInterval(updateOpTtlOnce, 1000);
+        }
+
+        function stopOpTtlTimer() {
+          if (opTtlTimer) { clearInterval(opTtlTimer); opTtlTimer = null; }
         }
 
 
