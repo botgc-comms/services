@@ -194,6 +194,10 @@ resource "azurerm_linux_web_app" "services_wastage_app" {
     application_stack {
       dotnet_version = "8.0"
     }
+
+    websockets_enabled = true
+    http2_enabled      = true
+    always_on          = true
   }
 
   app_settings = {

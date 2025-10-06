@@ -282,10 +282,14 @@
         }
 
         function enforceOperatorTimeout() {
-            if (!getCookie(OP_COOKIE)) return; // nothing selected
+            const hasOp = !!getCookie(OP_COOKIE);
+            if (!hasOp) return;
+
             if (operatorExpired()) {
-                clearOperatorSelection();
-                ensureOperatorSelected();
+                clearOperatorSelection();      // clear cookies + text
+                setOperatorStatus();           // <-- immediately replace the pill with “No operator selected.”
+                closeNonOperatorDialogs();     // close reason/search if open
+                openOperatorDialog();          // prompt to choose again
             }
         }
 
@@ -733,6 +737,12 @@
             const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1, 0);
             setTimeout(checkDay, next.getTime() - now.getTime());
         }
+
+        function closeNonOperatorDialogs() {
+            document.getElementById("reasonModal")?.open && document.getElementById("reasonModal").close();
+            document.getElementById("searchModal")?.open && document.getElementById("searchModal").close();
+        }
+
 
         // ===== Boot =====
         setOperatorStatus();
