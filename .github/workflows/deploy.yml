@@ -11,6 +11,7 @@ on:
       - 'BOTGC.MembershipApplication/**'
       - 'BOTGC.ManagementReports/**'
       - 'BOTGC.Leaderboards/**'
+      - 'BOTGC.POS/**'
       - 'terraform/**'
       - '.github/workflows/*.yml'
 

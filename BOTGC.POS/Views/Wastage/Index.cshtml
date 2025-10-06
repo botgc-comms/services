@@ -602,9 +602,10 @@
         function applyUnitConstraints(unit) {
             const ukey = unitKey(unit);
             const buttons = document.querySelectorAll(".reason-btn");
+            let cleared = false;
 
             buttons.forEach(btn => {
-                // read exclusions from data attribute or fallback by name
+                // from data-excludedunits or fallback by name
                 let ex = (btn.dataset.excludedunits || "").toLowerCase();
                 if (!ex) {
                     const name = btn.firstChild.textContent.trim().toLowerCase();
@@ -613,13 +614,17 @@
                 const excludes = ex.split("|").map(x => x.trim()).filter(Boolean);
                 const blocked = ukey && excludes.includes(ukey);
 
-                btn.disabled = !!blocked;
-                btn.classList.toggle("is-selected", false);
+                // hide instead of disable
+                btn.style.display = blocked ? "none" : "";
+                if (blocked && btn.classList.contains("is-selected")) {
+                    btn.classList.remove("is-selected");
+                    cleared = true;
+                }
             });
 
-            // clear any previously selected reason if it is now disabled
-            selectedReasonId = null;
+            if (cleared) selectedReasonId = null;
         }
+
 
         document.getElementById("logBtn").addEventListener("click", async () => {
             if (!selectedProduct) return;

@@ -236,7 +236,7 @@ dialog article footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
+  min-height: 70px;
   padding: 0.6rem 0.8rem;
   border-radius: 8px;
   border: 1px solid #ddd;
@@ -291,8 +291,12 @@ label {
 
 .qty-row {
   display: flex;
-  gap: 12px;
-  align-items: center;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.qty-row > label {
+  margin: 0;
 }
 
 #qty {
@@ -302,12 +306,15 @@ label {
 .qty-quick {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .qty-quick button {
   height: 44px;
   padding: 0 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .qr-block {
