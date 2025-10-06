@@ -201,13 +201,13 @@ resource "azurerm_linux_web_app" "services_wastage_app" {
   }
 
   app_settings = {
-    "APPINSIGHTS_INSTRUMENTATIONKEY""                     = azurerm_application_insights.app_insights.instrumentation_key
+    "APPINSIGHTS_INSTRUMENTATIONKEY"                      = azurerm_application_insights.app_insights.instrumentation_key
     "APPLICATIONINSIGHTS_CONNECTION_STRING"               = azurerm_application_insights.app_insights.connection_string
     "AppSettings__ApplicationInsights__ConnectionString"  = azurerm_application_insights.app_insights.connection_string
 
     "SCM_DO_BUILD_DURING_DEPLOYMENT"                      = true
     "WEBSITE_RUN_FROM_PACKAGE"                            = "1"
-    "DATA_CONTAINER_CONNECTION_STRING"                       = data.azurerm_storage_account.services_api_sa.primary_connection_string
+    "DATA_CONTAINER_CONNECTION_STRING"                    = data.azurerm_storage_account.services_api_sa.primary_connection_string
     "ASPNETCORE_ENVIRONMENT"                              = "Production"
 
     "AppSettings__Redis__ConnectionString"                = data.azurerm_redis_cache.redis.primary_connection_string
