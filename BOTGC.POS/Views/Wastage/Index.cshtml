@@ -375,21 +375,35 @@
         }
 
         async function pollSheet() {
-            try {
-                const sheet = await fetchSheet();
-                if (!sheet) return;
-                const have = existingIds();
-                const opLookup = {};
-                document.querySelectorAll("#operatorTiles .tile").forEach(t => opLookup[t.dataset.opid] = t.textContent);
+          try {
+            const sheet = await fetchSheet();
+            if (!sheet) return;
 
-                sheet.entries.sort((a,b)=> new Date(b.at) - new Date(a.at));
-                sheet.entries.forEach(e => {
-                    if (!have.has(e.id)) {
-                        const opName = opLookup[e.operatorId] || "Unknown";
-                        addRow(opName, e.productName, e.reason, e.quantity, e.id, e.at);
-                    }
-                });
-            } catch {}
+            // map operator id -> name for display
+            const opLookup = {};
+            document.querySelectorAll("#operatorTiles .tile").forEach(t => opLookup[t.dataset.opid] = t.textContent);
+
+            // sort newest first (as you had)
+            sheet.entries.sort((a, b) => new Date(b.at) - new Date(a.at));
+
+            // Build set of server-side ids
+            const serverIds = new Set(sheet.entries.map(e => e.id));
+
+            // 1) Remove any local rows that aren’t on the server anymore
+            const body = document.getElementById("sheetBody");
+            Array.from(body.querySelectorAll("tr")).forEach(tr => {
+              if (!serverIds.has(tr.dataset.id)) tr.remove();
+            });
+
+            // 2) Add any server rows we don’t already have
+            const have = existingIds();
+            sheet.entries.forEach(e => {
+              if (!have.has(e.id)) {
+                const opName = opLookup[e.operatorId] || "Unknown";
+                addRow(opName, e.productName, e.reason, e.quantity, e.id, e.at);
+              }
+            });
+          } catch {}
         }
 
         function startPolling() {

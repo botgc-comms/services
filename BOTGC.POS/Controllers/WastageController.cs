@@ -139,13 +139,4 @@ public class WastageController : Controller
 
         return Ok(new { ok = true });
     }
-
-
-    [HttpPost("/wastage/submit")]
-    public async Task<IActionResult> Submit()
-    {
-        await _waste.SubmitTodayAsync();
-        Response.Cookies.Delete(OperatorCookie);
-        return RedirectToAction(nameof(Index));
-    }
 }
