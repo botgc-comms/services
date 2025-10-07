@@ -527,7 +527,7 @@
 
             const fd = new FormData();
             fd.append("productId", selectedProduct.id);
-            fd.append("igProductId", selectedProduct.igProductId);
+            fd.append("igProductId", selectedProduct.igid);
             fd.append("unit", selectedProduct.unit);
             fd.append("productName", selectedProduct.name);
             fd.append("quantity", qty.toString());
@@ -578,12 +578,6 @@
                 btn.textContent = oldText;
             }
         });
-
-        function getReasonName(id) {
-            if (!id) return "Unspecified";
-            const btn = document.querySelector(`.reason-btn[data-reasonid='${id}']`);
-            return btn ? btn.firstChild.textContent.trim() : "Unspecified";
-        }
 
         // ===== SignalR (existing) =====
         let connection = null;

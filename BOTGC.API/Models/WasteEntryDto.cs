@@ -9,7 +9,6 @@
         string Unit, 
         string ProductName,
         string Reason,
-        decimal Quantity,
-        string? DeviceId
+        decimal Quantity
     );
 }

@@ -80,8 +80,9 @@ namespace BOTGC.API.Extensions
             services.AddHostedService<NewMemberAddedQueueProcessor>();
             services.AddHostedService<StockLevelAnalysisQueueProcessor>();
             services.AddHostedService<StockWastageQueueProcessor>();
+            services.AddHostedService<WasteSheetDailyFlusher>();
             services.AddHostedService<StockLevelEnqueueScheduler>();
-
+            
             // Register MediatR and scan for handlers in your assembly
             services.AddMediatR(cfg =>
             {

@@ -50,8 +50,7 @@ public partial class GetWasteSheetHandler
                     request.Unit, 
                     request.ProductName,
                     request.Reason,
-                    request.Quantity,
-                    request.DeviceId
+                    request.Quantity
                 );
 
                 sheet.Status = "Open";

@@ -121,8 +121,7 @@ namespace BOTGC.API.Controllers
                     request.Unit,
                     request.ProductName,
                     request.Reason,
-                    request.Quantity,
-                    request.DeviceId
+                    request.Quantity
                 );
 
                 var result = await _mediator.Send(cmd, HttpContext.RequestAborted);

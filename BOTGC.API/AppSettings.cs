@@ -22,7 +22,9 @@
 
         public MondaySettings Monday { get; set; } = new();
 
-        public FeatureToggles FeatureToggles { get; set; } = new(); 
+        public FeatureToggles FeatureToggles { get; set; } = new();
+
+        public Waste Waste { get; set; } = new();
 
         public ApplicationInsightsSettings ApplicationInsights { get; set; } = new();
 
@@ -57,8 +59,8 @@
         public int Default_TTL_Mins { get; set; } = 12 * 60;
         public int VeryShortTerm_TTL_mins { get; set; } = 1;
         public int ShortTerm_TTL_mins { get; set; } = 30;
-        public int MediumTerm_TTL_mins { get; set; } = 12*60;
-        public int LongTerm_TTL_mins { get; set; } = 24*60*30;
+        public int MediumTerm_TTL_mins { get; set; } = 12 * 60;
+        public int LongTerm_TTL_mins { get; set; } = 24 * 60 * 30;
         public int Forever_TTL_Mins { get; set; } = int.MaxValue;
 
         public FileCacheStorage FileCacheStorage { get; set; }
@@ -70,21 +72,21 @@
         public string EndPoint { get; set; } = string.Empty;
         public string SubscriptionKey { get; set; } = string.Empty;
     }
-    
+
     public class GitHub
     {
         public string Token { get; set; } = "";
         public string RepoUrl { get; set; } = "https://github.com/botgc-comms/data";
         public string ApiUrl { get; set; } = "https://api.github.com";
         public string RawUrl { get; set; } = "https://raw.githubusercontent.com/botgc-comms/data/master";
-        public string TrophyDirectory { get; set; } = "Trophies"; 
+        public string TrophyDirectory { get; set; } = "Trophies";
     }
 
     public class IG
     {
         public string BaseUrl { get; set; } = "https://www.botgc.co.uk";
-        public string MemberId { get; set; } 
-        public string MemberPassword { get; set; } 
+        public string MemberId { get; set; }
+        public string MemberPassword { get; set; }
         public string AdminPassword { get; set; }
 
         public IGEndpoints Urls { get; set; } = new IGEndpoints();
@@ -137,5 +139,15 @@
     {
         public bool EnableStockControlSchedule { get; set; } = true;
         public bool ProcessMembershipApplications { get; set; } = true;
+    }
+
+    public class Waste
+    {
+        public int MaxSheetsPerRun { get; set; } = 10;
+        public int DaysToLookBack { get; set; } = 7;
+        public int DefaultStockRoom { get; set; } = 3;
+        public string Cron { get; set; } = "0 3 * * *";
+        public string TimeZone { get; set; } = "Europe/London";
+        public bool RunOnStartup { get; set; } = false;
     }
 }

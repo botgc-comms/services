@@ -11,8 +11,7 @@ namespace BOTGC.API.Services.Queries
        string Unit, 
        string ProductName,
        string Reason,
-       decimal Quantity,
-       string? DeviceId
+       decimal Quantity
    ) : QueryBase<AddResultDto>;
 
 }

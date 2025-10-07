@@ -2,14 +2,17 @@
 using BOTGC.API.Models;
 using BOTGC.API.Services.Queries;
 using MediatR;
+using Microsoft.Extensions.Options;
 
 
 namespace BOTGC.API.Services.BackgroundServices
 {
-    public class StockWastageQueueProcessor(ILogger<StockWastageQueueProcessor> logger,
+    public class StockWastageQueueProcessor(IOptions<AppSettings> settings, 
+                                            ILogger<StockWastageQueueProcessor> logger,
                                             IMediator mediator,
                                             IQueueService<WasteEntryCommandDto> stockWastageQueueService) : BackgroundService
     {
+        private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly ILogger<StockWastageQueueProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         private readonly IQueueService<WasteEntryCommandDto> _stockWastageQueueService = stockWastageQueueService ?? throw new ArgumentNullException(nameof(stockWastageQueueService));
@@ -48,8 +51,8 @@ namespace BOTGC.API.Services.BackgroundServices
                             var command = new ConfirmAddWastageCommand
                             {
                                 WastageDateUtc = entry.WastageDateUtc,
-                                ProductId = entry.ProductId,
-                                StockRoomId = entry.StockRoomId,
+                                ProductId = int.Parse(entry.ProductId.ToString()),
+                                StockRoomId = entry.StockRoomId ?? _settings.Waste.DefaultStockRoom,
                                 Quantity = entry.Quantity,
                                 Reason = entry.Reason
                             };
