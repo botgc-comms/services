@@ -26,6 +26,8 @@
 
         public Waste Waste { get; set; } = new();
 
+        public StockTakeSettings StockTake { get; set; } = new();
+
         public ApplicationInsightsSettings ApplicationInsights { get; set; } = new();
 
         public string PlayingMemberExpression { get; set; } = "^(?:5|6|7|Intermediate|MX).*?$";
@@ -119,6 +121,7 @@
         public string SecurityLogMobileOrders { get; set; } = "/log.php?search=Mobile+order&person=&start={today}&starttime=&end={today}&endtime=";
         public string UpdateMemberPropertiesUrl { get; set; } = "/member.php?memberid={memberid}&requestType=ajax&ajaxaction=saveparamvalue";
         public string ConfirmAddWastageUrl { get; set; } = "/tillstockcontrol.php?&requestType=ajax&ajaxaction=confirmaddwastage ";
+        public string GetStockTakesReportUrl { get; set; } = "/tillstockcontrol.php?tab=transactions&requestType=ajax&ajaxaction=updatedata";
         public string MemberDetailsUrl { get; set; } = "/member.php?memberid={memberid}";
         public string StockItemsUrl { get; set; } = "/tillstockcontrol.php";
         public string TillOperatorsReportUrl { get; set; } = "/tilladmin.php?tab=operators";
@@ -149,5 +152,15 @@
         public string Cron { get; set; } = "0 3 * * *";
         public string TimeZone { get; set; } = "Europe/London";
         public bool RunOnStartup { get; set; } = false;
+    }
+
+    public class StockTakeSettings
+    {
+        public bool Enabled { get; set; }
+        public string PreparationFrequency { get; set; } // Cron expression
+        public int MinProductsPerSheet { get; set; }
+        public int MaxProductsPerSheet { get; set; }
+        public int TolerancePercent { get; set; }
+        public int MaxToleranceBreachesBeforeTicket { get; set; }
     }
 }

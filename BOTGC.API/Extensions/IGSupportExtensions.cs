@@ -53,6 +53,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IReportParser<HandicapIndexPointDto>, IGHandicapIndexHistoryReportParser>();
             services.AddSingleton<IReportParser<TillOperatorDto>, IGTillOperatorReportParser>();
             services.AddSingleton<IReportParser<NewMemberLookupDto>, IGNewMembersReportParser>();
+            services.AddSingleton<IReportParser<StockTakeEntryDto>, IGStockTakeReportParser>();
             services.AddSingleton<IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto>, IGLeaderboardReportParser>();
             services.AddSingleton<IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>, IGClubChampionshipLeaderboardReportParser>();
             

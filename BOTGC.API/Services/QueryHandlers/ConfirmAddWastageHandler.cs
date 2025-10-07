@@ -19,12 +19,12 @@ namespace BOTGC.API.Services.QueryHandlers
                     var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.ConfirmAddWastageUrl}";
 
                     var data = new Dictionary<string, string>
-                {
-                    { "id", request.ProductId.ToString() },
-                    { "stockRoomId", request.StockRoomId.ToString() },
-                    { "qty", request.Quantity.ToString() },
-                    { "reason", request.Reason }
-                };
+                    {
+                        { "id", request.ProductId.ToString() },
+                        { "stockRoomId", request.StockRoomId.ToString() },
+                        { "qty", request.Quantity.ToString() },
+                        { "reason", request.Reason }
+                    };
 
                     await _dataProvider.PostData(url, data);
                 }

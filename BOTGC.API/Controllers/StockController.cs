@@ -1,4 +1,5 @@
-﻿using BOTGC.API.Interfaces;
+﻿using BOTGC.API.Dto;
+using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
 using BOTGC.API.Services.Queries;
 using MediatR;
@@ -163,6 +164,63 @@ namespace BOTGC.API.Controllers
             {
                 _logger.LogError(ex, "Error deleting waste entry {EntryId} for {SheetDate}.", id, sheetDate.ToString("yyyy-MM-dd"));
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the waste entry.");
+            }
+        }
+
+        [HttpGet("stockTakes")]
+        public async Task<IActionResult> GetStockTakes([FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
+        {
+            _logger.LogInformation("Fetching previous stock takes...");
+
+            try
+            {
+                var query = new GetStockTakesQuery()
+                {
+                    FromDate = fromDate,
+                    ToDate = toDate   
+                };
+
+                var products = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (products == null || products.Count == 0)
+                {
+                    _logger.LogInformation("No previous stock takes were found");
+                    return Ok(new List<StockTakeEntryDto>());
+                }
+
+                _logger.LogInformation($"Successfully retrieved {products.Count} products involved in previous stock takes.");
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, @"Error retrieving previous stock takes.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving previous stock takes.");
+            }
+        }
+
+        [HttpGet("stockTakes/products")]
+        public async Task<IActionResult> GetStockTakeProducts()
+        {
+            _logger.LogInformation("Fetching prepared stock take product list...");
+
+            try
+            {
+                var query = new GetStockTakeProductsQuery();
+                var products = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (products == null || products.Count == 0)
+                {
+                    _logger.LogInformation("No products found for the stock take.");
+                    return Ok(new List<StockTakeEntryDto>());
+                }
+
+                _logger.LogInformation($"Successfully retrieved {products.Count} products for the stock take.");
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving stock take product list.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the stock take product list.");
             }
         }
 
