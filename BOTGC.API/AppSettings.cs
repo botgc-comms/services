@@ -162,5 +162,7 @@
         public int MaxProductsPerSheet { get; set; }
         public int TolerancePercent { get; set; }
         public int MaxToleranceBreachesBeforeTicket { get; set; }
+
+        public Dictionary<string, int> StockTakeComplexity { get; set; } = new();
     }
 }
