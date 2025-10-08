@@ -3,9 +3,13 @@ using BOTGC.MembershipApplication.Common;
 using BOTGC.MembershipApplication.Interfaces;
 using BOTGC.MembershipApplication.Models;
 using BOTGC.MembershipApplication.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Net;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -207,87 +211,91 @@ public class MembershipController : Controller
         return View();
     }
 
+    [AllowAnonymous]
     [HttpGet("/access/recent-applications")]
     public IActionResult GateRecentApplications()
     {
-        var diag = new Dictionary<string, string?>();
         var debug = Request.Query.ContainsKey("debug");
 
-        try
+        var secret = _settings.RecentApplicants.SharedSecret;
+        var ttl = (_settings.RecentApplicants.TokenTtlMinutes ?? 10) > 0
+            ? (_settings.RecentApplicants.TokenTtlMinutes ?? 10)
+            : 10;
+        var cookieName = string.IsNullOrWhiteSpace(_settings.RecentApplicants.CookieName)
+            ? "ra_tok"
+            : _settings.RecentApplicants.CookieName;
+
+        var targetPath = "/members/recent-applications";
+        var key = Request.Query["k"].ToString();
+
+        IActionResult Deny(string reason)
         {
-            diag["Environment"] = _env.EnvironmentName;
-            var secret = _settings.RecentApplicants.SharedSecret;
-            var allowedHost = _settings.RecentApplicants.AllowedReferrerHost;
-            var ttl = (_settings.RecentApplicants.TokenTtlMinutes ?? 10) > 0 ? (_settings.RecentApplicants.TokenTtlMinutes ?? 10) : 10;
-            var cookieName = string.IsNullOrWhiteSpace(_settings.RecentApplicants.CookieName) ? "ra_tok" : _settings.RecentApplicants.CookieName;
-
-            diag["AllowedReferrerHost"] = allowedHost;
-            diag["TTL_Min"] = ttl.ToString();
-            diag["CookieName"] = cookieName;
-
-            if (string.IsNullOrWhiteSpace(secret))
-                return DebugFail("Missing SharedSecret.", diag, debug);
-
-            var refererRaw = Request.Headers.Referer.ToString();
-            diag["RefererRaw"] = refererRaw;
-
-            if (_env.IsDevelopment())
-            {
-                // Accept missing or invalid referer in development
-                diag["RefererRaw"] = refererRaw;
-                diag["RefererHost"] = "(skipped in development)";
-            }
-            else
-            {
-                if (!Uri.TryCreate(refererRaw, UriKind.Absolute, out var refUri))
-                    return DebugFail("Invalid or missing Referer header.", diag, debug);
-
-                diag["RefererHost"] = refUri.Host;
-
-                if (!string.Equals(refUri.Host, allowedHost, StringComparison.OrdinalIgnoreCase))
-                    return DebugFail("Referer host does not match AllowedReferrerHost.", diag, debug);
-            }
-
-            var targetPath = "/members/recent-applications";
-            diag["TargetPath"] = targetPath;
-
-            var ua = Request.Headers.TryGetValue("User-Agent", out var headerVal) ? headerVal.ToString() : string.Empty;
-            var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
-            diag["UserAgent"] = string.IsNullOrEmpty(ua) ? "(empty)" : ua.Substring(0, Math.Min(120, ua.Length));
-            diag["ClientIP"] = ip;
-
-            var token = AccessToken.Issue(targetPath, DateTimeOffset.UtcNow.AddMinutes(ttl), secret, ua, ip);
-            diag["TokenIssued"] = $"yes (length {token.Length})";
-
-            var cookieDomain = _env.IsDevelopment() ? null : "apply.botgc.co.uk";
-            diag["CookieDomain"] = cookieDomain ?? "(host-only)";
-
-            Response.Cookies.Append(cookieName, token, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax,
-                Path = targetPath,
-                MaxAge = TimeSpan.FromMinutes(ttl),
-                Domain = cookieDomain
-            });
-
             if (debug)
             {
-                var html = BuildDebugPage("Gate succeeded", diag, targetPath);
+                var diag = new Dictionary<string, string?>
+                {
+                    ["Environment"] = _env.EnvironmentName,
+                    ["Reason"] = reason,
+                    ["KeyPresent"] = string.IsNullOrEmpty(key) ? "no" : "yes",
+                    ["RefererRaw"] = Request.Headers.Referer.ToString(),
+                    ["UserAgent"] = Request.Headers.UserAgent.ToString(),
+                    ["ClientIP"] = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    ["TargetPath"] = targetPath,
+                    ["CookieName"] = cookieName,
+                    ["TTL_Min"] = ttl.ToString()
+                };
+                var html = BuildDebugPage("Denied", diag, null);
                 return Content(html, "text/html");
             }
 
-            return Redirect(targetPath);
+            return StatusCode(StatusCodes.Status403Forbidden, "Denied.");
         }
-        catch (Exception ex)
+
+        if (string.IsNullOrWhiteSpace(secret))
+            return Deny("Missing SharedSecret.");
+
+        if (string.IsNullOrWhiteSpace(key))
+            return Deny("Missing key.");
+
+        // Validate key: "<path>|<unix-expiry>|<hex HMAC>"
+        var parts = key.Split('|');
+        if (parts.Length != 3) return Deny("Malformed key.");
+
+        var path = parts[0];
+        if (!string.Equals(path, targetPath, StringComparison.Ordinal))
+            return Deny("Path mismatch.");
+
+        if (!long.TryParse(parts[1], out var exp))
+            return Deny("Invalid expiry.");
+
+        if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() > exp)
+            return Deny("Key expired.");
+
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
+        var expected = Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes($"{path}|{exp}")));
+        var sigOk = CryptographicOperations.FixedTimeEquals(
+            Convert.FromHexString(expected),
+            Convert.FromHexString(parts[2]));
+
+        if (!sigOk) return Deny("Invalid signature.");
+
+        // Issue access cookie and redirect
+        var ua = Request.Headers.UserAgent.ToString();
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var token = AccessToken.Issue(targetPath, DateTimeOffset.UtcNow.AddMinutes(ttl), secret, ua, ip);
+
+        var cookieDomain = _env.IsDevelopment() ? null : "apply.botgc.co.uk";
+        Response.Cookies.Append(cookieName, token, new CookieOptions
         {
-            diag["Exception"] = ex.GetType().FullName;
-            diag["Message"] = ex.Message;
-            diag["Stack"] = ex.StackTrace;
-            var html = BuildDebugPage("Unhandled exception", diag, null);
-            return StatusCode(500, html);
-        }
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Path = targetPath,
+            MaxAge = TimeSpan.FromMinutes(ttl),
+            Domain = cookieDomain
+        });
+
+        return Redirect(targetPath);
     }
 
     private IActionResult DebugFail(string reason, IDictionary<string, string?> diag, bool debug)
@@ -336,9 +344,15 @@ public class MembershipController : Controller
         // Pass the application data to the API
         var client = _httpClientFactory.CreateClient("MembershipApi");
 
-        var applicants = await client.GetFromJsonAsync<List<MemberModel>>("api/members/waiting") ?? new List<MemberModel>();
-        var joinedRaw = await client.GetFromJsonAsync<List<RecentMemberApiModel>>("api/members/new") ?? new List<RecentMemberApiModel>();
+        var resp1 = await client.GetAsync("api/members/waiting");
+        var applicants = resp1.StatusCode == HttpStatusCode.NoContent
+            ? new List<MemberModel>()
+            : await resp1.Content.ReadFromJsonAsync<List<MemberModel>>() ?? new List<MemberModel>();
 
+        var resp2 = await client.GetAsync("api/members/new");
+        var joinedRaw = resp2.StatusCode == HttpStatusCode.NoContent
+            ? new List<RecentMemberApiModel>()
+            : await resp2.Content.ReadFromJsonAsync<List<RecentMemberApiModel>>() ?? new List<RecentMemberApiModel>();
         static string NormaliseName(MemberModel m)
         {
             var name = !string.IsNullOrWhiteSpace(m.FullName) ? m.FullName! : $"{m.FirstName} {m.LastName}";

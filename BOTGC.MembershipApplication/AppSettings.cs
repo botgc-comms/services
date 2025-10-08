@@ -35,7 +35,6 @@ public class GrowSurfSettings
 public class RecentApplicantsSettings
 {
     public string SharedSecret { get; set; }
-    public string AllowedReferrerHost { get; set; }
     public int? TokenTtlMinutes { get; set; }
     public string CookieName { get; set; }
 }

@@ -62,16 +62,20 @@ namespace BOTGC.API.Services.QueryHandlers
                 ttl
             ) ?? new List<StockTakeEntryDto>();
 
+            // Get all active stock items
             var stockItemsQuery = new GetStockLevelsQuery();
             var products = await _mediator.Send(stockItemsQuery, cancellationToken) ?? new List<StockItemDto>();
 
+            var activeProducts = products.Where(p => p.IsActive.GetValueOrDefault(true));
+
             var grouped = new List<StockTakeSummaryDto>();
 
-            foreach (var g in flatRows.GroupBy(r => r.StockItemId))
+            foreach (var product in activeProducts)
             {
-                var ordered = g.OrderBy(r => r.Timestamp ?? DateTimeOffset.MinValue).ToList();
+                // Find all stock take entries for this product
+                var entries = flatRows.Where(r => r.StockItemId == product.Id).OrderBy(r => r.Timestamp ?? DateTimeOffset.MinValue).ToList();
 
-                var snapshots = ordered
+                var snapshots = entries
                     .Where(r => r.Timestamp.HasValue)
                     .Select(r => new StockTakeSnapshotDto
                     {
@@ -82,10 +86,7 @@ namespace BOTGC.API.Services.QueryHandlers
                     })
                     .ToList();
 
-                var last = ordered.LastOrDefault();
-
-                var product = products.FirstOrDefault(p => p.Id == g.Key)
-                              ?? products.FirstOrDefault(p => string.Equals(p.Name, last?.Name, StringComparison.OrdinalIgnoreCase));
+                var last = entries.LastOrDefault();
 
                 var lastTs = last?.Timestamp;
                 int? daysSince = null;
@@ -95,16 +96,16 @@ namespace BOTGC.API.Services.QueryHandlers
                     daysSince = (int)(todayLocal - lastLocalDate).TotalDays;
                 }
 
-                var currentQty = product?.Quantity
+                var currentQty = product.Quantity
                                  ?? last?.CurrentQuantity
                                  ?? last?.NewQuantity;
 
                 grouped.Add(new StockTakeSummaryDto
                 {
                     StockItemId = product.Id,
-                    Name = product?.Name ?? last?.Name,
-                    Unit = product?.Unit ?? last?.Unit,
-                    Division = product?.Division ?? last?.Division,
+                    Name = product.Name,
+                    Unit = product.Unit,
+                    Division = product.Division,
                     CurrentQuantity = currentQty,
                     LastStockTake = lastTs,
                     DaysSinceLastStockTake = daysSince,
