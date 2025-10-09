@@ -58,6 +58,7 @@ app.UseRouting();
 
 app.MapHub<WastageHub>("/hubs/wastage");
 app.MapHub<NgrokHub>("/hubs/ngrok");
+app.MapHub<StockTakeHub>("/hubs/stocktake");
 
 app.MapGet("/access", (HttpContext ctx, IConfiguration cfg) =>
 {

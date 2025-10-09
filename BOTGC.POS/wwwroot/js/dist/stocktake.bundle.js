@@ -15,35 +15,61 @@
     const DRAFT_REMOVE_URL = (stockItemId, division) =>
         `/stocktake/observe/${stockItemId}?division=${encodeURIComponent(division)}`;
 
+    // ===== Profiles & labels =====
+    // Use token format "Code[@Location]" so we can require per-bar weights.
     const PROFILES = {
-        "WINES|BOTTLE": ["CountInLoungeBar", "CountInColtBar", "CountInStoreRoom", "OpenBottleWeightGrams"],
-        "MINERALS|BOTTLE": ["CountInLoungeBar", "CountInColtBar", "CountInStoreRoom"],
-        "SNACKS|EACH": ["CountInLoungeBar", "CountInColtBar", "CountInStoreRoom"],
-        "BEER CANS|CAN": ["CountInLoungeBar", "CountInColtBar", "CountInStoreRoom"],
-        "DRAUGHT BEER|PINT": ["CountInCellar", "KegWeightGrams"],
-        "*|*": ["CountInLoungeBar", "CountInColtBar", "CountInStoreRoom"]
+        "WINES|BOTTLE": [
+            "CountInStoreRoom",
+            "CountInLoungeBar",
+            "OpenBottleWeightGrams@Lounge",
+            "CountInColtBar",
+            "OpenBottleWeightGrams@Colt"
+        ],
+        "MINERALS|BOTTLE": [
+            "CountInStoreRoom",
+            "CountInLoungeBar",
+            "CountInColtBar"
+        ],
+        "SNACKS|EACH": [
+            "CountInStoreRoom",
+            "CountInLoungeBar",
+            "CountInColtBar"
+        ],
+        "BEER CANS|CAN": [
+            "CountInStoreRoom",
+            "CountInLoungeBar",
+            "CountInColtBar"
+        ],
+        "DRAUGHT BEER|PINT": [
+            "CountInCellar",
+            "KegWeightGrams@Cellar"
+        ],
+        "*|*": [
+            "CountInStoreRoom",
+            "CountInLoungeBar",
+            "CountInColtBar"
+        ]
     };
-
-    function isLikelyRedWine(name) {
-        const s = (name || "").toLowerCase();
-        return /(merlot|shiraz|syrah|malbec|rioja|tempranillo|cabernet|pinot noir|red)/.test(s);
-    }
-
-    function fieldLabel(code) {
-        if (code === "CountInLoungeBar") return "Count (Lounge bar)";
-        if (code === "CountInColtBar") return "Count (Colt bar)";
-        if (code === "CountInStoreRoom") return "Count (store room)";
-        if (code === "OpenBottleWeightGrams") return "Open bottle weight (g)";
-        // NEW:
-        if (code === "CountInCellar") return "Count (cellar)";
-        if (code === "KegWeightGrams") return "Keg weight (g)";
-        return code;
-    }
-
 
     function profileFor(division, unit) {
         const key = `${(division || "").toUpperCase()}|${(unit || "").toUpperCase()}`;
-        return PROFILES[key] || ["CountInStoreRoom"];
+        return PROFILES[key] || PROFILES["*|*"];
+    }
+
+    function parseToken(token) {
+        const [code, loc] = String(token).split("@");
+        return { code, location: loc || null };
+    }
+
+    function fieldLabel(token) {
+        const { code, location } = parseToken(token);
+        if (code === "CountInLoungeBar") return "Count (Lounge bar)";
+        if (code === "CountInColtBar") return "Count (Colt bar)";
+        if (code === "CountInStoreRoom") return "Count (store room)";
+        if (code === "CountInCellar") return "Count (cellar)";
+        if (code === "OpenBottleWeightGrams") return location ? `Total weight of open bottles (g, ${location})` : "Total weight of open bottles (g)";
+        if (code === "KegWeightGrams") return "Weight of Keg in use (g)";
+        return code;
     }
 
     // ===== Utilities =====
@@ -57,6 +83,65 @@
     function escapeHtml(s) { return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
     function slug(s) { return String(s || "").toLowerCase().replace(/\s+/g, "-").replace(/\//g, "-"); }
     function fmtTimeISO(iso) { const d = new Date(iso); const hh = d.getHours().toString().padStart(2, "0"); const mm = d.getMinutes().toString().padStart(2, "0"); return `${hh}:${mm}`; }
+
+    function getQueryParam(name) {
+        const u = new URL(window.location.href);
+        const v = u.searchParams.get(name);
+        return v === null ? null : v;
+    }
+
+    // Deterministic PRNG (xmur3 + sfc32)
+    function xmur3(str) {
+        let h = 1779033703 ^ str.length;
+        for (let i = 0; i < str.length; i++) {
+            h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+            h = (h << 13) | (h >>> 19);
+        }
+        return function () {
+            h = Math.imul(h ^ (h >>> 16), 2246822507);
+            h = Math.imul(h ^ (h >>> 13), 3266489909);
+            h ^= h >>> 16;
+            return h >>> 0;
+        };
+    }
+    function sfc32(a, b, c, d) {
+        return function () {
+            a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0;
+            let t = (a + b) | 0;
+            a = b ^ (b >>> 9);
+            b = (c + (c << 3)) | 0;
+            c = (c << 21) | (c >>> 11);
+            d = (d + 1) | 0;
+            t = (t + d) | 0;
+            c = (c + t) | 0;
+            return (t >>> 0) / 4294967296;
+        };
+    }
+    function seededRng(seedStr) {
+        const seed = xmur3(seedStr);
+        return sfc32(seed(), seed(), seed(), seed());
+    }
+
+    // Fisher–Yates using deterministic RNG
+    function shuffleDeterministic(arr, rng) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(rng() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // Pick N items deterministically for today
+    function pickDivisionsForToday(allDivisions, n) {
+        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        // Seed includes date + a stable string so every device gets the same set
+        const seed = `stocktake:${today}`;
+        const rng = seededRng(seed);
+        const shuffled = shuffleDeterministic(allDivisions, rng);
+        return shuffled.slice(0, Math.min(n, shuffled.length));
+    }
+
 
     // ===== State =====
     let plan = [];
@@ -95,7 +180,10 @@
             const tr = document.querySelector(`#obsTbody tr[data-id='${stockItemId}']`);
             if (tr) tr.remove();
             const t = tileFor(stockItemId);
-            if (t) t.classList.remove("tile--partial", "tile--complete");
+            if (t) {
+                t.classList.remove("tile--partial", "tile--complete");
+                t.querySelector(".tile__badge")?.remove();
+            }
             document.getElementById("observationsSection").hidden = obsMap.size === 0;
         });
 
@@ -199,11 +287,22 @@
         }
     }
 
+    function pluralizeUnit(unitRaw) {
+        const u = String(unitRaw || "").trim().toLowerCase();
+        if (!u) return "items";
+        if (u === "bottle") return "bottles";
+        if (u === "can") return "cans";
+        if (u === "each") return "items";
+        if (u === "pint") return "pints";
+        if (u.endsWith("s")) return u; // already plural
+        return u + "s";
+    }
+
+
     async function selectDivision(d) {
         currentDivision = d;
         document.getElementById("divisionTitle").textContent = d.division;
-        document.getElementById("divisionAge").textContent = `${Math.round(avgDays(d.products))} days on average`;
-
+        
         await loadDraftForDivision(d.division);
         renderProducts();
         renderObsTable();
@@ -217,16 +316,46 @@
             .find(t => parseInt(t.dataset.stockItemId, 10) === stockItemId) || null;
     }
 
+    function requiredPairsFor(entry) {
+        return profileFor(entry.division, entry.unit).map(t => parseToken(t));
+    }
+
+    function presentPairsFrom(entry) {
+        const arr = entry.observations || [];
+        return new Set(arr.map(o => `${o.code}@${o.location || ""}`));
+    }
+
+    function remainingCount(entry) {
+        const req = requiredPairsFor(entry);
+        const present = presentPairsFrom(entry);
+        let left = 0;
+        for (const r of req) {
+            const key = `${r.code}@${r.location || ""}`;
+            if (!present.has(key)) left++;
+        }
+        return left;
+    }
+
     function markTileState(stockItemId, entry) {
         const t = tileFor(stockItemId);
         if (!t) return;
+
         t.classList.remove("tile--partial", "tile--complete");
-        const required = profileFor(entry.division, entry.unit);
-        const present = new Set((entry.observations || []).map(o => o.code));
-        const nonZeroCount = (entry.observations || []).length;
-        if (nonZeroCount === 0) return;
-        const allFilled = required.every(code => present.has(code));
-        t.classList.add(allFilled ? "tile--complete" : "tile--partial"); // green vs grey
+        t.querySelector(".tile__badge")?.remove();
+
+        const any = (entry.observations || []).length > 0;
+        if (!any) return;
+
+        const left = remainingCount(entry);
+        if (left === 0) {
+            t.classList.add("tile--complete");
+        } else {
+            t.classList.add("tile--partial");
+            const badge = document.createElement("span");
+            badge.className = "tile__badge";
+            badge.textContent = `${left} left`;
+            t.appendChild(badge);
+        }
     }
 
     function renderProducts() {
@@ -237,7 +366,7 @@
         for (const p of list) {
             const entry = obsMap.get(p.stockItemId);
             const tile = document.createElement("div");
-            tile.className = `tile cat-${slug(division)}`;
+            tile.className = `tile`;
             tile.dataset.stockItemId = p.stockItemId;
             tile.dataset.name = p.name || "";
             tile.dataset.unit = p.unit || "";
@@ -250,29 +379,154 @@
         }
     }
 
-    function buildFields(container, requiredCodes, existing) {
+    // ===== Obs Modal =====
+    function buildFields(container, requiredTokens, existing, productUnit) {
         container.innerHTML = "";
-        for (const code of requiredCodes) {
-            const wrap = document.createElement("div");
-            wrap.className = "obs-field";
-            const existingVal = existing?.find(o => o.code === code)?.value ?? "";
 
-            let location = null;
-            if (code === "CountInLoungeBar") location = "Lounge";
-            else if (code === "CountInColtBar") location = "Colt";
-            else if (code === "CountInStoreRoom") location = "Store";
-            // NEW:
-            else if (code === "CountInCellar" || code === "KegWeightGrams") location = "Cellar";
+        // progress + hint
+        const progress = document.createElement("div");
+        progress.className = "obs-progress";
+        container.appendChild(progress);
 
-            wrap.innerHTML =
-                `<label>${escapeHtml(fieldLabel(code))}</label>
-       <input type="number" step="1" min="0"
-              data-code="${code}"
-              ${location ? `data-location="${location}"` : ""}
-              value="${existingVal}">`;
+        const hint = document.createElement("div");
+        hint.className = "obs-hint";
+        hint.textContent = "Blank = not observed. 0 = none found.";
+        container.appendChild(hint);
 
-            container.appendChild(wrap);
+        // groups wrapper
+        const groupsHost = document.createElement("div");
+        groupsHost.className = "obs-groups";
+        container.appendChild(groupsHost);
+
+        // map existing
+        const existingMap = new Map();
+        (existing || []).forEach(o => {
+            const key = `${o.code}@${o.location || ""}`;
+            existingMap.set(key, o.value);
+        });
+
+        const unitLabel = pluralizeUnit(productUnit);
+
+        function tokenToGroupAndLabel(token) {
+            const [code, locRaw] = String(token).split("@");
+            const loc = locRaw || null;
+
+            // “Count” fields become “Number of unopened {unit}”
+            const countLabel = `Number of unopened ${unitLabel}`;
+
+            if (code === "CountInStoreRoom") return { group: "Store Room", label: countLabel, key: `${code}@` };
+            if (code === "CountInColtBar") return { group: "Colt bar", label: countLabel, key: `${code}@` };
+            if (code === "CountInLoungeBar") return { group: "Lounge bar", label: countLabel, key: `${code}@` };
+            if (code === "CountInCellar") return { group: "Cellar", label: "Count", key: `${code}@` };
+
+            if (code === "OpenBottleWeightGrams" && loc === "Colt")
+                return { group: "Colt bar", label: "Total weight of open bottles (g)", key: `OpenBottleWeightGrams@Colt` };
+            if (code === "OpenBottleWeightGrams" && loc === "Lounge")
+                return { group: "Lounge bar", label: "Total weight of open bottles (g)", key: `OpenBottleWeightGrams@Lounge` };
+            if (code === "KegWeightGrams" && loc === "Cellar")
+                return { group: "Cellar", label: "Weight of Keg being used (g)", key: `KegWeightGrams@Cellar` };
+
+            return { group: "Other", label: code + (loc ? ` (${loc})` : ""), key: `${code}@${loc || ""}` };
         }
+
+        const order = ["Store Room", "Colt bar", "Lounge bar", "Cellar", "Other"];
+        const groups = new Map(order.map(n => [n, []]));
+        for (const token of requiredTokens) {
+            const meta = tokenToGroupAndLabel(token);
+            if (!groups.has(meta.group)) groups.set(meta.group, []);
+            groups.get(meta.group).push(meta);
+        }
+
+        for (const groupName of order) {
+            const fields = groups.get(groupName) || [];
+            if (!fields.length) continue;
+
+            const g = document.createElement("section");
+            g.className = "obs-group";
+
+            const h = document.createElement("h4");
+            h.className = "obs-group__title";
+            h.textContent = groupName;
+            g.appendChild(h);
+
+            const row = document.createElement("div");
+            row.className = "obs-row";
+            g.appendChild(row);
+
+            for (const f of fields) {
+                const current = existingMap.has(f.key) ? existingMap.get(f.key) : "";
+                const wrap = document.createElement("div");
+                wrap.className = "obs-field";
+                wrap.innerHTML =
+                    `<label class="obs-label">${escapeHtml(f.label)}</label>
+                 <div class="obs-input-row">
+                   <input type="number" step="1" min="0"
+                          class="obs-input"
+                          data-token="${escapeHtml(f.key)}"
+                          data-code="${escapeHtml(f.key.split("@")[0])}"
+                          ${f.key.includes("@") && !f.key.endsWith("@") ? `data-location="${escapeHtml(f.key.split("@")[1])}"` : ""}
+                          value="${current !== "" ? String(current) : ""}">
+                   <button type="button" class="btn-quick-zero" data-for="${escapeHtml(f.key)}" aria-label="Set to none">None</button>
+                 </div>`;
+                row.appendChild(wrap);
+            }
+
+            groupsHost.appendChild(g);
+        }
+
+        // bottom note
+        const note = document.createElement("div");
+        note.className = "obs-note";
+        note.textContent = "You can record some values now and come back later to complete this product. Observations should be completed before the end of the day.";
+
+        // Move note into the dialog footer and group buttons to the right
+        const footer = document.querySelector("#obsModal footer.actions");
+        footer.classList.add("obs-footer");
+        footer.querySelector(".obs-note")?.remove();
+        
+        // Wrap buttons once so we can align as a group
+        let btnWrap = footer.querySelector(".obs-btns");
+        if (!btnWrap) {
+          const okBtn = document.getElementById("obsSaveBtn");
+          const cancelBtn = document.getElementById("obsCancelBtn");
+          btnWrap = document.createElement("div");
+          btnWrap.className = "obs-btns";
+          // append wrapper, then move the existing buttons into it
+          footer.appendChild(btnWrap);
+          btnWrap.appendChild(okBtn);
+          btnWrap.appendChild(cancelBtn);
+        }
+
+        // Put the note at the start of the footer
+        footer.prepend(note);
+
+        function updateProgress() {
+            const inputs = Array.from(container.querySelectorAll("input[data-code]"));
+            const required = inputs.length;
+            const completed = inputs.filter(i => i.value !== "").length;
+            const done = completed === required;
+            progress.textContent = `${completed} of ${required} observations recorded${done ? " — Complete" : ""}`;
+        }
+
+        container.addEventListener("input", e => {
+            if (e.target && e.target.matches("input[data-code]")) updateProgress();
+        });
+
+        container.addEventListener("click", e => {
+            const btn = e.target.closest(".btn-quick-zero");
+            if (!btn) return;
+            const key = btn.dataset.for;
+            const input = Array.from(container.querySelectorAll("input[data-code]"))
+                .find(i => `${i.getAttribute("data-code")}@${i.getAttribute("data-location") || ""}` === key);
+            if (input) {
+                input.value = "0";
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                input.focus();
+                input.select();
+            }
+        });
+
+        updateProgress();
     }
 
     function openObsDialog(stockItemId, name, division, unit) {
@@ -283,22 +537,24 @@
         title.textContent = `Record observations: ${name}`;
 
         const existing = obsMap.get(stockItemId)?.observations || [];
-        const requiredCodes = profileFor(division, unit);
-        buildFields(fields, requiredCodes, existing, name);
+        const requiredTokens = profileFor(division, unit);
+        buildFields(fields, requiredTokens, existing, unit);
 
         const onSave = async () => {
+            // Build observations: include any input that has a value (including 0). Blank = not observed.
             const inputs = Array.from(fields.querySelectorAll("input[data-code]"));
             const obs = [];
             for (const i of inputs) {
-                const v = parseFloat(i.value || "0");
-                if (v > 0) {
-                    obs.push({
-                        stockItemId,
-                        code: i.getAttribute("data-code"),
-                        location: i.getAttribute("data-location"),
-                        value: v
-                    });
-                }
+                const raw = i.value;
+                if (raw === "") continue; // not observed
+                const v = parseFloat(raw);
+                if (!isFinite(v) || v < 0) continue;
+                obs.push({
+                    stockItemId,
+                    code: i.getAttribute("data-code"),
+                    location: i.getAttribute("data-location"),
+                    value: v
+                });
             }
 
             const opId = getCookie(OP_COOKIE);
@@ -343,21 +599,43 @@
         dlg.showModal();
     }
 
-    function obsSummaryText(obsArr) {
-        if (!obsArr?.length) return "No values";
+    // ===== Bottom table (Time + Operator + Product + Observations + icons) =====
+    function obsSummaryText(entry) {
+        const req = profileFor(entry.division, entry.unit);
+        const present = presentPairsFrom(entry);
+        const byKey = new Map((entry.observations || []).map(o => [`${o.code}@${o.location || ""}`, o.value]));
+
         const parts = [];
-        for (const o of obsArr) {
-            switch (o.code) {
-                case "CountInLoungeBar": parts.push(`${o.value} in Lounge bar`); break;
-                case "CountInColtBar": parts.push(`${o.value} in Colt bar`); break;
-                case "CountInStoreRoom": parts.push(`${o.value} in store room`); break;
-                case "OpenBottleWeightGrams": parts.push(`${o.value} g open bottle`); break;
-                // NEW:
-                case "CountInCellar": parts.push(`${o.value} in cellar`); break;
-                case "KegWeightGrams": parts.push(`${o.value} g keg weight`); break;
-                default: parts.push(`${o.code}: ${o.value}`); break;
+
+        function renderPart(token, render) {
+            const { code, location } = parseToken(token);
+            const key = `${code}@${location || ""}`;
+            if (present.has(key)) {
+                render(byKey.get(key));
+            } else {
+                parts.push(`${fieldLabel(token)}: not observed`);
             }
         }
+
+        for (const token of req) {
+            const { code, location } = parseToken(token);
+            if (code === "CountInLoungeBar") {
+                renderPart(token, v => parts.push(`${v} in Lounge bar`));
+            } else if (code === "CountInColtBar") {
+                renderPart(token, v => parts.push(`${v} in Colt bar`));
+            } else if (code === "CountInStoreRoom") {
+                renderPart(token, v => parts.push(`${v} in store room`));
+            } else if (code === "CountInCellar") {
+                renderPart(token, v => parts.push(`${v} in cellar`));
+            } else if (code === "OpenBottleWeightGrams") {
+                renderPart(token, v => parts.push(`${v} g open bottle (${location})`));
+            } else if (code === "KegWeightGrams") {
+                renderPart(token, v => parts.push(`${v} g keg weight`));
+            } else {
+                renderPart(token, v => parts.push(`${code}${location ? ` @ ${location}` : ""}: ${v}`));
+            }
+        }
+
         return parts.join("; ");
     }
 
@@ -367,7 +645,10 @@
         if (!data) return;
 
         const time = data.at ? fmtTimeISO(data.at) : "";
-        const summary = obsSummaryText(data.observations);
+        const left = remainingCount(data);
+        const statusText = left === 0 ? "Complete" : `Incomplete: ${left} remaining`;
+        const summary = obsSummaryText(data);
+        const annotated = `${statusText} — ${summary}`;
 
         let tr = tbody.querySelector(`tr[data-id='${stockItemId}']`);
         if (!tr) {
@@ -375,18 +656,18 @@
             tr.dataset.id = String(stockItemId);
             tr.innerHTML =
                 `<td>${escapeHtml(time)}</td>
-         <td>${escapeHtml(data.operatorName || "")}</td>
-         <td class="cell--product">${escapeHtml(data.name)}</td>
-         <td class="cell--obs">${escapeHtml(summary)}</td>
-         <td>
-            <button type="button" class="btn-icon js-edit" title="Edit"><i class="bi bi-pencil-square"></i></button>
-            <button type="button" class="btn-icon text-danger js-remove" title="Remove"><i class="bi bi-trash"></i></button>
-         </td>`;
+                 <td>${escapeHtml(data.operatorName || "")}</td>
+                 <td class="cell--product">${escapeHtml(data.name)}</td>
+                 <td class="cell--obs">${escapeHtml(annotated)}</td>
+                 <td>
+                    <button type="button" class="btn-icon js-edit" title="Edit"><i class="bi bi-pencil-square"></i></button>
+                    <button type="button" class="btn-icon text-danger js-remove" title="Remove"><i class="bi bi-trash"></i></button>
+                 </td>`;
             tbody.appendChild(tr);
         } else {
             tr.children[0].textContent = time;
             tr.children[1].textContent = data.operatorName || "";
-            tr.querySelector(".cell--obs").textContent = summary;
+            tr.querySelector(".cell--obs").textContent = annotated;
         }
 
         tr.querySelector(".js-edit").onclick = () => {
@@ -399,7 +680,10 @@
             obsMap.delete(data.stockItemId);
             tr.remove();
             const tile = tileFor(data.stockItemId);
-            if (tile) tile.classList.remove("tile--partial", "tile--complete");
+            if (tile) {
+                tile.classList.remove("tile--partial", "tile--complete");
+                tile.querySelector(".tile__badge")?.remove();
+            }
             document.getElementById("observationsSection").hidden = obsMap.size === 0;
         };
     }
@@ -418,7 +702,22 @@
         await startSignalR();
 
         plan = await fetchPlan();
-        renderDivisions(plan);
+
+        const showAll = getQueryParam("alldivisions") !== null;
+        const n = parseInt(getQueryParam("count") || "2", 10); // default 2; override with ?count=3 if needed
+        const listToShow = showAll ? plan : pickDivisionsForToday(plan, isFinite(n) && n > 0 ? n : 2);
+
+        // Optional: small caption so staff know why fewer show
+        const captionHost = document.getElementById("divisionTiles");
+        if (!showAll) {
+            const note = document.createElement("div");
+            note.className = "muted";
+            note.style.marginBottom = ".5rem";
+            note.textContent = `Showing ${listToShow.length} of ${plan.length} divisions today. Add ?alldivisions to the URL to show all.`;
+            captionHost.parentElement.insertBefore(note, captionHost);
+        }
+
+        renderDivisions(listToShow);
 
         if (getCookie(OP_COOKIE)) markOperatorActivity();
     });

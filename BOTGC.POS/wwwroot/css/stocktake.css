@@ -268,31 +268,79 @@ dialog article footer {
   color: #111 !important;
 }
 
+/* === PRODUCT TILES (scoped only to the products grid) === */
 .tiles--products .tile {
   min-height: 88px;
-}
-
-.tile--done {
-  opacity: 0.6;
   position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: none;
+  /* use same var approach as category tiles */
+  --bg: #f3f4f6; /* default: soft grey */
+  --fg: #111;
+  --badge: #d6dae0; /* darker shade for the small label */
+  background: var(--bg);
+  color: var(--fg);
 }
 
-.tile--done::after {
+/* PARTIAL = AMBER */
+.tiles--products .tile.tile--partial {
+  --bg: #ffd166; /* amber */
+  --fg: #111;
+  --badge: #caa24a; /* darker amber for the small label */
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* COMPLETE = GREEN */
+.tiles--products .tile.tile--complete {
+  --bg: #adddc4; /* your chosen green */
+  --fg: #111;
+  --badge: #7cc8a7; /* darker green for the small label */
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* small text colour uses the badge shade, same as cat tiles */
+.tiles--products .tile .tile__division {
+  color: var(--badge) !important;
+}
+
+/* only show the green tick when complete */
+.tiles--products .tile::after {
+  content: none;
+}
+
+.tiles--products .tile.tile--complete::after {
   content: "✓";
   position: absolute;
   top: 8px;
   left: 8px;
-  font-weight: 800;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
   width: 22px;
   height: 22px;
   border-radius: 999px;
   display: grid;
   place-items: center;
   font-size: 0.9rem;
+  font-weight: 800;
+  background: #14a44d;
+  color: #fff;
 }
 
+/* optional “N left” badge (JS adds .tile__badge when partial) */
+.tile__badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 0.72rem;
+  line-height: 1;
+  background: #111;
+  color: #fff;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  opacity: 0.9;
+}
+
+/* === TABLE (observed items) === */
 .sheet__table {
   width: 100%;
   max-width: 100%;
@@ -319,30 +367,167 @@ dialog article footer {
   background: #fafafa;
 }
 
-.obs-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(140px, 1fr));
-  gap: 10px;
-  margin-top: 0.5rem;
+/* icon buttons in table */
+.btn-icon {
+  border: none;
+  background: transparent;
+  padding: 0 0.25rem;
+  cursor: pointer;
 }
 
+/* ===== OBS DIALOG (grouped by location) ===== */
+#obsTitle.obs-title {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.obs-groups {
+  display: grid;
+  gap: 16px;
+  margin: 12px 0; /* space above/below the block */
+  padding: 12px 0; /* breathing room inside */
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.obs-group {
+  display: grid;
+  gap: 8px; /* tighter inside each group */
+}
+
+/* Title: more presence + better spacing */
+.obs-group__title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin: 10px 0 6px;
+}
+
+/* Subtle divider between groups (not the first) */
+.obs-group + .obs-group {
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+}
+
+/* Row of inputs inside a group */
+.obs-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 540px) {
+  .obs-row {
+    grid-template-columns: 1fr;
+  }
+}
 .obs-field {
   display: grid;
   gap: 6px;
 }
 
-.obs-field label {
+.obs-label {
   font-size: 0.9rem;
   color: #333;
 }
 
-.obs-field input[type=number] {
+/* Input & quick “None” button — identical height */
+.obs-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.obs-input {
   width: 100%;
+  height: 44px;
   padding: 0.5rem 0.55rem;
   border: 1px solid #d9d9d9;
   border-radius: 8px;
 }
 
+.obs-input:focus {
+  outline: 2px solid #9ecbff;
+  border-color: #9ecbff;
+}
+
+.btn-quick-zero {
+  height: 44px;
+  padding: 0 0.8rem;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-quick-zero:hover {
+  background: #f6f6f6;
+}
+
+/* Progress + hint */
+.obs-progress {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.obs-hint {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+/* Footer note at the bottom of the dialog */
+.obs-note {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #6b7280;
+  width: 66%;
+  max-width: 66%;
+}
+
+/* Footer row: note on left (2/3 width), buttons on right */
+.obs-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px; /* slight space from fields block */
+}
+
+.obs-footer .obs-note {
+  flex: 0 1 66%;
+  max-width: 66%;
+  margin-top: 0; /* override any earlier margins */
+}
+
+.obs-footer .obs-btns {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto; /* push buttons to the right */
+}
+
+/* Stack nicely on small screens */
+@media (max-width: 640px) {
+  .obs-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .obs-footer .obs-note {
+    flex: 0 1 auto;
+    max-width: 100%;
+    width: 100%;
+  }
+  .obs-footer .obs-btns {
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+}
+@media (max-width: 640px) {
+  .obs-note {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+/* responsive */
 @media (max-width: 860px) {
   .obs-grid {
     grid-template-columns: repeat(2, minmax(140px, 1fr));
@@ -352,48 +537,4 @@ dialog article footer {
   .obs-grid {
     grid-template-columns: 1fr;
   }
-}
-.tile--complete {
-  opacity: 0.95;
-}
-
-.tile--complete::after {
-  content: "✓";
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  font-size: 0.9rem;
-  font-weight: 800;
-  background: #14a44d; /* green */
-  color: #fff;
-}
-
-/* Partially done (grey) */
-.tile--partial::after {
-  content: "✓";
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  font-size: 0.9rem;
-  font-weight: 800;
-  background: #9aa1a9; /* grey */
-  color: #fff;
-}
-
-/* Icons in table cells are Bootstrap Icons (already used in wastage) */
-.btn-icon {
-  border: none;
-  background: transparent;
-  padding: 0 0.25rem;
-  cursor: pointer;
 }
