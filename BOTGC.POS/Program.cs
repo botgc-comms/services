@@ -16,6 +16,7 @@ builder.Services.AddSingleton<IOperatorService, HttpOperatorService>();
 builder.Services.AddSingleton<IProductService, HttpProductService>();
 builder.Services.AddSingleton<IReasonService, InMemoryReasonService>();
 builder.Services.AddSingleton<IWasteService, HttpWasteService>();
+builder.Services.AddSingleton<IStockTakeService, HttpStockTakeService>();   
 builder.Services.AddSingleton<NgrokState>();
 
 builder.Services.AddPosApiClients(builder.Configuration);

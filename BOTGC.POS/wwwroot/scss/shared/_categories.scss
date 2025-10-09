@@ -1,0 +1,6 @@
+@use "./variables" as *;
+@use "./helpers" as *;
+
+@each $name, $bg in $categories {
+    @include cat($name, $bg);
+}

@@ -1,0 +1,107 @@
+﻿@using System.Globalization
+@model BOTGC.POS.Models.StockTakeViewModel
+@{
+    ViewData["Title"] = "Mini Stock Take";
+    var ops = Model.Operators.ToDictionary(o => o.Id, o => o.DisplayName);
+}
+
+@functions {
+    public static string TextColourFor(string? hex)
+    {
+        if (string.IsNullOrWhiteSpace(hex)) return "#111";
+        var c = hex.Trim().TrimStart('#');
+        if (c.Length == 3) c = string.Concat(c.Select(ch => $"{ch}{ch}"));
+        if (c.Length != 6) return "#111";
+        var r = int.Parse(c.Substring(0, 2), NumberStyles.HexNumber);
+        var g = int.Parse(c.Substring(2, 2), NumberStyles.HexNumber);
+        var b = int.Parse(c.Substring(4, 2), NumberStyles.HexNumber);
+        var yiq = (r * 299 + g * 587 + b * 114) / 1000;
+        return yiq >= 150 ? "#111" : "#fff";
+    }
+}
+
+@section Head
+{
+    <link rel="stylesheet" href="~/css/stocktake.css" asp-append-version="true" />
+}
+
+<h2 class="mt-4 mt-sm-5 mt-md-5">
+    Mini Stock Take <span class="tag">@DateTime.UtcNow.ToString("dddd, dd MMM yyyy")</span>
+</h2>
+
+@if (Model.IsDue)
+{
+    <p class="muted">A stock take is due. Choose a division to begin.</p>
+}
+
+<div class="tiles" id="operatorStatus">
+    <span class="muted">No operator selected.</span>
+</div>
+
+<section class="mt-4 mt-sm-5 mt-md-5">
+    <h3 class="h5">Divisions</h3>
+    <div id="divisionTiles" class="tiles"></div>
+</section>
+
+<section class="mt-4 mt-sm-5 mt-md-5" id="productsSection" hidden>
+    <header class="actions">
+        <h3 class="h5 inline" id="divisionTitle">Products</h3>
+        <span class="tag" id="divisionAge"></span>
+    </header>
+
+    <div id="productTiles" class="tiles tiles--products"></div>
+</section>
+
+<section class="mt-4 mt-sm-5 mt-md-5" id="observationsSection" hidden>
+    <header class="actions">
+        <h3 class="h5 inline">Observed items</h3>
+        <button id="commitBtn" type="button">Commit all</button>
+    </header>
+
+    <table class="sheet__table" id="obsTable">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Observations</th>
+                <th style="width: 6rem;"></th>
+            </tr>
+        </thead>
+        <tbody id="obsTbody"></tbody>
+    </table>
+</section>
+
+<dialog id="operatorModal">
+    <article>
+        <header><strong>Select operator</strong></header>
+        <div class="tiles" id="operatorTiles">
+            @foreach (var op in Model.Operators)
+            {
+                var bg = string.IsNullOrWhiteSpace(op.ColorHex) ? "#cccccc" : op.ColorHex!;
+                var fg = TextColourFor(bg);
+                <div class="tile"
+                     style="background:@bg; color:@fg;"
+                     data-opid="@op.Id"
+                     data-color="@bg">
+                    @op.DisplayName
+                </div>
+            }
+        </div>
+    </article>
+</dialog>
+
+<dialog id="obsModal">
+    <article>
+        <header><strong id="obsTitle">Record observations</strong></header>
+        <form id="obsForm">
+            <div class="obs-grid" id="obsFields"></div>
+        </form>
+        <footer class="actions">
+            <button id="obsSaveBtn" type="button">OK</button>
+            <button type="button" id="obsCancelBtn">Cancel</button>
+        </footer>
+    </article>
+</dialog>
+
+@section Scripts {
+    <script src="~/js/dist/stocktake.bundle.min.js" asp-append-version="true" defer></script>
+}

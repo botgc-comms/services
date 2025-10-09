@@ -13,7 +13,10 @@ const paths = {
         './wwwroot/js/site.js',
     ],
     wastage: [
-        './wwwroot/js/wastage-sheet.js'
+        './wwwroot/js/wastagesheet.js'
+    ],
+    stocktake: [
+        './wwwroot/js/stocktake.js'
     ]
 };
 
@@ -50,17 +53,34 @@ function wastageScripts() {
         .pipe(gulp.dest(outputPath));
 }
 
-function sassTask() {
-    return gulp.src('./wwwroot/scss/index.scss')
+function stocktakeScripts() {
+    return gulp.src(paths.stocktake)
+        .pipe(concat('stocktake.bundle.js'))
+        .pipe(gulp.dest(outputPath))
+        .pipe(terser({ ecma: 2018 }))
+        .pipe(rename({ suffix: '.min' }))
+        .pipe(gulp.dest(outputPath));
+}
+
+function wastageSassTask() {
+    return gulp.src('./wwwroot/scss/wastage.scss')
         .pipe(gulpSass({ outputStyle: 'compressed' }).on('error', gulpSass.logError))
-        .pipe(rename('styles.css'))
+        .pipe(rename('wastage.css'))
+        .pipe(gulp.dest('./wwwroot/css/'));
+}
+
+function stockTakeSassTask() {
+    return gulp.src('./wwwroot/scss/stocktake.scss')
+        .pipe(gulpSass({ outputStyle: 'compressed' }).on('error', gulpSass.logError))
+        .pipe(rename('stocktake.css'))
         .pipe(gulp.dest('./wwwroot/css/'));
 }
 
 const build = gulp.series(
     clean,
-    gulp.parallel(vendorScripts, appScripts, wastageScripts, sassTask) // ⬅️ include wastage
+    gulp.parallel(vendorScripts, appScripts, wastageScripts, stocktakeScripts, wastageSassTask, stockTakeSassTask) 
 );
 
 exports.default = build;
-exports.sass = sassTask;
+exports.wastageSass = wastageSassTask;
+exports.stockTakeSass = stockTakeSassTask;

@@ -9,4 +9,3 @@ public interface IWasteService
     Task SubmitTodayAsync();
     Task<bool> DeleteAsync(Guid id);
 }
-

@@ -1,0 +1,91 @@
+﻿@use "./shared/index";
+
+.tiles--products .tile {
+    min-height: 88px;
+}
+
+.tile--done {
+    opacity: .6;
+    position: relative;
+}
+
+.tile--done::after {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-weight: 800;
+    background: rgba(0,0,0,.6);
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-size: .9rem;
+}
+
+.sheet__table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: index.$radius;
+    overflow: hidden;
+    box-shadow: index.$shadow;
+
+    th, td {
+        padding: .6rem .7rem;
+        border-bottom: 1px solid #eee;
+        text-align: left;
+        font-size: .95rem;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+    }
+
+    thead th {
+        background: #f6f6f6;
+        font-weight: 700;
+    }
+
+    tbody tr:hover {
+        background: #fafafa;
+    }
+}
+
+.obs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: .5rem;
+}
+
+.obs-field {
+    display: grid;
+    gap: 6px;
+}
+
+.obs-field label {
+    font-size: .9rem;
+    color: #333;
+}
+
+.obs-field input[type="number"] {
+    width: 100%;
+    padding: .5rem .55rem;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+}
+
+@media (max-width: 860px) {
+    .obs-grid {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .obs-grid {
+        grid-template-columns: 1fr;
+    }
+}

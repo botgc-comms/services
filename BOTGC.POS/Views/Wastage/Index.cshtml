@@ -25,6 +25,11 @@
     }
 }
 
+@section Head
+{
+  <link rel="stylesheet" href="~/css/wastage.css" asp-append-version="true" />
+}
+
 <h2 class="mt-4 mt-sm-5 mt-md-5">Today’s Wastage Sheet <span class="tag">@DateTime.UtcNow.ToString("dddd, dd MMM yyyy")</span></h2>
 
 <div class="tiles" id="operatorStatus">

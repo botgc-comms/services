@@ -1,0 +1,21 @@
+@use "sass:math";
+@use "sass:color";
+@use "./variables" as *;
+
+@function text-on($c) {
+    $r: color.channel($c, "red", $space: rgb);
+    $g: color.channel($c, "green", $space: rgb);
+    $b: color.channel($c, "blue", $space: rgb);
+    $yiq: math.div(($r * 299) + ($g * 587) + ($b * 114), 1000);
+    @return if($yiq >= 150, #111, #fff);
+}
+
+@mixin cat($name, $bg) {
+    .tile.cat-#{$name} {
+        --bg: #{$bg};
+        --fg: #{text-on($bg)};
+        --badge: #{color.mix(#000, $bg, 12%)};
+        background: #{$bg} !important;
+        color: #{text-on($bg)} !important;
+    }
+}

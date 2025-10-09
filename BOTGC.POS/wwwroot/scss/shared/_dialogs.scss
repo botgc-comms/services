@@ -1,0 +1,43 @@
+:root {
+    --modal-gutter: 20px;
+}
+
+dialog {
+    border: none;
+    border-radius: 14px;
+    padding: 0;
+
+    &::backdrop {
+        background: rgba(0,0,0,.35);
+    }
+
+    article {
+        padding: 1rem;
+        width: min(640px, 92vw);
+
+        header {
+            margin-bottom: .5rem;
+        }
+
+        footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: .5rem;
+            margin-top: .75rem;
+        }
+    }
+}
+
+#operatorModal {
+    inset: 0;
+    margin: auto;
+    padding: 0;
+}
+
+#operatorModal article {
+    width: min(560px, calc(100vw - 2 * var(--modal-gutter) - env(safe-area-inset-left) - env(safe-area-inset-right)));
+    max-height: calc(100vh - 2 * var(--modal-gutter) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow: auto;
+    padding: 12px;
+    border-radius: 16px;
+}

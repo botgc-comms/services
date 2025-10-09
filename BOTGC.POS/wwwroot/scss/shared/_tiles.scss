@@ -1,0 +1,43 @@
+@use "./variables" as *;
+
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.tile {
+    position: relative;
+    border-radius: $radius;
+    padding: 14px 10px;
+    min-height: 101px;
+    box-shadow: $shadow;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 600;
+    background: var(--bg, #ffffff);
+    color: var(--fg, #111);
+    border: 1px solid rgba(0,0,0,.06);
+
+    .tile__name {
+        margin-bottom: 4px;
+    }
+
+    .tile__division {
+        position: absolute;
+        right: 10px;
+        bottom: 6px;
+        font-size: .75rem;
+        line-height: 1;
+        color: var(--badge, #666);
+        opacity: .95;
+        pointer-events: none;
+    }
+}
+
+.tile--search {
+    background: #ffffff;
+}
