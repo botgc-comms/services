@@ -1,4 +1,4 @@
-﻿namespace BOTGC.API.Models
+﻿namespace BOTGC.API.Dto
 {
     public sealed record WasteSheetDto(
         DateTime Date,

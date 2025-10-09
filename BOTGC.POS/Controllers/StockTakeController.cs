@@ -1,6 +1,8 @@
-﻿using BOTGC.POS.Models;
+﻿using BOTGC.POS.Hubs;
+using BOTGC.POS.Models;
 using BOTGC.POS.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BOTGC.POS.Controllers;
 
@@ -11,36 +13,78 @@ public sealed class StockTakeController : Controller
 
     private readonly IOperatorService _operators;
     private readonly IStockTakeService _stockTakes;
+    private readonly IHubContext<StockTakeHub> _hub;
 
-    public StockTakeController(IOperatorService operators, IStockTakeService stockTakes)
+    public StockTakeController(
+        IOperatorService operators,
+        IStockTakeService stockTakes,
+        IHubContext<StockTakeHub> hub)
     {
-        _operators = operators ?? throw new ArgumentNullException(nameof(operators));
-        _stockTakes = stockTakes ?? throw new ArgumentNullException(nameof(stockTakes));
+        _operators = operators;
+        _stockTakes = stockTakes;
+        _hub = hub;
     }
 
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {
-        var ops = await _operators.GetAllAsync();
-        var plan = await _stockTakes.GetPlannedAsync();
-        var isDue = plan.Any(d => d.Products?.Count > 0);
-
         var vm = new StockTakeViewModel
         {
-            Operators = ops,
-            IsDue = isDue
+            Operators = await _operators.GetAllAsync(),
+            IsDue = (await _stockTakes.GetPlannedAsync()).Any(d => d.Products?.Count > 0)
         };
-
         return View(vm);
     }
 
     [HttpGet("products")]
     public async Task<IActionResult> Products()
+        => Ok(await _stockTakes.GetPlannedAsync());
+
+    [HttpGet("draft")]
+    public async Task<IActionResult> Draft([FromQuery] string division)
     {
-        var plan = await _stockTakes.GetPlannedAsync();
-        return Ok(plan);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+        var sheet = await _stockTakes.GetSheetAsync(today, division);
+        return Ok(sheet);
     }
 
+    [HttpPost("observe")]
+    public async Task<IActionResult> Observe([FromBody] StockTakeDraftEntry entry)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+
+        // Attach operator from cookie (UI concern)
+        if (!Request.Cookies.TryGetValue(OperatorCookie, out var opCookie) || !Guid.TryParse(opCookie, out var opId))
+            return Unauthorized();
+
+        entry.OperatorId = opId;
+        if (string.IsNullOrWhiteSpace(entry.OperatorName))
+        {
+            var op = await _operators.GetAsync(opId);
+            entry.OperatorName = op?.DisplayName ?? "Unknown";
+        }
+        if (entry.At == default) entry.At = DateTimeOffset.UtcNow;
+
+        await _stockTakes.UpsertEntryAsync(today, entry);
+
+        // Broadcast row so other devices update
+        await _hub.Clients.All.SendAsync("ObservationUpserted", entry);
+
+        return Ok(new { ok = true });
+    }
+
+    [HttpDelete("observe/{stockItemId:int}")]
+    public async Task<IActionResult> Remove([FromRoute] int stockItemId, [FromQuery] string division)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+        await _stockTakes.RemoveEntryAsync(today, division, stockItemId);
+
+        await _hub.Clients.All.SendAsync("ObservationRemoved", new { stockItemId, division });
+
+        return Ok(new { ok = true });
+    }
+
+    // Operator selection (UI-only; cookie lifespan 15 minutes)
     [HttpPost("select-operator")]
     public async Task<IActionResult> SelectOperator([FromForm] Guid id)
     {
@@ -51,21 +95,16 @@ public sealed class StockTakeController : Controller
         {
             HttpOnly = false,
             IsEssential = true,
-            Expires = DateTimeOffset.UtcNow.AddMinutes(10)
+            Expires = DateTimeOffset.UtcNow.AddMinutes(15)
         });
 
-        return Ok(new { ok = true, id = op.Id, name = op.DisplayName });
-    }
+        await _hub.Clients.All.SendAsync("OperatorSelected", new
+        {
+            id = op.Id,
+            name = op.DisplayName,
+            colorHex = op.ColorHex
+        });
 
-    [HttpPost("commit")]
-    public async Task<IActionResult> Commit([FromBody] StockTakeCommitDto payload)
-    {
-        if (!Request.Cookies.TryGetValue(OperatorCookie, out var opCookie) || !Guid.TryParse(opCookie, out var operatorId))
-            return Unauthorized();
-
-        var ok = await _stockTakes.CommitAsync(operatorId, payload.Timestamp, payload.Observations);
-        if (!ok) return StatusCode(502);
-
-        return Ok(new { ok = true });
+        return Ok(new { ok = true, id = op.Id, name = op.DisplayName, colorHex = op.ColorHex });
     }
 }

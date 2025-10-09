@@ -2,6 +2,7 @@
 using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
 using Microsoft.Extensions.Options;
+using BOTGC.API.Dto;
 
 namespace BOTGC.API.Services.BackgroundServices;
 

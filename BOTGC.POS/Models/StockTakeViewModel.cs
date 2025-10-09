@@ -6,7 +6,22 @@
         public bool IsDue { get; init; }
     }
 
-    public sealed class StockTakeObservationDto
+    public sealed class StockTakeDraftEntry
+    {
+        public int StockItemId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Division { get; set; } = string.Empty;
+        public string Unit { get; set; } = string.Empty;
+
+        public Guid OperatorId { get; set; }
+        public string OperatorName { get; set; } = string.Empty;
+
+        public DateTimeOffset At { get; set; } // when the observation was recorded
+
+        public List<StockTakeObservation> Observations { get; set; } = new();
+    }
+
+    public sealed class StockTakeObservation
     {
         public int StockItemId { get; set; }
         public string Code { get; set; } = string.Empty;
@@ -14,11 +29,11 @@
         public decimal Value { get; set; }
     }
 
-    public sealed class StockTakeCommitDto
-    {
-        public DateTimeOffset Timestamp { get; set; }
-        public List<StockTakeObservationDto> Observations { get; set; } = new();
-    }
+    //public sealed class StockTakeCommitDto
+    //{
+    //    public DateTimeOffset Timestamp { get; set; }
+    //    public List<StockTakeObservation> Observations { get; set; } = new();
+    //}
 
     public sealed class StockTakeDivisionPlan
     {

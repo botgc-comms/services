@@ -11,7 +11,7 @@ using BOTGC.API.Interfaces;
 
 namespace BOTGC.API.Common
 {
-    public class IGStockTakeReportParser : IReportParser<StockTakeEntryDto>
+    public class IGStockTakeReportParser : IReportParser<StockTakeReportEntryDto>
     {
         private readonly ILogger<IGStockTakeReportParser> _logger;
 
@@ -20,9 +20,9 @@ namespace BOTGC.API.Common
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<List<StockTakeEntryDto>> ParseReport(HtmlDocument document)
+        public async Task<List<StockTakeReportEntryDto>> ParseReport(HtmlDocument document)
         {
-            var results = new List<StockTakeEntryDto>();
+            var results = new List<StockTakeReportEntryDto>();
 
             var rows = document.DocumentNode.SelectNodes("//tr");
             if (rows == null || rows.Count == 0)
@@ -69,7 +69,7 @@ namespace BOTGC.API.Common
                     previous = balance.Value - delta.Value;
                 }
 
-                var dto = new StockTakeEntryDto
+                var dto = new StockTakeReportEntryDto
                 {
                     StockItemId = productId!.Value,
                     Name = name,

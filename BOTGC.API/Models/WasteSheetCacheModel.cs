@@ -1,4 +1,6 @@
-﻿namespace BOTGC.API.Models
+﻿using BOTGC.API.Dto;
+
+namespace BOTGC.API.Models
 {
     internal sealed class WasteSheetCacheModel
     {

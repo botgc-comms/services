@@ -185,7 +185,7 @@ namespace BOTGC.API.Controllers
                 if (products == null || products.Count == 0)
                 {
                     _logger.LogInformation("No previous stock takes were found");
-                    return Ok(new List<StockTakeEntryDto>());
+                    return Ok(new List<StockTakeReportEntryDto>());
                 }
 
                 _logger.LogInformation($"Successfully retrieved {products.Count} products involved in previous stock takes.");
@@ -211,7 +211,7 @@ namespace BOTGC.API.Controllers
                 if (products == null || products.Count == 0)
                 {
                     _logger.LogInformation("No products found for the stock take.");
-                    return Ok(new List<StockTakeEntryDto>());
+                    return Ok(new List<StockTakeReportEntryDto>());
                 }
 
                 _logger.LogInformation($"Successfully retrieved {products.Count} products for the stock take.");
@@ -239,5 +239,104 @@ namespace BOTGC.API.Controllers
 
             return Accepted(new { Message = "Stock analysis task queued." });
         }
+
+        // GET: /api/stock/stockTakes/sheet?day=yyyy-MM-dd&division=MINERALS
+        [HttpGet("stockTakes/sheet")]
+        public async Task<IActionResult> GetStockTakeSheet([FromQuery] DateTime? day = null, [FromQuery] string? division = null)
+        {
+            var sheetDate = (day?.Date ?? DateTime.UtcNow.Date);
+            var div = division ?? string.Empty;
+
+            _logger.LogInformation("Fetching stock take sheet for {SheetDate} / {Division}...", sheetDate.ToString("yyyy-MM-dd"), div);
+
+            try
+            {
+                var query = new GetStockTakeSheetQuery(sheetDate, div);
+                var sheet = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (sheet is null || sheet.Entries.Count == 0)
+                {
+                    _logger.LogInformation("No entries on stock take sheet for {SheetDate} / {Division}.", sheetDate.ToString("yyyy-MM-dd"), div);
+                    return Ok(new StockTakeSheetDto(sheetDate, div, "Open", new List<StockTakeEntryDto>()));
+                }
+
+                return Ok(sheet);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving stock take sheet for {SheetDate} / {Division}.", sheetDate.ToString("yyyy-MM-dd"), div);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the stock take sheet.");
+            }
+        }
+
+        // POST: /api/stock/stockTakes/sheet/entry?day=yyyy-MM-dd
+        [HttpPost("stockTakes/sheet/entry")]
+        public async Task<IActionResult> UpsertStockTakeEntry([FromBody] UpsertStockTakeEntryRequest request, [FromQuery] DateTime? day = null)
+        {
+            var sheetDate = (day?.Date ?? DateTime.UtcNow.Date);
+
+            _logger.LogInformation(
+                "Upserting stock take entry for {SheetDate}: {ProductName} ({StockItemId}) in {Division}.",
+                sheetDate.ToString("yyyy-MM-dd"), request.Name, request.StockItemId, request.Division
+            );
+
+            try
+            {
+                var cmd = new UpsertStockTakeEntryCommand(
+                    sheetDate,
+                    request.StockItemId,
+                    request.Name,
+                    request.Division,
+                    request.Unit,
+                    request.OperatorId,
+                    request.OperatorName,
+                    request.At,
+                    request.Observations?.Select(o =>
+                        new StockTakeObservationDto(o.StockItemId, o.Code, o.Location, o.Value)).ToList() ?? new List<StockTakeObservationDto>()
+                );
+
+                var result = await _mediator.Send(cmd, HttpContext.RequestAborted);
+
+                return Created($"/api/stock/stockTakes/sheet?day={sheetDate:yyyy-MM-dd}&division={Uri.EscapeDataString(request.Division ?? string.Empty)}",
+                               new { ok = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error upserting stock take entry for {SheetDate}.", sheetDate.ToString("yyyy-MM-dd"));
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while saving the stock take entry.");
+            }
+        }
+
+        // DELETE: /api/stock/stockTakes/sheet/entry/{stockItemId}?day=yyyy-MM-dd&division=MINERALS
+        [HttpDelete("stockTakes/sheet/entry/{stockItemId:int}")]
+        public async Task<IActionResult> DeleteStockTakeEntry([FromRoute] int stockItemId, [FromQuery] DateTime? day = null, [FromQuery] string? division = null)
+        {
+            var sheetDate = (day?.Date ?? DateTime.UtcNow.Date);
+            var div = division ?? string.Empty;
+
+            _logger.LogInformation(
+                "Deleting stock take entry {StockItemId} from sheet {SheetDate} / {Division}.",
+                stockItemId, sheetDate.ToString("yyyy-MM-dd"), div
+            );
+
+            try
+            {
+                var cmd = new DeleteFromStockTakeSheetCommand(sheetDate, div, stockItemId);
+                var result = await _mediator.Send(cmd, HttpContext.RequestAborted);
+
+                if (!result.Found)
+                {
+                    return NotFound(new { ok = false, message = "Entry not found" });
+                }
+
+                return Ok(new { ok = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting stock take entry {StockItemId} for {SheetDate} / {Division}.", stockItemId, sheetDate.ToString("yyyy-MM-dd"), div);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the stock take entry.");
+            }
+        }
+
     }
 }

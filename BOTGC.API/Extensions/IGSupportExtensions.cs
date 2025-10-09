@@ -8,7 +8,6 @@ using System.Net;
 using RedLockNet.SERedis.Configuration;
 using RedLockNet.SERedis;
 using StackExchange.Redis;
-using BOTGC.API.Models;
 
 namespace BOTGC.API.Extensions
 {
@@ -53,7 +52,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IReportParser<HandicapIndexPointDto>, IGHandicapIndexHistoryReportParser>();
             services.AddSingleton<IReportParser<TillOperatorDto>, IGTillOperatorReportParser>();
             services.AddSingleton<IReportParser<NewMemberLookupDto>, IGNewMembersReportParser>();
-            services.AddSingleton<IReportParser<StockTakeEntryDto>, IGStockTakeReportParser>();
+            services.AddSingleton<IReportParser<StockTakeReportEntryDto>, IGStockTakeReportParser>();
             services.AddSingleton<IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto>, IGLeaderboardReportParser>();
             services.AddSingleton<IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>, IGClubChampionshipLeaderboardReportParser>();
             

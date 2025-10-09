@@ -1,6 +1,6 @@
 ﻿using Azure.Storage.Queues;
 using BOTGC.API.Common;
-using BOTGC.API.Models;
+using BOTGC.API.Dto;
 using Microsoft.Extensions.Options;
 
 namespace BOTGC.API.Services

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BOTGC.API.Models
+namespace BOTGC.API.Dto
 {
     public sealed record WasteEntryCommandDto(
            [property: Required] DateTime WastageDateUtc,

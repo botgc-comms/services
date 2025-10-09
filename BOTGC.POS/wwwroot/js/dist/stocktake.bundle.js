@@ -1,44 +1,108 @@
 (() => {
     "use strict";
 
+    // ===== Config (15-minute operator session) =====
     const OP_COOKIE = "wastage_operator_id";
+    const OP_TS_COOKIE = "wastage_operator_ts";
+    const OP_TIMEOUT_MINUTES = 15;
+
     const PRODUCTS_URL = "/stocktake/products";
     const SELECT_OP_URL = "/stocktake/select-operator";
-    const COMMIT_URL = "/stocktake/commit";
+
+    // Shared draft endpoints (immediate save; nightly commit handled server-side)
+    const DRAFT_GET_URL = (division) => `/stocktake/draft?division=${encodeURIComponent(division)}`;
+    const DRAFT_UPSERT_URL = "/stocktake/observe";
+    const DRAFT_REMOVE_URL = (stockItemId, division) =>
+        `/stocktake/observe/${stockItemId}?division=${encodeURIComponent(division)}`;
 
     const PROFILES = {
-        "WINES|BOTTLE": [
-            { code: "CountInStoreRoom", label: "Count (store)", loc: "Store", step: 1 },
-            { code: "CountInFridge", label: "Count (fridge)", loc: "Fridge", step: 1 },
-            { code: "OpenBottleWeightGrams", label: "Open bottle weight (g)", loc: "Bar", step: 1 }
-        ],
-        "MINERALS|BOTTLE": [
-            { code: "CountInStoreRoom", label: "Count (store)", loc: "Store", step: 1 },
-            { code: "CountInFridge", label: "Count (fridge)", loc: "Fridge", step: 1 }
-        ],
-        "SNACKS|EACH": [
-            { code: "CountInStoreRoom", label: "Count", loc: "Store", step: 1 }
-        ],
-        "BEER CANS|CAN": [
-            { code: "CountInStoreRoom", label: "Count (store)", loc: "Store", step: 1 },
-            { code: "CountInFridge", label: "Count (fridge)", loc: "Fridge", step: 1 }
-        ]
+        "WINES|BOTTLE": ["CountInLoungeBar", "CountInColtBar", "CountInStoreRoom", "OpenBottleWeightGrams"],
+        "MINERALS|BOTTLE": ["CountInLoungeBar", "CountInColtBar", "CountInStoreRoom"],
+        "SNACKS|EACH": ["CountInLoungeBar", "CountInColtBar", "CountInStoreRoom"],
+        "BEER CANS|CAN": ["CountInLoungeBar", "CountInColtBar", "CountInStoreRoom"],
+        "DRAUGHT BEER|PINT": ["CountInCellar", "KegWeightGrams"],
+        "*|*": ["CountInLoungeBar", "CountInColtBar", "CountInStoreRoom"]
     };
+
+    function isLikelyRedWine(name) {
+        const s = (name || "").toLowerCase();
+        return /(merlot|shiraz|syrah|malbec|rioja|tempranillo|cabernet|pinot noir|red)/.test(s);
+    }
+
+    function fieldLabel(code) {
+        if (code === "CountInLoungeBar") return "Count (Lounge bar)";
+        if (code === "CountInColtBar") return "Count (Colt bar)";
+        if (code === "CountInStoreRoom") return "Count (store room)";
+        if (code === "OpenBottleWeightGrams") return "Open bottle weight (g)";
+        // NEW:
+        if (code === "CountInCellar") return "Count (cellar)";
+        if (code === "KegWeightGrams") return "Keg weight (g)";
+        return code;
+    }
+
 
     function profileFor(division, unit) {
         const key = `${(division || "").toUpperCase()}|${(unit || "").toUpperCase()}`;
-        return PROFILES[key] || [{ code: "CountInStoreRoom", label: "Count", loc: "Store", step: 1 }];
+        return PROFILES[key] || ["CountInStoreRoom"];
     }
 
+    // ===== Utilities =====
     function ready(fn) { if (document.readyState !== "loading") fn(); else document.addEventListener("DOMContentLoaded", fn); }
     function getCookie(n) { const v = ("; " + document.cookie).split("; " + n + "="); if (v.length === 2) return v.pop().split(";").shift(); return null; }
-    function slug(s) { return String(s || "").toLowerCase().replace(/\s+/g, "-").replace(/\//g, "-"); }
+    function setCookie(n, val, days) { let exp = ""; if (typeof days === "number") { const d = new Date(); d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000); exp = "; expires=" + d.toUTCString(); } document.cookie = `${n}=${val}; path=/; SameSite=Lax${exp}`; }
+    function deleteCookie(n) { document.cookie = `${n}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`; }
+    function nowUtcMs() { return Date.now(); }
+    function markOperatorActivity() { setCookie(OP_TS_COOKIE, String(nowUtcMs()), 365); }
+    function operatorExpired() { const ts = parseInt(getCookie(OP_TS_COOKIE) || "0", 10); if (!ts) return true; return (nowUtcMs() - ts) > OP_TIMEOUT_MINUTES * 60 * 1000; }
     function escapeHtml(s) { return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+    function slug(s) { return String(s || "").toLowerCase().replace(/\s+/g, "-").replace(/\//g, "-"); }
+    function fmtTimeISO(iso) { const d = new Date(iso); const hh = d.getHours().toString().padStart(2, "0"); const mm = d.getMinutes().toString().padStart(2, "0"); return `${hh}:${mm}`; }
 
+    // ===== State =====
     let plan = [];
     let currentDivision = null;
-    const observationsMap = new Map(); // stockItemId -> { stockItemId, name, division, unit, observations: [{code,location,value}] }
+    const obsMap = new Map(); // stockItemId -> { stockItemId, name, division, unit, operatorId, operatorName, at, observations[] }
 
+    // ===== SignalR (safe if not present) =====
+    let connection = null;
+    async function startSignalR() {
+        if (!window.signalR || !window.signalR.HubConnectionBuilder) return;
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/stocktake")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("OperatorSelected", (e) => {
+            const colour = e.colorHex || "#cccccc";
+            const el = document.getElementById("operatorStatus");
+            el.innerHTML = `<div class="tile tile--op" style="background:${colour};"><span class="tile__name">${escapeHtml(e.name)}</span></div>`;
+            el.querySelector(".tile--op").addEventListener("click", openOperatorDialog);
+            setCookie(OP_COOKIE, e.id, 365);
+            markOperatorActivity();
+        });
+
+        connection.on("ObservationUpserted", (entry) => {
+            if (!currentDivision || entry.division !== currentDivision.division) return;
+            obsMap.set(entry.stockItemId, entry);
+            upsertObsRow(entry.stockItemId);
+            markTileState(entry.stockItemId, entry);
+            document.getElementById("observationsSection").hidden = obsMap.size === 0;
+        });
+
+        connection.on("ObservationRemoved", ({ stockItemId, division }) => {
+            if (!currentDivision || division !== currentDivision.division) return;
+            obsMap.delete(stockItemId);
+            const tr = document.querySelector(`#obsTbody tr[data-id='${stockItemId}']`);
+            if (tr) tr.remove();
+            const t = tileFor(stockItemId);
+            if (t) t.classList.remove("tile--partial", "tile--complete");
+            document.getElementById("observationsSection").hidden = obsMap.size === 0;
+        });
+
+        try { await connection.start(); } catch { /* ignore */ }
+    }
+
+    // ===== Operator =====
     function setOperatorStatus() {
         const id = getCookie(OP_COOKIE);
         const el = document.getElementById("operatorStatus");
@@ -49,13 +113,13 @@
         }
         const tile = document.querySelector(`#operatorTiles .tile[data-opid='${id}']`);
         if (!tile) {
-            document.cookie = `${OP_COOKIE}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+            deleteCookie(OP_COOKIE); deleteCookie(OP_TS_COOKIE);
             el.innerHTML = '<span class="muted">No operator selected.</span>';
             openOperatorDialog();
             return;
         }
         const colour = tile.dataset.color || "#cccccc";
-        el.innerHTML = `<div class="tile tile--op" style="background:${colour};"><span class="tile__name">${tile.textContent.trim()}</span></div>`;
+        el.innerHTML = `<div class="tile tile--op" style="background:${colour};"><span class="tile__name">${escapeHtml(tile.textContent.trim())}</span></div>`;
         el.querySelector(".tile--op").addEventListener("click", openOperatorDialog);
     }
 
@@ -65,16 +129,59 @@
         dlg.showModal();
     }
 
+    function bindOperatorSelection() {
+        Array.from(document.querySelectorAll("#operatorTiles .tile")).forEach(t => {
+            t.addEventListener("click", async () => {
+                const id = t.dataset.opid;
+                const fd = new FormData(); fd.append("id", id);
+                const res = await fetch(SELECT_OP_URL, { method: "POST", body: fd });
+                if (res.ok) {
+                    setCookie(OP_COOKIE, id, 365);
+                    markOperatorActivity();
+                    document.getElementById("operatorModal").close();
+                    setOperatorStatus();
+                }
+            });
+        });
+    }
+
+    function startOperatorTimeout() {
+        const enforce = () => {
+            const id = getCookie(OP_COOKIE);
+            if (!id) return;
+            if (operatorExpired()) {
+                deleteCookie(OP_COOKIE); deleteCookie(OP_TS_COOKIE);
+                setOperatorStatus();
+                const m = document.getElementById("obsModal"); if (m?.open) m.close();
+                openOperatorDialog();
+            }
+        };
+        setInterval(enforce, 15000);
+        const activity = () => { if (getCookie(OP_COOKIE)) markOperatorActivity(); };
+        document.addEventListener("click", activity, { capture: true });
+        document.addEventListener("keydown", activity, { capture: true });
+        document.addEventListener("pointerdown", activity, { capture: true });
+    }
+
+    // ===== Data =====
     async function fetchPlan() {
         const res = await fetch(PRODUCTS_URL, { headers: { "accept": "application/json" } });
         if (!res.ok) return [];
         return await res.json();
     }
 
+    async function loadDraftForDivision(divName) {
+        const res = await fetch(DRAFT_GET_URL(divName));
+        if (!res.ok) { obsMap.clear(); return; }
+        const list = await res.json();
+        obsMap.clear();
+        for (const e of list) obsMap.set(e.stockItemId, e);
+    }
+
+    // ===== UI: Divisions & Products =====
     function avgDays(products) {
         if (!products?.length) return 9999;
-        let sum = 0;
-        for (const p of products) sum += (p.daysSinceLastStockTake ?? 9999);
+        let sum = 0; for (const p of products) sum += (p.daysSinceLastStockTake ?? 9999);
         return sum / products.length;
     }
 
@@ -92,42 +199,78 @@
         }
     }
 
-    function selectDivision(d) {
+    async function selectDivision(d) {
         currentDivision = d;
         document.getElementById("divisionTitle").textContent = d.division;
         document.getElementById("divisionAge").textContent = `${Math.round(avgDays(d.products))} days on average`;
-        renderProducts(d.products, d.division);
+
+        await loadDraftForDivision(d.division);
+        renderProducts();
+        renderObsTable();
+
         document.getElementById("productsSection").hidden = false;
+        document.getElementById("observationsSection").hidden = obsMap.size === 0;
     }
 
-    function isDone(stockItemId) {
-        return observationsMap.has(stockItemId);
+    function tileFor(stockItemId) {
+        return Array.from(document.querySelectorAll(".tiles--products .tile"))
+            .find(t => parseInt(t.dataset.stockItemId, 10) === stockItemId) || null;
     }
 
-    function renderProducts(products, division) {
+    function markTileState(stockItemId, entry) {
+        const t = tileFor(stockItemId);
+        if (!t) return;
+        t.classList.remove("tile--partial", "tile--complete");
+        const required = profileFor(entry.division, entry.unit);
+        const present = new Set((entry.observations || []).map(o => o.code));
+        const nonZeroCount = (entry.observations || []).length;
+        if (nonZeroCount === 0) return;
+        const allFilled = required.every(code => present.has(code));
+        t.classList.add(allFilled ? "tile--complete" : "tile--partial"); // green vs grey
+    }
+
+    function renderProducts() {
         const host = document.getElementById("productTiles");
         host.innerHTML = "";
-        for (const p of products) {
+        const division = currentDivision?.division || "";
+        const list = currentDivision?.products || [];
+        for (const p of list) {
+            const entry = obsMap.get(p.stockItemId);
             const tile = document.createElement("div");
-            const done = isDone(p.stockItemId);
-            tile.className = `tile cat-${slug(division)} ${done ? "tile--done" : ""}`;
+            tile.className = `tile cat-${slug(division)}`;
             tile.dataset.stockItemId = p.stockItemId;
             tile.dataset.name = p.name || "";
             tile.dataset.unit = p.unit || "";
-            tile.dataset.division = division || "";
+            tile.dataset.division = division;
             tile.innerHTML = `<div class="tile__name">${escapeHtml(p.name)}</div><small class="tile__division">${escapeHtml(p.unit || "")}</small>`;
             tile.addEventListener("click", () => openObsDialog(p.stockItemId, p.name, division, p.unit));
             host.appendChild(tile);
+
+            if (entry) markTileState(p.stockItemId, entry);
         }
     }
 
-    function buildFields(container, profile, existing) {
+    function buildFields(container, requiredCodes, existing) {
         container.innerHTML = "";
-        for (const f of profile) {
+        for (const code of requiredCodes) {
             const wrap = document.createElement("div");
             wrap.className = "obs-field";
-            const val = existing?.find(o => o.code === f.code)?.value ?? "";
-            wrap.innerHTML = `<label>${escapeHtml(f.label)}</label><input type="number" step="${f.step}" min="0" data-code="${f.code}" data-location="${f.loc}" value="${val}">`;
+            const existingVal = existing?.find(o => o.code === code)?.value ?? "";
+
+            let location = null;
+            if (code === "CountInLoungeBar") location = "Lounge";
+            else if (code === "CountInColtBar") location = "Colt";
+            else if (code === "CountInStoreRoom") location = "Store";
+            // NEW:
+            else if (code === "CountInCellar" || code === "KegWeightGrams") location = "Cellar";
+
+            wrap.innerHTML =
+                `<label>${escapeHtml(fieldLabel(code))}</label>
+       <input type="number" step="1" min="0"
+              data-code="${code}"
+              ${location ? `data-location="${location}"` : ""}
+              value="${existingVal}">`;
+
             container.appendChild(wrap);
         }
     }
@@ -138,165 +281,145 @@
         const fields = document.getElementById("obsFields");
 
         title.textContent = `Record observations: ${name}`;
-        const existing = observationsMap.get(stockItemId)?.observations || [];
-        const profile = profileFor(division, unit);
-        buildFields(fields, profile, existing);
 
-        const onSave = () => {
+        const existing = obsMap.get(stockItemId)?.observations || [];
+        const requiredCodes = profileFor(division, unit);
+        buildFields(fields, requiredCodes, existing, name);
+
+        const onSave = async () => {
             const inputs = Array.from(fields.querySelectorAll("input[data-code]"));
             const obs = [];
             for (const i of inputs) {
                 const v = parseFloat(i.value || "0");
                 if (v > 0) {
                     obs.push({
+                        stockItemId,
                         code: i.getAttribute("data-code"),
                         location: i.getAttribute("data-location"),
                         value: v
                     });
                 }
             }
-            observationsMap.set(stockItemId, {
-                stockItemId: stockItemId,
-                name: name,
-                division: division,
-                unit: unit,
+
+            const opId = getCookie(OP_COOKIE);
+            if (!opId || operatorExpired()) {
+                deleteCookie(OP_COOKIE); deleteCookie(OP_TS_COOKIE);
+                setOperatorStatus();
+                dlg.close();
+                openOperatorDialog();
+                return;
+            }
+
+            const entry = {
+                stockItemId,
+                name,
+                division,
+                unit,
+                operatorId: opId,
+                operatorName: document.querySelector("#operatorStatus .tile--op .tile__name")?.textContent?.trim() || "",
+                at: new Date().toISOString(),
                 observations: obs
+            };
+
+            const res = await fetch(DRAFT_UPSERT_URL, {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify(entry)
             });
+            if (!res.ok) { alert("Failed to save observations."); return; }
+
+            obsMap.set(stockItemId, { ...entry });
             upsertObsRow(stockItemId);
-            markTileDone(stockItemId);
-            document.getElementById("observationsSection").hidden = observationsMap.size === 0;
+            markTileState(stockItemId, entry);
+            document.getElementById("observationsSection").hidden = obsMap.size === 0;
+
             dlg.close();
-            dlg.removeEventListener("close", onCancel);
-            document.getElementById("obsSaveBtn").removeEventListener("click", onSave);
-            document.getElementById("obsCancelBtn").removeEventListener("click", onCancel);
         };
 
-        const onCancel = () => {
-            dlg.close();
-            dlg.removeEventListener("close", onCancel);
-            document.getElementById("obsSaveBtn").removeEventListener("click", onSave);
-            document.getElementById("obsCancelBtn").removeEventListener("click", onCancel);
-        };
+        const onCancel = () => dlg.close();
 
-        document.getElementById("obsSaveBtn").addEventListener("click", onSave);
-        document.getElementById("obsCancelBtn").addEventListener("click", onCancel);
-        dlg.addEventListener("close", onCancel, { once: true });
+        document.getElementById("obsSaveBtn").onclick = onSave;
+        document.getElementById("obsCancelBtn").onclick = onCancel;
         dlg.showModal();
-    }
-
-    function markTileDone(stockItemId) {
-        const el = document.querySelector(`.tiles--products .tile[data-stock-item-id='${stockItemId}']`);
-        const byData = Array.from(document.querySelectorAll(".tiles--products .tile")).find(t => parseInt(t.dataset.stockItemId, 10) === stockItemId);
-        const tile = el || byData;
-        if (tile) tile.classList.add("tile--done");
     }
 
     function obsSummaryText(obsArr) {
         if (!obsArr?.length) return "No values";
         const parts = [];
         for (const o of obsArr) {
-            if (o.code === "OpenBottleWeightGrams") parts.push(`${o.value} g open bottle`);
-            else if (o.code === "CountInStoreRoom") parts.push(`${o.value} in store`);
-            else if (o.code === "CountInFridge") parts.push(`${o.value} in fridge`);
-            else parts.push(`${o.code}: ${o.value}`);
+            switch (o.code) {
+                case "CountInLoungeBar": parts.push(`${o.value} in Lounge bar`); break;
+                case "CountInColtBar": parts.push(`${o.value} in Colt bar`); break;
+                case "CountInStoreRoom": parts.push(`${o.value} in store room`); break;
+                case "OpenBottleWeightGrams": parts.push(`${o.value} g open bottle`); break;
+                // NEW:
+                case "CountInCellar": parts.push(`${o.value} in cellar`); break;
+                case "KegWeightGrams": parts.push(`${o.value} g keg weight`); break;
+                default: parts.push(`${o.code}: ${o.value}`); break;
+            }
         }
         return parts.join("; ");
     }
 
     function upsertObsRow(stockItemId) {
         const tbody = document.getElementById("obsTbody");
-        const data = observationsMap.get(stockItemId);
+        const data = obsMap.get(stockItemId);
         if (!data) return;
-        let tr = tbody.querySelector(`tr[data-id='${stockItemId}']`);
+
+        const time = data.at ? fmtTimeISO(data.at) : "";
         const summary = obsSummaryText(data.observations);
 
+        let tr = tbody.querySelector(`tr[data-id='${stockItemId}']`);
         if (!tr) {
             tr = document.createElement("tr");
             tr.dataset.id = String(stockItemId);
             tr.innerHTML =
-                `<td class="cell--product">${escapeHtml(data.name)}</td>
+                `<td>${escapeHtml(time)}</td>
+         <td>${escapeHtml(data.operatorName || "")}</td>
+         <td class="cell--product">${escapeHtml(data.name)}</td>
          <td class="cell--obs">${escapeHtml(summary)}</td>
          <td>
-            <button type="button" class="btn btn-link p-0 js-edit">Edit</button>
-            <button type="button" class="btn btn-link text-danger p-0 js-remove">Remove</button>
+            <button type="button" class="btn-icon js-edit" title="Edit"><i class="bi bi-pencil-square"></i></button>
+            <button type="button" class="btn-icon text-danger js-remove" title="Remove"><i class="bi bi-trash"></i></button>
          </td>`;
             tbody.appendChild(tr);
         } else {
+            tr.children[0].textContent = time;
+            tr.children[1].textContent = data.operatorName || "";
             tr.querySelector(".cell--obs").textContent = summary;
         }
 
-        tr.querySelector(".js-edit").addEventListener("click", () => {
+        tr.querySelector(".js-edit").onclick = () => {
             openObsDialog(data.stockItemId, data.name, data.division, data.unit);
-        });
+        };
 
-        tr.querySelector(".js-remove").addEventListener("click", () => {
-            observationsMap.delete(data.stockItemId);
+        tr.querySelector(".js-remove").onclick = async () => {
+            const res = await fetch(DRAFT_REMOVE_URL(data.stockItemId, data.division), { method: "DELETE" });
+            if (!res.ok) { alert("Failed to remove."); return; }
+            obsMap.delete(data.stockItemId);
             tr.remove();
-            const t = Array.from(document.querySelectorAll(".tiles--products .tile")).find(x => parseInt(x.dataset.stockItemId, 10) === data.stockItemId);
-            if (t) t.classList.remove("tile--done");
-            document.getElementById("observationsSection").hidden = observationsMap.size === 0;
-        });
+            const tile = tileFor(data.stockItemId);
+            if (tile) tile.classList.remove("tile--partial", "tile--complete");
+            document.getElementById("observationsSection").hidden = obsMap.size === 0;
+        };
     }
 
-    async function commitAll() {
-        const opId = getCookie(OP_COOKIE);
-        if (!opId) { openOperatorDialog(); return; }
-
-        const flat = [];
-        for (const [, v] of observationsMap) {
-            for (const o of v.observations) {
-                flat.push({
-                    stockItemId: v.stockItemId,
-                    code: o.code,
-                    location: o.location,
-                    value: o.value
-                });
-            }
-        }
-        if (flat.length === 0) { alert("Add at least one observation."); return; }
-
-        const payload = { timestamp: new Date().toISOString(), observations: flat };
-        const btn = document.getElementById("commitBtn");
-        btn.disabled = true;
-        const old = btn.textContent;
-        btn.textContent = "Committing…";
-
-        try {
-            const res = await fetch(COMMIT_URL, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
-            if (!res.ok) { alert("Failed to commit."); return; }
-            alert("Stock take committed.");
-            observationsMap.clear();
-            document.getElementById("obsTbody").innerHTML = "";
-            document.getElementById("observationsSection").hidden = true;
-            if (currentDivision) renderProducts(currentDivision.products, currentDivision.division);
-        } finally {
-            btn.disabled = false;
-            btn.textContent = old;
-        }
+    function renderObsTable() {
+        const tbody = document.getElementById("obsTbody");
+        tbody.innerHTML = "";
+        for (const [, v] of obsMap) upsertObsRow(v.stockItemId);
     }
 
-    function bindOperatorSelection() {
-        Array.from(document.querySelectorAll("#operatorTiles .tile")).forEach(t => {
-            t.addEventListener("click", async () => {
-                const id = t.dataset.opid;
-                const fd = new FormData();
-                fd.append("id", id);
-                const res = await fetch(SELECT_OP_URL, { method: "POST", body: fd });
-                if (res.ok) {
-                    document.getElementById("operatorModal").close();
-                    setOperatorStatus();
-                }
-            });
-        });
-    }
-
+    // ===== Boot =====
     ready(async () => {
         bindOperatorSelection();
         setOperatorStatus();
+        startOperatorTimeout();
+        await startSignalR();
 
         plan = await fetchPlan();
         renderDivisions(plan);
 
-        document.getElementById("commitBtn").addEventListener("click", commitAll);
+        if (getCookie(OP_COOKIE)) markOperatorActivity();
     });
 })();

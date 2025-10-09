@@ -14,7 +14,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                       IMediator mediator,
                                       ILogger<GetStockTakesHandler> logger,
                                       IDataProvider dataProvider,
-                                      IReportParser<StockTakeEntryDto> reportParser)
+                                      IReportParser<StockTakeReportEntryDto> reportParser)
         : QueryHandlerBase<GetStockTakesQuery, List<StockTakeSummaryDto>>
     {
         private const string __CACHE_KEY = "Stock_Takes_{fromDate}_{toDate}";
@@ -23,7 +23,7 @@ namespace BOTGC.API.Services.QueryHandlers
         private readonly ILogger<GetStockTakesHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         private readonly IDataProvider _dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
         private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        private readonly IReportParser<StockTakeEntryDto> _reportParser = reportParser ?? throw new ArgumentNullException(nameof(reportParser));
+        private readonly IReportParser<StockTakeReportEntryDto> _reportParser = reportParser ?? throw new ArgumentNullException(nameof(reportParser));
 
         public async override Task<List<StockTakeSummaryDto>> Handle(GetStockTakesQuery request, CancellationToken cancellationToken)
         {
@@ -54,13 +54,13 @@ namespace BOTGC.API.Services.QueryHandlers
             var ttl = TimeSpan.FromMinutes(_settings.Cache.MediumTerm_TTL_mins);
             var url = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.GetStockTakesReportUrl}";
 
-            var flatRows = await _dataProvider.PostData<StockTakeEntryDto>(
+            var flatRows = await _dataProvider.PostData<StockTakeReportEntryDto>(
                 url,
                 form,
                 _reportParser,
                 cacheKey,
                 ttl
-            ) ?? new List<StockTakeEntryDto>();
+            ) ?? new List<StockTakeReportEntryDto>();
 
             // Get all active stock items
             var stockItemsQuery = new GetStockLevelsQuery();
@@ -73,7 +73,7 @@ namespace BOTGC.API.Services.QueryHandlers
             foreach (var product in activeProducts)
             {
                 // Find all stock take entries for this product
-                var entries = flatRows.Where(r => r.StockItemId == product.Id).OrderBy(r => r.Timestamp ?? DateTimeOffset.MinValue).ToList();
+                var entries = flatRows.Where(r => r.Name.ToLower() == product.Name.ToLower()).OrderBy(r => r.Timestamp ?? DateTimeOffset.MinValue).ToList();
 
                 var snapshots = entries
                     .Where(r => r.Timestamp.HasValue)

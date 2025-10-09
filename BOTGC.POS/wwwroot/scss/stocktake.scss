@@ -89,3 +89,49 @@
         grid-template-columns: 1fr;
     }
 }
+
+// Completed state (green)
+.tile--complete {
+    opacity: .95;
+}
+
+.tile--complete::after {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-size: .9rem;
+    font-weight: 800;
+    background: #14a44d; /* green */
+    color: #fff;
+}
+
+/* Partially done (grey) */
+.tile--partial::after {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-size: .9rem;
+    font-weight: 800;
+    background: #9aa1a9; /* grey */
+    color: #fff;
+}
+
+/* Icons in table cells are Bootstrap Icons (already used in wastage) */
+.btn-icon {
+    border: none;
+    background: transparent;
+    padding: 0 .25rem;
+    cursor: pointer;
+}

@@ -1,4 +1,4 @@
-﻿using BOTGC.API.Models;
+﻿using BOTGC.API.Dto;
 using MediatR;
 
 namespace BOTGC.API.Services.Queries
