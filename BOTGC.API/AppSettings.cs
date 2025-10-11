@@ -146,7 +146,6 @@
 
     public class Waste
     {
-        public int MaxSheetsPerRun { get; set; } = 10;
         public int DaysToLookBack { get; set; } = 7;
         public int DefaultStockRoom { get; set; } = 3;
         public string Cron { get; set; } = "0 3 * * *";
@@ -156,13 +155,11 @@
 
     public class StockTakeSettings
     {
-        public bool Enabled { get; set; }
-        public string PreparationFrequency { get; set; } // Cron expression
-        public int MinProductsPerSheet { get; set; }
-        public int MaxProductsPerSheet { get; set; }
-        public int TolerancePercent { get; set; }
-        public int MaxToleranceBreachesBeforeTicket { get; set; }
-
         public Dictionary<string, int> StockTakeComplexity { get; set; } = new();
+        public string Cron { get; init; } = "0 3 * * *"; // 03:00 every day
+        public string TimeZone { get; init; } = "Europe/London";
+        public bool RunOnStartup { get; init; } = true;
+        public int DaysToLookBack { get; init; } = 10;   // clamp inside flusher
+        public List<string> Divisions { get; init; } = new(); // e.g. ["WINES","MINERALS","SNACKS","BEER CANS","DRAUGHT BEER"]
     }
 }

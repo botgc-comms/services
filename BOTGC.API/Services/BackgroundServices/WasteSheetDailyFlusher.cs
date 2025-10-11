@@ -6,7 +6,7 @@ using BOTGC.API.Dto;
 
 namespace BOTGC.API.Services.BackgroundServices;
 
-public sealed class WasteSheetDailyFlusher : BackgroundService
+public sealed partial class WasteSheetDailyFlusher : BackgroundService
 {
     private readonly AppSettings _settings;
     private readonly ILogger<WasteSheetDailyFlusher> _logger;

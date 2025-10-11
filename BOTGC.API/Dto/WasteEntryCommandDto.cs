@@ -12,4 +12,5 @@ namespace BOTGC.API.Dto
            int? StockRoomId,
            string? ProductName
        );
+
 }
