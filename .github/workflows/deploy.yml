@@ -341,10 +341,6 @@ jobs:
       run: npm install
       working-directory: BOTGC.POS
 
-    - name: Build SCSS → CSS
-      run: npm run sass:build
-      working-directory: BOTGC.POS
-
     - name: Publish Wastage (BOTGC.POS)
       run: |
         dotnet publish BOTGC.POS/BOTGC.POS.csproj \
