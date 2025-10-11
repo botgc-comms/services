@@ -40,6 +40,13 @@
     <meta name="twitter:description" content="Log and review wastage at Burton on Trent GC.">
     <meta name="twitter:image" content="@ogLandscape">
 
+    <!-- Manifest-->
+    <link rel="manifest" href="/manifest.webmanifest">""
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Stock Control">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
     <!-- Favicons / icons -->
     <link rel="icon" type="image/png" sizes="32x32"
           href="~/img/Burton on Trent  - favicon.png" asp-append-version="true" />
@@ -131,6 +138,13 @@
             connection.start().catch(function () { });
           }
         })();
+
+        // Register the Service Worker
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", () => {
+            navigator.serviceWorker.register("/js/service-worker.js");
+          });
+        }
         
     </script>
 
