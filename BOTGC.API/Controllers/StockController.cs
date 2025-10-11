@@ -292,7 +292,8 @@ namespace BOTGC.API.Controllers
                     request.OperatorName,
                     request.At,
                     request.Observations?.Select(o =>
-                        new StockTakeObservationDto(o.StockItemId, o.Code, o.Location, o.Value)).ToList() ?? new List<StockTakeObservationDto>()
+                        new StockTakeObservationDto(o.StockItemId, o.Code, o.Location, o.Value)).ToList() ?? new List<StockTakeObservationDto>(),
+                    request.EstimatedQuantityAtCapture
                 );
 
                 var result = await _mediator.Send(cmd, HttpContext.RequestAborted);

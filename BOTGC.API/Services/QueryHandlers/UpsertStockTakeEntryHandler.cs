@@ -41,7 +41,8 @@ namespace BOTGC.API.Services.QueryHandlers
                         request.OperatorId,
                         request.OperatorName,
                         request.At,
-                        request.Observations?.ToList() ?? new List<StockTakeObservationDto>()
+                        request.Observations?.ToList() ?? new List<StockTakeObservationDto>(), 
+                        request.EstimatedQuantityAtCapture
                     );
 
                     sheet.Status = "Open";

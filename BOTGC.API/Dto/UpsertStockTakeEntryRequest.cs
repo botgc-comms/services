@@ -9,6 +9,7 @@
         string OperatorName,
         DateTimeOffset At,
         List<StockTakeObservationDto> Observations
+        decimal EstimatedQuantityAtCapture
     );
 
 }

@@ -11,6 +11,7 @@ namespace BOTGC.API.Services.Queries
         Guid OperatorId,
         string OperatorName,
         DateTimeOffset At,
-        List<StockTakeObservationDto> Observations
+        List<StockTakeObservationDto> Observations,
+        decimal EstimatedQuantityAtCapture
     ) : QueryBase<UpsertResultDto>;
 }

@@ -713,7 +713,7 @@
             const note = document.createElement("div");
             note.className = "muted";
             note.style.marginBottom = ".5rem";
-            note.textContent = `Showing ${listToShow.length} of ${plan.length} divisions today. Add ?alldivisions to the URL to show all.`;
+            note.textContent = `Select a product division to get started.`;
             captionHost.parentElement.insertBefore(note, captionHost);
         }
 
