@@ -46,6 +46,18 @@
             "CountInCellar",
             "KegWeightGrams@Cellar"
         ],
+        "PANTRY|EACH": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "PANTRY|BOTTLE": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "PANTRY|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
         "*|*": [
             "CountInStoreRoom",
             "CountInLoungeBar",
@@ -71,6 +83,8 @@
         if (code === "CountInCellar") return "Count (cellar)";
         if (code === "OpenBottleWeightGrams") return location ? `Total weight of open bottles (g, ${location})` : "Total weight of open bottles (g)";
         if (code === "KegWeightGrams") return "Weight of Keg in use (g)";
+        if (code === "CountInKitchen") return "Count (kitchen)";
+
         return code;
     }
 
@@ -517,11 +531,15 @@
                 return { group: "Lounge bar", label: "Total weight of open bottles (g)", code, location: "Lounge" };
             if (code === "KegWeightGrams" && loc === "Cellar")
                 return { group: "Cellar", label: "Weight of Keg being used (g)", code, location: "Cellar" };
+            if (code === "CountInKitchen")
+                return { group: "Kitchen", label: countLabel, code, location: "Kitchen" };
+
 
             return { group: "Other", label: code + (loc ? ` (${loc})` : ""), code, location: loc };
         }
 
-        const order = ["Store Room", "Colt bar", "Lounge bar", "Cellar", "Other"];
+        const order = ["Store Room", "Kitchen", "Colt bar", "Lounge bar", "Cellar", "Other"];
+
         const groups = new Map(order.map(n => [n, []]));
         for (const token of requiredTokens) {
             const meta = tokenToGroupAndLabel(token, unitLabel);
@@ -734,6 +752,9 @@
                 renderPart(token, v => parts.push(`${v} g open bottle (${location})`));
             } else if (code === "KegWeightGrams") {
                 renderPart(token, v => parts.push(`${v} g keg weight`));
+            }
+            else if (code === "CountInKitchen") {
+                renderPart(token, v => parts.push(`${v} in kitchen`));
             } else {
                 renderPart(token, v => parts.push(`${code}${location ? ` @ ${location}` : ""}: ${v}`));
             }

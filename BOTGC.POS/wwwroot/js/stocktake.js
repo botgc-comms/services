@@ -752,6 +752,7 @@
                 renderPart(token, v => parts.push(`${v} g open bottle (${location})`));
             } else if (code === "KegWeightGrams") {
                 renderPart(token, v => parts.push(`${v} g keg weight`));
+            }
             else if (code === "CountInKitchen") {
                 renderPart(token, v => parts.push(`${v} in kitchen`));
             } else {
