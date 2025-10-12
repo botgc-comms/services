@@ -521,6 +521,12 @@ dialog article footer {
     justify-content: flex-end;
   }
 }
+.obs-estimate {
+  font-weight: 600;
+  margin: 4px 0 8px;
+  color: #374151; /* slate-700-ish */
+}
+
 @media (max-width: 640px) {
   .obs-note {
     width: 100%;

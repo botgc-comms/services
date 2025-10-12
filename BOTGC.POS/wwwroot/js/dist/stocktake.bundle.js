@@ -15,6 +15,8 @@
     const DRAFT_REMOVE_URL = (stockItemId, division) =>
         `/stocktake/observe/${stockItemId}?division=${encodeURIComponent(division)}`;
 
+    let SHOW_ESTIMATED = false;
+
     // ===== Profiles & labels =====
     // Use token format "Code[@Location]" so we can require per-bar weights.
     const PROFILES = {
@@ -88,6 +90,16 @@
         const u = new URL(window.location.href);
         const v = u.searchParams.get(name);
         return v === null ? null : v;
+    }
+
+    async function loadUiConfig() {
+        try {
+            const res = await fetch("/stocktake/config", { headers: { "accept": "application/json" } });
+            if (res.ok) {
+                const cfg = await res.json();
+                SHOW_ESTIMATED = !!cfg.showEstimatedInDialog;
+            }
+        } catch { /* ignore */ }
     }
 
     // Deterministic PRNG (xmur3 + sfc32)
@@ -315,6 +327,10 @@
         return Array.from(document.querySelectorAll(".tiles--products .tile"))
             .find(t => parseInt(t.dataset.stockItemId, 10) === stockItemId) || null;
     }
+    function findProductInCurrentDivision(stockItemId) {
+        const products = currentDivision?.products || [];
+        return products.find(p => p.stockItemId === stockItemId) || null;
+    }
 
     function requiredPairsFor(entry) {
         return profileFor(entry.division, entry.unit).map(t => parseToken(t));
@@ -326,12 +342,17 @@
     }
 
     function remainingCount(entry) {
-        const req = requiredPairsFor(entry);
-        const present = presentPairsFrom(entry);
+        const reqTokens = profileFor(entry.division, entry.unit).map(t => parseToken(t));
+        const present = new Set((entry.observations || []).map(o => `${o.code}@${o.location || ""}`));
+
         let left = 0;
-        for (const r of req) {
+        for (const r of reqTokens) {
             const key = `${r.code}@${r.location || ""}`;
-            if (!present.has(key)) left++;
+            const isCount = r.code.startsWith("CountIn"); // counts match by code only
+            const matched = isCount
+                ? Array.from(present).some(k => k.startsWith(`${r.code}@`))
+                : present.has(key);
+            if (!matched) left++;
         }
         return left;
     }
@@ -371,6 +392,7 @@
             tile.dataset.name = p.name || "";
             tile.dataset.unit = p.unit || "";
             tile.dataset.division = division;
+            tile.dataset.estimate = (p.currentQuantity ?? "");
             tile.innerHTML = `<div class="tile__name">${escapeHtml(p.name)}</div><small class="tile__division">${escapeHtml(p.unit || "")}</small>`;
             tile.addEventListener("click", () => openObsDialog(p.stockItemId, p.name, division, p.unit));
             host.appendChild(tile);
@@ -380,8 +402,16 @@
     }
 
     // ===== Obs Modal =====
-    function buildFields(container, requiredTokens, existing, productUnit) {
+    function buildFields(container, requiredTokens, existing, productUnit, estimatedCurrent) {
         container.innerHTML = "";
+
+        // Optional estimated banner
+        if (SHOW_ESTIMATED && estimatedCurrent != null && isFinite(estimatedCurrent)) {
+            const est = document.createElement("div");
+            est.className = "obs-estimate";
+            est.textContent = `Current estimated stock: ${estimatedCurrent} ${pluralizeUnit(productUnit)}`;
+            container.appendChild(est);
+        }
 
         // progress + hint
         const progress = document.createElement("div");
@@ -407,33 +437,36 @@
 
         const unitLabel = pluralizeUnit(productUnit);
 
-        function tokenToGroupAndLabel(token) {
+        function tokenToGroupAndLabel(token, unitLabel) {
             const [code, locRaw] = String(token).split("@");
             const loc = locRaw || null;
 
-            // “Count” fields become “Number of unopened {unit}”
             const countLabel = `Number of unopened ${unitLabel}`;
 
-            if (code === "CountInStoreRoom") return { group: "Store Room", label: countLabel, key: `${code}@` };
-            if (code === "CountInColtBar") return { group: "Colt bar", label: countLabel, key: `${code}@` };
-            if (code === "CountInLoungeBar") return { group: "Lounge bar", label: countLabel, key: `${code}@` };
-            if (code === "CountInCellar") return { group: "Cellar", label: "Count", key: `${code}@` };
+            // For counts we now attach an explicit location string as well
+            if (code === "CountInStoreRoom")
+                return { group: "Store Room", label: countLabel, code, location: "Store" };
+            if (code === "CountInColtBar")
+                return { group: "Colt bar", label: countLabel, code, location: "Colt" };
+            if (code === "CountInLoungeBar")
+                return { group: "Lounge bar", label: countLabel, code, location: "Lounge" };
+            if (code === "CountInCellar")
+                return { group: "Cellar", label: "Count", code, location: "Cellar" };
 
             if (code === "OpenBottleWeightGrams" && loc === "Colt")
-                return { group: "Colt bar", label: "Total weight of open bottles (g)", key: `OpenBottleWeightGrams@Colt` };
+                return { group: "Colt bar", label: "Total weight of open bottles (g)", code, location: "Colt" };
             if (code === "OpenBottleWeightGrams" && loc === "Lounge")
-                return { group: "Lounge bar", label: "Total weight of open bottles (g)", key: `OpenBottleWeightGrams@Lounge` };
+                return { group: "Lounge bar", label: "Total weight of open bottles (g)", code, location: "Lounge" };
             if (code === "KegWeightGrams" && loc === "Cellar")
-                return { group: "Cellar", label: "Weight of Keg being used (g)", key: `KegWeightGrams@Cellar` };
+                return { group: "Cellar", label: "Weight of Keg being used (g)", code, location: "Cellar" };
 
-            return { group: "Other", label: code + (loc ? ` (${loc})` : ""), key: `${code}@${loc || ""}` };
+            return { group: "Other", label: code + (loc ? ` (${loc})` : ""), code, location: loc };
         }
 
         const order = ["Store Room", "Colt bar", "Lounge bar", "Cellar", "Other"];
         const groups = new Map(order.map(n => [n, []]));
         for (const token of requiredTokens) {
-            const meta = tokenToGroupAndLabel(token);
-            if (!groups.has(meta.group)) groups.set(meta.group, []);
+            const meta = tokenToGroupAndLabel(token, unitLabel);
             groups.get(meta.group).push(meta);
         }
 
@@ -454,20 +487,22 @@
             g.appendChild(row);
 
             for (const f of fields) {
-                const current = existingMap.has(f.key) ? existingMap.get(f.key) : "";
+                const key = `${f.code}@${f.location || ""}`;
+                const current = existingMap.has(key) ? existingMap.get(key) : "";
+
                 const wrap = document.createElement("div");
                 wrap.className = "obs-field";
                 wrap.innerHTML =
                     `<label class="obs-label">${escapeHtml(f.label)}</label>
-                 <div class="obs-input-row">
-                   <input type="number" step="1" min="0"
-                          class="obs-input"
-                          data-token="${escapeHtml(f.key)}"
-                          data-code="${escapeHtml(f.key.split("@")[0])}"
-                          ${f.key.includes("@") && !f.key.endsWith("@") ? `data-location="${escapeHtml(f.key.split("@")[1])}"` : ""}
-                          value="${current !== "" ? String(current) : ""}">
-                   <button type="button" class="btn-quick-zero" data-for="${escapeHtml(f.key)}" aria-label="Set to none">None</button>
-                 </div>`;
+                    <div class="obs-input-row">
+                        <input type="number" step="1" min="0"
+                            class="obs-input"
+                            data-code="${escapeHtml(f.code)}"
+                            ${f.location ? `data-location="${escapeHtml(f.location)}"` : ""}
+                            value="${current !== "" ? String(current) : ""}">
+                        <button type="button" class="btn-quick-zero" data-for="${escapeHtml(key)}" aria-label="Set to none">None</button>
+                    </div>`;
+
                 row.appendChild(wrap);
             }
 
@@ -518,6 +553,7 @@
             const key = btn.dataset.for;
             const input = Array.from(container.querySelectorAll("input[data-code]"))
                 .find(i => `${i.getAttribute("data-code")}@${i.getAttribute("data-location") || ""}` === key);
+
             if (input) {
                 input.value = "0";
                 input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -536,9 +572,12 @@
 
         title.textContent = `Record observations: ${name}`;
 
+        const product = findProductInCurrentDivision(stockItemId);
+        const estimated = product?.currentQuantity ?? null;
+
         const existing = obsMap.get(stockItemId)?.observations || [];
         const requiredTokens = profileFor(division, unit);
-        buildFields(fields, requiredTokens, existing, unit);
+        buildFields(fields, requiredTokens, existing, unit, estimated);
 
         const onSave = async () => {
             // Build observations: include any input that has a value (including 0). Blank = not observed.
@@ -566,6 +605,11 @@
                 return;
             }
 
+            const tileEl = tileFor(stockItemId);
+            const estRaw = tileEl?.dataset?.estimate ?? "";
+            const estNum = Number(estRaw);
+            const estimatedQuantityAtCapture = Number.isFinite(estNum) ? estNum : 0;
+
             const entry = {
                 stockItemId,
                 name,
@@ -574,7 +618,8 @@
                 operatorId: opId,
                 operatorName: document.querySelector("#operatorStatus .tile--op .tile__name")?.textContent?.trim() || "",
                 at: new Date().toISOString(),
-                observations: obs
+                observations: obs, 
+                estimatedQuantityAtCapture
             };
 
             const res = await fetch(DRAFT_UPSERT_URL, {
@@ -700,6 +745,7 @@
         setOperatorStatus();
         startOperatorTimeout();
         await startSignalR();
+        await loadUiConfig(); 
 
         plan = await fetchPlan();
 

@@ -19,6 +19,8 @@
         public DateTimeOffset At { get; set; } // when the observation was recorded
 
         public List<StockTakeObservation> Observations { get; set; } = new();
+
+        public decimal EstimatedQuantityAtCapture { get; set; }
     }
 
     public sealed class StockTakeObservation

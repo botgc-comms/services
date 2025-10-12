@@ -3,6 +3,7 @@ using BOTGC.POS.Models;
 using BOTGC.POS.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 
 namespace BOTGC.POS.Controllers;
 
@@ -11,6 +12,7 @@ public sealed class StockTakeController : Controller
 {
     private const string OperatorCookie = "wastage_operator_id";
 
+    private readonly AppSettings _settings;
     private readonly IOperatorService _operators;
     private readonly IStockTakeService _stockTakes;
     private readonly IHubContext<StockTakeHub> _hub;
@@ -18,12 +20,22 @@ public sealed class StockTakeController : Controller
     public StockTakeController(
         IOperatorService operators,
         IStockTakeService stockTakes,
-        IHubContext<StockTakeHub> hub)
+        IHubContext<StockTakeHub> hub,
+        IOptions<AppSettings> opts
+        )
     {
         _operators = operators;
         _stockTakes = stockTakes;
         _hub = hub;
+        _settings = opts?.Value ?? throw new ArgumentNullException(nameof(opts));
     }
+
+    [HttpGet("config")]
+    public IActionResult GetConfig()
+       => Ok(new
+       {
+           showEstimatedInDialog = _settings.StockTake.ShowEstimatedInDialog
+       });
 
     [HttpGet("")]
     public async Task<IActionResult> Index()

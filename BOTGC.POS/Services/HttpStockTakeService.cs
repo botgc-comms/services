@@ -85,7 +85,8 @@ public sealed class HttpStockTakeService : IStockTakeService
             entry.OperatorId,
             entry.OperatorName,
             entry.At,
-            entry.Observations.Select(o => new ApiStockTakeObservationRequest(o.StockItemId, o.Code, o.Location, o.Value)).ToList()
+            entry.Observations.Select(o => new ApiStockTakeObservationRequest(o.StockItemId, o.Code, o.Location, o.Value)).ToList(),
+            entry.EstimatedQuantityAtCapture
         );
 
         var res = await client.PostAsJsonAsync($"/api/stock/stockTakes/sheet/entry?day={date}", payload);
@@ -133,7 +134,8 @@ public sealed class HttpStockTakeService : IStockTakeService
         Guid OperatorId,
         string OperatorName,
         DateTimeOffset At,
-        List<ApiStockTakeObservationRequest> Observations
+        List<ApiStockTakeObservationRequest> Observations, 
+        decimal EstimatedQuantityAtCapture
     );
 
     private sealed record ApiStockTakeSheetDto(

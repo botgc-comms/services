@@ -5,6 +5,7 @@ public class AppSettings
     public string AllowedCorsOrigins { get; set; } = string.Empty;
     public ApiSettings API { get; set; } = new();
     public Access? Access { get; set; }
+    public StockTakeUiSettings StockTake { get; set; } = new();
 }
 
 public class ApiSettings
@@ -18,4 +19,9 @@ public class Access
     public string? SharedSecret { get; set; }
     public string? CookieName { get; set; }
     public int CookieTtlDays { get; set; } = 30;
+}
+
+public sealed class StockTakeUiSettings
+{
+    public bool ShowEstimatedInDialog { get; init; } = false;
 }
