@@ -46,6 +46,18 @@
             "CountInCellar",
             "KegWeightGrams@Cellar"
         ],
+        "PANTRY|EACH": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "PANTRY|BOTTLE": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "PANTRY|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
         "*|*": [
             "CountInStoreRoom",
             "CountInLoungeBar",
@@ -71,6 +83,8 @@
         if (code === "CountInCellar") return "Count (cellar)";
         if (code === "OpenBottleWeightGrams") return location ? `Total weight of open bottles (g, ${location})` : "Total weight of open bottles (g)";
         if (code === "KegWeightGrams") return "Weight of Keg in use (g)";
+        if (code === "CountInKitchen") return "Count (kitchen)";
+
         return code;
     }
 
@@ -296,13 +310,14 @@
 
     // ===== UI: Divisions & Products =====
     function avgDays(products) {
-      if (!products?.length) return null;
-      const vals = products
-           .map(p => p.daysSinceLastStockTake)
-           .filter(v => Number.isFinite(v));
-      if (vals.length === 0) return null;           
-      const sum = vals.reduce((a, b) => a + b, 0);
-      return Math.round(sum / vals.length);
+        if (!products?.length) return null;
+        const vals = products
+            .map(p => p.daysSinceLastStockTake)
+            .filter(v => Number.isFinite(v));
+        if (vals.length === 0) return null;
+        const sum = vals.reduce((a, b) => a + b, 0);
+        return Math.round(sum / vals.length);
+    }
 
     function renderDivisions(list) {
         const host = document.getElementById("divisionTiles");
@@ -337,7 +352,7 @@
 
         const draftIds = Array.from(obsMap.keys()); // stockItemIds in the sheet
 
-        // Build the product list we’ll actually render:
+        // Build the product P we’ll actually render:
         // 1) If the sheet has entries, start from those (guarantees parity across devices)
         // 2) Otherwise fall back to the suggested plan list
         let listToRender = [];
@@ -516,11 +531,15 @@
                 return { group: "Lounge bar", label: "Total weight of open bottles (g)", code, location: "Lounge" };
             if (code === "KegWeightGrams" && loc === "Cellar")
                 return { group: "Cellar", label: "Weight of Keg being used (g)", code, location: "Cellar" };
+            if (code === "CountInKitchen")
+                return { group: "Kitchen", label: countLabel, code, location: "Kitchen" };
+
 
             return { group: "Other", label: code + (loc ? ` (${loc})` : ""), code, location: loc };
         }
 
-        const order = ["Store Room", "Colt bar", "Lounge bar", "Cellar", "Other"];
+        const order = ["Store Room", "Kitchen", "Colt bar", "Lounge bar", "Cellar", "Other"];
+
         const groups = new Map(order.map(n => [n, []]));
         for (const token of requiredTokens) {
             const meta = tokenToGroupAndLabel(token, unitLabel);
@@ -733,6 +752,8 @@
                 renderPart(token, v => parts.push(`${v} g open bottle (${location})`));
             } else if (code === "KegWeightGrams") {
                 renderPart(token, v => parts.push(`${v} g keg weight`));
+            else if (code === "CountInKitchen") {
+                renderPart(token, v => parts.push(`${v} in kitchen`));
             } else {
                 renderPart(token, v => parts.push(`${code}${location ? ` @ ${location}` : ""}: ${v}`));
             }
@@ -833,10 +854,12 @@
         plan = await fetchPlan();
 
         const showAll = getQueryParam("alldivisions") !== null;
-        const n = parseInt(getQueryParam("count") || "2", 10); // default 2; override with ?count=3 if needed
+        const n = parseInt(getQueryParam("count") || "2", 10); 
+        const baseCount = (isFinite(n) && n > 0 ? n : 2); 
         const listToShow = showAll
-               ? plan
-               : pickDivisionsForTodayWithPinned(plan, (isFinite(n) && n > 0 ? n : 2), "PANTRY");
+            ? plan
+            : pickDivisionsForTodayWithPinned(plan, baseCount + 1, "PANTRY"); // PANTRY + N others
+
 
         // Optional: small caption so staff know why fewer show
         const captionHost = document.getElementById("divisionTiles");

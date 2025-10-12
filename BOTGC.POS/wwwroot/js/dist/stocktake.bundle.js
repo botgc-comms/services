@@ -296,9 +296,13 @@
 
     // ===== UI: Divisions & Products =====
     function avgDays(products) {
-        if (!products?.length) return 9999;
-        let sum = 0; for (const p of products) sum += (p.daysSinceLastStockTake ?? 9999);
-        return sum / products.length;
+        if (!products?.length) return null;
+        const vals = products
+            .map(p => p.daysSinceLastStockTake)
+            .filter(v => Number.isFinite(v));
+        if (vals.length === 0) return null;
+        const sum = vals.reduce((a, b) => a + b, 0);
+        return Math.round(sum / vals.length);
     }
 
     function renderDivisions(list) {
@@ -309,7 +313,8 @@
             const tile = document.createElement("div");
             tile.className = `tile cat-${slug(d.division)}`;
             tile.dataset.division = d.division;
-            tile.innerHTML = `<div class="tile__name">${escapeHtml(d.division)}</div><small class="tile__division">${Math.round(d._avg)} days</small>`;
+            const badge = (d._avg == null) ? "no history" : `${d._avg} days`;
+            tile.innerHTML = `<div class="tile__name">${escapeHtml(d.division)}</div><small class="tile__division">${badge}</small>`;
             tile.addEventListener("click", () => selectDivision(d));
             host.appendChild(tile);
         }
@@ -333,7 +338,7 @@
 
         const draftIds = Array.from(obsMap.keys()); // stockItemIds in the sheet
 
-        // Build the product list we’ll actually render:
+        // Build the product P we’ll actually render:
         // 1) If the sheet has entries, start from those (guarantees parity across devices)
         // 2) Otherwise fall back to the suggested plan list
         let listToRender = [];
@@ -790,6 +795,32 @@
         const tbody = document.getElementById("obsTbody");
         tbody.innerHTML = "";
         for (const [, v] of obsMap) upsertObsRow(v.stockItemId);
+        }
+
+    function pickDivisionsForTodayWithPinned(allDivisions, n, pinnedName) {
+        const today = new Date().toISOString().slice(0, 10); // seed by day
+        const seed = `stocktake:${today}`;
+        const rng = seededRng(seed);
+
+        // only divisions that actually have products
+        const available = allDivisions.filter(d => Array.isArray(d.products) && d.products.length > 0);
+
+        // try to find the pinned division (case-insensitive)
+        const pinned = available.find(d => (d.division || "").toLowerCase() === String(pinnedName || "").toLowerCase());
+
+        // shuffle the rest deterministically
+        const rest = shuffleDeterministic(
+            available.filter(d => d !== pinned),
+            rng
+        );
+
+        const out = [];
+        if (pinned) out.push(pinned);
+        for (const d of rest) {
+            if (out.length >= n) break;
+            out.push(d);
+        }
+        return out;
     }
 
     // ===== Boot =====
@@ -803,8 +834,12 @@
         plan = await fetchPlan();
 
         const showAll = getQueryParam("alldivisions") !== null;
-        const n = parseInt(getQueryParam("count") || "2", 10); // default 2; override with ?count=3 if needed
-        const listToShow = showAll ? plan : pickDivisionsForToday(plan, isFinite(n) && n > 0 ? n : 2);
+        const n = parseInt(getQueryParam("count") || "2", 10); 
+        const baseCount = (isFinite(n) && n > 0 ? n : 2); 
+        const listToShow = showAll
+            ? plan
+            : pickDivisionsForTodayWithPinned(plan, baseCount + 1, "PANTRY"); // PANTRY + N others
+
 
         // Optional: small caption so staff know why fewer show
         const captionHost = document.getElementById("divisionTiles");
