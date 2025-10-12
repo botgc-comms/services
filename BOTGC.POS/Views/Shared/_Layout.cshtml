@@ -108,10 +108,23 @@
                              "&returnUrl=" + encodeURIComponent(path);
 
             // Use your existing QR endpoint; it expects a path+query
-            block.innerHTML = '<img class="qr-img" width="84" height="84" loading="lazy" decoding="async" alt="Open this page on your phone" />';
-            var img = block.querySelector(".qr-img");
+            block.innerHTML = "";
+            const a = document.createElement("a");
+            a.className = "qr-link";
+            a.href = accessPath;                   // your target URL
+            a.setAttribute("aria-label", "Open this page on your phone");
+
+            const img = document.createElement("img");
+            img.className = "qr-img";
+            img.width = 84;
+            img.height = 84;
+            img.loading = "lazy";
+            img.decoding = "async";
+            img.alt = "Open this page on your phone";
             img.src = "/qr/page.png?pathAndQuery=" + encodeURIComponent(accessPath);
 
+            a.appendChild(img);
+            block.appendChild(a);
             block.style.display = "";
           }
 

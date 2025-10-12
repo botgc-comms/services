@@ -298,15 +298,18 @@
 
     async function loadDraftForDivision(divName) {
         const res = await fetch(DRAFT_GET_URL(divName));
-        if (!res.ok) { obsMap.clear(); return; }
-        const list = await res.json();
+        if (!res.ok) { obsMap.clear(); return []; }
+
+        const list = await res.json();         
         obsMap.clear();
         for (const e of list) {
             if ((e.observations?.length ?? 0) > 0) {
-                obsMap.set(e.stockItemId, e);
+                obsMap.set(e.stockItemId, e);     
             }
         }
+        return list; 
     }
+
 
     // ===== UI: Divisions & Products =====
     function avgDays(products) {
@@ -347,40 +350,25 @@
 
 
     async function selectDivision(d) {
-        // Load what’s in Redis for this division
-        await loadDraftForDivision(d.division);
+        const sheetEntries = await loadDraftForDivision(d.division); // all products in sheet
 
-        const draftIds = Array.from(obsMap.keys()); // stockItemIds in the sheet
-
-        // Build the product P we’ll actually render:
-        // 1) If the sheet has entries, start from those (guarantees parity across devices)
-        // 2) Otherwise fall back to the suggested plan list
         let listToRender = [];
-        if (draftIds.length > 0) {
-            // Prefer Redis sheet; include estimate if we have it
-            for (const [, e] of obsMap) {
-                listToRender.push({
-                    stockItemId: e.stockItemId,
-                    name: e.name,
-                    unit: e.unit,
-                    division: d.division,
-                    currentQuantity: e.estimatedQuantityAtCapture ?? null
-                });
-            }
-
-            // (Optional) If you still want to include any planned-but-not-seeded items, uncomment:
-            // const planned = d.products || [];
-            // for (const p of planned) {
-            //   if (!obsMap.has(p.stockItemId)) listToRender.push(p);
-            // }
+        if (sheetEntries.length > 0) {
+            // Build tiles from the cached sheet so every device sees the same products
+            listToRender = sheetEntries.map(e => ({
+                stockItemId: e.stockItemId,
+                name: e.name,
+                unit: e.unit,
+                division: d.division,
+                // show the estimate captured when the entry was seeded/observed
+                currentQuantity: e.estimatedQuantityAtCapture ?? null
+            }));
         } else {
-            // No sheet yet => fall back to plan (original behaviour)
+            // No sheet yet — use the suggestion plan from /stocktake/products
             listToRender = d.products || [];
         }
 
-        // Freeze the division we’ll use elsewhere
         currentDivision = { ...d, products: listToRender };
-
         document.getElementById("divisionTitle").textContent = d.division;
 
         renderProducts();

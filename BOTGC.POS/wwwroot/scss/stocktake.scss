@@ -270,6 +270,25 @@
     color: #374151; /* slate-700-ish */
 }
 
+.qr-link {
+    text-decoration: none;
+    color: inherit; /* ensures :visited doesn’t change color */
+    -webkit-tap-highlight-color: transparent; /* mobile tap highlight off */
+}
+
+.qr-link:visited {
+    color: inherit;
+}
+
+.qr-link:focus {
+    outline: none;
+}
+/* remove focus ring (if desired) */
+.qr-link img.qr-img {
+    display: block;
+}
+/* nixes inline-gap */
+
 
 @media (max-width: 640px) {
     .obs-note {
