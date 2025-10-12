@@ -60,6 +60,8 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, NewMemberAddedQueueService>();
             services.AddSingleton<IQueueService<NewMemberPropertyUpdateDto>, MemberPropertyUpdateQueueService>();
             services.AddSingleton<IQueueService<WasteEntryCommandDto>, StockWastageQueueService>();
+            services.AddSingleton<IQueueService<StockTakeSheetProcessCommandDto>, StockTakeQueueService>();
+            services.AddSingleton<IQueueService<StockTakeCompletedTicketCommandDto>, StockTakeCompletedQueueService>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 
@@ -81,6 +83,7 @@ namespace BOTGC.API.Extensions
             services.AddHostedService<StockLevelAnalysisQueueProcessor>();
             services.AddHostedService<StockWastageQueueProcessor>();
             services.AddHostedService<WasteSheetDailyFlusher>();
+            services.AddHostedService<StockTakeDailyFlusher>();
             services.AddHostedService<StockLevelEnqueueScheduler>();
             
             // Register MediatR and scan for handlers in your assembly
