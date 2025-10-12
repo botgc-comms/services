@@ -180,9 +180,21 @@
 
         connection.on("ObservationUpserted", (entry) => {
             if (!currentDivision || entry.division !== currentDivision.division) return;
-            obsMap.set(entry.stockItemId, entry);
-            upsertObsRow(entry.stockItemId);
-            markTileState(entry.stockItemId, entry);
+
+            if ((entry.observations?.length ?? 0) === 0) {
+              // treat as removal/clear
+              obsMap.delete(entry.stockItemId);
+              document.querySelector(`#obsTbody tr[data-id='${entry.stockItemId}']`)?.remove();
+              const t = tileFor(entry.stockItemId);
+              if (t) {
+                t.classList.remove("tile--partial", "tile--complete");
+                t.querySelector(".tile__badge")?.remove();
+              }
+            } else {
+              obsMap.set(entry.stockItemId, entry);
+              upsertObsRow(entry.stockItemId);
+              markTileState(entry.stockItemId, entry);
+            }
             document.getElementById("observationsSection").hidden = obsMap.size === 0;
         });
 
@@ -275,7 +287,11 @@
         if (!res.ok) { obsMap.clear(); return; }
         const list = await res.json();
         obsMap.clear();
-        for (const e of list) obsMap.set(e.stockItemId, e);
+        for (const e of list) {
+            if ((e.observations?.length ?? 0) > 0) {
+                obsMap.set(e.stockItemId, e);
+            }
+        }
     }
 
     // ===== UI: Divisions & Products =====
@@ -312,10 +328,42 @@
 
 
     async function selectDivision(d) {
-        currentDivision = d;
-        document.getElementById("divisionTitle").textContent = d.division;
-        
+        // Load what’s in Redis for this division
         await loadDraftForDivision(d.division);
+
+        const draftIds = Array.from(obsMap.keys()); // stockItemIds in the sheet
+
+        // Build the product list we’ll actually render:
+        // 1) If the sheet has entries, start from those (guarantees parity across devices)
+        // 2) Otherwise fall back to the suggested plan list
+        let listToRender = [];
+        if (draftIds.length > 0) {
+            // Prefer Redis sheet; include estimate if we have it
+            for (const [, e] of obsMap) {
+                listToRender.push({
+                    stockItemId: e.stockItemId,
+                    name: e.name,
+                    unit: e.unit,
+                    division: d.division,
+                    currentQuantity: e.estimatedQuantityAtCapture ?? null
+                });
+            }
+
+            // (Optional) If you still want to include any planned-but-not-seeded items, uncomment:
+            // const planned = d.products || [];
+            // for (const p of planned) {
+            //   if (!obsMap.has(p.stockItemId)) listToRender.push(p);
+            // }
+        } else {
+            // No sheet yet => fall back to plan (original behaviour)
+            listToRender = d.products || [];
+        }
+
+        // Freeze the division we’ll use elsewhere
+        currentDivision = { ...d, products: listToRender };
+
+        document.getElementById("divisionTitle").textContent = d.division;
+
         renderProducts();
         renderObsTable();
 
@@ -384,17 +432,22 @@
         host.innerHTML = "";
         const division = currentDivision?.division || "";
         const list = currentDivision?.products || [];
+
         for (const p of list) {
             const entry = obsMap.get(p.stockItemId);
             const tile = document.createElement("div");
-            tile.className = `tile`;
+            tile.className = "tile";
             tile.dataset.stockItemId = p.stockItemId;
             tile.dataset.name = p.name || "";
             tile.dataset.unit = p.unit || "";
             tile.dataset.division = division;
+            // keep the estimate used by the dialog
             tile.dataset.estimate = (p.currentQuantity ?? "");
-            tile.innerHTML = `<div class="tile__name">${escapeHtml(p.name)}</div><small class="tile__division">${escapeHtml(p.unit || "")}</small>`;
-            tile.addEventListener("click", () => openObsDialog(p.stockItemId, p.name, division, p.unit));
+            tile.innerHTML = `<div class="tile__name">${escapeHtml(p.name)}</div>
+                              <small class="tile__division">${escapeHtml(p.unit || "")}</small>`;
+            tile.addEventListener("click", () =>
+                openObsDialog(p.stockItemId, p.name, division, p.unit)
+            );
             host.appendChild(tile);
 
             if (entry) markTileState(p.stockItemId, entry);

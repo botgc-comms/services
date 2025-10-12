@@ -14,15 +14,11 @@ namespace BOTGC.API.Services.QueryHandlers
 {
     public class GetStockTakeProductsHandler(IOptions<AppSettings> settings,
                                              IMediator mediator,
-                                             ILogger<GetStockTakeProductsHandler> logger,
-                                             IDataProvider dataProvider) : QueryHandlerBase<GetStockTakeProductsQuery, List<DivisionStockTakeSuggestionDto>>
+                                             ILogger<GetStockTakeProductsHandler> logger) : QueryHandlerBase<GetStockTakeProductsQuery, List<DivisionStockTakeSuggestionDto>>
     {
-        private const string __CACHE_KEY = "Membership_Subscriptions_{fromDate}_{toDate}";
-
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         private readonly ILogger<GetStockTakeProductsHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        private readonly IDataProvider _dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
 
         // Common English stopwords to ignore in clustering
         private static readonly HashSet<string> StopWords = new(StringComparer.OrdinalIgnoreCase)

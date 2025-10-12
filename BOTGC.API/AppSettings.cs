@@ -155,7 +155,7 @@
 
     public class StockTakeSettings
     {
-        public Dictionary<string, int> StockTakeComplexity { get; set; } = new();
+        public Dictionary<string, int> StockTakeComplexity { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public string Cron { get; init; } = "0 3 * * *"; // 03:00 every day
         public string TimeZone { get; init; } = "Europe/London";
         public bool RunOnStartup { get; init; } = true;
