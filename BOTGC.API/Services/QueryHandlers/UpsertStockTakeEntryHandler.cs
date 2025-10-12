@@ -33,6 +33,20 @@ namespace BOTGC.API.Services.QueryHandlers
                     var sheet = await cache.GetAsync<StockTakeSheetCacheModel>(key).ConfigureAwait(false)
                                 ?? new StockTakeSheetCacheModel { Date = date, Division = division, Status = "Open" };
 
+                    if (!sheet.Entries.TryGetValue(request.StockItemId, out var existing))
+                    {
+                        // If somehow not seeded (edge), create it now using the request estimate
+                        existing = new StockTakeEntryDto(
+                            request.StockItemId, request.Name, division, request.Unit,
+                            request.OperatorId, request.OperatorName, request.At,
+                            new List<StockTakeObservationDto>(),
+                            request.EstimatedQuantityAtCapture
+                        );
+                    }
+
+                    // Preserve the original snapshot estimate from cache
+                    var estimate = existing.EstimatedQuantityAtCapture;
+
                     var entry = new StockTakeEntryDto(
                         request.StockItemId,
                         request.Name,
@@ -42,7 +56,7 @@ namespace BOTGC.API.Services.QueryHandlers
                         request.OperatorName,
                         request.At,
                         request.Observations?.ToList() ?? new List<StockTakeObservationDto>(), 
-                        request.EstimatedQuantityAtCapture
+                        estimate
                     );
 
                     sheet.Status = "Open";

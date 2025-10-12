@@ -270,7 +270,7 @@ dialog article footer {
 
 /* === PRODUCT TILES (scoped only to the products grid) === */
 .tiles--products .tile {
-  min-height: 88px;
+  min-height: 101px;
   position: relative;
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: none;

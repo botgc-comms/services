@@ -59,6 +59,7 @@ public sealed class GatekeeperMiddleware
         // (optional) Always allow static images/css/js to load without a key
         if (ctx.Request.Path.StartsWithSegments("/img", StringComparison.OrdinalIgnoreCase) ||
             ctx.Request.Path.StartsWithSegments("/css", StringComparison.OrdinalIgnoreCase) ||
+            ctx.Request.Path.StartsWithSegments("/manifesst", StringComparison.OrdinalIgnoreCase) ||
             ctx.Request.Path.StartsWithSegments("/js", StringComparison.OrdinalIgnoreCase))
         {
             await _next(ctx);
