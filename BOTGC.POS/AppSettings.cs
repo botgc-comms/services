@@ -24,4 +24,5 @@ public class Access
 public sealed class StockTakeUiSettings
 {
     public bool ShowEstimatedInDialog { get; init; } = false;
+    public bool EnforceSameSelectedOperatorAccrossDevices { get; init; } = false;   
 }

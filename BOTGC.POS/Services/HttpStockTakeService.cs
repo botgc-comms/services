@@ -101,8 +101,6 @@ public sealed class HttpStockTakeService : IStockTakeService
         res.EnsureSuccessStatusCode();
     }
 
-    // ---------- API DTOs (prefixed Api* to avoid clashes) ----------
-
     private sealed record DivisionPlanDto(string Division, List<ProductDto> Products);
 
     private sealed record ProductDto(
