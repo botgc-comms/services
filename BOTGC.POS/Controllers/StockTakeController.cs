@@ -110,12 +110,15 @@ public sealed class StockTakeController : Controller
             Expires = DateTimeOffset.UtcNow.AddMinutes(15)
         });
 
-        await _hub.Clients.All.SendAsync("OperatorSelected", new
+        if (_settings.StockTake.EnforceSameSelectedOperatorAccrossDevices)
         {
-            id = op.Id,
-            name = op.DisplayName,
-            colorHex = op.ColorHex
-        });
+            await _hub.Clients.All.SendAsync("OperatorSelected", new
+            {
+                id = op.Id,
+                name = op.DisplayName,
+                colorHex = op.ColorHex
+            });
+        }
 
         return Ok(new { ok = true, id = op.Id, name = op.DisplayName, colorHex = op.ColorHex });
     }
