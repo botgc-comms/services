@@ -35,6 +35,6 @@ public class GrowSurfSettings
 public class RecentApplicantsSettings
 {
     public string SharedSecret { get; set; }
-    public int? TokenTtlMinutes { get; set; }
+    public int? TokenTtlMinutes { get; set; } = 129600;
     public string CookieName { get; set; }
 }

@@ -61,7 +61,7 @@ variable "recent_applicants_allowed_referrer_host" {
 
 variable "recent_applicants_token_ttl_minutes" {
   type    = number
-  default = 10
+  default = 129600
 }
 
 variable "recent_applicants_cookie_name" {

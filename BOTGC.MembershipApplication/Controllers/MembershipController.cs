@@ -257,7 +257,6 @@ public class MembershipController : Controller
         if (string.IsNullOrWhiteSpace(key))
             return Deny("Missing key.");
 
-        // Validate key: "<path>|<unix-expiry>|<hex HMAC>"
         var parts = key.Split('|');
         if (parts.Length != 3) return Deny("Malformed key.");
 
@@ -268,18 +267,42 @@ public class MembershipController : Controller
         if (!long.TryParse(parts[1], out var exp))
             return Deny("Invalid expiry.");
 
-        if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() > exp)
+        var isNonExpiring = exp == 0;
+        if (!isNonExpiring && DateTimeOffset.UtcNow.ToUnixTimeSeconds() > exp)
             return Deny("Key expired.");
 
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
-        var expected = Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes($"{path}|{exp}")));
+        var payload = isNonExpiring ? $"{path}|0" : $"{path}|{exp}";
+        var expected = Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes(payload)));
         var sigOk = CryptographicOperations.FixedTimeEquals(
             Convert.FromHexString(expected),
             Convert.FromHexString(parts[2]));
 
+        if (Request.Query.ContainsKey("debug") && !sigOk)
+        {
+            var diag = new Dictionary<string, string?>
+            {
+                ["Environment"] = _env.EnvironmentName,
+                ["Reason"] = "Invalid signature.",
+                ["KeyPresent"] = "yes",
+                ["PathFromKey"] = path,
+                ["ExpFromKey"] = exp.ToString(),
+                ["Payload"] = payload,
+                ["PayloadHex"] = Convert.ToHexString(Encoding.UTF8.GetBytes(payload)),
+                ["ProvidedSig"] = parts[2],
+                ["ExpectedSig"] = expected,
+                ["UserAgent"] = Request.Headers.UserAgent.ToString(),
+                ["ClientIP"] = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                ["TargetPath"] = targetPath,
+                ["CookieName"] = cookieName,
+                ["TTL_Min"] = ttl.ToString()
+            };
+            var html = BuildDebugPage("Denied", diag, null);
+            return Content(html, "text/html");
+        }
+
         if (!sigOk) return Deny("Invalid signature.");
 
-        // Issue access cookie and redirect
         var ua = Request.Headers.UserAgent.ToString();
         var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
         var token = AccessToken.Issue(targetPath, DateTimeOffset.UtcNow.AddMinutes(ttl), secret, ua, ip);
@@ -296,13 +319,6 @@ public class MembershipController : Controller
         });
 
         return Redirect(targetPath);
-    }
-
-    private IActionResult DebugFail(string reason, IDictionary<string, string?> diag, bool debug)
-    {
-        if (!debug) return Forbid();
-        var html = BuildDebugPage(reason, diag, null);
-        return Content(html, "text/html");
     }
 
     private string BuildDebugPage(string title, IDictionary<string, string?> diag, string? continueUrl)
