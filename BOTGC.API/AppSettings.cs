@@ -161,5 +161,6 @@
         public bool RunOnStartup { get; init; } = true;
         public int DaysToLookBack { get; init; } = 10;   // clamp inside flusher
         public List<string> Divisions { get; init; } = new(); // e.g. ["WINES","MINERALS","SNACKS","BEER CANS","DRAUGHT BEER"]
+        public decimal TolerancePercent { get; init; } = 10m;
     }
 }

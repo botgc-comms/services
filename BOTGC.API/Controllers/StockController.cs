@@ -308,6 +308,43 @@ namespace BOTGC.API.Controllers
             }
         }
 
+        // POST: /api/stock/stockTakes?day=yyyy-MM-dd
+        [HttpPost("stockTakes")]
+        public async Task<IActionResult> SaveStockTake([FromBody] SaveStockTakeRequest request, [FromQuery] DateTime? day = null)
+        {
+            var sheetDate = (day?.Date ?? DateTime.UtcNow.Date);
+
+            _logger.LogInformation(
+                "Saving stock take via backend for {SheetDate} with {Count} items.",
+                sheetDate.ToString("yyyy-MM-dd"), request.Items.Count
+            );
+
+            try
+            {
+                var quantities = request.Items.ToDictionary(i => i.StockItemId, i => i.Quantity);
+                var reasons = request.Items.Where(i => !string.IsNullOrWhiteSpace(i.Reason))
+                                           .ToDictionary(i => i.StockItemId, i => i.Reason!);
+
+                var cmd = new SaveStockTakeCommand(
+                    request.TakenAtLocal,
+                    quantities,
+                    reasons.Count > 0 ? reasons : null
+                );
+
+                var ok = await _mediator.Send(cmd, HttpContext.RequestAborted);
+
+                if (!ok)
+                    return StatusCode(StatusCodes.Status502BadGateway, "Failed to persist stock take to backend.");
+
+                return Created($"/api/stock/stockTakes/sheet?day={sheetDate:yyyy-MM-dd}", new { ok = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving stock take for {SheetDate}.", sheetDate.ToString("yyyy-MM-dd"));
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while saving the stock take.");
+            }
+        }
+
         // DELETE: /api/stock/stockTakes/sheet/entry/{stockItemId}?day=yyyy-MM-dd&division=MINERALS
         [HttpDelete("stockTakes/sheet/entry/{stockItemId:int}")]
         public async Task<IActionResult> DeleteStockTakeEntry([FromRoute] int stockItemId, [FromQuery] DateTime? day = null, [FromQuery] string? division = null)

@@ -14,5 +14,4 @@ namespace BOTGC.API.Models
             Payload = payload;
         }
     }
-
 }

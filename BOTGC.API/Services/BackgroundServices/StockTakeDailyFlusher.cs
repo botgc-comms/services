@@ -89,7 +89,7 @@ public sealed class StockTakeDailyFlusher : BackgroundService
     {
         using var scope = _scopeFactory.CreateScope();
         var cache = scope.ServiceProvider.GetRequiredService<ICacheService>();
-        var queue = scope.ServiceProvider.GetRequiredService<IQueueService<StockTakeSheetProcessCommandDto>>();
+        var queue = scope.ServiceProvider.GetRequiredService<IQueueService<ProcessStockTakeCommand>>();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         // Decide which divisions to scan. Here we ask for the current product plan and
@@ -140,8 +140,10 @@ public sealed class StockTakeDailyFlusher : BackgroundService
                     Entries: sheet.Entries.Values.ToList() // StockTakeEntryDto list
                 );
 
-                var message = new StockTakeSheetProcessCommandDto(
+                var message = new ProcessStockTakeCommand(
                     Sheet: dto,
+                    Division: dto.Division, 
+                    Date: dto.Date,
                     CorrelationId: Guid.NewGuid().ToString("N"),
                     EnqueuedAtUtc: DateTime.UtcNow
                 );

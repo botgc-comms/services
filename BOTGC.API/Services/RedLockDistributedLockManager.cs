@@ -1,28 +1,11 @@
 ﻿using BOTGC.API.Common;
 using BOTGC.API.Interfaces;
 using Microsoft.Extensions.Logging;
-using RedLockNet;
 using RedLockNet.SERedis;
 using RedLockNet.SERedis.Configuration;
 
 namespace BOTGC.API.Services
 {
-    public class RedLockDistributedLock : IDistributedLock
-    {
-        private readonly IRedLock _redLock;
-
-        public RedLockDistributedLock(IRedLock redLock)
-        {
-            _redLock = redLock;
-        }
-
-        public bool IsAcquired => _redLock.IsAcquired;
-
-        public async ValueTask DisposeAsync()
-        {
-            await _redLock.DisposeAsync();
-        }
-    }
 
     public class RedLockDistributedLockManager : IDistributedLockManager
     {
@@ -67,31 +50,6 @@ namespace BOTGC.API.Services
                 cancellationToken: cancellationToken);
 
             return new RedLockDistributedLock(redLock);
-        }
-    }
-
-    public class NoOpDistributedLock : IDistributedLock
-    {
-        public bool IsAcquired => true;
-
-        public ValueTask DisposeAsync()
-        {
-            // Nothing to dispose
-            return ValueTask.CompletedTask;
-        }
-    }
-
-    public class NoOpDistributedLockManager : IDistributedLockManager
-    {
-        public Task<IDistributedLock> AcquireLockAsync(
-            string resource,
-            TimeSpan? expiry = null,
-            TimeSpan? waitTime = null,
-            TimeSpan? retryTime = null,
-            CancellationToken cancellationToken = default)
-        {
-            IDistributedLock lockInstance = new NoOpDistributedLock();
-            return Task.FromResult(lockInstance);
         }
     }
 }

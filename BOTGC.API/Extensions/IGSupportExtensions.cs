@@ -8,6 +8,7 @@ using System.Net;
 using RedLockNet.SERedis.Configuration;
 using RedLockNet.SERedis;
 using StackExchange.Redis;
+using BOTGC.API.Services.Queries;
 
 namespace BOTGC.API.Extensions
 {
@@ -53,14 +54,16 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IReportParser<TillOperatorDto>, IGTillOperatorReportParser>();
             services.AddSingleton<IReportParser<NewMemberLookupDto>, IGNewMembersReportParser>();
             services.AddSingleton<IReportParser<StockTakeReportEntryDto>, IGStockTakeReportParser>();
+            services.AddSingleton<IReportParser<StockItemTransactionReportEntryDto>, IGStockItemTransactionsReportParser>();
             services.AddSingleton<IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto>, IGLeaderboardReportParser>();
             services.AddSingleton<IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>, IGClubChampionshipLeaderboardReportParser>();
+            
             
             services.AddSingleton<IQueueService<NewMemberApplicationDto>, MembershipApplicationQueueService>();
             services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, NewMemberAddedQueueService>();
             services.AddSingleton<IQueueService<NewMemberPropertyUpdateDto>, MemberPropertyUpdateQueueService>();
             services.AddSingleton<IQueueService<WasteEntryCommandDto>, StockWastageQueueService>();
-            services.AddSingleton<IQueueService<StockTakeSheetProcessCommandDto>, StockTakeQueueService>();
+            services.AddSingleton<IQueueService<ProcessStockTakeCommand>, StockTakeQueueService>();
             services.AddSingleton<IQueueService<StockTakeCompletedTicketCommandDto>, StockTakeCompletedQueueService>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
@@ -74,6 +77,8 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IMemberApplicationFormPdfGeneratorService, QuestPDFMemberApplicationFormGenerator>();
 
             services.AddSingleton<ITaskBoardService, MondayTaskBoardService>();
+            services.AddSingleton<IBottleVolumeService, BottleVolumeService>();
+            services.AddSingleton<IBottleWeightDataSource, BottleWeightService>();
 
             services.AddHostedService<CompetitionBackgroundService>();
             services.AddHostedService<TeeTimeUsageBackgroundService>();
@@ -81,6 +86,7 @@ namespace BOTGC.API.Extensions
             services.AddHostedService<MemberPropertyUpdatesQueueProcessor>();
             services.AddHostedService<NewMemberAddedQueueProcessor>();
             services.AddHostedService<StockLevelAnalysisQueueProcessor>();
+            services.AddHostedService<StockTakeQueueProcessor>();
             services.AddHostedService<StockWastageQueueProcessor>();
             services.AddHostedService<WasteSheetDailyFlusher>();
             services.AddHostedService<StockTakeDailyFlusher>();

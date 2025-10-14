@@ -9,14 +9,10 @@ using Microsoft.Extensions.Options;
 
 namespace BOTGC.API.Services.QueryHandlers;
 
-public partial class GetWasteSheetHandler(IOptions<AppSettings> settings,
-                                  IMediator mediator,
-                                  ILogger<GetWasteSheetHandler> logger,
-                                  IServiceScopeFactory serviceScopeFactory)
+public partial class GetWasteSheetHandler(ILogger<GetWasteSheetHandler> logger,
+                                          IServiceScopeFactory serviceScopeFactory)
     : QueryHandlerBase<GetWasteSheetQuery, WasteSheetDto?>
 {
-    private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-    private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     private readonly ILogger<GetWasteSheetHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
 

@@ -7,9 +7,8 @@
         string Unit,
         Guid OperatorId,
         string OperatorName,
-        DateTimeOffset At,
+        DateTime At,
         List<StockTakeObservationDto> Observations,
         decimal EstimatedQuantityAtCapture
     );
-
 }
