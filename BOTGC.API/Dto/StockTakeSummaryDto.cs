@@ -11,4 +11,5 @@
         public int? DaysSinceLastStockTake { get; set; }
         public List<StockTakeSnapshotDto> StockTakes { get; set; } = new();
     }
+
 }

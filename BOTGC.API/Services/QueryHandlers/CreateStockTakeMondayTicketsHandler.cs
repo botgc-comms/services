@@ -1,6 +1,7 @@
 ﻿using BOTGC.API.Interfaces;
 using BOTGC.API.Services.Queries;
 using Microsoft.Extensions.Options;
+using System.Security.Policy;
 
 namespace BOTGC.API.Services.QueryHandlers;
 
@@ -26,7 +27,9 @@ public sealed class CreateStockTakeMondayTicketsHandler(
             t.InvestigateItems.Count
         );
 
-        string? igLink = ""; // optional; set in AppSettings if you have it, else stays null
+        var baseUrl = _settings.IG.BaseUrl?.TrimEnd('/') ?? throw new InvalidOperationException("Missing IG.BaseUrl in settings.");
+        var stockTakeId = request.Ticket.StockTakeId;
+        var igLink = stockTakeId.HasValue ? $"{baseUrl}/{_settings.IG.Urls.StockTakeDetailsUrl.Replace("{stocktakeid}", stockTakeId.ToString())}" : "";
 
         var parentId = await _taskBoardService.CreateStockTakeAndInvestigationsAsync(t, igLink);
 

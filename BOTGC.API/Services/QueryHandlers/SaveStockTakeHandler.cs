@@ -2,32 +2,29 @@
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services.Queries;
 using BOTGC.API.Services.QueryHandlers;
+using MediatR;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 
 namespace BOTGC.API.Services.QueryHandlers;
 
-public sealed partial class SaveStockTakeHandler : QueryHandlerBase<SaveStockTakeCommand, bool>
+public sealed partial class SaveStockTakeHandler(IOptions<AppSettings> settings,
+                            IMediator mediator,
+                            ILogger<SaveStockTakeHandler> logger,
+                            IDataProvider dataProvider) : QueryHandlerBase<SaveStockTakeCommand, int?>
 {
-    private readonly AppSettings _settings;
-    private readonly ILogger<SaveStockTakeHandler> _logger;
-    private readonly IDataProvider _dataProvider;
+    private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+    private readonly ILogger<SaveStockTakeHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IDataProvider _dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
+    private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
-    public SaveStockTakeHandler(IOptions<AppSettings> settings,
-                                ILogger<SaveStockTakeHandler> logger,
-                                IDataProvider dataProvider)
-    {
-        _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
-    }
-
-    public async override Task<bool> Handle(SaveStockTakeCommand request, CancellationToken cancellationToken)
+    public async override Task<int?> Handle(SaveStockTakeCommand request, CancellationToken cancellationToken)
     {
         try
         {
             var baseUrl = _settings.IG.BaseUrl?.TrimEnd('/') ?? throw new InvalidOperationException("Missing IG.BaseUrl in settings.");
-            var url = $"{baseUrl}/tillstockcontrol.php?tab=take&section=new&requestType=ajax&ajaxaction=saveStockTake";
+            var url = $"{baseUrl}/{_settings.IG.Urls.SaveStockTakeUrl}";
 
             var data = new Dictionary<string, string>
             {
@@ -49,12 +46,30 @@ public sealed partial class SaveStockTakeHandler : QueryHandlerBase<SaveStockTak
             }
 
             var result = await _dataProvider.PostData(url, data);
-            return true;
+
+            if (result != null)
+            {
+                var getStockTakesList = new GetStockTakesListQuery();
+                var stockTakes = await _mediator.Send(getStockTakesList, cancellationToken);    
+
+                if (stockTakes != null && stockTakes.Any())
+                {
+                    // Get the id of the most recent stock take
+                    var latest = stockTakes.OrderByDescending(st => st.CreatedAt).FirstOrDefault();
+                    if (latest != null)
+                    {
+                        _logger.LogInformation($"Successfully saved stock take with id {latest.Id} taken at {latest.CreatedAt}.");
+                        return latest.Id;
+                    }
+                }
+            }
+
+            return null;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to save stock take.");
-            return false;
+            return null;
         }
     }
 }

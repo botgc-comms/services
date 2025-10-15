@@ -124,7 +124,10 @@
         public string GetStockTakesReportUrl { get; set; } = "/tillstockcontrol.php?tab=transactions&requestType=ajax&ajaxaction=updatedata";
         public string MemberDetailsUrl { get; set; } = "/member.php?memberid={memberid}";
         public string StockItemsUrl { get; set; } = "/tillstockcontrol.php";
+        public string StockTakesListReportUrl { get; set; } = "/tillstockcontrol.php?tab=take";
         public string TillOperatorsReportUrl { get; set; } = "/tilladmin.php?tab=operators";
+        public string SaveStockTakeUrl { get; set; } = "/tillstockcontrol.php?tab=take&section=new&requestType=ajax&ajaxaction=saveStockTake";
+        public string StockTakeDetailsUrl { get; set; } = "/tillstockcontrol.php?tab=take&section=edit&id={stocktakeid}";  
     }
 
     public class FileCacheStorage

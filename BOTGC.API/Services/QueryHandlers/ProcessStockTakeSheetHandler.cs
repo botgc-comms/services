@@ -6,6 +6,7 @@ using BOTGC.API.Models;
 using BOTGC.API.Services.Queries;
 using MediatR;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace BOTGC.API.Services.QueryHandlers;
 
@@ -31,8 +32,10 @@ public sealed class ProcessStockTakeSheetHandler(
 
     public async override Task<bool> Handle(ProcessStockTakeCommand request, CancellationToken cancellationToken)
     {
+        int? stockTakeId = null;
+
         var sheet = request.Sheet;
-        var sheetDate = sheet.Date; // date part
+        var sheetDate = sheet.Date;
 
         var include = new Dictionary<int, decimal>();
         var notes = new List<string>();
@@ -231,7 +234,7 @@ public sealed class ProcessStockTakeSheetHandler(
 
             var saveCmd = new SaveStockTakeCommand(takenAtLocalFinal, include, reasons);
             var ok = await _mediator.Send(saveCmd, cancellationToken);
-            if (!ok)
+            if (!ok.HasValue)
             {
                 foreach (var kv in include)
                 {
@@ -264,6 +267,8 @@ public sealed class ProcessStockTakeSheetHandler(
             }
             else
             {
+                stockTakeId = ok.Value;
+
                 foreach (var kv in include)
                 {
                     var e = sheet.Entries.First(x => x.StockItemId == kv.Key);
@@ -292,6 +297,7 @@ public sealed class ProcessStockTakeSheetHandler(
         var summary = $"{header}\n{details}";
 
         var completionTicket = new StockTakeCompletedCommand(
+            StockTakeId: stockTakeId,
             Date: request.Date,
             Division: request.Division,
             InvestigateItems: investigateItems,
