@@ -106,6 +106,15 @@
         return v === null ? null : v;
     }
 
+    function parseQueryBool(v) {
+        if (v === null) return null;
+        if (v === "") return true; // ?showEstimates
+        const s = String(v).trim().toLowerCase();
+        if (["1", "true", "yes", "on"].includes(s)) return true;
+        if (["0", "false", "no", "off"].includes(s)) return false;
+        return null;
+    }
+
     async function loadUiConfig() {
         try {
             const res = await fetch("/stocktake/config", { headers: { "accept": "application/json" } });
@@ -300,16 +309,29 @@
         const res = await fetch(DRAFT_GET_URL(divName));
         if (!res.ok) { obsMap.clear(); return []; }
 
-        const list = await res.json();         
+        const raw = await res.json();
+
+        // 🔧 Accept both array and keyed-object forms
+        const list = Array.isArray(raw) ? raw : Object.values(raw ?? {});
+
         obsMap.clear();
         for (const e of list) {
-            if ((e.observations?.length ?? 0) > 0) {
-                obsMap.set(e.stockItemId, e);     
+            if ((e.observations?.length ?? e.Observations?.length ?? 0) > 0) {
+                obsMap.set(e.stockItemId ?? e.StockItemId, {
+                    stockItemId: e.stockItemId ?? e.StockItemId,
+                    name: e.name ?? e.Name,
+                    division: e.division ?? e.Division,
+                    unit: e.unit ?? e.Unit,
+                    operatorId: e.operatorId ?? e.OperatorId,
+                    operatorName: e.operatorName ?? e.OperatorName,
+                    at: e.at ?? e.At,
+                    observations: e.observations ?? e.Observations ?? [],
+                    estimatedQuantityAtCapture: e.estimatedQuantityAtCapture ?? e.EstimatedQuantityAtCapture ?? null
+                });
             }
         }
-        return list; 
+        return list;
     }
-
 
     // ===== UI: Divisions & Products =====
     function avgDays(products) {
@@ -354,18 +376,21 @@
 
         let listToRender = [];
         if (sheetEntries.length > 0) {
-            // Build tiles from the cached sheet so every device sees the same products
             listToRender = sheetEntries.map(e => ({
-                stockItemId: e.stockItemId,
-                name: e.name,
-                unit: e.unit,
+                stockItemId: e.stockItemId ?? e.StockItemId,
+                name: e.name ?? e.Name,
+                unit: e.unit ?? e.Unit,
                 division: d.division,
-                // show the estimate captured when the entry was seeded/observed
-                currentQuantity: e.estimatedQuantityAtCapture ?? null
+                currentQuantity: e.estimatedQuantityAtCapture ?? e.EstimatedQuantityAtCapture ?? null
             }));
         } else {
-            // No sheet yet — use the suggestion plan from /stocktake/products
-            listToRender = d.products || [];
+            listToRender = (d.products || []).map(p => ({
+                stockItemId: p.stockItemId ?? p.StockItemId,
+                name: p.name ?? p.Name,
+                unit: p.unit ?? p.Unit,
+                division: d.division,
+                currentQuantity: p.currentQuantity ?? p.CurrentQuantity ?? null
+            }));
         }
 
         currentDivision = { ...d, products: listToRender };
@@ -839,6 +864,11 @@
         startOperatorTimeout();
         await startSignalR();
         await loadUiConfig(); 
+
+        const qsOverride = parseQueryBool(getQueryParam("showEstimates"));
+        if (qsOverride !== null) {
+            SHOW_ESTIMATED = qsOverride;
+        }
 
         plan = await fetchPlan();
 

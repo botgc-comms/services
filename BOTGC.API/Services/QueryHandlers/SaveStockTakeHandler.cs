@@ -7,7 +7,7 @@ using System.Globalization;
 
 namespace BOTGC.API.Services.QueryHandlers;
 
-public sealed class SaveStockTakeHandler : QueryHandlerBase<SaveStockTakeCommand, bool>
+public sealed partial class SaveStockTakeHandler : QueryHandlerBase<SaveStockTakeCommand, bool>
 {
     private readonly AppSettings _settings;
     private readonly ILogger<SaveStockTakeHandler> _logger;

@@ -2,18 +2,15 @@
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
-using Microsoft.Extensions.Logging;
+using BOTGC.API.Services.Queries;
+using Humanizer;
 using Microsoft.Extensions.Options;
-using StackExchange.Redis;
+using Polly;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Humanizer;
-
-using Polly;
-using Microsoft.Extensions.DependencyInjection;
-using System.Globalization;
 
 namespace BOTGC.API.Services
 {
@@ -182,7 +179,7 @@ namespace BOTGC.API.Services
 
             _logger.LogInformation("Creating Monday task for membership application: {Name} (ApplicationId: {ApplicationId})",
                 name, dto.ApplicationId);
-                        
+
             var boardId = await GetBoardIdByNameAsync("Membership Applications")
                          ?? throw new InvalidOperationException("Board not found.");
 
@@ -228,7 +225,7 @@ namespace BOTGC.API.Services
                 ["date_mkq7q88n"] = new { date = dto.ApplicationDate.AddDays(3).ToString("yyyy-MM-dd") },
                 ["date_mkq7j3ma"] = new { date = dto.ApplicationDate.AddDays(5).ToString("yyyy-MM-dd") },
                 ["text_mkq7w63d"] = dto.ApplicationId,
-                ["boolean_mkqnq3va"] = new { @checked = dto.ArrangeFinance == true },  
+                ["boolean_mkqnq3va"] = new { @checked = dto.ArrangeFinance == true },
                 ["text_mkqn9qqm"] = dto.ReferrerId
             };
 
@@ -310,7 +307,7 @@ namespace BOTGC.API.Services
                   }
                 }";
 
-            var variables = new { boardId = new[] { boardId } };  
+            var variables = new { boardId = new[] { boardId } };
 
             var payload = new { query, variables };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -1032,5 +1029,319 @@ namespace BOTGC.API.Services
             response.EnsureSuccessStatusCode();
         }
 
+        public async Task<string> CreateStockTakeAndInvestigationsAsync(StockTakeCompletedCommand msg, string? igLink = null)
+        {
+            var parentBoardId = "5034730760";
+            var parentStatusLabel = msg.InvestigateItems.Count > 0 ? "Investigate" : "Done";
+            var parentName = $"Stock-take {msg.Date:yyyy-MM-dd} • {msg.Division} (Accepted {msg.AcceptedItems.Count}, Investigate {msg.InvestigateItems.Count})";
+
+            var operators = msg.AcceptedItems.Select(a => a.StockTakeEntry.OperatorName)
+                .Concat(msg.InvestigateItems.Select(i => i.StockTakeEntry.OperatorName))
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct()
+                .ToList();
+
+            var times = msg.AcceptedItems.Select(a => a.StockTakeEntry.At)
+                .Concat(msg.InvestigateItems.Select(i => i.StockTakeEntry.At))
+                .Where(t => t != default)
+                .OrderBy(t => t)
+                .ToList();
+
+            static decimal SumCounts(IEnumerable<StockTakeObservationDto> obs) =>
+                obs.Where(o => o.Code.StartsWith("CountIn", StringComparison.OrdinalIgnoreCase))
+                   .Sum(o => o.Value);
+
+            static string SplitByLocation(IEnumerable<StockTakeObservationDto> obs) =>
+                string.Join(" • ",
+                    obs.Where(o => o.Code.StartsWith("CountIn", StringComparison.OrdinalIgnoreCase))
+                       .Select(o => $"{o.Location} {o.Value:0}"));
+
+            string CaptureWindowHuman()
+            {
+                if (times.Count == 0) return string.Empty;
+                if (times.Count == 1) return times[0].ToString("HH:mm");
+                return $"{times.First():HH:mm}–{times.Last():HH:mm}";
+            }
+
+            string BuildParentUpdateHtml()
+            {
+                var statusHuman = msg.InvestigateItems.Count > 0 ? "To be investigated" : "Completed";
+                var dateHuman = msg.Date.ToString("dd MMM yyyy");
+                var window = CaptureWindowHuman();
+                var ops = operators.Count > 0 ? string.Join(", ", operators) : "Unspecified";
+
+                var sb = new System.Text.StringBuilder();
+                sb.Append("<p><strong>Status:</strong> ").Append(statusHuman).Append("</p>");
+                sb.Append("<p><strong>Mini stock take — ").Append(msg.Division).Append(" — ").Append(dateHuman).Append("</strong><br>");
+                if (!string.IsNullOrEmpty(window)) sb.Append("Counts captured ").Append(window).Append(" by ").Append(ops).Append(".</p>");
+                else sb.Append("Counts captured by ").Append(ops).Append(".</p>");
+
+                // Accepted
+                sb.Append("<p><strong>Accepted (").Append(msg.AcceptedItems.Count).Append(")</strong></p><ul>");
+                foreach (var a in msg.AcceptedItems)
+                {
+                    var obs = a.StockTakeEntry.Observations ?? new List<StockTakeObservationDto>();
+                    var onHand = a.Observed ?? SumCounts(obs);
+                    var est = a.Estimate ?? a.StockTakeEntry.EstimatedQuantityAtCapture;
+                    var open = obs.Where(o => string.Equals(o.Code, "OpenBottleWeightGrams", StringComparison.OrdinalIgnoreCase)).Sum(o => o.Value);
+
+                    sb.Append("<li>")
+                      .Append(a.StockTakeEntry.Name)
+                      .Append(" — ")
+                      .Append(onHand.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))
+                      .Append(" on hand (estimate ")
+                      .Append(est.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))
+                      .Append("). Open bottles recorded: ")
+                      .Append(open.ToString("0", System.Globalization.CultureInfo.InvariantCulture))
+                      .Append(" g.</li>");
+                }
+                sb.Append("</ul>");
+
+                // Investigate
+                sb.Append("<p><strong>Needs investigation (").Append(msg.InvestigateItems.Count).Append(")</strong></p><ul>");
+                foreach (var i in msg.InvestigateItems)
+                {
+                    var obs = i.StockTakeEntry.Observations ?? new List<StockTakeObservationDto>();
+                    var onHand = i.Observed ?? SumCounts(obs);
+                    var est = i.Estimate ?? i.StockTakeEntry.EstimatedQuantityAtCapture;
+                    var variance = i.Difference ?? (onHand - est);
+                    var pct = i.Percent ?? (est == 0 ? 0 : (variance / est) * 100m);
+                    var reason = string.IsNullOrWhiteSpace(i.Reason) ? "Manual review" : i.Reason!;
+                    var split = SplitByLocation(obs);
+
+                    sb.Append("<li>")
+                      .Append(i.StockTakeEntry.Name)
+                      .Append(" — ")
+                      .Append(reason.ToLowerInvariant())
+                      .Append(": ")
+                      .Append(onHand.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))
+                      .Append(" counted vs ")
+                      .Append(est.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))
+                      .Append(" expected (")
+                      .Append(variance.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))
+                      .Append(", ")
+                      .Append(pct.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture))
+                      .Append("%)");
+
+                    if (i.Allowed.HasValue)
+                    {
+                        sb.Append(" — allowed ")
+                          .Append(i.Allowed.Value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture));
+                        if (!string.IsNullOrWhiteSpace(i.DominantRule))
+                            sb.Append(" (rule: ").Append(i.DominantRule).Append(")");
+                    }
+                    sb.Append(".");
+
+                    if (!string.IsNullOrWhiteSpace(split)) sb.Append(" Split: ").Append(split).Append(".");
+                    sb.Append("</li>");
+                }
+                sb.Append("</ul>");
+
+                sb.Append("<p><strong>What to do</strong></p>")
+                  .Append("<ol>")
+                  .Append("<li>Recount at Store, Colt and Lounge.</li>")
+                  .Append("<li>Check recent deliveries, transfers and POS sales since the estimate time.</li>")
+                  .Append("<li>Review input logs if numbers look duplicated.</li>")
+                  .Append("</ol>");
+
+                return sb.ToString();
+            }
+
+            string BuildChildUpdateHtml(StockTakeItemInvestigationDto inv, decimal tolerancePercent = 10m)
+            {
+                var obs = inv.StockTakeEntry.Observations ?? new List<StockTakeObservationDto>();
+                var countObs = obs.Where(o => o.Code.StartsWith("CountIn", StringComparison.OrdinalIgnoreCase)).ToList();
+                var weightObs = obs.Where(o => o.Code.EndsWith("WeightGrams", StringComparison.OrdinalIgnoreCase)).ToList();
+
+                var onHand = inv.Observed ?? countObs.Sum(o => o.Value);
+                var est = inv.Estimate ?? inv.StockTakeEntry.EstimatedQuantityAtCapture;
+                var variance = inv.Difference ?? (onHand - est);
+                var pct = inv.Percent ?? (est == 0 ? 0 : (variance / est) * 100m);
+                var split = SplitByLocation(obs);
+
+                // prefer explicit reason if supplied
+                var reason = string.IsNullOrWhiteSpace(inv.Reason) ? "Manual review" : inv.Reason!;
+                var outsideTolerance = string.Equals(reason, "Outside tolerance", StringComparison.OrdinalIgnoreCase)
+                                       || (!string.Equals(reason, "No observations", StringComparison.OrdinalIgnoreCase) && Math.Abs(pct) > tolerancePercent);
+                var noObservations = string.Equals(reason, "No observations", StringComparison.OrdinalIgnoreCase)
+                                     || (countObs.Count == 0 && weightObs.Count == 0);
+                var partialObservations = string.Equals(reason, "Partial / incomplete observations", StringComparison.OrdinalIgnoreCase)
+                                          || (!noObservations && (countObs.Count == 0 ^ weightObs.Count == 0));
+
+                var sb = new System.Text.StringBuilder();
+                sb.Append("<p><strong>Why this needs checking:</strong> ").Append(reason).Append("</p>");
+                sb.Append("<p>")
+                  .Append(onHand.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))
+                  .Append(" counted vs ")
+                  .Append(est.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))
+                  .Append(" expected (")
+                  .Append(variance.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))
+                  .Append(", ")
+                  .Append(pct.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture))
+                  .Append("%)");
+
+                if (inv.Allowed.HasValue)
+                {
+                    sb.Append(" — allowed ")
+                      .Append(inv.Allowed.Value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture));
+                    if (!string.IsNullOrWhiteSpace(inv.DominantRule))
+                        sb.Append(" (rule: ").Append(inv.DominantRule).Append(")");
+                }
+                sb.Append("</p>");
+
+                if (!string.IsNullOrWhiteSpace(split)) sb.Append("<p>Split: ").Append(split).Append("</p>");
+
+                sb.Append("<p>Captured by ").Append(inv.StockTakeEntry.OperatorName)
+                  .Append(" at ").Append(inv.StockTakeEntry.At.ToString("dd MMM yyyy HH:mm"))
+                  .Append("</p>");
+
+                if (outsideTolerance)
+                {
+                    sb.Append("<p><strong>Actions</strong></p><ol>")
+                      .Append("<li>Confirm the relevant purchase orders have been logged.</li>")
+                      .Append("<li>Confirm wastage for this item has been accurately recorded.</li>")
+                      .Append("<li>Ensure the staff member knows how to count/weight this item and use the app correctly.</li>")
+                      .Append("</ol>")
+                      .Append("<p><em>Tip:</em> Perform another stock take for this product yourself.</p>");
+                }
+                else if (noObservations)
+                {
+                    sb.Append("<p><strong>Actions</strong></p><ol>")
+                      .Append("<li>Verify the item is still sold and should be active in IG.</li>")
+                      .Append("<li>If it is still stocked, ensure staff record <strong>0</strong> where none are found rather than leaving fields blank in the app.</li>")
+                      .Append("</ol>");
+                }
+                else if (partialObservations)
+                {
+                    sb.Append("<p><strong>Actions</strong></p><ol>")
+                      .Append("<li>Ensure the staff member understands the difference between recording <strong>zero</strong> and leaving a field blank.</li>")
+                      .Append("<li>For opened bottles, ensure they know how to <strong>weigh</strong> them correctly.</li>")
+                      .Append("</ol>");
+                }
+                else
+                {
+                    sb.Append("<p><strong>Actions</strong></p><ul>")
+                      .Append("<li>Recount all locations.</li>")
+                      .Append("<li>Check deliveries, transfers and POS since the estimate.</li>")
+                      .Append("</ul>");
+                }
+
+                sb.Append("<p>Outcome/notes:</p>");
+                return sb.ToString();
+            }
+
+            // parent row
+            var parentValues = new Dictionary<string, object?>
+            {
+                ["status"] = new { label = parentStatusLabel },
+                ["date4"] = new { date = msg.Date.ToString("yyyy-MM-dd") },
+                ["text_mkwqn3vg"] = msg.Division,
+                ["text_mkwqkapb"] = string.Join(", ", operators)
+            };
+            if (!string.IsNullOrWhiteSpace(igLink))
+            {
+                parentValues["link_mkwqs968"] = new { url = igLink, text = igLink };
+            }
+
+            var parentValuesJson = System.Text.Json.JsonSerializer.Serialize(parentValues, new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNamingPolicy = null,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
+
+            var createParentPayload = new
+            {
+                query = @"mutation ($boardId: ID!, $name: String!, $values: JSON!) {
+                     create_item(board_id: $boardId, item_name: $name, column_values: $values) { id }
+                 }",
+                variables = new { boardId = parentBoardId, name = parentName, values = parentValuesJson }
+            };
+
+            using var parentContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(createParentPayload), Encoding.UTF8, "application/json");
+            var parentResp = await _mondayApiPolicy.ExecuteAsync(() => _httpClient.PostAsync(string.Empty, parentContent));
+            parentResp.EnsureSuccessStatusCode();
+            var parentJson = System.Text.Json.Nodes.JsonNode.Parse(await parentResp.Content.ReadAsStringAsync());
+            var parentItemId = parentJson?["data"]?["create_item"]?["id"]?.ToString();
+            if (string.IsNullOrWhiteSpace(parentItemId)) throw new InvalidOperationException("Failed to create parent item.");
+
+            var parentUpdatePayload = new
+            {
+                query = @"mutation ($itemId: ID!, $body: String!) {
+                    create_update(item_id: $itemId, body: $body) { id }
+                 }",
+                variables = new { itemId = parentItemId, body = BuildParentUpdateHtml() }
+            };
+
+            using var updContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(parentUpdatePayload), Encoding.UTF8, "application/json");
+            var updResp = await _mondayApiPolicy.ExecuteAsync(() => _httpClient.PostAsync(string.Empty, updContent));
+            updResp.EnsureSuccessStatusCode();
+
+            // subitems
+            foreach (var inv in msg.InvestigateItems)
+            {
+                var obs = inv.StockTakeEntry.Observations ?? new List<StockTakeObservationDto>();
+                var observed = inv.Observed ?? SumCounts(obs);
+                var est = inv.Estimate ?? inv.StockTakeEntry.EstimatedQuantityAtCapture;
+                var variance = inv.Difference ?? (observed - est);
+                var pct = inv.Percent ?? (est == 0 ? 0 : (variance / est) * 100m);
+                var reason = string.IsNullOrWhiteSpace(inv.Reason) ? "Manual review" : inv.Reason!;
+                var varianceText = $"{variance.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)} ({pct.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)}%)";
+
+                var subValues = new Dictionary<string, object?>
+                {
+                    ["status"] = new { label = "Todo" },
+                    ["text_mkwq56zm"] = reason,
+                    ["text_mkwq6qpk"] = observed.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture),
+                    ["text_mkwqwnx3"] = est.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture),
+                    ["text_mkwqrhav"] = varianceText
+                };
+                if (!string.IsNullOrWhiteSpace(igLink))
+                {
+                    subValues["link_mkwqwxvb"] = new { url = igLink, text = igLink };
+                }
+
+                var subValuesJson = System.Text.Json.JsonSerializer.Serialize(subValues, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = null,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                });
+
+                var subPayload = new
+                {
+                    query = @"mutation ($parentId: ID!, $name: String!, $values: JSON!) {
+                        create_subitem(parent_item_id: $parentId, item_name: $name, column_values: $values) { id }
+                     }",
+                    variables = new
+                    {
+                        parentId = parentItemId,
+                        name = inv.StockTakeEntry.Name, // child title = product name
+                        values = subValuesJson
+                    }
+                };
+
+                using var subContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(subPayload), Encoding.UTF8, "application/json");
+                var subResp = await _mondayApiPolicy.ExecuteAsync(() => _httpClient.PostAsync(string.Empty, subContent));
+                subResp.EnsureSuccessStatusCode();
+
+                var subJson = System.Text.Json.Nodes.JsonNode.Parse(await subResp.Content.ReadAsStringAsync());
+                var subItemId = subJson?["data"]?["create_subitem"]?["id"]?.ToString();
+                if (string.IsNullOrWhiteSpace(subItemId)) continue;
+
+                var subBody = BuildChildUpdateHtml(inv, 10m);
+                var subUpdatePayload = new
+                {
+                    query = @"mutation ($itemId: ID!, $body: String!) {
+                        create_update(item_id: $itemId, body: $body) { id }
+                     }",
+                    variables = new { itemId = subItemId, body = subBody }
+                };
+
+                using var subUpdContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(subUpdatePayload), Encoding.UTF8, "application/json");
+                var subUpdResp = await _mondayApiPolicy.ExecuteAsync(() => _httpClient.PostAsync(string.Empty, subUpdContent));
+                subUpdResp.EnsureSuccessStatusCode();
+            }
+
+            return parentItemId!;
+        }
     }
 }

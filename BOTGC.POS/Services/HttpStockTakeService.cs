@@ -61,6 +61,7 @@ public sealed class HttpStockTakeService : IStockTakeService
             Unit = e.Unit,
             OperatorId = e.OperatorId,
             OperatorName = e.OperatorName,
+            EstimatedQuantityAtCapture = e.EstimatedQuantityAtCapture,
             At = e.At,
             Observations = e.Observations.Select(o => new StockTakeObservation
             {
@@ -151,7 +152,8 @@ public sealed class HttpStockTakeService : IStockTakeService
         Guid OperatorId,
         string OperatorName,
         DateTimeOffset At,
-        List<ApiStockTakeObservationDto> Observations
+        List<ApiStockTakeObservationDto> Observations,
+        decimal EstimatedQuantityAtCapture
     );
 
     private sealed record ApiStockTakeObservationDto(

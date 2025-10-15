@@ -31,12 +31,6 @@
         public decimal Value { get; set; }
     }
 
-    //public sealed class StockTakeCommitDto
-    //{
-    //    public DateTimeOffset Timestamp { get; set; }
-    //    public List<StockTakeObservation> Observations { get; set; } = new();
-    //}
-
     public sealed class StockTakeDivisionPlan
     {
         public string Division { get; set; } = string.Empty;

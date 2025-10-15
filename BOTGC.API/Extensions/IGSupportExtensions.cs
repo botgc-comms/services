@@ -64,7 +64,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IQueueService<NewMemberPropertyUpdateDto>, MemberPropertyUpdateQueueService>();
             services.AddSingleton<IQueueService<WasteEntryCommandDto>, StockWastageQueueService>();
             services.AddSingleton<IQueueService<ProcessStockTakeCommand>, StockTakeQueueService>();
-            services.AddSingleton<IQueueService<StockTakeCompletedTicketCommandDto>, StockTakeCompletedQueueService>();
+            services.AddSingleton<IQueueService<StockTakeCompletedCommand>, StockTakeCompletedQueueService>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 
@@ -87,6 +87,7 @@ namespace BOTGC.API.Extensions
             services.AddHostedService<NewMemberAddedQueueProcessor>();
             services.AddHostedService<StockLevelAnalysisQueueProcessor>();
             services.AddHostedService<StockTakeQueueProcessor>();
+            services.AddHostedService<StockTakeCompletedQueueProcessor>();
             services.AddHostedService<StockWastageQueueProcessor>();
             services.AddHostedService<WasteSheetDailyFlusher>();
             services.AddHostedService<StockTakeDailyFlusher>();

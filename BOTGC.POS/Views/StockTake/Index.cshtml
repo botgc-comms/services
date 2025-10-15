@@ -22,6 +22,29 @@
 
 @section Head
 {
+    <!--
+      Stocktake page – supported query string parameters (client-side):
+
+      ?alldivisions
+        • Flag (presence only). If present, shows ALL divisions instead of the daily subset.
+
+      ?count={N}
+        • Integer (default 2). Only used when 'alldivisions' is NOT present.
+        • Shows PANTRY + N other divisions for today (non-numeric/≤0 falls back to 2).
+
+      ?showEstimates[=value]
+        • Boolean override for showing estimated current stock in the dialog.
+        • Accepts: true/1/yes/on (enable), false/0/no/off (disable), blank means true (e.g. ?showEstimates).
+        • When omitted, behaviour falls back to /stocktake/config → showEstimatedInDialog.
+
+      Examples:
+        ?alldivisions
+        ?count=3
+        ?showEstimates
+        ?showEstimates=false
+        ?count=4&showEstimates=on
+    -->
+
     <link rel="stylesheet" href="~/css/stocktake.css" asp-append-version="true" />
 }
 
