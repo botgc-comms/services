@@ -20,6 +20,8 @@
 
         public QueueSettings Queue { get; set; } = new();
 
+        public StorageSettings Storage { get; set; } = new();   
+
         public MondaySettings Monday { get; set; } = new();
 
         public FeatureToggles FeatureToggles { get; set; } = new();
@@ -48,8 +50,14 @@
     public class QueueSettings
     {
         public string ConnectionString { get; set; }
-        public string Name { get; set; }
     }
+
+    public class StorageSettings
+    {
+        public string ConnectionString { get; set; }
+        public string LookupDataSource { get; set; } = "lookup";
+    }
+
     public class AuthSettings
     {
         public string XApiKey { get; set; } = "";

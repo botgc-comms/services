@@ -73,6 +73,9 @@ resource "azurerm_linux_web_app" "services_api_app" {
     "AppSettings__Queue__ConnectionString" = data.azurerm_storage_account.services_api_sa.primary_connection_string
     "AppSettings__Queue__Name"             = azurerm_storage_queue.membership_applications_queue.name
 
+    "AppSettings__Storage__ConnectionString" = data.azurerm_storage_account.services_api_sa.primary_connection_string
+    "AppSettings__Storage__LookupDataSource" = azurerm_storage_table.lookup_table.name
+
     "AppSettings__Monday__APIKey" = var.monday_com_apikey
 
   }

@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Data.Tables" Version="12.11.0" />
     <PackageReference Include="Azure.Storage.Queues" Version="12.22.0" />
     <PackageReference Include="Cronos" Version="0.11.1" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
@@ -33,6 +34,7 @@
     <PackageReference Include="RedLock.net" Version="2.3.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.1" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

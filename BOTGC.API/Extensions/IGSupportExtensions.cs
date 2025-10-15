@@ -9,6 +9,9 @@ using RedLockNet.SERedis.Configuration;
 using RedLockNet.SERedis;
 using StackExchange.Redis;
 using BOTGC.API.Services.Queries;
+using BOTGC.API.Models;
+using BOTGC.API.Services.Behaviours;
+using MediatR;
 
 namespace BOTGC.API.Extensions
 {
@@ -26,6 +29,8 @@ namespace BOTGC.API.Extensions
             };
 
             var httpClient = new HttpClient(httpHandler);
+
+            services.AddAzureTableStore<BottleCalibrationEntity>("BottleCalibration");
 
             services.AddSingleton<IDataProvider, IGDataProvider>();
 
@@ -58,8 +63,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IReportParser<StockItemTransactionReportEntryDto>, IGStockItemTransactionsReportParser>();
             services.AddSingleton<IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto>, IGLeaderboardReportParser>();
             services.AddSingleton<IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>, IGClubChampionshipLeaderboardReportParser>();
-            
-            
+                        
             services.AddSingleton<IQueueService<NewMemberApplicationDto>, MembershipApplicationQueueService>();
             services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, NewMemberAddedQueueService>();
             services.AddSingleton<IQueueService<NewMemberPropertyUpdateDto>, MemberPropertyUpdateQueueService>();
@@ -101,6 +105,10 @@ namespace BOTGC.API.Extensions
                     typeof(Program).Assembly
                 );
             });
+
+            // Order maters.
+            services.AddTransient<IPipelineBehavior<GetStockTakeSheetQuery, StockTakeSheetDto>, CacheStockTakeSheetBehaviour>();
+            services.AddTransient<IPipelineBehavior<GetStockTakeSheetQuery, StockTakeSheetDto>, EnrichBottleCalibrationBehaviour>();
 
             return services;
         }

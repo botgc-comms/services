@@ -10,5 +10,9 @@
         DateTime At,
         List<StockTakeObservationDto> Observations,
         decimal EstimatedQuantityAtCapture
-    );
+    )
+    {
+        public BottleCalibrationDto? Calibration { get; set; }
+        public bool CalibrationHighConfidence { get; set; }
+    }
 }
