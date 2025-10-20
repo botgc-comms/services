@@ -3,6 +3,7 @@
     public class StockItemAndTradeUnitDto : HateoasResource
     {
         public int Id { get; set; }
+        public string? ExternalId { get; set; }
         public string Name { get; set; }
         public bool? IsActive { get; set; }
         public string Unit { get; set; }
