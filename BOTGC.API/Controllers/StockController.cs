@@ -51,6 +51,33 @@ namespace BOTGC.API.Controllers
             }
         }
 
+        [HttpGet("stockItems")]
+        public async Task<IActionResult> GetStockItems()
+        {
+            _logger.LogInformation($"Fetching current stock items...");
+
+            try
+            {
+                var query = new GetStockItemsAndTradeUnitsQuery();
+
+                var stockItems = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (stockItems == null || stockItems.Count == 0)
+                {
+                    _logger.LogWarning($"No stock items where found.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved {stockItems.Count} stock items.");
+                return Ok(stockItems);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving stock items.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving stock items.");
+            }
+        }
+
         [HttpGet("tillOperators")]
         public async Task<IActionResult> GetTillOperators()
         {
@@ -305,6 +332,23 @@ namespace BOTGC.API.Controllers
             {
                 _logger.LogError(ex, "Error upserting stock take entry for {SheetDate}.", sheetDate.ToString("yyyy-MM-dd"));
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while saving the stock take entry.");
+            }
+        }
+
+
+        [HttpPost("stockTakes/purchaseOrder")]
+        public async Task<IActionResult> TestCreatePurchaseOrder([FromBody] PurchaseOrderDto request)
+        {
+            try
+            {
+                var cmd = new CreatePurchaseOrderCommand(request);
+                var result = await _mediator.Send(cmd, HttpContext.RequestAborted);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured creating the purchase order");
             }
         }
 

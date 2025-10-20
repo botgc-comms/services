@@ -136,6 +136,7 @@
         public string TillOperatorsReportUrl { get; set; } = "/tilladmin.php?tab=operators";
         public string SaveStockTakeUrl { get; set; } = "/tillstockcontrol.php?tab=take&section=new&requestType=ajax&ajaxaction=saveStockTake";
         public string StockTakeDetailsUrl { get; set; } = "/tillstockcontrol.php?tab=take&section=edit&id={stocktakeid}";  
+        public string CreatePurchaseOrderUrl { get; set; } = "/tillstockcontrol.php?tab=purchase_orders&page=1&received=1&start={date}&end={date}&requestType=ajax&ajaxaction=confirmAddDelivery";
     }
 
     public class FileCacheStorage

@@ -2,5 +2,5 @@
 
 namespace BOTGC.API.Services.Queries
 {
-    public record GetTillOperatorsQuery : QueryBase<List<TillOperatorDto>?>   {   }
+    public record GetTillOperatorsQuery : QueryBase<List<TillOperatorDto>?>;
 }

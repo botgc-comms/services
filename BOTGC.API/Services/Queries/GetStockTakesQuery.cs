@@ -10,4 +10,5 @@ namespace BOTGC.API.Services.Queries
         public int TillConfigId { get; set; } = 0;
         public int StockItemId { get; set; } = 0;
     };
+
 }

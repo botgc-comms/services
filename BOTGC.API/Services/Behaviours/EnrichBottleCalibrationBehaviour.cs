@@ -42,7 +42,13 @@ public sealed class EnrichBottleCalibrationBehaviour
                 res.Entity.EmptyWeightGrams,
                 res.Entity.FullWeightGrams,
                 res.Confidence,
-                res.Strategy
+                res.Strategy,
+                res.Entity.EmptyWeightSource,
+                res.Entity.FullWeightSource,
+                res.Entity.NominalVolumeSource,
+                res.Entity.InferredFromStockItemId,
+                res.Entity.InferredFromName,
+                res.Entity.InferredConfidence
             );
             e.CalibrationHighConfidence = res.IsHighConfidence;
         }

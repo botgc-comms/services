@@ -1,0 +1,5 @@
+﻿namespace BOTGC.API.Dto
+{
+    public sealed record StockItemUnitInfoDto(int UnitId, string UnitName, decimal Cost);
+
+}

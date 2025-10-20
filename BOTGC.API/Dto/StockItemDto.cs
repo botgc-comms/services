@@ -20,4 +20,5 @@
         public decimal? TwoQuantity { get; set; }
         public decimal? TwoValue { get; set; }
     }
+
 }

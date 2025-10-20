@@ -106,9 +106,10 @@ namespace BOTGC.API.Extensions
                 );
             });
 
-            // Order maters.
+            // Order matters.
             services.AddTransient<IPipelineBehavior<GetStockTakeSheetQuery, StockTakeSheetDto>, CacheStockTakeSheetBehaviour>();
             services.AddTransient<IPipelineBehavior<GetStockTakeSheetQuery, StockTakeSheetDto>, EnrichBottleCalibrationBehaviour>();
+            services.AddTransient<IPipelineBehavior<CreatePurchaseOrderFromDraftCommand, bool>, GetStockItemsAndTradeUnitsBehaviour>();
 
             return services;
         }
