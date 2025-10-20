@@ -32,38 +32,41 @@ namespace BOTGC.API.Extensions
 
             services.AddAzureTableStore<BottleCalibrationEntity>("BottleCalibration");
 
-            services.AddSingleton<IDataProvider, IGDataProvider>();
-
             services.AddSingleton(cookieContainer);
             services.AddSingleton(httpClient);
             services.AddSingleton<IGSessionService>(); 
             services.AddHostedService(provider => provider.GetRequiredService<IGSessionService>());
 
+            services.AddSingleton<IDataProvider, IGDataProvider>();
             services.AddSingleton<IGLoginService>();
-            services.AddSingleton<IReportParser<MemberDto>, IGMemberReportParser>();
-            services.AddSingleton<IReportParser<RoundDto>, IGRoundReportParser>();
-            services.AddSingleton<IReportParser<PlayerIdLookupDto>, IGPlayerIdLookupReportParser>();
-            services.AddSingleton<IReportParser<ScorecardDto>, IGScorecardReportParser>();
-            services.AddSingleton<IReportParser<MemberEventDto>, IGMemberEventsReportParser>();
-            services.AddSingleton<IReportParser<TeeSheetDto>, IGTeeSheetReportParser>();
-            services.AddSingleton<IReportParser<CompetitionDto>, IGCompetitionReportParser>();
-            services.AddSingleton<IReportParser<CompetitionSettingsDto>, IGCompetitionSettingsReportParser>();
-            services.AddSingleton<IReportParser<CompetitionSummaryDto>, IGCompetitionSummaryReportParser>();
-            services.AddSingleton<IReportParser<SecurityLogEntryDto>, IGSecurityLogReportParser>();
-            services.AddSingleton<IReportParser<MemberCDHLookupDto>, IGCDHLookupReportParser>();
-            services.AddSingleton<IReportParser<NewMemberResponseDto>, IGNewMemberResponseReportParser>();
-            services.AddSingleton<IReportParser<StockItemDto>, IGStockItemReportParser>();
-            services.AddSingleton<IReportParser<SubscriptionPaymentDto>, IGSubscriptionPaymentsReportParser>();
-            services.AddSingleton<IReportParser<MemberDetailsDto>, IGMemberDetailsReportParser>();
-            services.AddSingleton<IReportParser<HandicapIndexPointDto>, IGHandicapIndexHistoryReportParser>();
-            services.AddSingleton<IReportParser<TillOperatorDto>, IGTillOperatorReportParser>();
-            services.AddSingleton<IReportParser<NewMemberLookupDto>, IGNewMembersReportParser>();
-            services.AddSingleton<IReportParser<StockTakeDto>, IGStockTakeListReportParser>();
-            services.AddSingleton<IReportParser<StockTakeReportEntryDto>, IGStockTakeReportParser>();
-            services.AddSingleton<IReportParser<StockItemTransactionReportEntryDto>, IGStockItemTransactionsReportParser>();
-            services.AddSingleton<IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto>, IGLeaderboardReportParser>();
-            services.AddSingleton<IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>, IGClubChampionshipLeaderboardReportParser>();
-                        
+
+            services.AddIGReportParsers();
+
+            
+            //services.AddSingleton<IReportParser<MemberDto>, IGMemberReportParser>();
+            //services.AddSingleton<IReportParser<RoundDto>, IGRoundReportParser>();
+            //services.AddSingleton<IReportParser<PlayerIdLookupDto>, IGPlayerIdLookupReportParser>();
+            //services.AddSingleton<IReportParser<ScorecardDto>, IGScorecardReportParser>();
+            //services.AddSingleton<IReportParser<MemberEventDto>, IGMemberEventsReportParser>();
+            //services.AddSingleton<IReportParser<TeeSheetDto>, IGTeeSheetReportParser>();
+            //services.AddSingleton<IReportParser<CompetitionDto>, IGCompetitionReportParser>();
+            //services.AddSingleton<IReportParser<CompetitionSettingsDto>, IGCompetitionSettingsReportParser>();
+            //services.AddSingleton<IReportParser<CompetitionSummaryDto>, IGCompetitionSummaryReportParser>();
+            //services.AddSingleton<IReportParser<SecurityLogEntryDto>, IGSecurityLogReportParser>();
+            //services.AddSingleton<IReportParser<MemberCDHLookupDto>, IGCDHLookupReportParser>();
+            //services.AddSingleton<IReportParser<NewMemberResponseDto>, IGNewMemberResponseReportParser>();
+            //services.AddSingleton<IReportParser<StockItemDto>, IGStockItemReportParser>();
+            //services.AddSingleton<IReportParser<SubscriptionPaymentDto>, IGSubscriptionPaymentsReportParser>();
+            //services.AddSingleton<IReportParser<MemberDetailsDto>, IGMemberDetailsReportParser>();
+            //services.AddSingleton<IReportParser<HandicapIndexPointDto>, IGHandicapIndexHistoryReportParser>();
+            //services.AddSingleton<IReportParser<TillOperatorDto>, IGTillOperatorReportParser>();
+            //services.AddSingleton<IReportParser<NewMemberLookupDto>, IGNewMembersReportParser>();
+            //services.AddSingleton<IReportParser<StockTakeDto>, IGStockTakeListReportParser>();
+            //services.AddSingleton<IReportParser<StockTakeReportEntryDto>, IGStockTakeReportParser>();
+            //services.AddSingleton<IReportParser<StockItemTransactionReportEntryDto>, IGStockItemTransactionsReportParser>();
+            //services.AddSingleton<IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto>, IGLeaderboardReportParser>();
+            //services.AddSingleton<IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>, IGClubChampionshipLeaderboardReportParser>();
+
             services.AddSingleton<IQueueService<NewMemberApplicationDto>, MembershipApplicationQueueService>();
             services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, NewMemberAddedQueueService>();
             services.AddSingleton<IQueueService<NewMemberPropertyUpdateDto>, MemberPropertyUpdateQueueService>();
@@ -110,6 +113,26 @@ namespace BOTGC.API.Extensions
             services.AddTransient<IPipelineBehavior<GetStockTakeSheetQuery, StockTakeSheetDto>, CacheStockTakeSheetBehaviour>();
             services.AddTransient<IPipelineBehavior<GetStockTakeSheetQuery, StockTakeSheetDto>, EnrichBottleCalibrationBehaviour>();
             services.AddTransient<IPipelineBehavior<CreatePurchaseOrderFromDraftCommand, bool>, GetStockItemsAndTradeUnitsBehaviour>();
+
+            return services;
+        }
+    }
+
+    public static class RegisterReportParsersExtensions
+    {
+        public static IServiceCollection AddIGReportParsers(this IServiceCollection services)
+        {
+            services.AddSingleton<IGLoginService>();
+
+            services.Scan(s => s
+                .FromAssemblies(typeof(RegisterReportParsersExtensions).Assembly)
+                .AddClasses(c => c.AssignableTo(typeof(IReportParser<>)))
+                    .AsImplementedInterfaces()
+                    .WithSingletonLifetime()
+                .AddClasses(c => c.AssignableTo(typeof(IReportParserWithMetadata<,>)))
+                    .AsImplementedInterfaces()
+                    .WithSingletonLifetime()
+            );
 
             return services;
         }

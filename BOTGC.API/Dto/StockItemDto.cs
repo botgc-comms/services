@@ -3,6 +3,7 @@
     public class StockItemDto: HateoasResource
     {
         public int Id { get; set; }
+        public string ExternalId { get; set; }
         public string Name { get; set; }
         public int? MinAlert { get; set; }
         public int? MaxAlert { get; set; }

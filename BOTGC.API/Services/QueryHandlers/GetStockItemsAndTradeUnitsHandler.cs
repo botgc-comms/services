@@ -26,6 +26,7 @@ public class GetStockItemsAndTradeUnitsHandler(IOptions<AppSettings> settings,
         var retVal = stockItems.Select(si => new StockItemAndTradeUnitDto
         {
             Id = si.Id,
+            ExternalId = si.ExternalId, 
             Name = si.Name,
             Unit = si.Unit,
             Division = si.Division,

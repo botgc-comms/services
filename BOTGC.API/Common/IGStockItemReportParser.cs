@@ -47,7 +47,8 @@ namespace BOTGC.API.Common
                     var dto = new StockItemDto
                     {
                         Id = GetInt(element, "id"),
-                        Name = GetString(element, "name"),
+                        Name = GetName(element, "name"),
+                        ExternalId = GetExternalId(element, "name"),
                         MinAlert = GetNullableInt(element, "min_alert"),
                         MaxAlert = GetNullableInt(element, "max_alert"),
                         IsActive = GetNullableBool(element, "is_active"),
@@ -74,6 +75,28 @@ namespace BOTGC.API.Common
 
             _logger.LogInformation("Successfully parsed {Count} stock items.", stockItems.Count);
             return stockItems;
+        }
+
+        private static string GetName(JsonElement e, string name)
+        {
+            var str = GetString(e, name);
+            var strMatch = Regex.Match(str, "(^.*?)\\s*\\[[^\\]]*\\]\\s*$", RegexOptions.Singleline);
+            if (strMatch.Success)
+            {
+                return strMatch.Groups[1].Value;
+            }
+            return str;
+        }
+
+        private static string GetExternalId(JsonElement e, string name)
+        {
+            var str = GetString(e, name);
+            var strMatch = Regex.Match(str, "^.*?\\s*\\[\\s*([^\\]]*?)\\s*\\]\\s*$", RegexOptions.Singleline);
+            if (strMatch.Success)
+            {
+                return strMatch.Groups[1].Value;
+            }
+            return null;
         }
 
         private static string ExtractJsonFromScript(string script)

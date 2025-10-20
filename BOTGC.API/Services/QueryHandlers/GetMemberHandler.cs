@@ -45,8 +45,8 @@ namespace BOTGC.API.Services.QueryHandlers
                 member.ID = playerLookupId.PlayerId;
                 member.MemberNumber = playerLookupId.MemberId;
 
-                member.Forename = playerLookupId.Forename;
-                member.Surname = playerLookupId.Surname;
+                member.Forename = playerLookupId.Forename ?? "";
+                member.Surname = playerLookupId.Surname ?? "";
 
                 _logger.LogInformation($"Successfully retrieved the member details for member ID {request.MemberNumber}.");
                 return response.First();

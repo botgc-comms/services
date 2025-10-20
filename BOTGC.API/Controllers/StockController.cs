@@ -77,7 +77,7 @@ namespace BOTGC.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving stock items.");
             }
         }
-
+        
         [HttpGet("tillOperators")]
         public async Task<IActionResult> GetTillOperators()
         {
@@ -166,6 +166,68 @@ namespace BOTGC.API.Controllers
             {
                 _logger.LogError(ex, "Error adding waste entry for {SheetDate}.", sheetDate.ToString("yyyy-MM-dd"));
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding the waste entry.");
+            }
+        }
+
+        [HttpPut("stockItems/{id}")]
+        public async Task<IActionResult> UpdateStockItem([FromRoute] string id, [FromBody] UpdateStockItemCommand cmd)
+        {
+            using var _ = _logger.BeginScope(new Dictionary<string, object?>
+            {
+                ["RouteId"] = id
+            });
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for UpdateStockItem.");
+                return ValidationProblem(ModelState);
+            }
+
+            if (!int.TryParse(id, out var routeStockId))
+            {
+                _logger.LogWarning("Route id '{Id}' is not a valid integer.", id);
+                return BadRequest(new { message = "Invalid stock item id in route." });
+            }
+
+            // Ensure the command has the correct StockId
+            if (cmd is null)
+            {
+                _logger.LogWarning("Request body is null for UpdateStockItem {RouteStockId}.", routeStockId);
+                return BadRequest(new { message = "Request body cannot be null." });
+            }
+
+            // If the command has no StockId set, populate it from the route; otherwise ensure it matches.
+            if (cmd.StockId != routeStockId)
+            {
+                _logger.LogWarning("Route id {RouteStockId} does not match body StockId {BodyStockId}.", routeStockId, cmd.StockId);
+                return BadRequest(new { message = "Route id does not match body StockId." });
+            }
+
+            try
+            {
+                _logger.LogInformation("Updating stock item {StockId}.", routeStockId);
+
+                var updated = await _mediator.Send(cmd, HttpContext.RequestAborted);
+                if (!updated)
+                {
+                    _logger.LogError("Failed to update stock item {StockId}.", routeStockId);
+                    return StatusCode(StatusCodes.Status502BadGateway, new { ok = false, message = "Upstream update failed." });
+                }
+
+                _logger.LogInformation("Successfully updated stock item {StockId}.", routeStockId);
+
+                // Return a conventional 200 with a small payload; alternatively NoContent() is fine if you prefer 204.
+                return Ok(new { ok = true, id = routeStockId });
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("Request cancelled while updating stock item {StockId}.", routeStockId);
+                return StatusCode(StatusCodes.Status499ClientClosedRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error updating stock item {StockId}.", routeStockId);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while updating the stock item." });
             }
         }
 
