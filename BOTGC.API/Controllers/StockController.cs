@@ -1,4 +1,5 @@
-﻿using BOTGC.API.Dto;
+﻿// Controllers/StockController.cs — fully annotated
+using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
 using BOTGC.API.Services.Queries;
@@ -8,6 +9,9 @@ using Microsoft.Extensions.Options;
 
 namespace BOTGC.API.Controllers
 {
+    /// <summary>
+    /// Stock and stock-take operations for BOTGC.
+    /// </summary>
     [ApiController]
     [Route("api/stock")]
     [Produces("application/json")]
@@ -24,88 +28,107 @@ namespace BOTGC.API.Controllers
         private readonly ILogger<StockController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         private readonly IStockAnalysisTaskQueue _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
 
+        /// <summary>
+        /// Gets the current stock levels.
+        /// </summary>
+        /// <returns>A list of stock items with current levels.</returns>
         [HttpGet("stockLevels")]
+        [ProducesResponseType(typeof(List<StockItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> GetStockLevels()
         {
-            _logger.LogInformation($"Fetching current stock levels...");
+            _logger.LogInformation("Fetching current stock levels...");
 
             try
             {
                 var query = new GetStockLevelsQuery();
-                
                 var stockItems = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (stockItems == null || stockItems.Count == 0)
                 {
-                    _logger.LogWarning($"No stock items where found.");
+                    _logger.LogWarning("No stock items were found.");
                     return NoContent();
                 }
 
-                _logger.LogInformation($"Successfully retrieved {stockItems.Count} stock items.");
+                _logger.LogInformation("Successfully retrieved {Count} stock items.", stockItems.Count);
                 return Ok(stockItems);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error retrieving stock items.");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving stock items.");
+                _logger.LogError(ex, "Error retrieving stock items.");
+                return Problem("An error occurred while retrieving stock items.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
+        /// <summary>
+        /// Gets the stock catalogue including available trade units.
+        /// </summary>
+        /// <returns>Stock items with trade unit information.</returns>
         [HttpGet("stockItems")]
+        [ProducesResponseType(typeof(List<StockItemAndTradeUnitDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> GetStockItems()
         {
-            _logger.LogInformation($"Fetching current stock items...");
+            _logger.LogInformation("Fetching current stock items...");
 
             try
             {
                 var query = new GetStockItemsAndTradeUnitsQuery();
-
                 var stockItems = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (stockItems == null || stockItems.Count == 0)
                 {
-                    _logger.LogWarning($"No stock items where found.");
+                    _logger.LogWarning("No stock items were found.");
                     return NoContent();
                 }
 
-                _logger.LogInformation($"Successfully retrieved {stockItems.Count} stock items.");
+                _logger.LogInformation("Successfully retrieved {Count} stock items.", stockItems.Count);
                 return Ok(stockItems);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error retrieving stock items.");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving stock items.");
+                _logger.LogError(ex, "Error retrieving stock items.");
+                return Problem("An error occurred while retrieving stock items.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
-        
+
+        /// <summary>
+        /// Gets the list of till operators.
+        /// </summary>
         [HttpGet("tillOperators")]
+        [ProducesResponseType(typeof(List<TillOperatorDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> GetTillOperators()
         {
-            _logger.LogInformation($"Fetching current till operators...");
+            _logger.LogInformation("Fetching current till operators...");
 
             try
             {
                 var query = new GetTillOperatorsQuery();
-
                 var tillOperators = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (tillOperators == null || tillOperators.Count == 0)
                 {
-                    _logger.LogWarning($"No stock items where found.");
+                    _logger.LogWarning("No till operators were found.");
                     return NoContent();
                 }
 
-                _logger.LogInformation($"Successfully retrieved {tillOperators.Count} till operators.");
+                _logger.LogInformation("Successfully retrieved {Count} till operators.", tillOperators.Count);
                 return Ok(tillOperators);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error retrieving till operators.");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving till operators.");
+                _logger.LogError(ex, "Error retrieving till operators.");
+                return Problem("An error occurred while retrieving till operators.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
+        /// <summary>
+        /// Gets the waste sheet for a specific day.
+        /// </summary>
+        /// <param name="day">UTC date (yyyy-MM-dd). Defaults to today if omitted.</param>
         [HttpGet("wasteSheet")]
+        [ProducesResponseType(typeof(WasteSheetDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetWasteSheet([FromQuery] DateTime? day = null)
         {
             var sheetDate = (day?.Date ?? DateTime.UtcNow.Date);
@@ -127,12 +150,19 @@ namespace BOTGC.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving waste sheet for {SheetDate}.", sheetDate.ToString("yyyy-MM-dd"));
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the waste sheet.");
+                return Problem("An error occurred while retrieving the waste sheet.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
-
+        /// <summary>
+        /// Adds an entry to the waste sheet for the specified day.
+        /// </summary>
+        /// <param name="request">Waste entry details.</param>
+        /// <param name="day">UTC date (yyyy-MM-dd). Defaults to today if omitted.</param>
         [HttpPost("wasteSheet/entry")]
+        [ProducesResponseType(typeof(AddResultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         public async Task<IActionResult> AddToWasteSheet([FromBody] AddWasteEntryRequest request, [FromQuery] DateTime? day = null)
         {
             var sheetDate = (day?.Date ?? DateTime.UtcNow.Date);
@@ -156,8 +186,7 @@ namespace BOTGC.API.Controllers
 
                 if (result.Duplicated)
                 {
-                    // Idempotent success (already processed)
-                    return Ok(new { ok = true, duplicated = true });
+                    return Ok(result);
                 }
 
                 return Created($"/api/stock/wasteSheet?day={sheetDate:yyyy-MM-dd}", new { ok = true, duplicated = false });
@@ -165,17 +194,22 @@ namespace BOTGC.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding waste entry for {SheetDate}.", sheetDate.ToString("yyyy-MM-dd"));
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding the waste entry.");
+                return Problem("An error occurred while adding the waste entry.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
+        /// <summary>
+        /// Updates a stock item by ID.
+        /// </summary>
+        /// <param name="id">Stock item ID (route).</param>
+        /// <param name="cmd">Update payload; <c>StockId</c> must match the route ID.</param>
         [HttpPut("stockItems/{id}")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status499ClientClosedRequest)]
         public async Task<IActionResult> UpdateStockItem([FromRoute] string id, [FromBody] UpdateStockItemCommand cmd)
         {
-            using var _ = _logger.BeginScope(new Dictionary<string, object?>
-            {
-                ["RouteId"] = id
-            });
+            using var _ = _logger.BeginScope(new Dictionary<string, object?> { ["RouteId"] = id });
 
             if (!ModelState.IsValid)
             {
@@ -189,14 +223,12 @@ namespace BOTGC.API.Controllers
                 return BadRequest(new { message = "Invalid stock item id in route." });
             }
 
-            // Ensure the command has the correct StockId
             if (cmd is null)
             {
                 _logger.LogWarning("Request body is null for UpdateStockItem {RouteStockId}.", routeStockId);
                 return BadRequest(new { message = "Request body cannot be null." });
             }
 
-            // If the command has no StockId set, populate it from the route; otherwise ensure it matches.
             if (cmd.StockId != routeStockId)
             {
                 _logger.LogWarning("Route id {RouteStockId} does not match body StockId {BodyStockId}.", routeStockId, cmd.StockId);
@@ -215,8 +247,6 @@ namespace BOTGC.API.Controllers
                 }
 
                 _logger.LogInformation("Successfully updated stock item {StockId}.", routeStockId);
-
-                // Return a conventional 200 with a small payload; alternatively NoContent() is fine if you prefer 204.
                 return Ok(new { ok = true, id = routeStockId });
             }
             catch (OperationCanceledException)
@@ -227,11 +257,18 @@ namespace BOTGC.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unhandled error updating stock item {StockId}.", routeStockId);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while updating the stock item." });
+                return Problem("An error occurred while updating the stock item.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
+        /// <summary>
+        /// Deletes a waste entry by ID for a specific day.
+        /// </summary>
+        /// <param name="id">Waste entry ID.</param>
+        /// <param name="day">UTC date (yyyy-MM-dd). Defaults to today if omitted.</param>
         [HttpDelete("wasteSheet/entry/{id}")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteFromWasteSheet(Guid id, [FromQuery] DateTime? day = null)
         {
             var sheetDate = (day?.Date ?? DateTime.UtcNow.Date);
@@ -252,42 +289,52 @@ namespace BOTGC.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting waste entry {EntryId} for {SheetDate}.", id, sheetDate.ToString("yyyy-MM-dd"));
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the waste entry.");
+                return Problem("An error occurred while deleting the waste entry.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
+        /// <summary>
+        /// Gets historic stock takes, optionally filtered by date range.
+        /// </summary>
+        /// <param name="fromDate">Inclusive start date (UTC).</param>
+        /// <param name="toDate">Inclusive end date (UTC).</param>
         [HttpGet("stockTakes")]
+        [ProducesResponseType(typeof(List<StockTakeReportEntryDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetStockTakes([FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
         {
             _logger.LogInformation("Fetching previous stock takes...");
 
             try
             {
-                var query = new GetStockTakesQuery()
+                var query = new GetStockTakesQuery
                 {
                     FromDate = fromDate,
-                    ToDate = toDate   
+                    ToDate = toDate
                 };
 
                 var products = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (products == null || products.Count == 0)
                 {
-                    _logger.LogInformation("No previous stock takes were found");
+                    _logger.LogInformation("No previous stock takes were found.");
                     return Ok(new List<StockTakeReportEntryDto>());
                 }
 
-                _logger.LogInformation($"Successfully retrieved {products.Count} products involved in previous stock takes.");
+                _logger.LogInformation("Successfully retrieved {Count} products involved in previous stock takes.", products.Count);
                 return Ok(products);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, @"Error retrieving previous stock takes.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving previous stock takes.");
+                _logger.LogError(ex, "Error retrieving previous stock takes.");
+                return Problem("An error occurred while retrieving previous stock takes.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
+        /// <summary>
+        /// Gets the prepared product list for a stock take.
+        /// </summary>
         [HttpGet("stockTakes/products")]
+        [ProducesResponseType(typeof(List<StockTakeReportEntryDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetStockTakeProducts()
         {
             _logger.LogInformation("Fetching prepared stock take product list...");
@@ -303,17 +350,23 @@ namespace BOTGC.API.Controllers
                     return Ok(new List<StockTakeReportEntryDto>());
                 }
 
-                _logger.LogInformation($"Successfully retrieved {products.Count} products for the stock take.");
+                _logger.LogInformation("Successfully retrieved {Count} products for the stock take.", products.Count);
                 return Ok(products);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving stock take product list.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the stock take product list.");
+                return Problem("An error occurred while retrieving the stock take product list.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
+        /// <summary>
+        /// Queues an asynchronous stock analysis task.
+        /// </summary>
+        /// <param name="request">Analysis task details.</param>
         [HttpPost("analyse")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status202Accepted)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> QueueStockAnalysis([FromBody] StockAnalysisTaskItem request)
         {
             _logger.LogInformation("Received request to queue stock analysis.");
@@ -321,16 +374,20 @@ namespace BOTGC.API.Controllers
             if (request == null)
             {
                 _logger.LogWarning("No task data supplied in the request body.");
-                return BadRequest("Missing task data.");
+                return BadRequest(new ProblemDetails { Title = "Validation error", Detail = "Missing task data." });
             }
 
             await _taskQueue.QueueTaskAsync(request);
-
-            return Accepted(new { Message = "Stock analysis task queued." });
+            return Accepted(new { message = "Stock analysis task queued." });
         }
 
-        // GET: /api/stock/stockTakes/sheet?day=yyyy-MM-dd&division=MINERALS
+        /// <summary>
+        /// Gets a stock take sheet for a specific day and division.
+        /// </summary>
+        /// <param name="day">UTC date (yyyy-MM-dd). Defaults to today.</param>
+        /// <param name="division">Division filter (e.g. MINERALS). Optional.</param>
         [HttpGet("stockTakes/sheet")]
+        [ProducesResponseType(typeof(StockTakeSheetDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetStockTakeSheet([FromQuery] DateTime? day = null, [FromQuery] string? division = null)
         {
             var sheetDate = (day?.Date ?? DateTime.UtcNow.Date);
@@ -354,12 +411,17 @@ namespace BOTGC.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving stock take sheet for {SheetDate} / {Division}.", sheetDate.ToString("yyyy-MM-dd"), div);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the stock take sheet.");
+                return Problem("An error occurred while retrieving the stock take sheet.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
-        // POST: /api/stock/stockTakes/sheet/entry?day=yyyy-MM-dd
+        /// <summary>
+        /// Creates or updates an entry on the stock take sheet.
+        /// </summary>
+        /// <param name="request">Entry details to upsert.</param>
+        /// <param name="day">UTC date (yyyy-MM-dd). Defaults to today.</param>
         [HttpPost("stockTakes/sheet/entry")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
         public async Task<IActionResult> UpsertStockTakeEntry([FromBody] UpsertStockTakeEntryRequest request, [FromQuery] DateTime? day = null)
         {
             var sheetDate = (day?.Date ?? DateTime.UtcNow.Date);
@@ -380,12 +442,11 @@ namespace BOTGC.API.Controllers
                     request.OperatorId,
                     request.OperatorName,
                     request.At,
-                    request.Observations?.Select(o =>
-                        new StockTakeObservationDto(o.StockItemId, o.Code, o.Location, o.Value)).ToList() ?? new List<StockTakeObservationDto>(),
+                    request.Observations?.Select(o => new StockTakeObservationDto(o.StockItemId, o.Code, o.Location, o.Value)).ToList() ?? new List<StockTakeObservationDto>(),
                     request.EstimatedQuantityAtCapture
                 );
 
-                var result = await _mediator.Send(cmd, HttpContext.RequestAborted);
+                var _ = await _mediator.Send(cmd, HttpContext.RequestAborted);
 
                 return Created($"/api/stock/stockTakes/sheet?day={sheetDate:yyyy-MM-dd}&division={Uri.EscapeDataString(request.Division ?? string.Empty)}",
                                new { ok = true });
@@ -393,38 +454,46 @@ namespace BOTGC.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error upserting stock take entry for {SheetDate}.", sheetDate.ToString("yyyy-MM-dd"));
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while saving the stock take entry.");
+                return Problem("An error occurred while saving the stock take entry.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
-
+        /// <summary>
+        /// Creates a purchase order from stock take recommendations.
+        /// </summary>
+        /// <param name="request">Purchase order details.</param>
         [HttpPost("stockTakes/purchaseOrder")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         public async Task<IActionResult> TestCreatePurchaseOrder([FromBody] PurchaseOrderDto request)
         {
             try
             {
                 var cmd = new CreatePurchaseOrderCommand(request);
-                var result = await _mediator.Send(cmd, HttpContext.RequestAborted);
-
-                return Ok();
+                var _ = await _mediator.Send(cmd, HttpContext.RequestAborted);
+                return Ok(new { ok = true });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured creating the purchase order");
+                _logger.LogError(ex, "Error creating purchase order.");
+                return Problem("An error occurred creating the purchase order.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
-        // DELETE: /api/stock/stockTakes/sheet/entry/{stockItemId}?day=yyyy-MM-dd&division=MINERALS
+        /// <summary>
+        /// Deletes a stock take entry by stock item ID for a day and division.
+        /// </summary>
+        /// <param name="stockItemId">Stock item ID.</param>
+        /// <param name="day">UTC date (yyyy-MM-dd). Defaults to today.</param>
+        /// <param name="division">Division name. Optional.</param>
         [HttpDelete("stockTakes/sheet/entry/{stockItemId:int}")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteStockTakeEntry([FromRoute] int stockItemId, [FromQuery] DateTime? day = null, [FromQuery] string? division = null)
         {
             var sheetDate = (day?.Date ?? DateTime.UtcNow.Date);
             var div = division ?? string.Empty;
 
-            _logger.LogInformation(
-                "Deleting stock take entry {StockItemId} from sheet {SheetDate} / {Division}.",
-                stockItemId, sheetDate.ToString("yyyy-MM-dd"), div
-            );
+            _logger.LogInformation("Deleting stock take entry {StockItemId} from sheet {SheetDate} / {Division}.", stockItemId, sheetDate.ToString("yyyy-MM-dd"), div);
 
             try
             {
@@ -441,9 +510,8 @@ namespace BOTGC.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting stock take entry {StockItemId} for {SheetDate} / {Division}.", stockItemId, sheetDate.ToString("yyyy-MM-dd"), div);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the stock take entry.");
+                return Problem("An error occurred while deleting the stock take entry.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
-
     }
 }
