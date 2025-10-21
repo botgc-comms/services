@@ -138,6 +138,9 @@
         public string StockTakeDetailsUrl { get; set; } = "/tillstockcontrol.php?tab=take&section=edit&id={stocktakeid}";  
         public string CreatePurchaseOrderUrl { get; set; } = "/tillstockcontrol.php?tab=purchase_orders&page=1&received=1&start={date}&end={date}&requestType=ajax&ajaxaction=confirmAddDelivery";
         public string UpdateStockItemUrl { get; set; } = "/tillstockcontrol.php?tab=items&section=edit&id={id} ";
+        public string CreateStockItemUrl { get; set; } = "/tillstockcontrol.php?tab=items&section=new&requestType=ajax&ajaxaction=addItem";
+        public string CreateStockDialogUrl { get; set; } = "/tillstockcontrol.php?tab=items&section=new";
+
     }
 
     public class FileCacheStorage

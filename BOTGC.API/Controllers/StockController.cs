@@ -93,6 +93,37 @@ namespace BOTGC.API.Controllers
         }
 
         /// <summary>
+        /// Gets the stock catalogue including available trade units.
+        /// </summary>
+        /// <returns>Stock items with trade unit information.</returns>
+        [HttpPost("stockItems")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> AddStockItems([FromBody] CreateStockItemCommand command)
+        {
+            _logger.LogInformation("Fetching current stock items...");
+
+            try
+            {
+                var stockItemId = await _mediator.Send(command, HttpContext.RequestAborted);
+
+                if (stockItemId == null)
+                {
+                    _logger.LogWarning("Failed to create Stock Item {name}.", command.Name);
+                    return NoContent();
+                }
+
+                _logger.LogInformation("Successfully created stock item {StockItemName}: {StockItemId}.", command.Name, stockItemId);  
+                return Ok(stockItemId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating stock item.");
+                return Problem("An error occurred while creating stock item.", statusCode: StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
         /// Gets the list of till operators.
         /// </summary>
         [HttpGet("tillOperators")]

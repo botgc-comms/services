@@ -264,5 +264,67 @@ namespace BOTGC.API.Services
 
             return s;
         }
+
+        public async Task<string> GetData(string reportUrl, string? cacheKey = null, TimeSpan? cacheTTL = null)
+        {
+            HtmlDocument? doc = null;
+
+            ICacheService? cacheService = null;
+
+            _logger.LogInformation("Starting retrieval of raw reponse for {reportUrl}", reportUrl);
+
+            cacheTTL = cacheTTL ?? TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins);
+
+            if (!string.IsNullOrEmpty(cacheKey))
+            {
+                using var scope = _serviceScopeFactory.CreateScope();
+                cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+
+                var rawKey = cacheKey + __RAWSUFFIX;
+                var rawHtml = await cacheService.GetAsync<string>(rawKey, true).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(rawHtml))
+                {
+                    try
+                    {
+                        _logger.LogInformation("Using cached raw HTML for {reportUrl}", reportUrl);
+                        doc = BuildHtmlDocumentFromRaw(rawHtml);
+
+                        _logger.LogInformation("Successfully loaded cached raw HTML for {reportUrl}", reportUrl);
+                    }
+                    catch (Exception)
+                    {
+                        _logger.LogError("Failed to load cached HTML for {reportUrl}", reportUrl);
+                        doc = null;
+                    }
+                }
+            }
+
+            await _igSessionManagementService.WaitForLoginAsync();
+
+            _logger.LogInformation("Starting report retrieval for {reportUrl}", reportUrl);
+
+            await _igSessionManagementService.WaitForLoginAsync();
+
+            _logger.LogInformation("Fetching report from {Url}", reportUrl);
+            if (doc == null) doc = await _igSessionManagementService.GetPageContent(reportUrl);
+
+            if (!string.IsNullOrEmpty(cacheKey) && cacheTTL != null && doc != null && doc.DocumentNode != null && doc.DocumentNode.OuterHtml.Length != 0)
+            {
+                var rawKey = cacheKey + __RAWSUFFIX;
+                var rawHtml = doc.DocumentNode.OuterHtml;
+                await cacheService.SetAsync(rawKey, rawHtml, cacheTTL.Value).ConfigureAwait(false);
+            }
+
+            if (doc != null)
+            {
+                return doc.DocumentNode.OuterHtml;
+            }
+            else
+            {
+                _logger.LogError("Failed to retrieve data from {Url}", reportUrl);
+                return string.Empty;
+
+            }
+        }
     }
 }
