@@ -59,6 +59,13 @@
             "CountInCellar",
             "KegWeightGrams@Cellar"
         ],
+        "SPIRITS|BOTTLE": [
+            "CountInStoreRoom",
+            "CountInLoungeBar",
+            "OpenBottleWeightGrams@Lounge",
+            "CountInColtBar",
+            "OpenBottleWeightGrams@Colt"
+        ],
 
         // Kitchen — default each division to Store Room + Kitchen
         "MEAT & POULTRY|*": [
@@ -134,6 +141,7 @@
         "FORTIFIED WINES"
     ];
     const BEVERAGE_SET = new Set(BEVERAGE_DIVISIONS.map(s => s.toUpperCase()));
+    const OPENABLE_BOTTLE_DIVISIONS = new Set(["WINES", "FORTIFIED WINES", "SPIRITS"]);
 
     function parseIntOrNull(v) {
         const n = parseInt(v ?? "", 10);
@@ -162,8 +170,20 @@
     }
 
     function profileFor(division, unit) {
-        const key = `${(division || "").toUpperCase()}|${(unit || "").toUpperCase()}`;
-        return PROFILES[key] || PROFILES["*|*"];
+        const d = String(division || "").toUpperCase();
+        const u = String(unit || "").toUpperCase();
+
+        // Match order: exact → div|* → *|unit → *|*
+        const exact = PROFILES[`${d}|${u}`];
+        if (exact) return exact;
+
+        const divAny = PROFILES[`${d}|*`];
+        if (divAny) return divAny;
+
+        const anyUnit = PROFILES[`*|${u}`];
+        if (anyUnit) return anyUnit;
+
+        return PROFILES["*|*"];
     }
 
     function parseToken(token) {
@@ -285,7 +305,8 @@
     // ===== State =====
     let plan = [];
     let currentDivision = null;
-    const obsMap = new Map(); // stockItemId -> { stockItemId, name, division, unit, operatorId, operatorName, at, observations[] }
+    const obsMap = new Map();
+    const calibMap = new Map();
 
     // ===== SignalR (safe if not present) =====
     let connection = null;
@@ -419,21 +440,38 @@
         const list = Array.isArray(raw) ? raw : Object.values(raw ?? {});
 
         obsMap.clear();
+        calibMap.clear();
+
         for (const e of list) {
-            if ((e.observations?.length ?? e.Observations?.length ?? 0) > 0) {
-                obsMap.set(e.stockItemId ?? e.StockItemId, {
-                    stockItemId: e.stockItemId ?? e.StockItemId,
+            const stockItemId = e.stockItemId ?? e.StockItemId;
+            const calibration = e.calibration ?? e.Calibration ?? null;
+            if (calibration) {
+                // normalise to a consistent shape for JS
+                calibMap.set(stockItemId, {
+                    nominalVolumeMl: calibration.nominalVolumeMl ?? calibration.NominalVolumeMl,
+                    emptyWeightGrams: calibration.emptyWeightGrams ?? calibration.EmptyWeightGrams,
+                    fullWeightGrams: calibration.fullWeightGrams ?? calibration.FullWeightGrams,
+                    confidence: calibration.confidence ?? calibration.Confidence,
+                    strategy: calibration.strategy ?? calibration.Strategy
+                });
+            }
+
+            const obs = e.observations ?? e.Observations ?? [];
+            if (obs.length > 0) {
+                obsMap.set(stockItemId, {
+                    stockItemId,
                     name: e.name ?? e.Name,
                     division: e.division ?? e.Division,
                     unit: e.unit ?? e.Unit,
                     operatorId: e.operatorId ?? e.OperatorId,
                     operatorName: e.operatorName ?? e.OperatorName,
                     at: e.at ?? e.At,
-                    observations: e.observations ?? e.Observations ?? [],
+                    observations: obs,
                     estimatedQuantityAtCapture: e.estimatedQuantityAtCapture ?? e.EstimatedQuantityAtCapture ?? null
                 });
             }
         }
+
         return list;
     }
 
@@ -563,6 +601,10 @@
         }
     }
 
+    function getCalibration(stockItemId) {
+        return calibMap.get(stockItemId) || null;
+    }
+
     function renderProducts() {
         const host = document.getElementById("productTiles");
         host.innerHTML = "";
@@ -577,13 +619,22 @@
             tile.dataset.name = p.name || "";
             tile.dataset.unit = p.unit || "";
             tile.dataset.division = division;
-            // keep the estimate used by the dialog
             tile.dataset.estimate = (p.currentQuantity ?? "");
+
+            // mark low/missing calibration for bottles
+            const isBottle = String(p.unit || "").toUpperCase() === "BOTTLE";
+            const isOpenableDiv = OPENABLE_BOTTLE_DIVISIONS.has(String(division || "").toUpperCase());
+            const cal = calibMap.get(p.stockItemId);
+            const lowConfidence = isBottle && isOpenableDiv && (!cal || !(cal.confidence >= 0.95));
+            if (lowConfidence) tile.classList.add("tile--uncertain");
+
             tile.innerHTML = `<div class="tile__name">${escapeHtml(p.name)}</div>
-                              <small class="tile__division">${escapeHtml(p.unit || "")}</small>`;
+                          <small class="tile__division">${escapeHtml(p.unit || "")}</small>`;
+
             tile.addEventListener("click", () =>
                 openObsDialog(p.stockItemId, p.name, division, p.unit)
             );
+
             host.appendChild(tile);
 
             if (entry) markTileState(p.stockItemId, entry);
@@ -591,8 +642,18 @@
     }
 
     // ===== Obs Modal =====
-    function buildFields(container, requiredTokens, existing, productUnit, estimatedCurrent) {
+    function buildFields(container, requiredTokens, existing, productUnit, estimatedCurrent, calibCtx = { needsBottleCalibration: false, calibration: null, name: "" }) {
         container.innerHTML = "";
+
+        const { needsBottleCalibration, calibration, name } = calibCtx;
+
+        if (needsBottleCalibration) {
+            const warn = document.createElement("div");
+            warn.className = "obs-estimate";
+            const confTxt = calibration ? `(${Math.round((calibration.confidence ?? 0) * 100)}% match)` : "(no match yet)";
+            warn.textContent = `Bottle details unconfirmed ${confTxt}. Please weigh a full and/or an empty bottle if available.`;
+            container.appendChild(warn);
+        }
 
         // Optional estimated banner
         if (SHOW_ESTIMATED && estimatedCurrent != null && isFinite(estimatedCurrent)) {
@@ -626,13 +687,16 @@
 
         const unitLabel = pluralizeUnit(productUnit);
 
-        function tokenToGroupAndLabel(token, unitLabel) {
+        function tokenToGroupAndLabel(token, unitLabel, ctx) {
             const [code, locRaw] = String(token).split("@");
             const loc = locRaw || null;
 
-            const countLabel = `Number of unopened ${unitLabel}`;
+            // If it’s an openable bottle, we care about unopened counts; otherwise just say “Count”.
+            const isCount = code.startsWith("CountIn");
+            const countLabel = (isCount && ctx.isOpenableBottle)
+                ? `Number of unopened ${unitLabel}`
+                : `Count`;
 
-            // For counts we now attach an explicit location string as well
             if (code === "CountInStoreRoom")
                 return { group: "Store Room", label: countLabel, code, location: "Store" };
             if (code === "CountInColtBar")
@@ -651,15 +715,22 @@
             if (code === "CountInKitchen")
                 return { group: "Kitchen", label: countLabel, code, location: "Kitchen" };
 
-
             return { group: "Other", label: code + (loc ? ` (${loc})` : ""), code, location: loc };
         }
+
+        const ctx = {
+            isOpenableBottle:
+                String(productUnit || "").toUpperCase() === "BOTTLE" &&
+                OPENABLE_BOTTLE_DIVISIONS.has(
+                    String(currentDivision?.division || "").toUpperCase()
+                )
+        };
 
         const order = ["Store Room", "Kitchen", "Colt bar", "Lounge bar", "Cellar", "Other"];
 
         const groups = new Map(order.map(n => [n, []]));
         for (const token of requiredTokens) {
-            const meta = tokenToGroupAndLabel(token, unitLabel);
+            const meta = tokenToGroupAndLabel(token, unitLabel, ctx);
             groups.get(meta.group).push(meta);
         }
 
@@ -698,6 +769,46 @@
 
                 row.appendChild(wrap);
             }
+
+            groupsHost.appendChild(g);
+        }
+
+        // If bottle calibration is needed, add optional weight inputs
+        if (needsBottleCalibration) {
+            const g = document.createElement("section");
+            g.className = "obs-group";
+            const h = document.createElement("h4");
+            h.className = "obs-group__title";
+            h.textContent = "Bottle calibration (optional)";
+            g.appendChild(h);
+
+            const row = document.createElement("div");
+            row.className = "obs-row";
+            g.appendChild(row);
+
+            // Optional “Full bottle” weight (g)
+            const fullWrap = document.createElement("div");
+            fullWrap.className = "obs-field";
+            fullWrap.innerHTML =
+                `<label class="obs-label">Weight of full bottle (g)</label>
+                 <div class="obs-input-row">
+                    <input type="number" step="1" min="0" class="obs-input"
+                           data-code="FullBottleWeightGrams" value="">
+                    <button type="button" class="btn-quick-zero" data-for="FullBottleWeightGrams@" aria-label="Clear">Clear</button>
+                 </div>`;
+            row.appendChild(fullWrap);
+
+            // Optional “Empty bottle” weight (g)
+            const emptyWrap = document.createElement("div");
+            emptyWrap.className = "obs-field";
+            emptyWrap.innerHTML =
+                `<label class="obs-label">Weight of empty bottle (g)</label>
+                 <div class="obs-input-row">
+                    <input type="number" step="1" min="0" class="obs-input"
+                           data-code="EmptyBottleWeightGrams" value="">
+                    <button type="button" class="btn-quick-zero" data-for="EmptyBottleWeightGrams@" aria-label="Clear">Clear</button>
+                 </div>`;
+            row.appendChild(emptyWrap);
 
             groupsHost.appendChild(g);
         }
@@ -770,7 +881,14 @@
 
         const existing = obsMap.get(stockItemId)?.observations || [];
         const requiredTokens = profileFor(division, unit);
-        buildFields(fields, requiredTokens, existing, unit, estimated);
+
+        const calibration = getCalibration(stockItemId);
+        const isBottle = String(unit || "").toUpperCase() === "BOTTLE";
+        const isOpenableDiv = OPENABLE_BOTTLE_DIVISIONS.has(String(division || "").toUpperCase());
+
+        const needsBottleCalibration = isBottle && isOpenableDiv && (!calibration || !(calibration.confidence >= 0.95));
+
+        buildFields(fields, requiredTokens, existing, unit, estimated, { needsBottleCalibration, calibration, name });
 
         const onSave = async () => {
             // Build observations: include any input that has a value (including 0). Blank = not observed.

@@ -69,7 +69,16 @@ public sealed class HttpStockTakeService : IStockTakeService
                 Code = o.Code,
                 Location = o.Location,
                 Value = o.Value
-            }).ToList()
+            }).ToList(),
+            Calibration = e.Calibration is null ? null : new BottleCalibration
+            {
+                NominalVolumeMl = e.Calibration.NominalVolumeMl,
+                EmptyWeightGrams = e.Calibration.EmptyWeightGrams,
+                FullWeightGrams = e.Calibration.FullWeightGrams,
+                Confidence = (decimal)e.Calibration.Confidence,
+                Strategy = e.Calibration.Strategy
+            },
+            CalibrationHighConfidence = e.CalibrationHighConfidence
         }).ToList();
     }
 
@@ -153,7 +162,9 @@ public sealed class HttpStockTakeService : IStockTakeService
         string OperatorName,
         DateTimeOffset At,
         List<ApiStockTakeObservationDto> Observations,
-        decimal EstimatedQuantityAtCapture
+        decimal EstimatedQuantityAtCapture,
+        ApiBottleCalibrationDto? Calibration,         
+        bool CalibrationHighConfidence                
     );
 
     private sealed record ApiStockTakeObservationDto(
@@ -161,5 +172,19 @@ public sealed class HttpStockTakeService : IStockTakeService
         string Code,
         string? Location,
         decimal Value
+    );
+
+    private sealed record ApiBottleCalibrationDto(
+        int NominalVolumeMl,
+        int EmptyWeightGrams,
+        int FullWeightGrams,
+        double Confidence,
+        string Strategy,
+        int EmptyWeightSource,
+        int FullWeightSource,
+        int NominalVolumeSource,
+        int? InferredFromStockItemId,
+        string? InferredFromName,
+        double? InferredConfidence
     );
 }
