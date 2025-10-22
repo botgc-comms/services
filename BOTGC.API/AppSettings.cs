@@ -176,7 +176,8 @@
         public string TimeZone { get; init; } = "Europe/London";
         public bool RunOnStartup { get; init; } = true;
         public int DaysToLookBack { get; init; } = 10;   // clamp inside flusher
-        public List<string> Divisions { get; init; } = new(); // e.g. ["WINES","MINERALS","SNACKS","BEER CANS","DRAUGHT BEER"]
+        public List<string> KitchenDivisions { get; init; } = new(); // e.g. ["MEAT & POULTRY","FISH","DAIRY","BAKERY","DESSERTS & ICE CREAM", "FRUIT & VEG", "SAUCES", "DRY GOODS", "PREPARED MEALS", "HOT DRINKS"]
+        public List<string> BeverageDivisions { get; init; } = new(); // e.g. ["WINES","MINERALS","SNACKS","BEER CANS","DRAUGHT BEER", "BOTTLED BEER", "FORTIFIED WINES"]
         public decimal TolerancePercent { get; init; } = 10m;
     }
 }

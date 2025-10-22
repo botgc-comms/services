@@ -20,7 +20,15 @@
     // ===== Profiles & labels =====
     // Use token format "Code[@Location]" so we can require per-bar weights.
     const PROFILES = {
+        // Beverages — explicit coverage
         "WINES|BOTTLE": [
+            "CountInStoreRoom",
+            "CountInLoungeBar",
+            "OpenBottleWeightGrams@Lounge",
+            "CountInColtBar",
+            "OpenBottleWeightGrams@Colt"
+        ],
+        "FORTIFIED WINES|BOTTLE": [
             "CountInStoreRoom",
             "CountInLoungeBar",
             "OpenBottleWeightGrams@Lounge",
@@ -42,10 +50,59 @@
             "CountInLoungeBar",
             "CountInColtBar"
         ],
+        "BOTTLED BEER|BOTTLE": [
+            "CountInStoreRoom",
+            "CountInLoungeBar",
+            "CountInColtBar"
+        ],
         "DRAUGHT BEER|PINT": [
             "CountInCellar",
             "KegWeightGrams@Cellar"
         ],
+
+        // Kitchen — default each division to Store Room + Kitchen
+        "MEAT & POULTRY|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "FISH|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "DAIRY|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "BAKERY|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "DESSERTS & ICE CREAM|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "FRUIT & VEG|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "SAUCES|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "DRY GOODS|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "PREPARED MEALS|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+        "HOT DRINKS|*": [
+            "CountInStoreRoom",
+            "CountInKitchen"
+        ],
+
+        // Optional pantry convenience (kept if you still use it)
         "PANTRY|EACH": [
             "CountInStoreRoom",
             "CountInKitchen"
@@ -58,12 +115,51 @@
             "CountInStoreRoom",
             "CountInKitchen"
         ],
+
+        // Global fallback
         "*|*": [
             "CountInStoreRoom",
             "CountInLoungeBar",
             "CountInColtBar"
         ]
     };
+
+    const BEVERAGE_DIVISIONS = [
+        "WINES",
+        "MINERALS",
+        "SNACKS",
+        "BEER CANS",
+        "BOTTLED BEER",
+        "DRAUGHT BEER",
+        "FORTIFIED WINES"
+    ];
+    const BEVERAGE_SET = new Set(BEVERAGE_DIVISIONS.map(s => s.toUpperCase()));
+
+    function parseIntOrNull(v) {
+        const n = parseInt(v ?? "", 10);
+        return Number.isFinite(n) && n > 0 ? n : null;
+    }
+
+    function pickFromBucketForToday(planList, predicate, n, seedSuffix) {
+        const today = new Date().toISOString().slice(0, 10);
+        const seed = `stocktake:${today}:${seedSuffix}`;
+        const rng = seededRng(seed);
+
+        const inBucket = planList
+            .filter(d => predicate(d))
+            .filter(d => Array.isArray(d.products) && d.products.length > 0);
+
+        const shuffled = shuffleDeterministic(inBucket, rng);
+        return shuffled.slice(0, Math.min(n, shuffled.length));
+    }
+
+    function isBeverageDivision(d) {
+        return BEVERAGE_SET.has(String(d.division || "").toUpperCase());
+    }
+
+    function isKitchenDivision(d) {
+        return !isBeverageDivision(d);
+    }
 
     function profileFor(division, unit) {
         const key = `${(division || "").toUpperCase()}|${(unit || "").toUpperCase()}`;
@@ -97,7 +193,15 @@
     function markOperatorActivity() { setCookie(OP_TS_COOKIE, String(nowUtcMs()), 365); }
     function operatorExpired() { const ts = parseInt(getCookie(OP_TS_COOKIE) || "0", 10); if (!ts) return true; return (nowUtcMs() - ts) > OP_TIMEOUT_MINUTES * 60 * 1000; }
     function escapeHtml(s) { return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
-    function slug(s) { return String(s || "").toLowerCase().replace(/\s+/g, "-").replace(/\//g, "-"); }
+    function slug(s) {
+        return String(s || "")
+            .toLowerCase()
+            .normalize("NFKD")
+            .replace(/&/g, " ")
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
+    }
+
     function fmtTimeISO(iso) { const d = new Date(iso); const hh = d.getHours().toString().padStart(2, "0"); const mm = d.getMinutes().toString().padStart(2, "0"); return `${hh}:${mm}`; }
 
     function getQueryParam(name) {
@@ -872,13 +976,32 @@
 
         plan = await fetchPlan();
 
+        const bevOverride = parseIntOrNull(getQueryParam("bev"));
+        const kitOverride = parseIntOrNull(getQueryParam("kit"));
+        const totalOverride = parseIntOrNull(getQueryParam("count"));
+
+        let bevCount;
+        let kitCount;
+
+        if (bevOverride !== null || kitOverride !== null) {
+            bevCount = bevOverride ?? 2;
+            kitCount = kitOverride ?? 2;
+        } else if (totalOverride !== null) {
+            bevCount = Math.ceil(totalOverride / 2);
+            kitCount = Math.floor(totalOverride / 2);
+        } else {
+            bevCount = 2;
+            kitCount = 2;
+        }
+
         const showAll = getQueryParam("alldivisions") !== null;
-        const n = parseInt(getQueryParam("count") || "2", 10); 
-        const baseCount = (isFinite(n) && n > 0 ? n : 2); 
+
         const listToShow = showAll
             ? plan
-            : pickDivisionsForTodayWithPinned(plan, baseCount + 1, "PANTRY"); // PANTRY + N others
-
+            : [
+                ...pickFromBucketForToday(plan, isBeverageDivision, bevCount, "bev"),
+                ...pickFromBucketForToday(plan, isKitchenDivision, kitCount, "kit")
+            ];
 
         // Optional: small caption so staff know why fewer show
         const captionHost = document.getElementById("divisionTiles");

@@ -197,74 +197,146 @@ dialog article footer {
 }
 
 .tile.cat-minerals {
-  --bg: #cfe3ff;
+  --bg: #d6f4e6;
   --fg: #111;
-  --badge: rgb(182.16, 199.76, 224.4);
-  background: #cfe3ff !important;
+  --badge: rgb(188.32, 214.72, 202.4);
+  background: #d6f4e6 !important;
   color: #111 !important;
 }
 
 .tile.cat-wines {
-  --bg: #e9c4c4;
+  --bg: #f2c7cf;
   --fg: #111;
-  --badge: rgb(205.04, 172.48, 172.48);
-  background: #e9c4c4 !important;
+  --badge: rgb(212.96, 175.12, 182.16);
+  background: #f2c7cf !important;
   color: #111 !important;
 }
 
 .tile.cat-draught-beer {
-  --bg: #ffd166;
+  --bg: #ffe39a;
   --fg: #111;
-  --badge: rgb(224.4, 183.92, 89.76);
-  background: #ffd166 !important;
+  --badge: rgb(224.4, 199.76, 135.52);
+  background: #ffe39a !important;
   color: #111 !important;
 }
 
 .tile.cat-spirits {
-  --bg: #d6ccff;
+  --bg: #e0e4ff;
   --fg: #111;
-  --badge: rgb(188.32, 179.52, 224.4);
-  background: #d6ccff !important;
+  --badge: rgb(197.12, 200.64, 224.4);
+  background: #e0e4ff !important;
   color: #111 !important;
 }
 
 .tile.cat-snacks {
-  --bg: #ffe7c2;
+  --bg: #ffe6cc;
   --fg: #111;
-  --badge: rgb(224.4, 203.28, 170.72);
-  background: #ffe7c2 !important;
+  --badge: rgb(224.4, 202.4, 179.52);
+  background: #ffe6cc !important;
   color: #111 !important;
 }
 
 .tile.cat-bottled-beer {
-  --bg: #ffe9a3;
+  --bg: #fff0c9;
   --fg: #111;
-  --badge: rgb(224.4, 205.04, 143.44);
-  background: #ffe9a3 !important;
+  --badge: rgb(224.4, 211.2, 176.88);
+  background: #fff0c9 !important;
   color: #111 !important;
 }
 
 .tile.cat-beer-cans {
-  --bg: #ffd0d0;
+  --bg: #ffd6d6;
   --fg: #111;
-  --badge: rgb(224.4, 183.04, 183.04);
-  background: #ffd0d0 !important;
+  --badge: rgb(224.4, 188.32, 188.32);
+  background: #ffd6d6 !important;
   color: #111 !important;
 }
 
 .tile.cat-fortified-wines {
-  --bg: #f0b3c1;
+  --bg: #f3bfd0;
   --fg: #111;
-  --badge: rgb(211.2, 157.52, 169.84);
-  background: #f0b3c1 !important;
+  --badge: rgb(213.84, 168.08, 183.04);
+  background: #f3bfd0 !important;
   color: #111 !important;
 }
 
-.tile.cat-pantry {
-  --bg: #f4f4f4;
+.tile.cat-bakery {
+  --bg: #ffe8cc;
   --fg: #111;
-  --badge: rgb(214.72, 214.72, 214.72);
-  background: #f4f4f4 !important;
+  --badge: rgb(224.4, 204.16, 179.52);
+  background: #ffe8cc !important;
+  color: #111 !important;
+}
+
+.tile.cat-dairy {
+  --bg: #fff6d8;
+  --fg: #111;
+  --badge: rgb(224.4, 216.48, 190.08);
+  background: #fff6d8 !important;
+  color: #111 !important;
+}
+
+.tile.cat-meat-poultry {
+  --bg: #ffd6b8;
+  --fg: #111;
+  --badge: rgb(224.4, 188.32, 161.92);
+  background: #ffd6b8 !important;
+  color: #111 !important;
+}
+
+.tile.cat-fish {
+  --bg: #d4f5f9;
+  --fg: #111;
+  --badge: rgb(186.56, 215.6, 219.12);
+  background: #d4f5f9 !important;
+  color: #111 !important;
+}
+
+.tile.cat-fruit-veg {
+  --bg: #d7f3d2;
+  --fg: #111;
+  --badge: rgb(189.2, 213.84, 184.8);
+  background: #d7f3d2 !important;
+  color: #111 !important;
+}
+
+.tile.cat-prepared-meals {
+  --bg: #ece4ff;
+  --fg: #111;
+  --badge: rgb(207.68, 200.64, 224.4);
+  background: #ece4ff !important;
+  color: #111 !important;
+}
+
+.tile.cat-hot-drinks {
+  --bg: #f1e0d2;
+  --fg: #111;
+  --badge: rgb(212.08, 197.12, 184.8);
+  background: #f1e0d2 !important;
+  color: #111 !important;
+}
+
+.tile.cat-sauces {
+  --bg: #e0f2e2;
+  --fg: #111;
+  --badge: rgb(197.12, 212.96, 198.88);
+  background: #e0f2e2 !important;
+  color: #111 !important;
+}
+
+.tile.cat-dry-goods {
+  --bg: #f3e9d7;
+  --fg: #111;
+  --badge: rgb(213.84, 205.04, 189.2);
+  background: #f3e9d7 !important;
+  color: #111 !important;
+}
+
+.tile.cat-desserts-ice-cream {
+  --bg: #ffdde9;
+  --fg: #111;
+  --badge: rgb(224.4, 194.48, 205.04);
+  background: #ffdde9 !important;
   color: #111 !important;
 }
 

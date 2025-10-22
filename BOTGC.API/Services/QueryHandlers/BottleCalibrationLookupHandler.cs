@@ -154,7 +154,7 @@ public sealed class BottleCalibrationLookupHandler(ITableStore<BottleCalibration
         if (d.Contains("wine")) return 750;
         if (d.Contains("spirits")) return 700;
         if (d.Contains("liqueur")) return 500;
-        if (d.Contains("cordial") || d.Contains("pantry")) return 1000;
+        if (d.Contains("cordial")) return 1000;
         if (d.Contains("beer")) return 500;
         if (d.Contains("minerals")) return 500;
         return 750;
