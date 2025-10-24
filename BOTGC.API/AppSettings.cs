@@ -140,6 +140,8 @@
         public string UpdateStockItemUrl { get; set; } = "/tillstockcontrol.php?tab=items&section=edit&id={id} ";
         public string CreateStockItemUrl { get; set; } = "/tillstockcontrol.php?tab=items&section=new&requestType=ajax&ajaxaction=addItem";
         public string CreateStockDialogUrl { get; set; } = "/tillstockcontrol.php?tab=items&section=new";
+        public string TillProductInformationUrl { get; set; } = "/tilladmin.php?tab=products&section=addedit&id={productid}";
+        public string TillProductsReportUrl { get; set; } = "/tilladmin.php?tab=products";
 
     }
 

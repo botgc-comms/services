@@ -61,6 +61,70 @@ namespace BOTGC.API.Controllers
         }
 
         /// <summary>
+        /// Gets product settings
+        /// </summary>
+        /// <returns>A product settings for the given produc tid.</returns>
+        [HttpGet("products/{id}")]
+        [ProducesResponseType(typeof(TillProductInformationDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> GetProduct([FromRoute] int id)
+        {
+            _logger.LogInformation("Fetching product information for product {ProductId}...", id);  
+
+            try
+            {
+                var query = new GetTillProductInformationQuery(ProductId: id);
+                var productInformation = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (productInformation == null)
+                {
+                    _logger.LogWarning("No product information found for product {ProductId}.", id);    
+                    return NoContent();
+                }
+
+                _logger.LogInformation("Successfully retrieved product information for product {ProductId}.", id);  
+                return Ok(productInformation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving product information for product {ProductId}.", id);  
+                return Problem("An error occurred while retrieving product information.", statusCode: StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Gets product settings
+        /// </summary>
+        /// <returns>A product settings for the given produc tid.</returns>
+        [HttpGet("products")]
+        [ProducesResponseType(typeof(TillProductInformationDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> GetProducts()
+        {
+            _logger.LogInformation("Fetching all products");
+
+            try
+            {
+                var query = new GetTillProductsQuery();
+                var products = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (products == null && products!.Any())
+                {
+                    _logger.LogWarning("No products found.");   
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved {products.Count} products.");
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving products."); 
+                return Problem("An error occurred while retrieving products.", statusCode: StatusCodes.Status500InternalServerError);   
+            }
+        }
+
+        /// <summary>
         /// Gets the stock catalogue including available trade units.
         /// </summary>
         /// <returns>Stock items with trade unit information.</returns>
