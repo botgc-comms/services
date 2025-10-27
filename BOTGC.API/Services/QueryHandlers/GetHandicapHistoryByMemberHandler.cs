@@ -14,7 +14,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                                    IDataProvider dataProvider,
                                                    IReportParser<HandicapIndexPointDto> reportParser) : QueryHandlerBase<GetHandicapHistoryByMemberQuery, PlayerHandicapSummaryDto>
     {
-        private const string __CACHE_KEY = "Handicap_Hisotry_By_Member_{memberId}";
+        private const string __CACHE_KEY = "Handicap_Hisotry_By_Member:{memberId}";
 
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));

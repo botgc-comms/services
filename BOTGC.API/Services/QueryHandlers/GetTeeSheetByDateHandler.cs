@@ -12,7 +12,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                           IDataProvider dataProvider,
                                           IReportParser<TeeSheetDto> reportParser) : QueryHandlerBase<GetTeeSheetByDateQuery, TeeSheetDto?>
     {
-        private const string __CACHE_KEY = "TeeSheet_By_Date_{date}";
+        private const string __CACHE_KEY = "TeeSheet_By_Date:{date}";
 
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly ILogger<GetTeeSheetByDateHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));

@@ -12,7 +12,7 @@ public class GetCompetitionLeaderboardByCompetitionHandler(IOptions<AppSettings>
                                                            IDataProvider dataProvider,
                                                            IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto> reportParser) : QueryHandlerBase<GetCompetitionLeaderboardByCompetitionQuery, LeaderBoardDto?>
 {
-    private const string __CACHE_KEY = "Leaderboard_Settings_{compid}";
+    private const string __CACHE_KEY = "Leaderboard_Settings:{compid}";
 
     private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
     private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));

@@ -10,7 +10,7 @@ public class GetTillProductInformationHandler(IOptions<AppSettings> settings,
                                               IDataProvider dataProvider,
                                               IReportParser<TillProductInformationDto> reportParser) : QueryHandlerBase<GetTillProductInformationQuery, TillProductInformationDto?>
 {
-    private const string __CACHE_KEY = "Till_Product_{productid}";
+    private const string __CACHE_KEY = "Till_Product:{productid}";
 
     private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
     private readonly ILogger<GetCompetitionLeaderboardByCompetitionHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -22,7 +22,7 @@ public class GetTillProductInformationHandler(IOptions<AppSettings> settings,
         var productId = request.ProductId.ToString();
 
         var productSettingsUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.TillProductInformationUrl}".Replace("{productid}", productId);
-        var productInformation = await _dataProvider.GetData<TillProductInformationDto>(productSettingsUrl, _reportParser, __CACHE_KEY.Replace("{productid}", productId.ToString()), TimeSpan.FromMinutes(_settings.Cache.LongTerm_TTL_mins));
+        var productInformation = await _dataProvider.GetData<TillProductInformationDto>(productSettingsUrl, _reportParser, __CACHE_KEY.Replace("{productid}", productId.ToString()), TimeSpan.FromMinutes(_settings.Cache.Forever_TTL_Mins));
 
         if (productInformation != null && productInformation.Any())
         {

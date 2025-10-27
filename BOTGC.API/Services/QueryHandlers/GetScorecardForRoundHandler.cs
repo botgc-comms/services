@@ -11,7 +11,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                              IDataProvider dataProvider,
                                              IReportParser<ScorecardDto> reportParser) : QueryHandlerBase<GetScorecardForRoundQuery, ScorecardDto?>
     {
-        private const string __CACHE_KEY = "Scorecard_By_Round_{roundId}";
+        private const string __CACHE_KEY = "Scorecard_By_Round:{roundId}";
 
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly ILogger<GetScorecardForRoundHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));

@@ -73,6 +73,5 @@ public sealed class IGProductsReportParser : IReportParser<TillProductLookupDto>
 
         return results;
     }
-
 }
 

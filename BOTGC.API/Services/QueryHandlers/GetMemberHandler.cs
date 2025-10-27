@@ -13,7 +13,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                   IDataProvider dataProvider,
                                   IReportParser<MemberDetailsDto> reportParser) : QueryHandlerBase<GetMemberQuery, MemberDetailsDto?>
     {
-        private const string __CACHE_KEY = "Membership_Details_{memberid}";
+        private const string __CACHE_KEY = "Membership_Details:{memberid}";
 
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly ILogger<GetMemberEventsHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));

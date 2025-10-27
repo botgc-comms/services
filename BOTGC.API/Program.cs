@@ -4,12 +4,14 @@ using BOTGC.API.Extensions;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services;
 using BOTGC.API.Services.ReportServices;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.OpenApi.Models;
 using RedLockNet.SERedis;
 using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
 using System.Globalization;
+using System.Text.Json.Serialization;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,8 +20,12 @@ var gb = CultureInfo.GetCultureInfo("en-GB");
 CultureInfo.DefaultThreadCurrentCulture = gb;
 CultureInfo.DefaultThreadCurrentUICulture = gb;
 
-builder.Services.AddControllers();
-
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

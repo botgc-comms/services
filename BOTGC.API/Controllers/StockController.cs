@@ -250,6 +250,38 @@ namespace BOTGC.API.Controllers
         }
 
         /// <summary>
+        /// Gets the current stock levels.
+        /// </summary>
+        /// <returns>A list of stock items with current levels.</returns>
+        [HttpGet("wasteSheet/Products")]
+        [ProducesResponseType(typeof(List<WastageProductDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> GetWastageProducts()
+        {
+            _logger.LogInformation("Fetching products for the wastage sheet...");
+
+            try
+            {
+                var query = new GetWastageProductsQuery();
+                var stockItems = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (stockItems == null || stockItems.Count == 0)
+                {
+                    _logger.LogWarning("No wastage products were found.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation("Successfully retrieved {Count} wastage products.", stockItems.Count);
+                return Ok(stockItems);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving wastage products.");
+                return Problem("An error occurred while retrieving wastage products.", statusCode: StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
         /// Adds an entry to the waste sheet for the specified day.
         /// </summary>
         /// <param name="request">Waste entry details.</param>

@@ -17,7 +17,7 @@ public class GetStockTakesHandler(IOptions<AppSettings> settings,
                                     IReportParser<StockTakeReportEntryDto> reportParser)
     : QueryHandlerBase<GetStockTakesQuery, List<StockTakeSummaryDto>>
 {
-    private const string __CACHE_KEY = "Stock_Takes_{fromDate}_{toDate}";
+    private const string __CACHE_KEY = "Stock_Takes:{fromDate}_{toDate}";
 
     private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
     private readonly ILogger<GetStockTakesHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));

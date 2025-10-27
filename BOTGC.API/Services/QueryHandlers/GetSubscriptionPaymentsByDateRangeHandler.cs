@@ -11,7 +11,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                                            IDataProvider dataProvider,
                                                            IReportParser<SubscriptionPaymentDto> reportParser) : QueryHandlerBase<GetSubscriptionPaymentsByDateRangeQuery, List<SubscriptionPaymentDto>>
     {
-        private const string __CACHE_KEY = "Membership_Subscriptions_{fromDate}_{toDate}";
+        private const string __CACHE_KEY = "Membership_Subscriptions:{fromDate}_{toDate}";
 
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly ILogger<GetSubscriptionPaymentsByDateRangeHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));

@@ -11,7 +11,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                         IDataProvider dataProvider,
                                         IReportParser<MemberEventDto> reportParser) : QueryHandlerBase<GetMemberEventsQuery, List<MemberEventDto>>
     {
-        private const string __CACHE_KEY = "Membership_Event_History_{fromDate}_{toDate}";
+        private const string __CACHE_KEY = "Membership_Event_History:{fromDate}_{toDate}";
 
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly ILogger<GetMemberEventsHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));

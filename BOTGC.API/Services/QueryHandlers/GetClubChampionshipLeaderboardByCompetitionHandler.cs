@@ -14,7 +14,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                                              IDataProvider dataProvider,
                                                              IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto> reportParser) : QueryHandlerBase<GetClubChampionshipLeaderboardByCompetitionQuery, ClubChampionshipLeaderBoardDto?>
     {
-        private const string __CACHE_KEY = "Leaderboard_Settings_{compid}";
+        private const string __CACHE_KEY = "Leaderboard_Settings:{compid}";
 
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));

@@ -79,6 +79,14 @@ public sealed class IGProductAdminReportParser : IReportParser<TillProductInform
                         .FirstOrDefault(s => !string.IsNullOrEmpty(s));
                 }
 
+                var extId = default(string);
+                var extIdMatch = Regex.Match(name, "^(.*?)\\s+\\[(\\d+)\\]\\s*$");
+                if (extIdMatch.Success)
+                {
+                    name = extIdMatch.Groups[1].Value.Trim();
+                    extId = extIdMatch.Groups[2].Value;
+                }
+
                 var unit = selectedOption?.GetAttributeValue("data-unit", null) ?? unitNode?.InnerText?.Trim();
                 var qty = ReadDecimal(qtyNode?.GetAttributeValue("value", null));
                 var sellingPrice = ReadDecimal(priceEachNode?.GetAttributeValue("value", null));
@@ -90,6 +98,7 @@ public sealed class IGProductAdminReportParser : IReportParser<TillProductInform
                 {
                     StockId = stockId,
                     Name = name,
+                    ExternalId = extId, 
                     Unit = unit,
                     Quantity = qty,
                     SellingPrice = sellingPrice

@@ -12,7 +12,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                                  IDataProvider dataProvider,
                                                  IReportParser<MemberCDHLookupDto> reportParser) : QueryHandlerBase<LookupMemberCDHIdDetailsQuery, MemberCDHLookupDto?>
     {
-        private const string __CACHE_KEY = "MemberCDHLookup_{cdhid}";
+        private const string __CACHE_KEY = "MemberCDHLookup:{cdhid}";
 
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly ILogger<LookupMemberCDHIdDetailsHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));

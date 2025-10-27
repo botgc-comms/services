@@ -12,7 +12,7 @@ public class GetTillProductsHandler(IOptions<AppSettings> settings,
                                     IReportParser<TillProductLookupDto> reportParser,
                                     IDataProvider dataProvider) : QueryHandlerBase<GetTillProductsQuery, List<TillProductInformationDto>?>
 {
-    private const string CacheKey = "Till_Products";
+    private const string __CacheKey = "Till_Products";
     private const int DegreeOfParallelism = 5;
 
     private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
@@ -27,7 +27,7 @@ public class GetTillProductsHandler(IOptions<AppSettings> settings,
         {
             var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.TillProductsReportUrl}";
             var ttl = TimeSpan.FromMinutes(_settings.Cache.MediumTerm_TTL_mins);
-            var tillProducts = await _dataProvider.GetData<TillProductLookupDto>(reportUrl, _reportParser, CacheKey, ttl);
+            var tillProducts = await _dataProvider.GetData<TillProductLookupDto>(reportUrl, _reportParser, __CacheKey, ttl);
 
             if (tillProducts == null || tillProducts.Count == 0)
             {
@@ -77,5 +77,3 @@ public class GetTillProductsHandler(IOptions<AppSettings> settings,
         }
     }
 }
-
-

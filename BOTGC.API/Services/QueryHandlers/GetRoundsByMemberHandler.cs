@@ -13,7 +13,7 @@ namespace BOTGC.API.Services.QueryHandlers
                                           IDataProvider dataProvider,
                                           IReportParser<RoundDto> reportParser) : QueryHandlerBase<GetRoundsByMemberIdQuery, List<RoundDto>>
     {
-        private const string __CACHE_KEY = "Rounds_By_Member_{memberId}";
+        private const string __CACHE_KEY = "Rounds_By_Member:{memberId}";
 
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
