@@ -126,7 +126,7 @@
         public string ActiveCompetitionsUrl { get; set; } = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=active&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20";
         public string CompetitionSettingsUrl { get; set; } = "/compadmin3.php?compid={compid}&tab=settings";
         public string CompetitionSummaryUrl { get; set; } = "/compadmin3.php?compid={compid}&tab=summary";
-        public string LeaderBoardUrl { get; set; } = "/competition.php?compid={compid}&preview=1&sort={grossOrNett}";
+        public string LeaderBoardUrl { get; set; } = "/competition.php?compid={compid}&preview=1&sort={grossOrNett}&div={division}";
         public string SecurityLogMobileOrders { get; set; } = "/log.php?search=Mobile+order&person=&start={today}&starttime=&end={today}&endtime=";
         public string UpdateMemberPropertiesUrl { get; set; } = "/member.php?memberid={memberid}&requestType=ajax&ajaxaction=saveparamvalue";
         public string ConfirmAddWastageUrl { get; set; } = "/tillstockcontrol.php?&requestType=ajax&ajaxaction=confirmaddwastage ";

@@ -6,6 +6,15 @@ namespace BOTGC.API.Dto
     {
         public List<LeaderboardPlayerDto> Players { get; set; }
         public CompetitionSettingsDto CompetitionDetails { get; set; }
+
+        public List<DivisionDto> Divisions { get; set; }
+    }
+
+    public class DivisionDto
+    {
+        public int Number { get; set; }
+        public int? Limit { get; set;  }
+        public List<LeaderboardPlayerDto> Players { get; set; } 
     }
 
     public class PlayerDtoBase: HateoasResource
