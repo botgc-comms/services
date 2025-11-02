@@ -59,6 +59,8 @@ public sealed class IGProductAdminReportParser : IReportParser<TillProductInform
             foreach (var row in componentRows)
             {
                 var hiddenId = row.SelectSingleNode(".//input[@type='hidden' and @name='stock_ids[]']");
+                if (hiddenId == null) continue;
+
                 var select = row.SelectSingleNode(".//select[contains(@class,'stockItems')]");
                 var unitNode = row.SelectSingleNode(".//p[contains(@class,'stock-unit')]");
                 var qtyNode = row.SelectSingleNode(".//input[@name='stock_amounts[]']");

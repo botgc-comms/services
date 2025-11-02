@@ -1,4 +1,7 @@
-﻿using BOTGC.POS.Hubs;
+﻿using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
+using BOTGC.POS.Hubs;
 using BOTGC.POS.Models;
 using BOTGC.POS.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -54,7 +57,7 @@ public class WastageController : Controller
     {
         if (string.IsNullOrWhiteSpace(q)) return Ok(Array.Empty<object>());
         var results = await _products.SearchAsync(q);
-        return Ok(results.Select(p => new { p.Id, p.Name, p.Category, p.igProductId, p.unit}));
+        return Ok(results.Select(p => new { p.Id, p.Name, p.Category, p.igProductId, p.unit }));
     }
 
     [HttpPost("/wastage/select-operator")]
@@ -75,7 +78,7 @@ public class WastageController : Controller
     public async Task<IActionResult> Log(
         [FromForm] Guid productId,
         [FromForm] long igProductId,
-        [FromForm] string unit, 
+        [FromForm] string unit,
         [FromForm] string productName,
         [FromForm] Guid? reasonId,
         [FromForm] string? customReason,
@@ -85,12 +88,9 @@ public class WastageController : Controller
         if (!Request.Cookies.TryGetValue(OperatorCookie, out var opCookie) || !Guid.TryParse(opCookie, out var operatorId))
             return Unauthorized();
 
-        var reasonText = customReason?.Trim();
-        if (reasonId.HasValue)
-        {
-            var r = await _reasons.GetAsync(reasonId.Value);
-            if (r != null) reasonText = r.Name;
-        }
+        if (quantity <= 0) return BadRequest(new { ok = false, message = "Quantity must be greater than zero." });
+
+        var reasonText = await ResolveReasonAsync(reasonId, customReason);
 
         var id = Guid.TryParse(clientId, out var parsed) ? parsed : Guid.NewGuid();
 
@@ -99,24 +99,23 @@ public class WastageController : Controller
             DateTimeOffset.UtcNow,
             operatorId,
             productId,
-            igProductId, 
-            unit, 
+            igProductId,
+            unit,
             productName,
-            reasonText ?? "Unspecified",
+            reasonText,
             quantity
         );
 
         await _waste.AddAsync(entry);
 
-        // Broadcast to all connected clients
         await _hub.Clients.All.SendAsync("EntryAdded", new
         {
             id = entry.Id,
             atIso = entry.At.ToString("o"),
             operatorId = entry.OperatorId,
             productId = entry.ProductId,
-            igProductId = entry.IGProductId, 
-            unit = entry.Unit, 
+            igProductId = entry.IGProductId,
+            unit = entry.Unit,
             productName = entry.ProductName,
             reason = entry.Reason,
             quantity = entry.Quantity
@@ -129,14 +128,142 @@ public class WastageController : Controller
     public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _waste.DeleteAsync(id);
-
-        if (!result)
-        {
-            return NotFound(new { ok = false, message = "Entry not found" });
-        }
+        if (!result) return NotFound(new { ok = false, message = "Entry not found" });
 
         await _hub.Clients.All.SendAsync("EntryDeleted", new { id });
 
         return Ok(new { ok = true });
+    }
+
+    [HttpGet("/wastage/product/{id:guid}")]
+    public async Task<IActionResult> Product(Guid id)
+    {
+        var details = await _products.GetDetailsAsync(id);
+        if (details is null) return NotFound();
+        return Ok(details);
+    }
+
+    [HttpPost("/wastage/log-product")]
+    public async Task<IActionResult> LogProduct(
+        [FromForm] Guid productId,
+        [FromForm] decimal quantity,
+        [FromForm] Guid? reasonId,
+        [FromForm] string? customReason,
+        [FromForm] string? clientId)
+    {
+        if (!Request.Cookies.TryGetValue(OperatorCookie, out var opCookie) || !Guid.TryParse(opCookie, out var operatorId))
+            return Unauthorized();
+
+        if (quantity <= 0) return BadRequest(new { ok = false, message = "Quantity must be greater than zero." });
+
+        var details = await _products.GetDetailsAsync(productId);
+        if (details is null)
+        {
+            var single = await _products.GetAsync(productId);
+            if (single is null) return BadRequest(new { ok = false, message = "Unknown product." });
+            details = new ProductDetails(single.Id, single.Name, single.Category, single.igProductId, single.unit, new List<ProductComponent>());
+        }
+
+        var reasonText = await ResolveReasonAsync(reasonId, customReason);
+
+        var batchId = Guid.TryParse(clientId, out var parsedBatch) ? parsedBatch : Guid.NewGuid();
+        var now = DateTimeOffset.UtcNow;
+        var toAdd = new List<WasteEntry>();
+
+        if (details.Components is { Count: > 0 })
+        {
+            foreach (var comp in details.Components)
+            {
+                if (comp.Id <= 0) continue;
+                var compQty = ((comp.Quantity ?? 1m) * quantity);
+                var entryId = DeterministicId($"waste:batch:{batchId}:comp:{comp.Id}:qty:{compQty.ToString("G29", CultureInfo.InvariantCulture)}");
+
+                toAdd.Add(new WasteEntry(
+                    entryId,
+                    now,
+                    operatorId,
+                    productId,
+                    comp.Id,
+                    comp.Unit ?? string.Empty,
+                    $"{details.Name} – {comp.Name}",
+                    reasonText,
+                    compQty
+                ));
+            }
+        }
+        else
+        {
+            var entryId = DeterministicId($"waste:batch:{batchId}:single:{details.igProductId}:qty:{quantity.ToString("G29", CultureInfo.InvariantCulture)}");
+
+            toAdd.Add(new WasteEntry(
+                entryId,
+                now,
+                operatorId,
+                productId,
+                details.igProductId,
+                details.Unit,
+                details.Name,
+                reasonText,
+                quantity
+            ));
+        }
+
+        var added = new List<WasteEntry>();
+        try
+        {
+            foreach (var e in toAdd)
+            {
+                await _waste.AddAsync(e);
+                added.Add(e);
+            }
+        }
+        catch
+        {
+            foreach (var e in added)
+            {
+                try { await _waste.DeleteAsync(e.Id); } catch { }
+            }
+            return StatusCode(500, new { ok = false, message = "Failed to log waste." });
+        }
+
+        var payload = added.Select(e => new
+        {
+            id = e.Id,
+            at = e.At.ToString("o"),
+            operatorId = e.OperatorId,
+            productId = e.ProductId,
+            igProductId = e.IGProductId,
+            unit = e.Unit,
+            productName = e.ProductName,
+            reason = e.Reason,
+            quantity = e.Quantity,
+            clientBatchId = batchId
+        }).ToList();
+
+        await _hub.Clients.All.SendAsync("EntriesAdded", payload);
+        foreach (var e in payload)
+        {
+            await _hub.Clients.All.SendAsync("EntryAdded", e);
+        }
+
+        return Ok(new { ok = true, count = added.Count, batchId });
+    }
+
+    private async Task<string> ResolveReasonAsync(Guid? reasonId, string? customReason)
+    {
+        var rt = customReason?.Trim();
+        if (reasonId.HasValue)
+        {
+            var r = await _reasons.GetAsync(reasonId.Value);
+            if (r != null) rt = r.Name;
+        }
+        return string.IsNullOrWhiteSpace(rt) ? "Unspecified" : rt;
+    }
+
+    private static Guid DeterministicId(string key)
+    {
+        using var md5 = MD5.Create();
+        var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(key));
+        return new Guid(hash);
     }
 }

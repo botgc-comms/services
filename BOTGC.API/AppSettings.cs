@@ -121,6 +121,7 @@
         public string NewMembershipApplicationUrl { get; set; } = "/membership_addmember.php?&requestType=ajax&ajaxaction=confirmadd";
         public string MemberCDHLookupUrl { get; set; } = "/membership_addmember.php?&requestType=ajax&ajaxaction=cdhidlookup";
         public string TeeBookingsUrl { get; set; } = "/teetimes.php?date={date}";
+        public string FinalisedCompetitionsUrl { get; set; } = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=finalised&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20";
         public string UpcomingCompetitionsUrl { get; set; } = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=upcoming&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20";
         public string ActiveCompetitionsUrl { get; set; } = "/compdash.php?tab=competitions&requestType=ajax&ajaxaction=morecomps&status=active&entrants=all&kind=all&teamsolo=all&year=all&offset=0&limit=20";
         public string CompetitionSettingsUrl { get; set; } = "/compadmin3.php?compid={compid}&tab=settings";

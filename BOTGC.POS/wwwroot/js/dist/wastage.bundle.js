@@ -356,33 +356,42 @@
                 }
             });
         });
-
-        function productChosen(id, name, igid, unit) {
+                function productChosen(id, name, igid, unit) {
             if (!getCookie(OP_COOKIE)) { ensureOperatorSelected(); return; }
             if (operatorExpired()) { clearOperatorSelection(); ensureOperatorSelected(); return; }
 
-            selectedProduct = { id, name, igid, unit };
-            selectedReasonId = null;
+            selectedProduct = { id, name, igid, unit, components: [] };
 
-            document.getElementById("reasonTitle").textContent = `Reason for: ${name}`;
+            // Fetch details (gets components + canonical unit/name from server)
+            fetch(`/wastage/product/${id}`)
+                .then(r => r.ok ? r.json() : null)
+                .then(d => {
+                    if (d) {
+                        selectedProduct.name = d.name;
+                        selectedProduct.igid = d.igProductId;
+                        selectedProduct.unit = d.unit;
+                        selectedProduct.components = Array.isArray(d.components) ? d.components : [];
+                    }
 
-            const customEl = document.getElementById("customReason");
-            customEl.value = "";
-            customEl.dataset.autofill = "0";
+                    document.getElementById("reasonTitle").textContent = `Reason for: ${selectedProduct.name}`;
 
-            document.getElementById("qty").value = "";
+                    const customEl = document.getElementById("customReason");
+                    customEl.value = "";
+                    customEl.dataset.autofill = "0";
 
-            // Unit badge + step tuning
-            const u = (unit || "").trim();
-            document.getElementById("qtyUnit").textContent = u ? `(${u})` : "";
+                    document.getElementById("qty").value = "";
 
-            const qtyInput = document.getElementById("qty");
-            if (/pint|half|ml|ltr|liter|litre/i.test(u)) qtyInput.step = "0.25";
-            else qtyInput.step = "1";
+                    const u = (selectedProduct.unit || "").trim();
+                    document.getElementById("qtyUnit").textContent = u ? `(${u})` : "";
 
-            applyUnitConstraints(unit);
+                    const qtyInput = document.getElementById("qty");
+                    if (/pint|half|ml|ltr|liter|litre/i.test(u)) qtyInput.step = "0.25";
+                    else qtyInput.step = "1";
 
-            document.getElementById("reasonModal").showModal();
+                    applyUnitConstraints(selectedProduct.unit);
+
+                    document.getElementById("reasonModal").showModal();
+                });
         }
 
         Array.from(document.querySelectorAll("#topTiles .tile")).forEach(t => {
@@ -412,8 +421,10 @@
             const catSlug = (s) =>
                 (s || "uncategorised")
                     .toLowerCase()
-                    .replace(/\s+/g, "-")
-                    .replace(/\//g, "-");
+                    .normalize("NFKD")
+                    .replace(/&/g, " ")
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-+|-+$/g, "");
 
             data.forEach(p => {
                 const slug = catSlug(p.category);
@@ -511,7 +522,6 @@
             if (cleared) selectedReasonId = null;
         }
 
-
         document.getElementById("logBtn").addEventListener("click", async () => {
             if (isLogging) return;
             if (!selectedProduct) return;
@@ -525,26 +535,9 @@
             const custom = customEl.value.trim();
             const isAuto = customEl.dataset.autofill === "1";
 
-            const fd = new FormData();
-            fd.append("productId", selectedProduct.id);
-            fd.append("igProductId", selectedProduct.igid);
-            fd.append("unit", selectedProduct.unit);
-            fd.append("productName", selectedProduct.name);
-            fd.append("quantity", qty.toString());
-
-            const clientId = guid();
-            fd.append("clientId", clientId);
-
-            if (selectedReasonId && isAuto) {
-                fd.append("reasonId", selectedReasonId);
-            } else if (custom) {
-                fd.append("customReason", custom);
-                selectedReasonId = null;
-            } else if (selectedReasonId) {
-                fd.append("reasonId", selectedReasonId);
-            } else {
-                alert("Please pick a reason or enter one."); return;
-            }
+            let reasonIdToSend = null;
+            if (selectedReasonId && isAuto) reasonIdToSend = selectedReasonId;
+            else if (!custom && selectedReasonId) reasonIdToSend = selectedReasonId;
 
             const btn = document.getElementById("logBtn");
             isLogging = true;
@@ -553,25 +546,31 @@
             btn.textContent = "Logging…";
 
             try {
-                const res = await fetch("/wastage/log", { method: "POST", body: fd });
+                const fd = new FormData();
+                fd.append("productId", selectedProduct.id);
+                fd.append("quantity", qty.toString());
+                const clientId = guid();
+                fd.append("clientId", clientId);
+                if (reasonIdToSend) fd.append("reasonId", reasonIdToSend);
+                else if (custom) fd.append("customReason", custom);
+
+                const res = await fetch("/wastage/log-product", { method: "POST", body: fd });
                 if (res.status === 401) { clearOperatorSelection(); ensureOperatorSelected(); return; }
                 if (!res.ok) { alert("Failed to log waste."); return; }
 
-                // Successful action = operator activity; refresh the timeout.
                 markOperatorActivity();
                 document.getElementById("reasonModal").close();
 
                 selectedProduct = null;
                 selectedReasonId = null;
                 document.getElementById("qty").value = "";
-
-                const customEl = document.getElementById("customReason");
                 customEl.value = "";
                 customEl.dataset.autofill = "0";
                 document.querySelectorAll(".reason-btn.is-selected").forEach(x => x.classList.remove("is-selected"));
 
                 await pollSheet();
-
+            } catch {
+                alert("Failed to log waste.");
             } finally {
                 isLogging = false;
                 btn.disabled = false;
@@ -584,10 +583,15 @@
         function startSignalR() {
             connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/wastage")
+                .withUrl("/hubs/wastage")
                 .withAutomaticReconnect()
                 .build();
 
             connection.on("EntryAdded", async () => {
+                await pollSheet();
+            });
+
+            connection.on("EntriesAdded", async () => {
                 await pollSheet();
             });
 

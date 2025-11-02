@@ -49,7 +49,6 @@ var gatekeeper = new GatekeeperOptions
     SharedSecret = builder.Configuration["AppSettings:Access:SharedSecret"] ?? "",
     CookieName = builder.Configuration["AppSettings:Access:CookieName"] ?? "pos_access",
     RedirectUrl = "/access?returnUrl={returnUrl}",
-    // AllowedCidrs = new[] { "10.0.0.0/8", "192.168.0.0/16" } // optional
 };
 app.UseMiddleware<GatekeeperMiddleware>(gatekeeper);
 

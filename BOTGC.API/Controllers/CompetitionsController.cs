@@ -1,16 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
-using BOTGC.API.Services;
-using System.Runtime;
-using System.Threading;
 using MediatR;
 using BOTGC.API.Services.Queries;
-using BOTGC.API.Services.QueryHandlers;
 
 namespace BOTGC.API.Controllers
 {
@@ -66,29 +60,52 @@ namespace BOTGC.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Returns competitions filtered by status (active, future, and/or finalised).
+        /// </summary>
+        /// <remarks>
+        /// Defaults to <c>?active=true&amp;future=true&amp;finalised=false</c>.
+        /// Examples:
+        /// GET /api/stock?active=true&amp;future=true
+        /// GET /api/stock?finalised=true
+        /// GET /api/stock?active=true&amp;finalised=true
+        /// </remarks>
+        /// <param name="active">Include currently active competitions. Default true.</param>
+        /// <param name="future">Include upcoming competitions. Default true.</param>
+        /// <param name="finalised">Include finalised competitions. Default false.</param>
+        /// <response code="200">A list of competitions matching the supplied filters.</response>
+        /// <response code="204">No competitions matched the supplied filters.</response>
+        /// <response code="500">An error occurred while retrieving competitions.</response>
         [HttpGet("")]
-        public async Task<IActionResult> GetCurrentAndFutureCompetitions()
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(List<CompetitionDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetCompetitions(
+            [FromQuery] bool active = true,
+            [FromQuery] bool future = true,
+            [FromQuery] bool finalised = false)
         {
-            _logger.LogInformation($"Fetching current and future competitions...");
+            _logger.LogInformation("Fetching competitions with filters => active: {Active}, future: {Future}, finalised: {Finalised}.", active, future, finalised);
 
             try
             {
-                var query = new GetActiveAndFutureCompetitionsQuery();
+                var query = new GetActiveAndFutureCompetitionsQuery(active, future, finalised);
                 var competitions = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (competitions == null || competitions.Count == 0)
                 {
-                    _logger.LogWarning($"No competitions found.");
+                    _logger.LogWarning("No competitions found for the supplied filters.");
                     return NoContent();
                 }
 
-                _logger.LogInformation($"Successfully retrieved {competitions.Count} competitions.");
+                _logger.LogInformation("Successfully retrieved {Count} competitions.", competitions.Count);
                 return Ok(competitions);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error retrieving competitions.");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving current and future competitions.");
+                _logger.LogError(ex, "Error retrieving competitions.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving competitions.");
             }
         }
 

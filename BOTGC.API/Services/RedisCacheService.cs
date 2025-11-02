@@ -25,8 +25,11 @@ namespace BOTGC.API.Services
 
         public async Task<T?> GetAsync<T>(string key, bool force = false) where T : class
         {
+            T retVal = null;
+
             var gate = KeyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
             await gate.WaitAsync().ConfigureAwait(false);
+
             try
             {
                 if (!force && ShouldSkipCache() && !IsKeyWarmedForThisRequest(key))
@@ -38,12 +41,19 @@ namespace BOTGC.API.Services
                 var data = await _cache.GetStringAsync(key).ConfigureAwait(false);
                 if (string.IsNullOrEmpty(data)) return null;
 
-                return JsonSerializer.Deserialize<T>(data);
+                retVal = JsonSerializer.Deserialize<T>(data);
+            }
+            catch (Exception ex)
+            {
+                retVal = default(T);
+                _logger.LogError(ex, "Error retrieving key '{Key}' from cache.", key);      
             }
             finally
             {
                 gate.Release();
             }
+
+            return retVal;
         }
 
         public async Task SetAsync<T>(string key, T value, TimeSpan expiration) where T : class
