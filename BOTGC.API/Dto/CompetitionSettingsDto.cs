@@ -17,7 +17,8 @@ namespace BOTGC.API.Dto
         public string Format { get; set; }
         public string ResultsDisplay { get; set; }
         public DateTime Date { get; set; }
-        public Dictionary<string, int>? MultiPartCompetition { get; set; }
+        public Dictionary<string, int>? MultiPartCompetition { get; set;     }
+        public CompetitionSignupSettingsDto SignupSettings { get; set; }
 
         public Dictionary<string, int> CoursePar { get; set; } = new Dictionary<string, int>
         {
@@ -58,5 +59,21 @@ namespace BOTGC.API.Dto
     {
         public int? Id { get; set; }
         public Dictionary<string, int>? MultiPartCompetition { get; set; }
+    }
+
+    public sealed class CompetitionSignupSettingsDto: HateoasResource
+    {
+        public bool? CompetitionPaymentsRequired { get; set; }
+        public List<SignupChargeDto> Charges { get; set; } = new List<SignupChargeDto>();
+        public bool? PaymentsFromMemberAccounts { get; set; }
+        public bool? DirectPayments { get; set; }
+        public string? PaymentDue { get; set; }
+    }
+
+    public sealed class SignupChargeDto
+    {
+        public string? Description { get; set; }
+        public bool? Required { get; set; }
+        public decimal? Amount { get; set; }
     }
 }
