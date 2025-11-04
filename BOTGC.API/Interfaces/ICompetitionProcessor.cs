@@ -6,5 +6,4 @@ namespace BOTGC.API.Interfaces
     {
         Task ProcessCompetitionAsync(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken);
     }
-
 }

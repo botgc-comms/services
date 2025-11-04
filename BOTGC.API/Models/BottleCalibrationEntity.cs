@@ -11,7 +11,7 @@ public enum BottleMetricSource
     Inferred = 3   // copied from a similar product (brand/size), with confidence
 }
 
-public sealed class BottleCalibrationEntity : ITableEntity
+public sealed partial class BottleCalibrationEntity : ITableEntity
 {
     public string PartitionKey { get; set; } = "BottleCalibration";
     public string RowKey { get; set; } = string.Empty;

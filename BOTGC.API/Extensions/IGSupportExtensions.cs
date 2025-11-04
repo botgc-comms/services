@@ -12,6 +12,7 @@ using BOTGC.API.Services.Queries;
 using BOTGC.API.Models;
 using BOTGC.API.Services.Behaviours;
 using MediatR;
+using static BOTGC.API.Models.BottleCalibrationEntity;
 
 namespace BOTGC.API.Extensions
 {
@@ -31,6 +32,9 @@ namespace BOTGC.API.Extensions
             var httpClient = new HttpClient(httpHandler);
 
             services.AddAzureTableStore<BottleCalibrationEntity>("BottleCalibration");
+            services.AddAzureTableStore<CompetitionPayoutHeaderEntity>("CompetitionPayoutHeader");
+            services.AddAzureTableStore<CompetitionPayoutWinnerEntity>("CompetitionPayoutWinner");
+
 
             services.AddSingleton(cookieContainer);
             services.AddSingleton(httpClient);
@@ -41,31 +45,6 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IGLoginService>();
 
             services.AddIGReportParsers();
-
-            
-            //services.AddSingleton<IReportParser<MemberDto>, IGMemberReportParser>();
-            //services.AddSingleton<IReportParser<RoundDto>, IGRoundReportParser>();
-            //services.AddSingleton<IReportParser<PlayerIdLookupDto>, IGPlayerIdLookupReportParser>();
-            //services.AddSingleton<IReportParser<ScorecardDto>, IGScorecardReportParser>();
-            //services.AddSingleton<IReportParser<MemberEventDto>, IGMemberEventsReportParser>();
-            //services.AddSingleton<IReportParser<TeeSheetDto>, IGTeeSheetReportParser>();
-            //services.AddSingleton<IReportParser<CompetitionDto>, IGCompetitionReportParser>();
-            //services.AddSingleton<IReportParser<CompetitionSettingsDto>, IGCompetitionSettingsReportParser>();
-            //services.AddSingleton<IReportParser<CompetitionSummaryDto>, IGCompetitionSummaryReportParser>();
-            //services.AddSingleton<IReportParser<SecurityLogEntryDto>, IGSecurityLogReportParser>();
-            //services.AddSingleton<IReportParser<MemberCDHLookupDto>, IGCDHLookupReportParser>();
-            //services.AddSingleton<IReportParser<NewMemberResponseDto>, IGNewMemberResponseReportParser>();
-            //services.AddSingleton<IReportParser<StockItemDto>, IGStockItemReportParser>();
-            //services.AddSingleton<IReportParser<SubscriptionPaymentDto>, IGSubscriptionPaymentsReportParser>();
-            //services.AddSingleton<IReportParser<MemberDetailsDto>, IGMemberDetailsReportParser>();
-            //services.AddSingleton<IReportParser<HandicapIndexPointDto>, IGHandicapIndexHistoryReportParser>();
-            //services.AddSingleton<IReportParser<TillOperatorDto>, IGTillOperatorReportParser>();
-            //services.AddSingleton<IReportParser<NewMemberLookupDto>, IGNewMembersReportParser>();
-            //services.AddSingleton<IReportParser<StockTakeDto>, IGStockTakeListReportParser>();
-            //services.AddSingleton<IReportParser<StockTakeReportEntryDto>, IGStockTakeReportParser>();
-            //services.AddSingleton<IReportParser<StockItemTransactionReportEntryDto>, IGStockItemTransactionsReportParser>();
-            //services.AddSingleton<IReportParserWithMetadata<LeaderBoardDto, CompetitionSettingsDto>, IGLeaderboardReportParser>();
-            //services.AddSingleton<IReportParserWithMetadata<ChampionshipLeaderboardPlayerDto, CompetitionSettingsDto>, IGClubChampionshipLeaderboardReportParser>();
 
             services.AddSingleton<IQueueService<NewMemberApplicationDto>, MembershipApplicationQueueService>();
             services.AddSingleton<IQueueService<NewMemberApplicationResultDto>, NewMemberAddedQueueService>();
@@ -79,7 +58,9 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<ITeeTimeUsageTaskQueue, TeeTimeUsageTaskQueue>();
             services.AddSingleton<IStockAnalysisTaskQueue, StockLevelAnalysisTaskQueue>();
             services.AddSingleton<ICompetitionTaskQueue, CompetitionTaskQueue>();
-            
+            services.AddSingleton<IPrizeConfigProvider, CompetitionPrizeConfigProvider>();
+            services.AddSingleton<ICompetitionPayoutCalculator, CompetitionPayoutCalculator>(); 
+
             services.AddSingleton<ICompetitionProcessorResolver, CompetitionProcessorResolver>();
 
             services.AddSingleton<IMemberApplicationFormPdfGeneratorService, QuestPDFMemberApplicationFormGenerator>();
@@ -87,6 +68,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<ITaskBoardService, MondayTaskBoardService>();
             services.AddSingleton<IBottleVolumeService, BottleVolumeService>();
             services.AddSingleton<IBottleWeightDataSource, BottleWeightService>();
+            services.AddSingleton<ICompetitionPayoutStore, CompetitionPayoutStore>();
 
             services.AddHostedService<CompetitionBackgroundService>();
             services.AddHostedService<TeeTimeUsageBackgroundService>();

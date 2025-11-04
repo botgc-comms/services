@@ -43,6 +43,16 @@ namespace BOTGC.API.Controllers
             return Accepted(new { Message = "Competition status retrieval started." });
         }
 
+        [HttpPost("winnings/calculate")]
+        public async Task<IActionResult> CalculateWinnings()
+        {
+            var command = new ProcessFinalisedCompetitionPayoutsCommand();
+
+            var competitionsProcessed = await _mediator.Send(command, HttpContext.RequestAborted);  
+
+            return Accepted(new { Message = $"Winnings have been calculated for {competitionsProcessed} competitions." });
+        }
+
         [HttpGet("juniorEclectic/results")]
         public async Task<IActionResult> GetJuniorEclecticResults([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
         {

@@ -1,4 +1,6 @@
-﻿namespace BOTGC.API
+﻿using System.Text.Json.Serialization;
+
+namespace BOTGC.API
 {
     public class AppSettings
     {
@@ -34,6 +36,8 @@
 
         public string PlayingMemberExpression { get; set; } = "^(?:5|6|7|Intermediate|MX).*?$";
         public string NonPlayingMemberExpression { get; set; } = "^(?!5|6|7|Intermediate|MX|1894|Corporate|Staff|Professional|Test).+$";
+
+        public PrizePayoutOptions PrizePayout { get; set; } = new();
 
     }
 
@@ -183,5 +187,44 @@
         public List<string> KitchenDivisions { get; init; } = new(); // e.g. ["MEAT & POULTRY","FISH","DAIRY","BAKERY","DESSERTS & ICE CREAM", "FRUIT & VEG", "SAUCES", "DRY GOODS", "PREPARED MEALS", "HOT DRINKS"]
         public List<string> BeverageDivisions { get; init; } = new(); // e.g. ["WINES","MINERALS","SNACKS","BEER CANS","DRAUGHT BEER", "BOTTLED BEER", "FORTIFIED WINES"]
         public decimal TolerancePercent { get; init; } = 10m;
+    }
+
+    public sealed class PrizePayoutOptions
+    {
+        public string EligibilityExpression { get; set; } = "^.*?(?:Stableford|Medal).*?[#\\d+].*?$";   
+        public List<PrizeRuleSet> RuleSets { get; set; } = new();
+    }
+
+    public sealed class PrizeRuleSet
+    {
+        public DateTime DateFrom { get; set; }
+
+        public decimal PayoutPercent { get; set; }
+
+        public decimal EntryFeeFallback { get; set; }
+
+        public CharityRuleConfig Charity { get; set; } = new();
+
+        public PrizeSplits Splits { get; set; } = new();
+    }
+
+    public sealed class CharityRuleConfig
+    {
+        public bool Enabled { get; set; }
+
+        public int? ExemptWhenDivisionsEquals { get; set; }
+
+        public decimal? BaselineEntryFee { get; set; }
+
+        public decimal? PercentOfRevenue { get; set; }
+
+        public decimal? FixedAmount { get; set; }
+    }
+
+    public sealed class PrizeSplits
+    {
+        public List<decimal> IndividualTop3 { get; set; } = new() { 0.50m, 0.33m, 0.17m };
+
+        public List<decimal> PairsTeamTop5 { get; set; } = new() { 0.30m, 0.25m, 0.20m, 0.15m, 0.10m };
     }
 }

@@ -8,5 +8,4 @@
         public required DateTime DatePlayed { get; set; }
         public required string ExclusionReason { get; set; }
     }
-
 }

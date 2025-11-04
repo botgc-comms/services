@@ -7,11 +7,11 @@ using Microsoft.Extensions.Options;
 
 namespace BOTGC.API.Services.QueryHandlers
 {
-    public class GetActiveAndFutureCompetitionsHandler(IOptions<AppSettings> settings,
-                                                       IMediator mediator,
-                                                       ILogger<GetActiveAndFutureCompetitionsHandler> logger,
-                                                       IDataProvider dataProvider,
-                                                       IReportParser<CompetitionDto> reportParser) : QueryHandlerBase<GetActiveAndFutureCompetitionsQuery, List<CompetitionDto>>
+    public class GetCompetitionsHandler(IOptions<AppSettings> settings,
+                                        IMediator mediator,
+                                        ILogger<GetCompetitionsHandler> logger,
+                                        IDataProvider dataProvider,
+                                        IReportParser<CompetitionDto> reportParser) : QueryHandlerBase<GetActiveAndFutureCompetitionsQuery, List<CompetitionDto>>
     {
         private const string __CACHE_ACTIVECOMPETITIONS = "Active_Competitions";
         private const string __CACHE_FUTURECOMPETITIONS = "Future_Competitions";
@@ -19,7 +19,7 @@ namespace BOTGC.API.Services.QueryHandlers
 
         private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        private readonly ILogger<GetActiveAndFutureCompetitionsHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly ILogger<GetCompetitionsHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         private readonly IDataProvider _dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
         private readonly IReportParser<CompetitionDto> _reportParser = reportParser ?? throw new ArgumentNullException(nameof(reportParser));
 
