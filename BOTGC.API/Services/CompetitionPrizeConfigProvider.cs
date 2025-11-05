@@ -16,8 +16,19 @@ public sealed class CompetitionPrizeConfigProvider : IPrizeConfigProvider
     public PrizeRuleSet GetEffective(DateTime competitionDate)
     {
         var date = competitionDate.Date;
-        var pick = _sets.Where(s => s.DateFrom.Date <= date).OrderByDescending(s => s.DateFrom).FirstOrDefault();
-        if (pick != null) return pick;
+        var pick = _sets.Where(s => s.DateFrom.Date <= date)
+                        .OrderByDescending(s => s.DateFrom)
+                        .FirstOrDefault();
+
+        if (pick != null)
+        {
+            pick.Splits ??= new PrizeSplits();
+            if (pick.Splits.IndividualTop3 == null || pick.Splits.IndividualTop3.Count == 0)
+                pick.Splits.IndividualTop3 = new() { 0.50m, 0.33m, 0.17m };
+            if (pick.Splits.PairsTeamTop5 == null || pick.Splits.PairsTeamTop5.Count == 0)
+                pick.Splits.PairsTeamTop5 = new() { 0.30m, 0.25m, 0.20m, 0.15m, 0.10m };
+            return pick;
+        }
 
         return new PrizeRuleSet
         {
@@ -30,9 +41,14 @@ public sealed class CompetitionPrizeConfigProvider : IPrizeConfigProvider
                 ExemptWhenDivisionsEquals = 4,
                 BaselineEntryFee = 4.00m
             },
-            Splits = new PrizeSplits()
+            Splits = new PrizeSplits
+            {
+                IndividualTop3 = new() { 0.50m, 0.33m, 0.17m },
+                PairsTeamTop5 = new() { 0.30m, 0.25m, 0.20m, 0.15m, 0.10m }
+            }
         };
     }
+
 
     public decimal ComputeCharityAmount(PrizeRuleSet cfg, int divisions, int entrants, decimal entryFee, decimal revenue)
     {

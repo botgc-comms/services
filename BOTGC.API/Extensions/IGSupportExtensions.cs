@@ -68,7 +68,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<ITaskBoardService, MondayTaskBoardService>();
             services.AddSingleton<IBottleVolumeService, BottleVolumeService>();
             services.AddSingleton<IBottleWeightDataSource, BottleWeightService>();
-            services.AddSingleton<ICompetitionPayoutStore, CompetitionPayoutStore>();
+            services.AddSingleton<ICompetitionPayoutStore, CompetitionPayoutService>();
 
             services.AddHostedService<CompetitionBackgroundService>();
             services.AddHostedService<TeeTimeUsageBackgroundService>();

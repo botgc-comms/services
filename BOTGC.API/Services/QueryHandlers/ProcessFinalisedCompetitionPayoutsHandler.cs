@@ -98,7 +98,6 @@ public sealed class ProcessFinalisedCompetitionPayoutsHandler(
         if (leaderboard is null) return false;
 
         var entrants = leaderboard.Players?.Where(p => p.PlayerId.HasValue).Select(p => p.PlayerId!.Value).Distinct().Count() ?? 0;
-        if (entrants == 0) return false;
 
         var effective = _prizeConfig.GetEffective(comp.Date!.Value);
         var entryFee = ResolveEntryFee(settings, effective);
@@ -107,10 +106,21 @@ public sealed class ProcessFinalisedCompetitionPayoutsHandler(
         var charityAmount = _prizeConfig.ComputeCharityAmount(effective, divisions, entrants, entryFee, revenue);
 
         var (ruleName, split) = _prizeConfig.GetSplitForFormat(effective, settings.Format);
-        var rule = new PrizeRule(ruleName, split, residualToLast: true);
-        var maxPlaces = rule.Splits.Count;
+
+        // Normalise and ensure the whole division pot is allocated.
+        // If splits sum < 1, the remainder is added to the last place;
+        // if > 1, they’re scaled to sum to 1.
+        var normalisedSplits = NormaliseAndFill(split);
+        var rule = new PrizeRule(ruleName, normalisedSplits, residualToLast: false);
+        var maxPlaces = normalisedSplits.Count;
 
         var winnersPerDivision = BuildDivisionInputs(leaderboard);
+
+        // Pay only the top N places, where N = split count.
+        foreach (var d in winnersPerDivision)
+        {
+            d.OrderedByPosition = d.OrderedByPosition.Take(maxPlaces).ToList();
+        }
 
         var input = new CompetitionPayoutInput
         {
@@ -186,6 +196,39 @@ public sealed class ProcessFinalisedCompetitionPayoutsHandler(
                 DivisionName = "Division 1",
                 OrderedByPosition = ordered
             });
+        }
+
+        return list;
+    }
+
+    private static IReadOnlyList<decimal> NormaliseAndFill(IReadOnlyList<decimal> splits)
+    {
+        var list = (splits ?? Array.Empty<decimal>()).ToList();
+        if (list.Count == 0) return new List<decimal> { 1m };
+
+        // Guard against negatives.
+        for (int i = 0; i < list.Count; i++)
+            if (list[i] < 0m) list[i] = 0m;
+
+        var sum = list.Sum();
+        if (sum <= 0m)
+        {
+            // All zeros – pay winner takes all.
+            list[0] = 1m;
+            for (int i = 1; i < list.Count; i++) list[i] = 0m;
+            return list;
+        }
+
+        if (sum < 1m)
+        {
+            // Give the residual to the last paid place.
+            list[list.Count - 1] += (1m - sum);
+        }
+        else if (sum > 1m)
+        {
+            // Scale to sum to 1.
+            for (int i = 0; i < list.Count; i++)
+                list[i] = list[i] / sum;
         }
 
         return list;

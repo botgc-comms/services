@@ -17,13 +17,13 @@ public sealed partial class BottleCalibrationEntity
         public string CompetitionName { get; set; } = string.Empty;
         public DateTime CompetitionDate { get; set; }
         public int Entrants { get; set; }
-        public decimal EntryFee { get; set; }
+        public double EntryFee { get; set; }
         public int Divisions { get; set; }
-        public decimal PayoutPercent { get; set; }
-        public decimal Revenue { get; set; }
-        public decimal PrizePot { get; set; }
-        public decimal CharityAmount { get; set; }
-        public decimal ClubIncome { get; set; }
+        public double PayoutPercent { get; set; }
+        public double Revenue { get; set; }
+        public double PrizePot { get; set; }
+        public double CharityAmount { get; set; }
+        public double ClubIncome { get; set; }
         public string RuleSet { get; set; } = string.Empty;
         public string Currency { get; set; } = "GBP";
 
@@ -41,13 +41,13 @@ public sealed partial class BottleCalibrationEntity
                 CompetitionName = r.CompetitionName,
                 CompetitionDate = dateUtc,
                 Entrants = r.Entrants,
-                EntryFee = r.EntryFee,
+                EntryFee = (double)r.EntryFee,
                 Divisions = r.Divisions,
-                PayoutPercent = r.PayoutPercent,
-                Revenue = r.Revenue,
-                PrizePot = r.PrizePot,
-                CharityAmount = r.CharityAmount,
-                ClubIncome = r.ClubIncome,
+                PayoutPercent = (double)r.PayoutPercent,
+                Revenue = (double)r.Revenue,
+                PrizePot = (double)r.PrizePot,
+                CharityAmount = (double)r.CharityAmount,
+                ClubIncome = (double)r.ClubIncome,
                 RuleSet = r.RuleSet,
                 Currency = r.Currency
             };

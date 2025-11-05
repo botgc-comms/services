@@ -17,7 +17,7 @@ public sealed class CompetitionPayoutWinnerEntity : ITableEntity
     public int Position { get; set; }
     public string CompetitorId { get; set; } = string.Empty;
     public string CompetitorName { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
+    public double Amount { get; set; }
     public string Currency { get; set; } = "GBP";
 
     public static CompetitionPayoutWinnerEntity FromWinner(WinnerPayoutDto w)
@@ -32,7 +32,7 @@ public sealed class CompetitionPayoutWinnerEntity : ITableEntity
             Position = w.Position,
             CompetitorId = w.CompetitorId,
             CompetitorName = w.CompetitorName,
-            Amount = w.Amount,
+            Amount = (double)w.Amount,
             Currency = w.Currency
         };
     }
