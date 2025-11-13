@@ -99,7 +99,7 @@ namespace BOTGC.API.Services.BackgroundServices
                         if (taskItemId != null)
                         {
                             var fileName = $"MembershipApplication_{resultDto.Application.ApplicationId}.pdf";
-                            await _taskBoardService.AttachFile(taskItemId, pdfBytes, fileName);
+                            await _taskBoardService.AttachMemberApplicationForm(taskItemId, pdfBytes, fileName);
 
                             _logger.LogInformation("Successfully processed and attached PDF for ApplicationId {ApplicationId}.", resultDto.Application.ApplicationId);
 

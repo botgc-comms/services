@@ -52,6 +52,9 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IQueueService<WasteEntryCommandDto>, StockWastageQueueService>();
             services.AddSingleton<IQueueService<ProcessStockTakeCommand>, StockTakeQueueService>();
             services.AddSingleton<IQueueService<StockTakeCompletedCommand>, StockTakeCompletedQueueService>();
+            services.AddSingleton<IQueueService<ProcessPrizeInvoiceCommand>, PrizeInvoiceQueueService>();
+            services.AddSingleton<IQueueService<SendPrizeNotificationEmailCommand>, PrizeNotificationsQueueService>(); 
+            services.AddSingleton<IQueueService<ProcessCompetitionWinningsBatchCompletedCommand>, NewCompetitionPrizesCalcualtedQueueService>();  
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 
@@ -59,16 +62,19 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IStockAnalysisTaskQueue, StockLevelAnalysisTaskQueue>();
             services.AddSingleton<ICompetitionTaskQueue, CompetitionTaskQueue>();
             services.AddSingleton<IPrizeConfigProvider, CompetitionPrizeConfigProvider>();
-            services.AddSingleton<ICompetitionPayoutCalculator, CompetitionPayoutCalculator>(); 
+            services.AddSingleton<ICompetitionPayoutCalculator, CompetitionPayoutCalculator>();
+            services.AddSingleton<ICmsEncodingHelper, CmsEncodingHelper>();
 
             services.AddSingleton<ICompetitionProcessorResolver, CompetitionProcessorResolver>();
 
             services.AddSingleton<IMemberApplicationFormPdfGeneratorService, QuestPDFMemberApplicationFormGenerator>();
+            services.AddSingleton<ICompetitionPrizeInvoicePdfGeneratorService, QuestPDFCompetitionPrizeInvoiceGenerator>();
 
             services.AddSingleton<ITaskBoardService, MondayTaskBoardService>();
             services.AddSingleton<IBottleVolumeService, BottleVolumeService>();
             services.AddSingleton<IBottleWeightDataSource, BottleWeightService>();
             services.AddSingleton<ICompetitionPayoutStore, CompetitionPayoutService>();
+            services.AddSingleton<IBlobStorageService, AzureBlobStorageService>();       
 
             services.AddHostedService<CompetitionBackgroundService>();
             services.AddHostedService<TeeTimeUsageBackgroundService>();
@@ -82,7 +88,10 @@ namespace BOTGC.API.Extensions
             services.AddHostedService<WasteSheetDailyFlusher>();
             services.AddHostedService<StockTakeDailyFlusher>();
             services.AddHostedService<StockLevelEnqueueScheduler>();
-            
+            services.AddHostedService<CompetitionResultsPageUpdateQueueProcessor>();
+            services.AddHostedService<PrizeNotificationsQueueProcessor>();
+            services.AddHostedService<PrizeInvoiceQueueProcessor>();
+
             // Register MediatR and scan for handlers in your assembly
             services.AddMediatR(cfg =>
             {

@@ -1,4 +1,5 @@
-﻿using BOTGC.API.Common;
+﻿using BOTGC.API.Dto;
+using BOTGC.API.IGScrapers;
 
 namespace BOTGC.API.Services.Queries
 {

@@ -3,6 +3,7 @@ using BOTGC.API.Interfaces;
 using BOTGC.API.Services.Queries;
 using MediatR;
 using Microsoft.Extensions.Options;
+using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -14,7 +15,10 @@ public sealed class ProcessFinalisedCompetitionPayoutsHandler(
         IMediator mediator,
         ICompetitionPayoutCalculator payoutCalculator,
         ICompetitionPayoutStore payoutStore,
-        IPrizeConfigProvider prizeConfig
+        IPrizeConfigProvider prizeConfig,
+        IQueueService<SendPrizeNotificationEmailCommand> playerNotificationsQueueService,
+        IQueueService<ProcessPrizeInvoiceCommand> prizeInvoiceQueueService,
+        IQueueService<ProcessCompetitionWinningsBatchCompletedCommand> prizeCalculationsCompleteQueueService
     ) : QueryHandlerBase<ProcessFinalisedCompetitionPayoutsCommand, int>
 {
     private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
@@ -23,13 +27,41 @@ public sealed class ProcessFinalisedCompetitionPayoutsHandler(
     private readonly ICompetitionPayoutCalculator _payoutCalculator = payoutCalculator ?? throw new ArgumentNullException(nameof(payoutCalculator));
     private readonly ICompetitionPayoutStore _payoutStore = payoutStore ?? throw new ArgumentNullException(nameof(payoutStore));
     private readonly IPrizeConfigProvider _prizeConfig = prizeConfig ?? throw new ArgumentNullException(nameof(prizeConfig));
+    private readonly IQueueService<SendPrizeNotificationEmailCommand> _playerNotificationsQueueService = playerNotificationsQueueService;
+    private readonly IQueueService<ProcessPrizeInvoiceCommand> _prizeInvoiceQueueService = prizeInvoiceQueueService;
+    private readonly IQueueService<ProcessCompetitionWinningsBatchCompletedCommand> _prizeCalculationsCompleteQueueService = prizeCalculationsCompleteQueueService;
 
     public override async Task<int> Handle(ProcessFinalisedCompetitionPayoutsCommand request, CancellationToken cancellationToken)
     {
-        var eligibilityExpression = new Regex(_settings.PrizePayout.EligibilityExpression ?? ".*", RegexOptions.IgnoreCase);    
+        var eligibilityExpression = new Regex(_settings.PrizePayout.EligibilityExpression ?? ".*", RegexOptions.IgnoreCase);
+        var excludeExpression = new Regex(_settings.PrizePayout.ExclusionExpression ?? "^$", RegexOptions.IgnoreCase);
 
-        var competitions = await _mediator.Send(new GetActiveAndFutureCompetitionsQuery(Active: false, Future: false, Finalised: true), cancellationToken);
-        if (competitions is null || competitions.Count == 0) return 0;
+        var competitions = await _mediator.Send(
+            new GetCompetitionsQuery(Active: false, Future: false, Finalised: true),
+            cancellationToken);
+
+        if (competitions is null || competitions.Count == 0)
+            return 0;
+
+        var childIds = competitions
+            .Where(c => c.MultiPartCompetition is { Count: > 0 })
+            .SelectMany(c => c.MultiPartCompetition!.Keys)
+            .Select(k => int.TryParse(k, out var id) ? id : 0)
+            .Where(id => id > 0)
+            .ToHashSet();
+
+        if (childIds.Count > 0)
+        {
+            _logger.LogInformation("Excluding {Count} child competitions from payout processing: {Ids}.",
+                childIds.Count, string.Join(", ", childIds.OrderBy(x => x)));
+        }
+
+        competitions = competitions
+            .Where(c => c.Id.HasValue && !childIds.Contains(c.Id.Value))
+            .ToList();
+
+        if (competitions.Count == 0)
+            return 0;
 
         var toProcess = new List<CompetitionDto>();
 
@@ -43,35 +75,63 @@ public sealed class ProcessFinalisedCompetitionPayoutsHandler(
                 date = compSettings?.Date;
                 comp.Date = date;
             }
-            if (!date.HasValue) continue;
+
+            if (!date.HasValue)
+                continue;
 
             var exists = await _payoutStore.ExistsAsync(comp.Id!.Value, date.Value, cancellationToken);
-            if (!exists) toProcess.Add(comp);
+            if (!exists)
+                toProcess.Add(comp);
         }
 
-        if (toProcess.Count == 0) return 0;
+        if (toProcess.Count == 0)
+            return 0;
 
-        var processed = 0;
+        var notEligible = toProcess.Where(tp => !eligibilityExpression.IsMatch(tp.Name)).ToList();
+        if (notEligible.Count > 0)
+        {
+            _logger.LogWarning(
+                "The following competitions are not eligible for prize payout processing based on the expression '{Expression}': {Competitions}",
+                eligibilityExpression,
+                string.Join(", ", notEligible.Select(ne => $"{ne.Name} (ID: {ne.Id})")));
+        }
+
+        var excluded = toProcess.Where(tp => excludeExpression.IsMatch(tp.Name)).ToList();
+        if (excluded.Count > 0)
+        {
+            _logger.LogWarning(
+                "The following competitions have been excluded for prize payout processing based on the expression '{Expression}': {Competitions}",
+                excludeExpression,
+                string.Join(", ", excluded.Select(ne => $"{ne.Name} (ID: {ne.Id})")));
+        }
+
+        toProcess = toProcess.Where(tp => eligibilityExpression.IsMatch(tp.Name)).ToList();
+        toProcess = toProcess.Where(tp => !excludeExpression.IsMatch(tp.Name)).ToList();
+
+        if (toProcess.Count == 0)
+            return 0;
+
+        _logger.LogInformation("Processing {Count} competitions for prize payouts.", toProcess.Count);
+
         var semaphore = new SemaphoreSlim(5, 5);
         var tasks = new List<Task>();
-
-        var notEligible = toProcess.Where(tp => !eligibilityExpression.IsMatch(tp.Name)).ToList();  
-        _logger.LogWarning("The following competitions are not eligible for prize payout processing based on the eligibility expression: {Expression}. Competitions: {Competitions}",
-            eligibilityExpression.ToString(), string.Join(", ", notEligible.Select(ne => $"{ne.Name} (ID: {ne.Id})"))); 
-
-        // Filter to include only eligible competitions
-        toProcess = toProcess.Where(tp => eligibilityExpression.IsMatch(tp.Name)).ToList();
-        _logger.LogInformation("Processing {Count} competitions for prize payouts.", toProcess.Count);  
+        var processedCount = 0;
+        var processedCompetitionIds = new ConcurrentBag<int>();
 
         foreach (var comp in toProcess)
         {
             await semaphore.WaitAsync(cancellationToken);
+
             tasks.Add(Task.Run(async () =>
             {
                 try
                 {
                     var ok = await ProcessOneAsync(comp, cancellationToken);
-                    if (ok) Interlocked.Increment(ref processed);
+                    if (ok)
+                    {
+                        Interlocked.Increment(ref processedCount);
+                        processedCompetitionIds.Add(comp.Id!.Value);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -85,7 +145,26 @@ public sealed class ProcessFinalisedCompetitionPayoutsHandler(
         }
 
         await Task.WhenAll(tasks);
-        return processed;
+
+        var completedIds = processedCompetitionIds
+            .Distinct()
+            .OrderBy(id => id)
+            .ToList();
+
+        if (completedIds.Count > 0)
+        {
+            var cmd = new ProcessCompetitionWinningsBatchCompletedCommand(
+                completedIds,
+                DateTime.UtcNow);
+
+            await _prizeCalculationsCompleteQueueService.EnqueueAsync(cmd, cancellationToken);
+
+            _logger.LogInformation(
+                "Enqueued ProcessCompetitionWinningsBatchCompletedCommand for competitions: {Ids}.",
+                string.Join(", ", completedIds));
+        }
+
+        return processedCount;
     }
 
     private async Task<bool> ProcessOneAsync(CompetitionDto comp, CancellationToken cancellationToken)
@@ -107,16 +186,12 @@ public sealed class ProcessFinalisedCompetitionPayoutsHandler(
 
         var (ruleName, split) = _prizeConfig.GetSplitForFormat(effective, settings.Format);
 
-        // Normalise and ensure the whole division pot is allocated.
-        // If splits sum < 1, the remainder is added to the last place;
-        // if > 1, they’re scaled to sum to 1.
         var normalisedSplits = NormaliseAndFill(split);
         var rule = new PrizeRule(ruleName, normalisedSplits, residualToLast: false);
         var maxPlaces = normalisedSplits.Count;
 
         var winnersPerDivision = BuildDivisionInputs(leaderboard);
 
-        // Pay only the top N places, where N = split count.
         foreach (var d in winnersPerDivision)
         {
             d.OrderedByPosition = d.OrderedByPosition.Take(maxPlaces).ToList();
@@ -141,21 +216,27 @@ public sealed class ProcessFinalisedCompetitionPayoutsHandler(
 
         await _payoutStore.PersistAsync(result, cancellationToken);
 
-        //await _payoutQueue.EnqueueAsync(new CompetitionPayoutCalculatedMessage
-        //{
-        //    CompetitionId = result.CompetitionId,
-        //    CompetitionName = result.CompetitionName,
-        //    CompetitionDate = result.CompetitionDate,
-        //    CalculatedAtUtc = result.CalculatedAtUtc,
-        //    Winners = result.Winners.Select(w => new CompetitionPayoutCalculatedMessage.Winner
-        //    {
-        //        DivisionNumber = w.DivisionNumber,
-        //        Position = w.Position,
-        //        CompetitorId = w.CompetitorId,
-        //        CompetitorName = w.CompetitorName,
-        //        Amount = w.Amount
-        //    }).ToList()
-        //}, cancellationToken);
+        if (_settings.PrizePayout.SendPlayerEmails)
+        {
+            await _playerNotificationsQueueService.EnqueueManyAsync(
+                result.Winners.Select(w =>
+                    new SendPrizeNotificationEmailCommand(
+                        w.CompetitorId,
+                        w.Position,
+                        default,
+                        w.CompetitorName,
+                        input.CompetitionDate,
+                        input.CompetitionName,
+                        w.Amount)),
+                cancellationToken);
+        }
+
+        if (_settings.PrizePayout.GenerateInvoices)
+        {
+            await _prizeInvoiceQueueService.EnqueueAsync(
+                new ProcessPrizeInvoiceCommand(comp.Id!.Value),
+                cancellationToken);
+        }
 
         return true;
     }
@@ -206,14 +287,12 @@ public sealed class ProcessFinalisedCompetitionPayoutsHandler(
         var list = (splits ?? Array.Empty<decimal>()).ToList();
         if (list.Count == 0) return new List<decimal> { 1m };
 
-        // Guard against negatives.
         for (int i = 0; i < list.Count; i++)
             if (list[i] < 0m) list[i] = 0m;
 
         var sum = list.Sum();
         if (sum <= 0m)
         {
-            // All zeros – pay winner takes all.
             list[0] = 1m;
             for (int i = 1; i < list.Count; i++) list[i] = 0m;
             return list;
@@ -221,12 +300,10 @@ public sealed class ProcessFinalisedCompetitionPayoutsHandler(
 
         if (sum < 1m)
         {
-            // Give the residual to the last paid place.
             list[list.Count - 1] += (1m - sum);
         }
         else if (sum > 1m)
         {
-            // Scale to sum to 1.
             for (int i = 0; i < list.Count; i++)
                 list[i] = list[i] / sum;
         }

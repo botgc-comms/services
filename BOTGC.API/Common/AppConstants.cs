@@ -1,4 +1,6 @@
-﻿namespace BOTGC.API.Common
+﻿using BOTGC.API.Services;
+
+namespace BOTGC.API.Common
 {
     public static class AppConstants
     {
@@ -8,6 +10,10 @@
         public const string StockWastageQueueName = "stock-wastage";
         public const string StockTakeProcessQueueName = "stock-take-process";
         public const string StockTakeCompletedQueueName = "stock-takes-completed";
+
+        public const string PrizeNotificationQueueName = "prize-notifications";
+        public const string PrizeInvoiceQueueName = "prize-invoices";
+        public const string NewCompetitionPrizesCalcualtedQueueName = "prize-calculations-completed";   
 
         public const int QueueVisibilityTimeoutMinutes = 3;
         public const int QueueLockExpiryBufferSeconds = 30;

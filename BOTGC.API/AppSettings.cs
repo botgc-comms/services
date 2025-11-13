@@ -10,6 +10,9 @@ namespace BOTGC.API
 
         public string TrophyFilePath { get; set; }
 
+        public string ProShopEmail { get; set; } = "proshop@botgc.co.uk";
+        public int AccountantMemberId { get; set; } = 97484;
+
         public int ConcurrentRequestThrottle { get; set; } = 5;
 
         public AzureFaceApi AzureFaceApi { get; set; } = new();
@@ -21,6 +24,7 @@ namespace BOTGC.API
         public IG IG { get; set; } = new();
 
         public QueueSettings Queue { get; set; } = new();
+        public Invoices Invoices { get; set; } = new();
 
         public StorageSettings Storage { get; set; } = new();   
 
@@ -39,6 +43,13 @@ namespace BOTGC.API
 
         public PrizePayoutOptions PrizePayout { get; set; } = new();
 
+    }
+
+    public class Invoices
+    {
+        public string ContainerName { get; set; } = "invoices";
+        public int SasExpiryDays { get; set; } = 365;
+        public string EmailsSentFrom { get; set; } = "accounts@botgc.co.uk";
     }
 
     public class ApplicationInsightsSettings
@@ -60,6 +71,7 @@ namespace BOTGC.API
     {
         public string ConnectionString { get; set; }
         public string LookupDataSource { get; set; } = "lookup";
+        public string[] PublicContainers { get; set; } = Array.Empty<string>();
     }
 
     public class AuthSettings
@@ -102,6 +114,8 @@ namespace BOTGC.API
         public string MemberId { get; set; }
         public string MemberPassword { get; set; }
         public string AdminPassword { get; set; }
+
+        public int CompetitionResultsPageId { get; set; } 
 
         public IGEndpoints Urls { get; set; } = new IGEndpoints();
 
@@ -148,6 +162,7 @@ namespace BOTGC.API
         public string CreateStockDialogUrl { get; set; } = "/tillstockcontrol.php?tab=items&section=new";
         public string TillProductInformationUrl { get; set; } = "/tilladmin.php?tab=products&section=addedit&id={productid}";
         public string TillProductsReportUrl { get; set; } = "/tilladmin.php?tab=products";
+        public string TrophyCompetitionsUrl { get; set; } = "/trophy_competitions";
 
     }
 
@@ -191,8 +206,11 @@ namespace BOTGC.API
 
     public sealed class PrizePayoutOptions
     {
-        public string EligibilityExpression { get; set; } = "^.*?(?:Stableford|Medal).*?[#\\d+].*?$";   
+        public string EligibilityExpression { get; set; } = "^.*?(?:Stab[a-z]*|Medal)([\\s#]*?)\\d{1,2}(?:[^\\d]|$).*?$";
+        public string ExclusionExpression { get; set; } = "^.*?(?:Marler).*?$";
         public List<PrizeRuleSet> RuleSets { get; set; } = new();
+        public bool SendPlayerEmails { get; set; } = true;
+        public bool GenerateInvoices { get; set; } = true;
     }
 
     public sealed class PrizeRuleSet

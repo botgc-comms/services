@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Xunit;
 using HtmlAgilityPack;
 using BOTGC.API.Dto;
-using BOTGC.API.Common;
 using Microsoft.Extensions.Logging;
 using FakeItEasy;
+using BOTGC.API.IGScrapers;
 
 namespace BOTGC.API.Tests.Services.CompetitionLeaderBoard
 {

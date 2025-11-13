@@ -57,6 +57,13 @@
         public string DivisionName { get; set; } = string.Empty;
         public List<(string CompetitorId, string CompetitorName)> OrderedByPosition { get; set; } = new();
     }
+
+    public sealed class CompetitionWinningsCalcualtionResultDto
+    {
+        public int CompetitionId { get; set; }
+        public DateTime CalcualtedOn { get; set; }
+    }
+
     public sealed class CompetitionPayoutInput
     {
         public int CompetitionId { get; set; }

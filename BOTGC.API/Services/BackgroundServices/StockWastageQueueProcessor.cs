@@ -5,78 +5,76 @@ using MediatR;
 using Microsoft.Extensions.Options;
 
 
-namespace BOTGC.API.Services.BackgroundServices
+namespace BOTGC.API.Services.BackgroundServices;
+
+public class StockWastageQueueProcessor(IOptions<AppSettings> settings, 
+                                        ILogger<StockWastageQueueProcessor> logger,
+                                        IMediator mediator,
+                                        IQueueService<WasteEntryCommandDto> stockWastageQueueService) : BackgroundService
 {
-    public class StockWastageQueueProcessor(IOptions<AppSettings> settings, 
-                                            ILogger<StockWastageQueueProcessor> logger,
-                                            IMediator mediator,
-                                            IQueueService<WasteEntryCommandDto> stockWastageQueueService) : BackgroundService
+    private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+    private readonly ILogger<StockWastageQueueProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+    private readonly IQueueService<WasteEntryCommandDto> _stockWastageQueueService = stockWastageQueueService ?? throw new ArgumentNullException(nameof(stockWastageQueueService));
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        private readonly AppSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-        private readonly ILogger<StockWastageQueueProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        private readonly IQueueService<WasteEntryCommandDto> _stockWastageQueueService = stockWastageQueueService ?? throw new ArgumentNullException(nameof(stockWastageQueueService));
+        const int maxAttempts = 5;
+        Exception? lastError = default;
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        while (!stoppingToken.IsCancellationRequested)
         {
-            const int maxAttempts = 5;
-            Exception? lastError = default;
+            var messages = await _stockWastageQueueService.ReceiveMessagesAsync(maxMessages: 5, cancellationToken: stoppingToken);
 
-            while (!stoppingToken.IsCancellationRequested)
+            foreach (var msg in messages)
             {
-                var messages = await _stockWastageQueueService.ReceiveMessagesAsync(maxMessages: 5, cancellationToken: stoppingToken);
+                var entry = msg.Payload;
 
-                foreach (var msg in messages)
+                if (entry == null)
                 {
-                    var entry = msg.Payload;
+                    _logger.LogWarning("Failed to deserialise waste entry for message {MessageId}.", msg.Message.MessageId);
+                    await _stockWastageQueueService.DeleteMessageAsync(msg.Message.MessageId, msg.Message.PopReceipt, stoppingToken);
+                    continue;
+                }
 
-                    if (entry == null)
+                try
+                {
+                    if (msg.Message.DequeueCount > maxAttempts)
                     {
-                        _logger.LogWarning("Failed to deserialise waste entry for message {MessageId}.", msg.Message.MessageId);
+                        await _stockWastageQueueService.DeadLetterEnqueueAsync(entry, msg.Message.DequeueCount, DateTime.UtcNow, lastError, stoppingToken);
                         await _stockWastageQueueService.DeleteMessageAsync(msg.Message.MessageId, msg.Message.PopReceipt, stoppingToken);
                         continue;
                     }
 
                     try
                     {
-                        if (msg.Message.DequeueCount > maxAttempts)
+                        var command = new ConfirmAddWastageCommand
                         {
-                            await _stockWastageQueueService.DeadLetterEnqueueAsync(entry, msg.Message.DequeueCount, DateTime.UtcNow, lastError, stoppingToken);
-                            await _stockWastageQueueService.DeleteMessageAsync(msg.Message.MessageId, msg.Message.PopReceipt, stoppingToken);
-                            continue;
-                        }
+                            WastageDateUtc = entry.WastageDateUtc,
+                            ProductId = int.Parse(entry.ProductId.ToString()),
+                            StockRoomId = entry.StockRoomId ?? _settings.Waste.DefaultStockRoom,
+                            Quantity = entry.Quantity,
+                            Reason = entry.Reason
+                        };
 
-                        try
-                        {
-                            var command = new ConfirmAddWastageCommand
-                            {
-                                WastageDateUtc = entry.WastageDateUtc,
-                                ProductId = int.Parse(entry.ProductId.ToString()),
-                                StockRoomId = entry.StockRoomId ?? _settings.Waste.DefaultStockRoom,
-                                Quantity = entry.Quantity,
-                                Reason = entry.Reason
-                            };
-
-                            await _mediator.Send(command, stoppingToken);
-                            await _stockWastageQueueService.DeleteMessageAsync(msg.Message.MessageId, msg.Message.PopReceipt, stoppingToken);
-                        }
-                        catch (Exception ex)
-                        {
-                            lastError = ex;
-                            _logger.LogError(ex, "Error confirming wastage for product {ProductId} on {Date}.", entry.ProductId, entry.WastageDateUtc);
-                            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, msg.Message.DequeueCount)), stoppingToken);
-                        }
+                        await _mediator.Send(command, stoppingToken);
+                        await _stockWastageQueueService.DeleteMessageAsync(msg.Message.MessageId, msg.Message.PopReceipt, stoppingToken);
                     }
                     catch (Exception ex)
                     {
                         lastError = ex;
-                        _logger.LogError(ex, "Unexpected error processing stock wastage message {MessageId}.", msg.Message.MessageId);
+                        _logger.LogError(ex, "Error confirming wastage for product {ProductId} on {Date}.", entry.ProductId, entry.WastageDateUtc);
+                        await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, msg.Message.DequeueCount)), stoppingToken);
                     }
                 }
-
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                catch (Exception ex)
+                {
+                    lastError = ex;
+                    _logger.LogError(ex, "Unexpected error processing stock wastage message {MessageId}.", msg.Message.MessageId);
+                }
             }
+
+            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
     }
 }
-

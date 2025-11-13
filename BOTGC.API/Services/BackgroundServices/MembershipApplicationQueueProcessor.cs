@@ -1,5 +1,5 @@
-﻿using BOTGC.API.Common;
-using BOTGC.API.Dto;
+﻿using BOTGC.API.Dto;
+using BOTGC.API.IGScrapers;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services.Queries;
 using MediatR;

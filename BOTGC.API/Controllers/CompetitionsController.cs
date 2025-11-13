@@ -92,6 +92,23 @@ namespace BOTGC.API.Controllers
         }
 
         /// <summary>
+        /// Returns the annual winnings summary for the specified calendar year.
+        /// </summary>
+        /// <param name="year">Calendar year, e.g. <c>2025</c>.</param>
+        /// <returns>Divisional winners per competition, overall top earner, and total prize money paid.</returns>
+        /// <response code="200">The annual winnings summary.</response>
+        /// <response code="400">The supplied year was invalid.</response>
+        [HttpPost("winnings/postresults")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(YearlyWinningsSummaryDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<YearlyWinningsSummaryDto>> PostResults()
+        {
+            var dto = await _mediator.Send(new UpdateCompetitionResultsPageCommand(), HttpContext.RequestAborted);
+            return Ok(dto);
+        }
+
+        /// <summary>
         /// Returns cached Junior Eclectic results for the specified date range.
         /// </summary>
         /// <param name="fromDate">Start date (inclusive).</param>
@@ -141,7 +158,7 @@ namespace BOTGC.API.Controllers
 
             try
             {
-                var query = new GetActiveAndFutureCompetitionsQuery(active, future, finalised);
+                var query = new GetCompetitionsQuery(active, future, finalised);
                 var competitions = await _mediator.Send(query, HttpContext.RequestAborted);
 
                 if (competitions == null || competitions.Count == 0)

@@ -2,5 +2,5 @@
 
 namespace BOTGC.API.Services.Queries
 {
-    public sealed record UpdateCompetitionResultsPageCommand : QueryBase<string>;
+    public sealed record UpdateCompetitionResultsPageCommand : QueryBase<bool>;
 }

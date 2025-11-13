@@ -1,4 +1,4 @@
-﻿using BOTGC.API.Common;
+﻿using BOTGC.API.IGScrapers;
 
 namespace BOTGC.API.Dto
 {

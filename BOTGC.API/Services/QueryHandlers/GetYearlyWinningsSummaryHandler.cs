@@ -108,6 +108,7 @@ public sealed class GetYearlyWinningsSummaryHandler(
                 CompetitionId = h.CompetitionId,
                 CompetitionName = h.CompetitionName ?? string.Empty,
                 CompetitionDate = compDate,
+                Entrants = h.Entrants,  
                 PrizePot = (decimal)h.PrizePot,
                 Revenue = (decimal)h.Revenue,
                 Currency = h.Currency ?? "GBP",

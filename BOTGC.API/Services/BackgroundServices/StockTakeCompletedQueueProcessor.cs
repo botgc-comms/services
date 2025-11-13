@@ -1,5 +1,4 @@
-﻿using BOTGC.API.Dto;
-using BOTGC.API.Interfaces;
+﻿using BOTGC.API.Interfaces;
 using BOTGC.API.Services.Queries;
 using MediatR;
 using Microsoft.Extensions.Options;
