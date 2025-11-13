@@ -1,4 +1,5 @@
-﻿using BOTGC.API.Interfaces;
+﻿using BOTGC.API.Common;
+using BOTGC.API.Interfaces;
 using BOTGC.API.Services.Queries;
 
 namespace BOTGC.API.Services.QueryHandlers;
@@ -35,13 +36,16 @@ public sealed class CreateCompetitionPrizeInvoiceTicketHandler(
             request.InvoiceId,
             summary.CompetitionId);
 
+        var nextWorkingDay = DateHelper.NextWorkingDay(DateTime.Now);
+
         // Create task on Stacy board
         var itemId = await _taskBoardService.CreateFinanceTaskAsync(
             groupTitle: groupTitle,
             taskName: itemName,
             assigneeEmail: null,         
             statusLabel: "To do",
-            deadline: summary.CompetitionDate.AddDays(7));
+            deadline: nextWorkingDay
+        );
 
         if (string.IsNullOrWhiteSpace(itemId))
         {
