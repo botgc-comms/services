@@ -45,7 +45,7 @@ public class GetCompetitionsHandler(IOptions<AppSettings> settings,
         if (request.Finalised)
         {
             var finalisedCompetitionsUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.FinalisedCompetitionsUrl}";
-            var finalisedCompetitions = await _dataProvider.GetData<CompetitionDto>(finalisedCompetitionsUrl, _reportParser, __CACHE_FINALISEDCOMPETITIONS, TimeSpan.FromMinutes(_settings.Cache.ShortTerm_TTL_mins));
+            var finalisedCompetitions = await _dataProvider.GetData<CompetitionDto>(finalisedCompetitionsUrl, _reportParser, __CACHE_FINALISEDCOMPETITIONS, TimeSpan.FromMinutes(_settings.Cache.LongTerm_TTL_mins));
             if (finalisedCompetitions != null) allCompetitions.AddRange(finalisedCompetitions);
         }
 
