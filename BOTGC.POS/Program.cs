@@ -16,8 +16,10 @@ builder.Services.AddSingleton<IOperatorService, HttpOperatorService>();
 builder.Services.AddSingleton<IProductService, HttpProductService>();
 builder.Services.AddSingleton<IReasonService, InMemoryReasonService>();
 builder.Services.AddSingleton<IWasteService, HttpWasteService>();
-builder.Services.AddSingleton<IStockTakeService, HttpStockTakeService>();   
+builder.Services.AddSingleton<IStockTakeService, HttpStockTakeService>();
 builder.Services.AddSingleton<NgrokState>();
+
+builder.Services.AddSingleton<IStockTakeScheduleService, SimpleStockTakeScheduleService>();
 
 builder.Services.AddPosApiClients(builder.Configuration);
 
@@ -43,13 +45,17 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 
+var appSettings = app.Services.GetRequiredService<AppSettings>();
+var accessSettings = appSettings.Access ?? new Access();
+
 var gatekeeper = new GatekeeperOptions
 {
     QueryKey = "k",
-    SharedSecret = builder.Configuration["AppSettings:Access:SharedSecret"] ?? "",
-    CookieName = builder.Configuration["AppSettings:Access:CookieName"] ?? "pos_access",
-    RedirectUrl = "/access?returnUrl={returnUrl}",
+    SharedSecret = accessSettings.SharedSecret ?? string.Empty,
+    CookieName = accessSettings.CookieName ?? "pos_access",
+    RedirectUrl = "/access?returnUrl={returnUrl}"
 };
+
 app.UseMiddleware<GatekeeperMiddleware>(gatekeeper);
 
 app.UseStaticFiles();
@@ -59,12 +65,17 @@ app.MapHub<WastageHub>("/hubs/wastage");
 app.MapHub<NgrokHub>("/hubs/ngrok");
 app.MapHub<StockTakeHub>("/hubs/stocktake");
 
-app.MapGet("/access", (HttpContext ctx, IConfiguration cfg) =>
+app.MapGet("/access", (HttpContext ctx, AppSettings settings) =>
 {
-    var secret = cfg["AppSettings:Access:SharedSecret"] ?? "";
-    var cookieName = cfg["AppSettings:Access:CookieName"] ?? "pos_access";
-    var ttlDaysStr = cfg["AppSettings:Access:CookieTtlDays"];
-    var ttlDays = int.TryParse(ttlDaysStr, out var d) ? d : 30;
+    var access = settings.Access;
+    if (access is null || string.IsNullOrEmpty(access.SharedSecret))
+    {
+        return Results.Content("Access not configured.");
+    }
+
+    var secret = access.SharedSecret;
+    var cookieName = access.CookieName ?? "pos_access";
+    var ttlDays = access.CookieTtlDays <= 0 ? 365 : access.CookieTtlDays;
 
     var provided = ctx.Request.Query["k"].ToString();
     var returnUrl = ctx.Request.Query["returnUrl"].ToString();

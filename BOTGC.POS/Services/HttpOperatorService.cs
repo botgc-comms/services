@@ -57,5 +57,3 @@ public sealed class HttpOperatorService : IOperatorService
 
     private sealed record ApiTillOperator(long Id, string Name, bool IsActive, string? ColorHex);
 }
-
-

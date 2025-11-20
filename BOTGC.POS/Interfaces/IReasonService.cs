@@ -7,4 +7,3 @@ public interface IReasonService
     Task<IReadOnlyList<Reason>> GetAllAsync();
     Task<Reason?> GetAsync(Guid id);
 }
-

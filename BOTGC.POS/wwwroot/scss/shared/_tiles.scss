@@ -41,3 +41,9 @@
 .tile--search {
     background: #ffffff;
 }
+
+@media (min-width: 992px) {
+    .tiles .tile {
+        min-width: 175px;
+    }
+}

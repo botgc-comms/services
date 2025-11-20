@@ -27,6 +27,14 @@
         let isLogging = false;
         let deleteTargetId = null;
 
+        let stockTakeInfo = null;
+        let currentOperatorName = "";
+
+        let stockTakeChimeTimer = null;
+        let stockTakeAcknowledged = false;
+
+        let hasUserInteracted = false;
+
         document.addEventListener("click", e => {
             const btn = e.target.closest(".delete-btn");
             if (!btn) return;
@@ -64,6 +72,21 @@
             deleteTargetId = null;
             document.getElementById("confirmDeleteDialog").close();
         });
+
+        const stockBtn = document.getElementById("stocktakeAlertBtn");
+        if (stockBtn) {
+            stockBtn.addEventListener("click", () => {
+                stockTakeAcknowledged = true;
+                stopStockTakeChimeTimer();
+
+                if (!stockTakeInfo || !stockTakeInfo.url) return;
+                const base = stockTakeInfo.url;
+                const op = currentOperatorName || "";
+                const sep = base.includes("?") ? "&" : "?";
+                const url = `${base}${sep}operator=${encodeURIComponent(op)}`;
+                window.open(url, "_blank", "noopener");
+            });
+        }
 
         // ===== Utils =====
         function guid() {
@@ -116,6 +139,7 @@
             deleteCookie(OP_COOKIE);
             deleteCookie(OP_TS_COOKIE);
             stopOpTtlTimer();
+            currentOperatorName = "";
             const el = document.getElementById("operatorStatus");
             if (el) el.innerHTML = '<span class="muted">No operator selected.</span>';
         }
@@ -125,10 +149,10 @@
             if (!hasOp) return;
 
             if (operatorExpired()) {
-                clearOperatorSelection();      // clear cookies + text
-                setOperatorStatus();           // <-- immediately replace the pill with “No operator selected.”
-                closeNonOperatorDialogs();     // close reason/search if open
-                openOperatorDialog();          // prompt to choose again
+                clearOperatorSelection();      
+                setOperatorStatus();           
+                closeNonOperatorDialogs();     
+                openOperatorDialog();          
             }
         }
 
@@ -209,6 +233,8 @@
             const THROTTLE_MS = 5000;
 
             const maybeMark = () => {
+                hasUserInteracted = true; 
+
                 if (!getCookie(OP_COOKIE)) return; // only while an operator is selected
                 const now = nowUtcMs();
                 if (now - lastMark >= THROTTLE_MS) {
@@ -314,6 +340,7 @@
                 </div>`;
             bindOperatorPillClick();
             startOpTtlTimer();
+            showStockTakeBannerIfNeeded();
         }
 
         function ensureOperatorSelected() {
@@ -682,6 +709,126 @@
             if (opTtlTimer) { clearInterval(opTtlTimer); opTtlTimer = null; }
         }
 
+        async function loadStockTakeStatus() {
+            try {
+                const res = await fetch("/wastage/stocktake-status");
+                if (!res.ok) return;
+                stockTakeInfo = await res.json();
+                showStockTakeBannerIfNeeded();
+            } catch { }
+        }
+
+        function showStockTakeBannerIfNeeded() {
+            const host = document.getElementById("stocktakeAlert");
+            if (!host) return;
+
+            const shouldShow = stockTakeInfo && stockTakeInfo.due && stockTakeInfo.url;
+
+            if (shouldShow && host.hidden) {
+                host.hidden = false;
+                startStockTakeChimeTimer();
+
+                if (shouldChimeNow()) {
+                    playStockTakeSound();
+                }
+            } else if (!shouldShow) {
+                host.hidden = true;
+                stopStockTakeChimeTimer();
+            }
+        }
+
+        function clearStockTakeBanner() {
+            const host = document.getElementById("stocktakeAlert");
+            if (host) host.hidden = true;
+            stopStockTakeChimeTimer();
+        }
+
+        function playStockTakeSound() {
+            if (!hasUserInteracted) return;
+
+            const audio = document.getElementById("stocktakeSound");
+            const btn = document.getElementById("stocktakeAlertBtn");
+
+            if (btn) {
+                btn.classList.remove("stocktake-alert__btn--shiver");
+                void btn.offsetWidth; // restart animation
+                btn.classList.add("stocktake-alert__btn--shiver");
+                setTimeout(() => btn.classList.remove("stocktake-alert__btn--shiver"), 500);
+            }
+
+            if (!audio) return;
+            try {
+                audio.currentTime = 0;
+                audio.play();
+            } catch {
+                // ignore autoplay blocks
+            }
+        }
+
+        function isWithinChimeWindow() {
+            if (!stockTakeInfo) return false;
+
+            const startStr = stockTakeInfo.chimeStart;
+            const endStr = stockTakeInfo.chimeEnd;
+
+            const start = parseTimeToMinutes(startStr);
+            const end = parseTimeToMinutes(endStr);
+
+            if (start === null || end === null) return true;
+
+            const now = new Date();
+            const cur = now.getHours() * 60 + now.getMinutes();
+
+            if (start <= end) {
+                return cur >= start && cur <= end;
+            }
+
+            // Handles windows that cross midnight (e.g. 22:00–02:00)
+            return cur >= start || cur <= end;
+        }
+
+        function shouldChimeNow() {
+            if (!hasUserInteracted) return false; // must satisfy autoplay rules
+            if (!stockTakeInfo || !stockTakeInfo.due || !stockTakeInfo.url) return false;
+            if (!stockTakeInfo.chimeEnabled) return false;
+            if (stockTakeAcknowledged) return false;
+            if (!isWithinChimeWindow()) return false;
+            return true;
+        }
+
+        function startStockTakeChimeTimer() {
+            stopStockTakeChimeTimer();
+
+            if (!stockTakeInfo || !stockTakeInfo.chimeEnabled) return;
+
+            let interval = parseInt(stockTakeInfo.chimeIntervalMinutes, 10);
+            if (!interval || interval <= 0) interval = 15;
+
+            stockTakeChimeTimer = setInterval(() => {
+                if (shouldChimeNow()) {
+                    playStockTakeSound();
+                }
+            }, interval * 60 * 1000);
+        }
+
+        function stopStockTakeChimeTimer() {
+            if (stockTakeChimeTimer) {
+                clearInterval(stockTakeChimeTimer);
+                stockTakeChimeTimer = null;
+            }
+        }
+
+
+        function parseTimeToMinutes(hhmm) {
+            if (!hhmm || typeof hhmm !== "string") return null;
+            const parts = hhmm.split(":");
+            if (parts.length !== 2) return null;
+            const h = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10);
+            if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return null;
+            return h * 60 + m;
+        }
+
         // ===== Boot =====
         setOperatorStatus();
         ensureOperatorSelected();
@@ -690,6 +837,7 @@
         startTimeoutEnforcer();
         startDayGuard();
         attachActivityListeners();
+        loadStockTakeStatus();
 
         // If an operator is already selected, (re)start the timeout window now.
         if (getCookie(OP_COOKIE)) markOperatorActivity();

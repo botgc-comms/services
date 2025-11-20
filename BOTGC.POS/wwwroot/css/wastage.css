@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   box-sizing: border-box;
 }
@@ -100,6 +101,11 @@ button:disabled {
   background: #ffffff;
 }
 
+@media (min-width: 992px) {
+  .tiles .tile, .tiles .operator-pill .tile--op, .operator-pill .tiles .tile--op {
+    min-width: 175px;
+  }
+}
 input[type=search],
 input[type=text],
 input[type=number] {
@@ -481,4 +487,143 @@ dialog article footer {
   font-size: 0.9rem;
   max-width: 420px;
   word-break: break-all;
+}
+
+/* Container row stays as before */
+.operator-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.stocktake-alert {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Enhanced pill */
+.stocktake-alert__btn {
+  position: relative;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #ffe8a3, #ffd370);
+  color: #663c00;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  isolation: isolate;
+}
+
+/* “Metallic” moving light sweep */
+.stocktake-alert__btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -20%;
+  width: 40%;
+  height: 220%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+  filter: blur(6px);
+  opacity: 0.9;
+  pointer-events: none;
+  transform: translateY(-50%) rotate(25deg); /* centred vertically, fixed angle */
+  animation: stocktake-shine 3.8s linear infinite;
+}
+
+@keyframes stocktake-shine {
+  0% {
+    transform: translate(-150%, -50%) rotate(25deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.95;
+  }
+  50% {
+    transform: translate(50%, -50%) rotate(25deg); /* mid-sweep across pill */
+    opacity: 0.95;
+  }
+  85% {
+    opacity: 0;
+  }
+  100% {
+    transform: translate(250%, -50%) rotate(25deg); /* off to the right */
+    opacity: 0;
+  }
+}
+/* Subtle outer glow to draw the eye */
+.stocktake-alert__btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(255, 211, 112, 0.6);
+  opacity: 0.6;
+  pointer-events: none;
+  animation: stocktake-pulse 2.8s ease-out infinite;
+}
+
+.stocktake-alert__sub {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+/* Mobile layout: stack below operator and full width */
+@media (max-width: 767.98px) {
+  .operator-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .stocktake-alert {
+    justify-content: stretch;
+  }
+  .stocktake-alert__btn {
+    width: 100%;
+    align-items: center;
+    text-align: center;
+  }
+}
+@keyframes stocktake-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 211, 112, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(255, 211, 112, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 211, 112, 0);
+  }
+}
+.stocktake-alert__btn--shiver {
+  animation: stocktake-shiver 0.4s ease-in-out;
+}
+
+@keyframes stocktake-shiver {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  20% {
+    transform: translateX(-1px) rotate(-0.8deg);
+  }
+  40% {
+    transform: translateX(1px) rotate(0.8deg);
+  }
+  60% {
+    transform: translateX(-1px) rotate(-0.6deg);
+  }
+  80% {
+    transform: translateX(1px) rotate(0.6deg);
+  }
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
 }

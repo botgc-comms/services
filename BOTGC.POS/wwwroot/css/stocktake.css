@@ -101,6 +101,11 @@ button:disabled {
   background: #ffffff;
 }
 
+@media (min-width: 992px) {
+  .tiles .tile, .tiles .operator-pill .tile--op, .operator-pill .tiles .tile--op {
+    min-width: 175px;
+  }
+}
 input[type=search],
 input[type=text],
 input[type=number] {

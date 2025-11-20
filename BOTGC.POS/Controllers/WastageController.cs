@@ -6,32 +6,29 @@ using BOTGC.POS.Models;
 using BOTGC.POS.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 
 namespace BOTGC.POS.Controllers;
 
-public class WastageController : Controller
+public class WastageController(
+
+    IOptions<AppSettings> settings,
+    IStockTakeScheduleService stockTakeSchedule,
+    IOperatorService operators,
+    IProductService products,
+    IReasonService reasons,
+    IWasteService waste,
+    IHubContext<WastageHub> hub) : Controller
 {
     private const string OperatorCookie = "wastage_operator_id";
 
-    private readonly IOperatorService _operators;
-    private readonly IProductService _products;
-    private readonly IReasonService _reasons;
-    private readonly IWasteService _waste;
-    private readonly IHubContext<WastageHub> _hub;
-
-    public WastageController(
-        IOperatorService operators,
-        IProductService products,
-        IReasonService reasons,
-        IWasteService waste,
-        IHubContext<WastageHub> hub)
-    {
-        _operators = operators;
-        _products = products;
-        _reasons = reasons;
-        _waste = waste;
-        _hub = hub;
-    }
+    private readonly IOperatorService _operators = operators;
+    private readonly IProductService _products = products;
+    private readonly IReasonService _reasons = reasons;
+    private readonly IWasteService _waste = waste;
+    private readonly IHubContext<WastageHub> _hub = hub;
+    private readonly IStockTakeScheduleService _stockTakeSchedule = stockTakeSchedule;
+    private readonly AppSettings _appSettings = settings.Value;
 
     public async Task<IActionResult> Index()
     {
@@ -58,6 +55,24 @@ public class WastageController : Controller
         if (string.IsNullOrWhiteSpace(q)) return Ok(Array.Empty<object>());
         var results = await _products.SearchAsync(q);
         return Ok(results.Select(p => new { p.Id, p.Name, p.Category, p.igProductId, p.unit }));
+    }
+
+    [HttpGet("/wastage/stocktake-status")]
+    public IActionResult StockTakeStatus()
+    {
+        var due = _stockTakeSchedule.IsStockTakeDue(DateTimeOffset.UtcNow);
+        var stockCfg = _appSettings.StockTake ?? new StockTakeUiSettings();
+        var url = stockCfg.StockTakeUrl ?? string.Empty;
+
+        return Ok(new
+        {
+            due = due && !string.IsNullOrWhiteSpace(url),
+            url,
+            chimeEnabled = stockCfg.EnableChime,
+            chimeStart = stockCfg.ChimeStartTime,
+            chimeEnd = stockCfg.ChimeEndTime,
+            chimeIntervalMinutes = stockCfg.ChimeIntervalMinutes
+        });
     }
 
     [HttpPost("/wastage/select-operator")]

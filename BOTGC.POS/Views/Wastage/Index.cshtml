@@ -32,9 +32,21 @@
 
 <h2 class="mt-4 mt-sm-5 mt-md-5">Today’s Wastage Sheet <span class="tag">@DateTime.UtcNow.ToString("dddd, dd MMM yyyy")</span></h2>
 
-<div class="tiles" id="operatorStatus">
-    <span class="muted">No operator selected.</span>
+<audio id="stocktakeSound" src="~/audio/Epidemic Sound.mp3" preload="auto"></audio>
+
+<div class="operator-row">
+    <div class="tiles" id="operatorStatus">
+        <span class="muted">No operator selected.</span>
+    </div>
+
+    <div id="stocktakeAlert" class="stocktake-alert" hidden>
+        <button type="button" id="stocktakeAlertBtn" class="stocktake-alert__btn">
+            <strong>Stock take due today</strong>
+            <span class="stocktake-alert__sub">Tap here to open the stock-take screen</span>
+        </button>
+    </div>
 </div>
+
 
 <article class="sheet">
     <details open class="mt-4 mt-sm-5 mt-md-5">
