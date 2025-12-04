@@ -1,0 +1,25 @@
+﻿@* Views/Shared/_Tile_RulesQuiz.cshtml *@
+@model BOTGC.MemberPortal.Models.DashboardTileViewModel
+
+@{
+    var controller = string.IsNullOrWhiteSpace(Model.Controller) ? "Rules" : Model.Controller;
+    var action = string.IsNullOrWhiteSpace(Model.Action) ? "Quiz" : Model.Action;
+    var imageUrl = string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/icons/rules.png" : Model.ImageUrl;
+}
+
+<a asp-controller="@controller"
+   asp-action="@action"
+   class="tile tile--dash tile--dash-rules">
+    <div class="tile__avatar tile__avatar--icon">
+        <img src="@imageUrl" alt="" aria-hidden="true" />
+    </div>
+
+    <div class="tile__text">
+        <div class="tile__name">
+            Play a rules quiz
+        </div>
+        <div class="tile__hint">
+            Answer fun questions about the rules of golf.
+        </div>
+    </div>
+</a>

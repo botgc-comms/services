@@ -1,0 +1,70 @@
+@use "./variables" as *;
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem .75rem;
+    background: #f3f4f6;
+}
+
+.auth-card {
+    width: min(400px, 100%);
+    border-radius: $radius;
+    box-shadow: $shadow;
+    background: #ffffff;
+    padding: 1.25rem 1.4rem;
+}
+
+.auth-card__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: .75rem;
+}
+
+.auth-card__subtitle {
+    font-size: .9rem;
+    color: $muted;
+    margin-bottom: 1rem;
+}
+
+.auth-field {
+    margin-bottom: .85rem;
+
+    label {
+        font-size: .9rem;
+        margin-bottom: .25rem;
+    }
+
+    input {
+        width: 100%;
+        padding: .55rem .6rem;
+        border-radius: 8px;
+        border: 1px solid #d9d9d9;
+        background: #fff;
+
+        &:focus {
+            outline: 2px solid #9ecbff;
+            border-color: #9ecbff;
+        }
+    }
+
+    .field-error {
+        margin-top: .25rem;
+        font-size: .8rem;
+        color: #b91c1c;
+    }
+}
+
+.auth-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: .5rem;
+    justify-content: flex-end;
+}
+
+/* use your existing button base; this just tightens spacing for auth */
+.auth-submit-btn {
+    min-width: 110px;
+}

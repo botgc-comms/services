@@ -1,0 +1,51 @@
+﻿@model BOTGC.MemberPortal.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Sign in";
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <h1 class="auth-card__title">Sign in</h1>
+        <p class="auth-card__subtitle">
+            Enter your details to access the member portal.
+        </p>
+
+        <form asp-action="Login" method="post" novalidate>
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+            <div class="auth-field">
+                <label asp-for="Username"></label>
+                <input asp-for="Username" autocomplete="username" />
+                <span asp-validation-for="Username" class="field-error"></span>
+            </div>
+
+            <div class="auth-field">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="field-error"></span>
+            </div>
+
+            <div class="auth-field">
+                <div class="form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label"></label>
+                </div>
+            </div>
+
+            <input type="hidden" asp-for="ReturnUrl" />
+
+            <div class="auth-actions">
+                <button type="submit" class="auth-submit-btn">
+                    Sign in
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

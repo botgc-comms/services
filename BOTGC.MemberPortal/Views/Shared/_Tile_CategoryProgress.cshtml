@@ -1,0 +1,40 @@
+﻿@* Views/Shared/_Tile_CategoryProgress.cshtml *@
+@model BOTGC.MemberPortal.Models.DashboardTileViewModel
+
+@using System
+
+@{
+    var progress = Model.ProgressPercent ?? 0;
+    if (progress < 0)
+    {
+        progress = 0;
+    }
+    if (progress > 100)
+    {
+        progress = 100;
+    }
+
+    var label = !string.IsNullOrWhiteSpace(Model.ProgressLabel)
+        ? Model.ProgressLabel
+        : $"{progress}% ready for the next group";
+
+    var style = $"--progress:{progress};";
+}
+
+<div class="tile tile--dash tile--dash-progress" style="@style">
+    <div class="tile__avatar tile__avatar--icon">
+        <img src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/icons/progress.png" : Model.ImageUrl)" alt="" aria-hidden="true" />
+    </div>
+
+    <div class="tile__text">
+        <div class="tile__name">
+            Getting to your next group
+        </div>
+        <div class="tile__hint">
+            This shows how close you are to moving up.
+        </div>
+        <div class="tile__progress-label">
+            @label
+        </div>
+    </div>
+</div>

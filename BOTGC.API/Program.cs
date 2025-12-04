@@ -152,6 +152,8 @@ else
 // Add support for interacting with IG
 builder.Services.AddIGSupport();
 
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
 var locOptions = new RequestLocalizationOptions

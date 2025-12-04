@@ -1,0 +1,23 @@
+﻿@model BOTGC.MemberPortal.Models.DashboardTileViewModel
+
+@{
+    var bg = string.IsNullOrWhiteSpace(Model.BackgroundColor)
+        ? "#ffffff"
+        : Model.BackgroundColor;
+
+    var style = $"--bg:{bg};";
+}
+
+<div class="tile tile--dash" style="@style">
+    <div class="tile__content">
+        <div class="tile__text">
+            <div class="tile__name">
+                @(string.IsNullOrWhiteSpace(Model.Title) ? "Tile" : Model.Title)
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <div class="tile__hint">@Model.Description</div>
+            }
+        </div>
+    </div>
+</div>

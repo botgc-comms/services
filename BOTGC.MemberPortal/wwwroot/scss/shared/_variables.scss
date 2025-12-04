@@ -1,0 +1,29 @@
+﻿$app-max: 1100px;
+$radius: 12px;
+$shadow: 0 1px 3px rgba(0,0,0,.15);
+$muted: #6b7280;
+
+$categories: (
+  // Beverages 
+  minerals: #d6f4e6,        // mint
+  wines: #f2c7cf,           // soft rose
+  draught-beer: #ffe39a,    // pale amber
+  spirits: #e0e4ff,         // icy periwinkle
+  snacks: #ffe6cc,          // apricot
+  bottled-beer: #fff0c9,    // pale straw
+  beer-cans: #ffd6d6,       // soft salmon
+  fortified-wines: #f3bfd0, // pastel plum
+
+  // Kitchen 
+  bakery: #ffe8cc,              // warm wheat
+  dairy: #fff6d8,               // light cream
+  meat-poultry: #ffd6b8,        // soft peach
+  fish: #d4f5f9,                // pale aqua
+  fruit-veg: #d7f3d2,           // pastel green
+  prepared-meals: #ece4ff,      // soft lilac
+  hot-drinks: #f1e0d2,          // light chai
+  sauces: #e0f2e2,              // mint/sage green
+  dry-goods: #f3e9d7,           // oat/tan
+  desserts-ice-cream: #ffdde9   // blush pink
+);
+

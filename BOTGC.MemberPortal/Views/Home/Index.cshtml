@@ -1,0 +1,38 @@
+﻿@model BOTGC.MemberPortal.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Junior dashboard";
+}
+
+<div class="app-wrap dashboard">
+    <header class="dashboard-header">
+        <h1 class="dashboard-header__title">
+            Hi, @Model.DisplayName
+        </h1>
+        <p class="dashboard-header__subtitle">
+            Your current junior category:
+            <strong>@Model.JuniorCategory</strong>
+        </p>
+    </header>
+
+    <section class="dashboard-section">
+        <h2 class="visually-hidden">What would you like to do?</h2>
+
+        <div class="tiles tiles--dashboard">
+            @foreach (var tile in Model.Tiles)
+            {
+                var partialName = tile.Type switch
+                {
+                    "cadet_vouchers"      => "_Tile_CadetVouchers",
+                    "junior_mentor"       => "_Tile_JuniorMentor",
+                    "rules_quiz"          => "_Tile_RulesQuiz",
+                    "handicap_session"    => "_Tile_HandicapSession",
+                    "category_progress"   => "_Tile_CategoryProgress",
+                    _                     => "_Tile_Default"
+                };
+
+                @await Html.PartialAsync(partialName, tile)
+            }
+        </div>
+    </section>
+</div>

@@ -1,0 +1,25 @@
+﻿@* Views/Shared/_Tile_JuniorMentor.cshtml (Your golf buddy) *@
+@model BOTGC.MemberPortal.Models.DashboardTileViewModel
+
+@{
+    var controller = string.IsNullOrWhiteSpace(Model.Controller) ? "Buddy" : Model.Controller;
+    var action = string.IsNullOrWhiteSpace(Model.Action) ? "Chat" : Model.Action;
+    var imageUrl = string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/img/buddy.jpg" : Model.ImageUrl;
+}
+
+<a asp-controller="@controller"
+   asp-action="@action"
+   class="tile tile--dash tile--dash-buddy">
+    <div class="tile__avatar">
+        <img src="@imageUrl" alt="Your golf buddy" />
+    </div>
+
+    <div class="tile__text">
+        <div class="tile__name">
+            Your golf buddy
+        </div>
+        <div class="tile__hint">
+            Ask your buddy for help or to play a game.
+        </div>
+    </div>
+</a>

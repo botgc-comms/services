@@ -73,5 +73,3 @@ public sealed partial class SaveStockTakeHandler(IOptions<AppSettings> settings,
         }
     }
 }
-
-

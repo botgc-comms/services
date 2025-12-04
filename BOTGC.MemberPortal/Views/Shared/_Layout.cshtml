@@ -1,0 +1,198 @@
+﻿@using BOTGC.MemberPortal
+@inject BOTGC.MemberPortal.NgrokState Ngrok
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
+
+@{
+    var pathAndQuery = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
+
+    string Abs(string appRelative)
+    {
+        var baseUri = new Uri($"{Context.Request.Scheme}://{Context.Request.Host}");
+        return new Uri(baseUri, Url.Content(appRelative)).ToString();
+    }
+
+    var pageUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
+    var ogLandscape = Abs("~/img/Burton on Trent  - 1894.png");
+    var ogSquare = ogLandscape;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Burton on Trent Golf Club - @ViewData["Title"]</title>
+
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="Burton on Trent Golf Club">
+    <meta property="og:title" content="Wastage - Management Reports">
+    <meta property="og:description" content="Log and review wastage at Burton on Trent GC.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="@pageUrl">
+    <meta property="og:image" content="@ogLandscape" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image" content="@ogSquare" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Wastage - Management Reports">
+    <meta name="twitter:description" content="Log and review wastage at Burton on Trent GC.">
+    <meta name="twitter:image" content="@ogLandscape">
+
+    <!-- Manifest-->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Stock Control">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+    <!-- Favicons / icons -->
+    <link rel="icon" type="image/png" sizes="16x16"
+          href="~/img/favicon-16x16.png" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="32x32"
+          href="~/img/favicon-32x32.png" asp-append-version="true" />
+    <link rel="shortcut icon" type="image/png"
+          href="~/img/Burton on Trent  - 1894.png" asp-append-version="true" />
+    <link rel="apple-touch-icon" sizes="180x180"
+          href="~/img/apple-touch-icon.png" asp-append-version="true" />
+    
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.0/dist/browser/signalr.min.js"></script>
+
+    <link rel="stylesheet" href="~/css/member-portal.css" asp-append-version="true" />
+    
+    @RenderSection("Head", required: false)
+</head>
+<body>
+    <header>
+    </header>
+    <div class="container-md">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container d-flex align-items-center justify-content-between py-2">
+            <div>
+                &copy; @DateTime.UtcNow.Year - Burton on Trent Golf Club
+            </div>
+            <div id="qr-block"
+                 class="qr-block d-flex align-items-center gap-2"
+                 data-path="@pathAndQuery"
+                 data-access-key="@Config["AppSettings:Access:SharedSecret"]"
+                 data-ngrok-url="@Ngrok.PublicUrl"
+                 style="display:none"></div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/dist/site.bundle.min.js" asp-append-version="true" defer></script>
+
+    <script>
+        (function () {
+              var block = document.getElementById("qr-block");
+              if (!block) return;
+
+              var path = block.getAttribute("data-path") || "/";
+              var key  = block.getAttribute("data-access-key") || "";
+              var initialNgrokUrl = block.getAttribute("data-ngrok-url") || "";
+              var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+
+            function render(baseUrl) {
+                if (!baseUrl) return;
+
+                var accessPath;
+
+                if (key) {
+                // Gatekeeper enabled: /access?k=<key>&returnUrl=<path>
+                accessPath = "/access?k=" + encodeURIComponent(key) +
+                                "&returnUrl=" + encodeURIComponent(path);
+                } else {
+                // No key configured: just use the current path directly
+                accessPath = path || "/";
+                }
+
+                block.innerHTML = "";
+
+                var a = document.createElement("a");
+                a.className = "qr-link";
+                a.href = accessPath;
+                a.setAttribute("aria-label", "Open this page on your phone");
+
+                var img = document.createElement("img");
+                img.className = "qr-img";
+                img.width = 84;
+                img.height = 84;
+                img.loading = "lazy";
+                img.decoding = "async";
+                img.alt = "Open this page on your phone";
+                img.src = "/qr/page.png?pathAndQuery=" + encodeURIComponent(accessPath);
+
+                a.appendChild(img);
+                block.appendChild(a);
+                block.style.display = "";
+            }
+
+            // 1. If the server already knows the ngrok URL, just use it.
+            if (initialNgrokUrl) {
+                render(initialNgrokUrl);
+                return;
+            }
+
+            // 2. Try /ngrok/status (optional, but keeps your existing behaviour).
+            fetch("/ngrok/status", { credentials: "same-origin" })
+                .then(function (r) { return r.ok ? r.json() : { url: null }; })
+                .then(function (j) {
+                    if (j && j.url) {
+                        render(j.url);
+                    } else if (!isLocal) {
+                        // Non-local, just use the current origin
+                        render(location.origin);
+                    } else {
+                        // Local and no URL yet: fall back to SignalR and wait for it
+                        startSignalR();
+                    }
+                })
+                .catch(function () {
+                    if (!isLocal) {
+                    render(location.origin);
+                    }
+                });
+
+            function startSignalR() {
+                if (typeof signalR === "undefined" || !signalR.HubConnectionBuilder) return;
+
+                var connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/hubs/ngrok")
+                    .withAutomaticReconnect()
+                    .build();
+
+                connection.on("NgrokUrlAvailable", function (url) {
+                    if (url) {
+                    render(url);
+                    }
+                });
+
+                connection.start().catch(function () { });
+            }
+        })();
+
+        // Register the Service Worker
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", function () {
+            navigator.serviceWorker.register("/js/service-worker.js");
+          });
+        }
+    </script>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "name": "BOTGC Member Portal",
+  "short_name": "Member Portal",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "description": "Membership application for Burton on Trent Golf Club.",
+  "lang": "en-GB",
+  "dir": "ltr",
+  "background_color": "#ffffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/img/Burton on Trent  - 1894.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/img/Burton on Trent  - 1894.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

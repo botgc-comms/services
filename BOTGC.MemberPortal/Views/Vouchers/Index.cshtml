@@ -1,0 +1,50 @@
+﻿@model IReadOnlyList<BOTGC.MemberPortal.Models.VoucherTypeSummaryViewModel>
+
+@{
+    ViewData["Title"] = "Your vouchers";
+}
+
+<div class="app-wrap dashboard">
+    <header class="dashboard-header">
+        <h1 class="dashboard-header__title">Your vouchers</h1>
+        <p class="dashboard-header__subtitle">
+            Tap a voucher type to show the code to the shop.
+        </p>
+    </header>
+
+    @if (Model == null || !Model.Any())
+    {
+        <p>You do not have any vouchers at the moment.</p>
+    }
+    else
+    {
+        <section class="dashboard-section">
+            <div class="tiles tiles--dashboard tiles--vouchers">
+                @foreach (var t in Model)
+                {
+                    var bg = string.IsNullOrWhiteSpace(t.BackgroundColor)
+                    ? "#d6f4e6"
+                    : t.BackgroundColor;
+
+                    var style = $"--bg:{bg};";
+
+                    <a asp-controller="Vouchers"
+                       asp-action="Show"
+                       asp-route-typeKey="@t.TypeKey"
+                       class="tile tile--dash tile--dash-voucher"
+                       style="@style">
+                        <div class="tile__content">
+                            <div class="tile__text">
+                                <div class="tile__name">@t.Title</div>
+                                <div class="tile__hint">@t.Description</div>
+                                <div class="voucher-tile__count">
+                                    @t.AvailableCount voucher@(t.AvailableCount == 1 ? "" : "s") available
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </section>
+    }
+</div>

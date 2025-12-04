@@ -43,5 +43,4 @@ public class QrController : Controller
 
         return File(png, "image/png");
     }
-
 }

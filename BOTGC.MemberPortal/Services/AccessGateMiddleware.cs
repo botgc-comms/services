@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
 using System.Net;
-using BOTGC.POS;
-using BOTGC.POS.Common;
+using BOTGC.MemberPortal;
+using BOTGC.MemberPortal.Common;
 
-namespace BOTGC.POS.Services;
+namespace BOTGC.MemberPortal.Services;
 
 public sealed class GatekeeperOptions
 {
@@ -59,7 +59,8 @@ public sealed class GatekeeperMiddleware
         // (optional) Always allow static images/css/js to load without a key
         if (ctx.Request.Path.StartsWithSegments("/img", StringComparison.OrdinalIgnoreCase) ||
             ctx.Request.Path.StartsWithSegments("/css", StringComparison.OrdinalIgnoreCase) ||
-            ctx.Request.Path.StartsWithSegments("/manifesst", StringComparison.OrdinalIgnoreCase) ||
+            ctx.Request.Path.StartsWithSegments("/manifest", StringComparison.OrdinalIgnoreCase) ||
+            ctx.Request.Path.StartsWithSegments("/voucher", StringComparison.OrdinalIgnoreCase) ||
             ctx.Request.Path.StartsWithSegments("/js", StringComparison.OrdinalIgnoreCase))
         {
             await _next(ctx);

@@ -35,6 +35,13 @@ namespace BOTGC.API.Extensions
             services.AddAzureTableStore<CompetitionPayoutHeaderEntity>("CompetitionPayoutHeader");
             services.AddAzureTableStore<CompetitionPayoutWinnerEntity>("CompetitionPayoutWinner");
 
+            services.AddAzureTableStore<EposAccountEntity>("EPOSAccounts");
+            services.AddAzureTableStore<EposProductEntity>("EPOSProducts");
+            services.AddAzureTableStore<EposVoucherEntity>("EPOSVouchers");
+            services.AddAzureTableStore<EposVoucherCodeIndexEntity>("EPOSVoucherCodes");
+            services.AddAzureTableStore<EposProShopInvoiceEntity>("EPOSVoucherInvoices");
+            services.AddAzureTableStore<EposProShopInvoiceLineEntity>("EPOSVoucherInvoiceLines");
+            services.AddAzureTableStore<EposAccountTransactionEntity>("EPOSAccountTransactions");
 
             services.AddSingleton(cookieContainer);
             services.AddSingleton(httpClient);
@@ -54,7 +61,8 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IQueueService<StockTakeCompletedCommand>, StockTakeCompletedQueueService>();
             services.AddSingleton<IQueueService<ProcessPrizeInvoiceCommand>, PrizeInvoiceQueueService>();
             services.AddSingleton<IQueueService<SendPrizeNotificationEmailCommand>, PrizeNotificationsQueueService>(); 
-            services.AddSingleton<IQueueService<ProcessCompetitionWinningsBatchCompletedCommand>, NewCompetitionPrizesCalcualtedQueueService>();  
+            services.AddSingleton<IQueueService<ProcessCompetitionWinningsBatchCompletedCommand>, NewCompetitionPrizesCalcualtedQueueService>();
+            services.AddSingleton<IEposStore, EposStore>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
 
@@ -74,8 +82,10 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IBottleVolumeService, BottleVolumeService>();
             services.AddSingleton<IBottleWeightDataSource, BottleWeightService>();
             services.AddSingleton<ICompetitionPayoutStore, CompetitionPayoutService>();
-            services.AddSingleton<IBlobStorageService, AzureBlobStorageService>();       
+            services.AddSingleton<IBlobStorageService, AzureBlobStorageService>();
+            services.AddSingleton<IBenefitsQrTokenService, BenefitsQrTokenService>();
 
+            services.AddHostedService<EposProductSeedService>();
             services.AddHostedService<CompetitionBackgroundService>();
             services.AddHostedService<TeeTimeUsageBackgroundService>();
             services.AddHostedService<MembershipApplicationQueueProcessor>();

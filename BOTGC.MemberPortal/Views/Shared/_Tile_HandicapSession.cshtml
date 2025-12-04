@@ -1,0 +1,25 @@
+﻿@* Views/Shared/_Tile_HandicapSession.cshtml *@
+@model BOTGC.MemberPortal.Models.DashboardTileViewModel
+
+@{
+    var controller = string.IsNullOrWhiteSpace(Model.Controller) ? "Handicap" : Model.Controller;
+    var action = string.IsNullOrWhiteSpace(Model.Action) ? "NextSession" : Model.Action;
+    var imageUrl = string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/icons/group-session.png" : Model.ImageUrl;
+}
+
+<a asp-controller="@controller"
+   asp-action="@action"
+   class="tile tile--dash tile--dash-handicap">
+    <div class="tile__avatar tile__avatar--icon">
+        <img src="@imageUrl" alt="" aria-hidden="true" />
+    </div>
+
+    <div class="tile__text">
+        <div class="tile__name">
+            Next group session
+        </div>
+        <div class="tile__hint">
+            See when your next group session is.
+        </div>
+    </div>
+</a>

@@ -175,7 +175,7 @@ public sealed class HttpProductService : IProductService
                 igid = c.Id;
                 unit = (c.Unit ?? string.Empty).Trim();
                 finalName = string.IsNullOrWhiteSpace(c.Name) ? name : c.Name!.Trim();
-                category = (c.Division ?? string.Empty).Trim();
+                category = ToTitle(c.Division ?? string.Empty).Trim();
             }
             else
             {
@@ -247,9 +247,8 @@ public sealed class HttpProductService : IProductService
         if (set.Any(s => s.Contains("BEER"))) return "Beer";
         if (set.Contains("CIDER")) return "Cider";
         if (set.Any(s => s.Contains("WINE"))) return "Wine";
-        if (set.All(s => s is "KITCHEN" or "FOOD" or "DESSERTS" or "PREPARED MEALS" or "BAKERY")) return "Kitchen";
 
-        return string.Join(" & ", set.Take(2).Select(ToTitle));
+        return "Kitchen";
     }
 
     private static string ToTitle(string s)

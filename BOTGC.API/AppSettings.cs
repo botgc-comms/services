@@ -43,6 +43,8 @@ namespace BOTGC.API
 
         public PrizePayoutOptions PrizePayout { get; set; } = new();
 
+        public EposBenefitsSettings EposBenefits { get; set; } = new();
+
     }
 
     public class Invoices
@@ -204,6 +206,37 @@ namespace BOTGC.API
         public decimal TolerancePercent { get; init; } = 10m;
     }
 
+    public sealed class EposBenefitsSettings
+    {
+        public string QrRedemptionUrl { get; set; } = "https://localhost:7052/voucher/redeem?payload={payload}";
+        public string QrEncryptionKey { get; set; } = string.Empty;
+        public List<EposBenefitsCategoryRule> CategoryRules { get; set; } = new();
+        public List<EposProductConfig> Products { get; set; } = new();
+    }
+
+    public sealed class EposBenefitsCategoryRule
+    {
+        public string CategoryCode { get; set; } = string.Empty;
+
+        public decimal SubscriptionCreditPercentage { get; set; }
+    }
+
+    public sealed class EposProductConfig
+    {
+        public string ProductId { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string Category { get; set; } = string.Empty;
+        public decimal DefaultRedemptionValue { get; set; }
+        public decimal DefaultAllowanceCharge { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTimeOffset? ProductExpiresAtUtc { get; set; }
+        public List<string>? AllowedMembershipCategories { get; set; }
+        public string ScannerType { get; set; } = "QR";
+        public string CallbackUrl { get; set; }
+    }
+
     public sealed class PrizePayoutOptions
     {
         public string EligibilityExpression { get; set; } = "^.*?(?:Stab[a-z]*|Medal)([\\s#]*?)\\d{1,2}(?:[^\\d]|$).*?$";
@@ -245,4 +278,5 @@ namespace BOTGC.API
 
         public List<decimal> PairsTeamTop5 { get; set; } = new();
     }
+    
 }

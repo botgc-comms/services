@@ -1,0 +1,55 @@
+﻿@model BOTGC.MemberPortal.Models.DashboardTileViewModel
+
+@{
+    var hasRoute = !string.IsNullOrWhiteSpace(Model.Controller) && !string.IsNullOrWhiteSpace(Model.Action);
+    var isProgress = string.Equals(Model.Type, "category_progress", System.StringComparison.OrdinalIgnoreCase);
+    var progressValue = Model.ProgressPercent ?? 0;
+
+    var cssClasses = "tile tile--dash";
+    if (string.Equals(Model.Type, "cadet_vouchers", System.StringComparison.OrdinalIgnoreCase))
+    {
+        cssClasses += " tile--dash-primary";
+    }
+    else if (string.Equals(Model.Type, "junior_mentor", System.StringComparison.OrdinalIgnoreCase))
+    {
+        cssClasses += " tile--dash-secondary";
+    }
+    else if (string.Equals(Model.Type, "rules_quiz", System.StringComparison.OrdinalIgnoreCase))
+    {
+        cssClasses += " tile--dash-accent";
+    }
+    else if (string.Equals(Model.Type, "handicap_session", System.StringComparison.OrdinalIgnoreCase))
+    {
+        cssClasses += " tile--dash-info";
+    }
+    else if (isProgress)
+    {
+        cssClasses += " tile--dash-progress";
+    }
+
+    var style = string.Empty;
+    if (!string.IsNullOrWhiteSpace(Model.BackgroundColor))
+    {
+        style = $"--bg:{Model.BackgroundColor};";
+    }
+    if (isProgress)
+    {
+        style += $"--progress:{progressValue};";
+    }
+}
+
+@if (hasRoute)
+{
+    <a asp-controller="@Model.Controller"
+       asp-action="@Model.Action"
+       class="@cssClasses"
+       style="@style">
+        @await Html.PartialAsync("_DashboardTileContent", Model)
+    </a>
+}
+else
+{
+    <div class="@cssClasses" style="@style">
+        @await Html.PartialAsync("_DashboardTileContent", Model)
+    </div>
+}

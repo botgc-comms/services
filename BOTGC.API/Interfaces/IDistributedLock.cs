@@ -1,8 +1,6 @@
-﻿namespace BOTGC.API.Interfaces
-{
-    public interface IDistributedLock : IAsyncDisposable
-    {
-        bool IsAcquired { get; }
-    }
+﻿namespace BOTGC.API.Interfaces;
 
+public interface IDistributedLock : IAsyncDisposable
+{
+    bool IsAcquired { get; }
 }

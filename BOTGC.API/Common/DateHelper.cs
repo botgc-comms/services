@@ -19,6 +19,8 @@ namespace BOTGC.API.Common
         return d;
     }
 
+    public static long UtcTicks(this DateTimeOffset dto) => dto.UtcDateTime.Ticks;
+
     public static bool IsNonWorkingDay(DateTime date)
     {
         var d = date.Date;

@@ -1,0 +1,34 @@
+﻿@model BOTGC.MemberPortal.Models.VoucherDisplayViewModel
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="voucher-screen">
+    <a asp-controller="Vouchers"
+       asp-action="Index"
+       class="voucher-screen__close"
+       aria-label="Close">
+        ✕
+    </a>
+
+    <div class="voucher-screen__content">
+        <header class="voucher-screen__header">
+            <h1 class="voucher-screen__title">@Model.Title</h1>
+            <p class="voucher-screen__subtitle">@Model.Description</p>
+        </header>
+
+        <div class="voucher-screen__qr">
+            <img src="@Url.Action("Qr", "Vouchers", new { code = Model.Code })"
+                 alt="Voucher code to be scanned" />
+        </div>
+
+        <div class="voucher-screen__code">
+            Code: <strong>@Model.Code</strong>
+        </div>
+
+        <p class="voucher-screen__hint">
+            Show this screen to the shop so they can scan the code.
+        </p>
+    </div>
+</div>
