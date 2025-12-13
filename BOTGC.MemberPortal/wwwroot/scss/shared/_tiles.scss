@@ -146,3 +146,48 @@ $tile-height: 170px;
         grid-template-columns: 1fr;
     }
 }
+
+/* Circular “water level” avatar for progress tile */
+.tile__avatar--progress {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 95px;
+    height: 95px;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 8px rgba(15, 23, 42, .25);
+    background: #e5f0ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* default values for JS-driven props */
+    --wave-offset-x: 0px;
+    --wave-offset-y: 0px;
+    --wave-tilt: 0deg;
+}
+
+/* Percentage text in the circle */
+.progress-circle__value {
+    position: relative;
+    z-index: 2;
+    font-size: .85rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* Water fill inside the circle */
+.tile__avatar--progress::before {
+    content: "";
+    position: absolute;
+    left: -20%;
+    bottom: -10%;
+    width: 140%;
+    height: calc(var(--progress) * 1% + 20%);
+    background: radial-gradient(120% 200% at 50% 0, #93c5fd 0%, #2563eb 50%, #1d4ed8 100%);
+    opacity: .9;
+    transform: translateX(var(--wave-offset-x)) translateY(var(--wave-offset-y)) rotate(var(--wave-tilt));
+    transition: transform .08s ease-out;
+}

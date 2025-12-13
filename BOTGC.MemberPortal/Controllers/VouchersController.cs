@@ -49,6 +49,7 @@ public sealed class VouchersController : Controller
                     TypeKey = g.Key,
                     Title = first.TypeTitle,
                     Description = first.TypeDescription,
+                    Image = first.Image,
                     AvailableCount = g.Count(v => v.IsActive),
                     BackgroundColor = null
                 };

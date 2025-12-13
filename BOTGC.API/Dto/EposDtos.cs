@@ -37,11 +37,14 @@ namespace BOTGC.API.Dto
     public sealed class ProductEntitlementDto
     {
         public Guid ProductId { get; set; }
+        public Guid? VoucherId { get; set; }
         public string ProductCode { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;
-
+        public string ProductImage { get; set; } = string.Empty;
         public decimal RedemptionValue { get; set; }
         public decimal AllowanceCharge { get; set; }
+
+        public bool IsAvailable { get; set; }
     }
 
     public sealed class AccountEntitlementsDto

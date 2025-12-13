@@ -1,5 +1,4 @@
-﻿@* Views/Shared/_Tile_CategoryProgress.cshtml *@
-@model BOTGC.MemberPortal.Models.DashboardTileViewModel
+﻿@model BOTGC.MemberPortal.Models.DashboardTileViewModel
 
 @using System
 
@@ -22,8 +21,8 @@
 }
 
 <div class="tile tile--dash tile--dash-progress" style="@style">
-    <div class="tile__avatar tile__avatar--icon">
-        <img src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/icons/progress.png" : Model.ImageUrl)" alt="" aria-hidden="true" />
+    <div class="tile__avatar tile__avatar--progress">
+        <span class="progress-circle__value">@progress%</span>
     </div>
 
     <div class="tile__text">
@@ -38,3 +37,76 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        const maxTilt = 12; // degrees
+        const maxOffset = 6; // px
+
+        function setWaveFromNormalised(dx, dy) {
+            // dx, dy are roughly in range [-1, 1]
+            const tilt = dx * maxTilt;
+            const offsetX = dx * maxOffset;
+            const offsetY = -dy * maxOffset; // tilt “down” in direction of gravity
+
+            document.querySelectorAll(".tile__avatar--progress").forEach(function (el) {
+                el.style.setProperty("--wave-tilt", tilt.toFixed(2) + "deg");
+                el.style.setProperty("--wave-offset-x", offsetX.toFixed(2) + "px");
+                el.style.setProperty("--wave-offset-y", offsetY.toFixed(2) + "px");
+            });
+        }
+
+        function setupDeviceOrientation() {
+            if (!window.DeviceOrientationEvent) {
+                return false;
+            }
+
+            const handler = function (event) {
+                // gamma: left/right tilt (-90 to 90)
+                // beta: front/back tilt (-180 to 180)
+                const gamma = event.gamma || 0;
+                const beta = event.beta || 0;
+
+                // normalise roughly to [-1, 1]
+                const nx = Math.max(-1, Math.min(1, gamma / 30));
+                const ny = Math.max(-1, Math.min(1, beta / 30));
+
+                setWaveFromNormalised(nx, ny);
+            };
+
+            // Some browsers require permission (mainly iOS); this keeps it simple
+            try {
+                window.addEventListener("deviceorientation", handler, true);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        function setupMouseFallback() {
+            const handler = function (event) {
+                const w = window.innerWidth || 1;
+                const h = window.innerHeight || 1;
+
+                const nx = (event.clientX / w) * 2 - 1;    // -1 (left) to +1 (right)
+                const ny = (event.clientY / h) * 2 - 1;    // -1 (top) to +1 (bottom)
+
+                console.log("mouse moving")
+
+                setWaveFromNormalised(nx, ny);
+            };
+
+            window.addEventListener("mousemove", handler);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const ok = setupDeviceOrientation();
+            if (!ok) {
+                setupMouseFallback();
+            }
+        });
+    })();
+
+</script>
+
+

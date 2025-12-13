@@ -1,5 +1,7 @@
 ﻿using Azure;
 using Azure.Data.Tables;
+using System;
+using System.Runtime.Serialization;
 
 namespace BOTGC.API.Models;
 
@@ -25,8 +27,17 @@ public sealed class EposAccountTransactionEntity : ITableEntity
 
     public int MemberId { get; set; }
 
+    // Stored as Edm.Double under "Amount"
+    [DataMember(Name = "Amount")]
+    public double AmountRaw { get; set; }
+
     /// <summary>Positive for credit, negative for debit.</summary>
-    public double Amount { get; set; }
+    [IgnoreDataMember]
+    public decimal Amount
+    {
+        get => (decimal)AmountRaw;
+        set => AmountRaw = (double)value;
+    }
 
     public string Type { get; set; } = string.Empty; // "Credit" / "Debit"
     public string Reason { get; set; } = string.Empty;
@@ -53,10 +64,33 @@ public sealed class EposProductEntity : ITableEntity
     public string Code { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string? Image { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
 
-    public decimal DefaultRedemptionValue { get; set; }
-    public decimal DefaultAllowanceCharge { get; set; }
+    // Stored in table as Edm.Double under the existing column name "DefaultRedemptionValue"
+    [DataMember(Name = "DefaultRedemptionValue")]
+    public double DefaultRedemptionValueRaw { get; set; }
+
+    [IgnoreDataMember]
+    public decimal DefaultRedemptionValue
+    {
+        get => (decimal)DefaultRedemptionValueRaw;
+        set => DefaultRedemptionValueRaw = (double)value;
+    }
+
+    // Stored as Edm.Double under "DefaultAllowanceCharge"
+    [DataMember(Name = "DefaultAllowanceCharge")]
+    public double DefaultAllowanceChargeRaw { get; set; }
+
+    [IgnoreDataMember]
+    public decimal DefaultAllowanceCharge
+    {
+        get => (decimal)DefaultAllowanceChargeRaw;
+        set => DefaultAllowanceChargeRaw = (double)value;
+    }
+
+    public int QuantityAllowed { get; set; }
+    public int NoRepeatUseWithinDays { get; set; }
 
     public bool IsActive { get; set; } = true;
 
@@ -66,7 +100,6 @@ public sealed class EposProductEntity : ITableEntity
 
     public Guid ProductId => Guid.Parse(RowKey);
     public static string RowKeyFor(Guid productId) => productId.ToString("N");
-    
 }
 
 public sealed class EposVoucherEntity : ITableEntity
@@ -83,8 +116,27 @@ public sealed class EposVoucherEntity : ITableEntity
     public string ProductCode { get; set; } = string.Empty;
     public string ProductName { get; set; } = string.Empty;
 
-    public decimal RedemptionValue { get; set; }
-    public decimal AllowanceCharge { get; set; }
+    // Stored as Edm.Double under "RedemptionValue"
+    [DataMember(Name = "RedemptionValue")]
+    public double RedemptionValueRaw { get; set; }
+
+    [IgnoreDataMember]
+    public decimal RedemptionValue
+    {
+        get => (decimal)RedemptionValueRaw;
+        set => RedemptionValueRaw = (double)value;
+    }
+
+    // Stored as Edm.Double under "AllowanceCharge"
+    [DataMember(Name = "AllowanceCharge")]
+    public double AllowanceChargeRaw { get; set; }
+
+    [IgnoreDataMember]
+    public decimal AllowanceCharge
+    {
+        get => (decimal)AllowanceChargeRaw;
+        set => AllowanceChargeRaw = (double)value;
+    }
 
     public bool IsBonus { get; set; }
     public string? AwardReason { get; set; }
@@ -134,7 +186,17 @@ public sealed class EposProShopInvoiceEntity : ITableEntity
     public DateTimeOffset? FromUtc { get; set; }
     public DateTimeOffset? ToUtc { get; set; }
     public string? Description { get; set; }
-    public decimal TotalAmount { get; set; }
+
+    // Stored as Edm.Double under "TotalAmount"
+    [DataMember(Name = "TotalAmount")]
+    public double TotalAmountRaw { get; set; }
+
+    [IgnoreDataMember]
+    public decimal TotalAmount
+    {
+        get => (decimal)TotalAmountRaw;
+        set => TotalAmountRaw = (double)value;
+    }
 
     public Guid InvoiceId => Guid.Parse(RowKey);
     public static string RowKeyFor(Guid invoiceId) => invoiceId.ToString("N");
@@ -152,8 +214,28 @@ public sealed class EposProShopInvoiceLineEntity : ITableEntity
     public string ProductName { get; set; } = string.Empty;
 
     public int Quantity { get; set; }
-    public decimal RedemptionValuePerUnit { get; set; }
-    public decimal TotalRedemptionValue { get; set; }
+
+    // Stored as Edm.Double under "RedemptionValuePerUnit"
+    [DataMember(Name = "RedemptionValuePerUnit")]
+    public double RedemptionValuePerUnitRaw { get; set; }
+
+    [IgnoreDataMember]
+    public decimal RedemptionValuePerUnit
+    {
+        get => (decimal)RedemptionValuePerUnitRaw;
+        set => RedemptionValuePerUnitRaw = (double)value;
+    }
+
+    // Stored as Edm.Double under "TotalRedemptionValue"
+    [DataMember(Name = "TotalRedemptionValue")]
+    public double TotalRedemptionValueRaw { get; set; }
+
+    [IgnoreDataMember]
+    public decimal TotalRedemptionValue
+    {
+        get => (decimal)TotalRedemptionValueRaw;
+        set => TotalRedemptionValueRaw = (double)value;
+    }
 
     public Guid InvoiceId => Guid.Parse(PartitionKey);
     public Guid ProductIdGuid => Guid.Parse(ProductId);

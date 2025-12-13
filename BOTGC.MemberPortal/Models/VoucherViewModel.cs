@@ -6,6 +6,7 @@ public sealed class VoucherViewModel
     public string TypeKey { get; init; } = string.Empty;
     public string TypeTitle { get; init; } = string.Empty;
     public string TypeDescription { get; init; } = string.Empty;
+    public string Image { get; set; } = string.Empty;
 
     public string Code { get; init; } = string.Empty;
     public decimal RemainingValue { get; init; }

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="BOTGC.Mobile.LoginPage"
+    BackgroundColor="White">
+
+    <VerticalStackLayout
+        Padding="32"
+        Spacing="24"
+        VerticalOptions="Center">
+
+        <!-- Logo -->
+        <Image Source="login_logo_fixed.png" HeightRequest="120" HorizontalOptions="Center" />
+
+        <!-- Title -->
+        <Label
+            Text="Welcome"
+            FontSize="28"
+            FontAttributes="Bold"
+            HorizontalOptions="Center"
+            TextColor="Black" />
+
+        <Label
+            Text="Please log in to continue"
+            FontSize="14"
+            HorizontalOptions="Center"
+            TextColor="Gray" />
+
+        <!-- Email / Phone -->
+        <Entry
+            x:Name="UsernameEntry"
+            Placeholder="Email or phone number"
+            Keyboard="Email"
+            ClearButtonVisibility="WhileEditing" />
+
+        <!-- Password -->
+        <Entry
+            x:Name="PasswordEntry"
+            Placeholder="Password"
+            IsPassword="True"
+            ClearButtonVisibility="WhileEditing" />
+
+        <!-- Login button -->
+        <Button
+            Text="Log In"
+            HeightRequest="48"
+            BackgroundColor="#F5A623"
+            TextColor="White"
+            CornerRadius="12"
+            Clicked="OnLoginClicked" />
+
+        <!-- Forgot password -->
+        <Label
+            Text="Forgot password?"
+            FontSize="13"
+            TextColor="#F5A623"
+            HorizontalOptions="Center" />
+
+    </VerticalStackLayout>
+
+</ContentPage>

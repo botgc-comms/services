@@ -99,7 +99,7 @@ public sealed class EposStore : IEposStore
             PartitionKey = TransactionPartition(account.MemberId),
             RowKey = TransactionRowKey(now),
             MemberId = account.MemberId,
-            Amount = (double)amount,
+            Amount = amount,
             Type = "Credit",
             Reason = reason ?? string.Empty,
             CreatedAtUtc = now,
@@ -131,7 +131,7 @@ public sealed class EposStore : IEposStore
             PartitionKey = TransactionPartition(account.MemberId),
             RowKey = TransactionRowKey(now),
             MemberId = account.MemberId,
-            Amount = (double)-amount,
+            Amount = -amount,
             Type = "Debit",
             Reason = reason ?? string.Empty,
             CreatedAtUtc = now,
@@ -146,7 +146,7 @@ public sealed class EposStore : IEposStore
     public async Task<decimal> GetBalanceAsync(int memberId, CancellationToken ct)
     {
         var txns = await GetAccountTransactionsAsync(memberId, null, null, ct);
-        return (decimal)txns.Sum(t => t.Amount);
+        return txns.Sum(t => t.Amount);
     }
 
     public async Task<IReadOnlyList<EposAccountTransactionEntity>> GetAccountTransactionsAsync(

@@ -208,7 +208,7 @@ namespace BOTGC.API
 
     public sealed class EposBenefitsSettings
     {
-        public string QrRedemptionUrl { get; set; } = "https://localhost:7052/voucher/redeem?payload={payload}";
+        public string QrRedemptionUrl { get; set; } = "https://localhost:7055/voucher/redeem?payload={payload}";
         public string QrEncryptionKey { get; set; } = string.Empty;
         public List<EposBenefitsCategoryRule> CategoryRules { get; set; } = new();
         public List<EposProductConfig> Products { get; set; } = new();
@@ -226,10 +226,13 @@ namespace BOTGC.API
         public string ProductId { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
+        public string? Image { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string Category { get; set; } = string.Empty;
         public decimal DefaultRedemptionValue { get; set; }
         public decimal DefaultAllowanceCharge { get; set; }
+        public int QuantityAllowed { get; set; }
+        public int NoRepeatUseWithinDays { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTimeOffset? ProductExpiresAtUtc { get; set; }
         public List<string>? AllowedMembershipCategories { get; set; }

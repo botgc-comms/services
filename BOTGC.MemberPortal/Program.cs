@@ -42,6 +42,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUserAuthenticationService, InMemoryUserAuthenticationService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+builder.Services.AddScoped<IVoucherService, ApiVoucherService>();
+
 builder.Services.AddScoped<ITileService, TileService>();
 
 builder.Services.AddScoped<ITileAdapter, CadetVouchersTileAdapter>();
@@ -49,7 +51,6 @@ builder.Services.AddScoped<ITileAdapter, JuniorMentorTileAdapter>();
 builder.Services.AddScoped<ITileAdapter, RulesQuizTileAdapter>();
 builder.Services.AddScoped<ITileAdapter, HandicapSessionTileAdapter>();
 builder.Services.AddScoped<ITileAdapter, CategoryProgressTileAdapter>();
-builder.Services.AddScoped<IVoucherService, InMemoryVoucherService>();
 
 
 builder.Services.Configure<ForwardedHeadersOptions>(o =>

@@ -4,14 +4,14 @@
 @{
     var controller = string.IsNullOrWhiteSpace(Model.Controller) ? "Handicap" : Model.Controller;
     var action = string.IsNullOrWhiteSpace(Model.Action) ? "NextSession" : Model.Action;
-    var imageUrl = string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/icons/group-session.png" : Model.ImageUrl;
+    var imageUrl = string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/img/products/photo_group_coaching.png" : Model.ImageUrl;
 }
 
 <a asp-controller="@controller"
    asp-action="@action"
    class="tile tile--dash tile--dash-handicap">
-    <div class="tile__avatar tile__avatar--icon">
-        <img src="@imageUrl" alt="" aria-hidden="true" />
+    <div class="tile__avatar">
+        <img src="@imageUrl" alt="Your golf buddy" />
     </div>
 
     <div class="tile__text">

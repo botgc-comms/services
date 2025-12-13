@@ -59,9 +59,12 @@ namespace BOTGC.API.Services
                     Code = cfg.Code ?? string.Empty,
                     DisplayName = cfg.DisplayName ?? string.Empty,
                     Description = cfg.Description,
+                    Image = cfg.Image,
                     Category = cfg.Category ?? string.Empty,
                     DefaultRedemptionValue = cfg.DefaultRedemptionValue,
                     DefaultAllowanceCharge = cfg.DefaultAllowanceCharge,
+                    QuantityAllowed = cfg.QuantityAllowed,
+                    NoRepeatUseWithinDays = cfg.NoRepeatUseWithinDays,
                     IsActive = cfg.IsActive,
                     ProductExpiresAtUtc = cfg.ProductExpiresAtUtc,
                     AllowedMembershipCategories = allowedCategories
