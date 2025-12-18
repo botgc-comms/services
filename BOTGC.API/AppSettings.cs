@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using BOTGC.API.Controllers;
+using System.Text.Json.Serialization;
 
 namespace BOTGC.API
 {
@@ -79,6 +80,27 @@ namespace BOTGC.API
     public class AuthSettings
     {
         public string XApiKey { get; set; } = "";
+
+        public AppAuthSettings App { get; set; } = new();   
+    }
+
+    public sealed class AppAuthSettings
+    {
+        public int QrCodeTtlMinutes { get; set; } = 2;
+        public int SessionTtlMinutes { get; set; } = 5;
+        public int MaxDobAttempts { get; set; } = 5;
+
+        public int AccessTokenTtlMinutes { get; set; } = 60;
+        public int RefreshTokenTtlDays { get; set; } = 365;
+
+        public string JwtSigningKey { get; set; } = string.Empty;
+        public string JwtIssuer { get; set; } = "BOTGC";
+        public string JwtAudience { get; set; } = "BOTGC.App";
+        public string? QrBaseUrl { get; set; }
+        public string[] AllowedClientIds { get; set; } = ["23f23f23f-wseg3g-b87*&87VB*7-vtc6*&^%-76t5-&^5765-I&65"];
+
+        public List<string>? AllowedMembershipCategories { get; set; }
+        public List<string>? AllowedMembershipCategoryGroups { get; set; }
     }
 
     public class Cache

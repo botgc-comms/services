@@ -7,7 +7,19 @@ public enum MembershipAnomalyType
     StatusWithoutJoinDate
 }
 
-public class MembershipReportDto
+public sealed class MembershipReportPageViewModel
+{
+    public MembershipReportPageViewModel(MembershipReportDto report, IReadOnlyList<HateoasLink> pageLinks)
+    {
+        Report = report ?? throw new ArgumentNullException(nameof(report));
+        PageLinks = pageLinks ?? throw new ArgumentNullException(nameof(pageLinks));
+    }
+
+    public MembershipReportDto Report { get; }
+    public IReadOnlyList<HateoasLink> PageLinks { get; }
+}
+
+public class MembershipReportDto : HateoasResource
 {
     public List<MembershipReportEntryDto> DataPoints { get; set; } = new();
     public string DataPointsCsv { get; set; }
@@ -171,5 +183,4 @@ public class MemberSummmaryDto
     public string MembershipCategory { get; set; }
     public string MembershipStatus { get; set; }
 }
-
 

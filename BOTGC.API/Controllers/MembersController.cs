@@ -41,21 +41,90 @@ namespace BOTGC.API.Controllers
         /// <response code="204">No members found.</response>
         /// <response code="500">An internal server error occurred.</response>
         [HttpGet("report")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<MembershipReportDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MembershipReportDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MembershipReportDto>> GetMembershipReport()
+        public async Task<ActionResult<MembershipReportDto>> GetMembershipReport([FromQuery] string? financialYear)
         {
             _logger.LogInformation("Fetching membership report");
 
             try
             {
-                var membershipReport = await _membershipReporting.GetManagementReport(HttpContext.RequestAborted);
+                var today = DateTime.UtcNow.Date;
+                var currentFyStartYear = today.Month >= 10 ? today.Year : today.Year - 1;
+                var currentFyEndYear = currentFyStartYear + 1;
+
+                if (string.IsNullOrWhiteSpace(financialYear))
+                {
+                    financialYear = ToFinancialYearString(currentFyStartYear, currentFyEndYear);
+                }
+
+                if (!TryParseFinancialYear(financialYear, out var fyStartYear, out var fyEndYear))
+                {
+                    return BadRequest("financialYear must be in the format '24/25' and represent consecutive years.");
+                }
+
+                var fyStart = new DateTime(fyStartYear, 10, 1);
+                var fyEnd = new DateTime(fyEndYear, 9, 30);
+
+                var currentFyStart = new DateTime(currentFyStartYear, 10, 1);
+                var currentFyEnd = currentFyStart.AddYears(1).AddDays(-1);
+
+                var isCurrentFy = fyStart == currentFyStart && fyEnd == currentFyEnd;
+
+                var anchorDate = isCurrentFy ? today : fyEnd;
+
+                var membershipReport = await _membershipReporting.GetManagementReport(anchorDate, HttpContext.RequestAborted);
 
                 if (membershipReport == null)
                 {
                     _logger.LogWarning("Failed to generate management report.");
                     return NoContent();
+                }
+
+                membershipReport.Links.Clear();
+
+                var selfFy = ToFinancialYearString(fyStartYear, fyEndYear);
+                membershipReport.Links.Add(new HateoasLink
+                {
+                    Rel = "self",
+                    Href = Url.ActionLink(
+                        action: nameof(GetMembershipReport),
+                        controller: "Members",
+                        values: new { financialYear = selfFy }) ?? string.Empty,
+                    Method = "GET"
+                });
+
+                var prevStartYear = fyStartYear - 1;
+                var prevEndYear = fyEndYear - 1;
+                var prevFy = ToFinancialYearString(prevStartYear, prevEndYear);
+
+                membershipReport.Links.Add(new HateoasLink
+                {
+                    Rel = "previous",
+                    Href = Url.ActionLink(
+                        action: nameof(GetMembershipReport),
+                        controller: "Members",
+                        values: new { financialYear = prevFy }) ?? string.Empty,
+                    Method = "GET"
+                });
+
+                if (!isCurrentFy && fyEnd < currentFyEnd)
+                {
+                    var nextStartYear = fyStartYear + 1;
+                    var nextEndYear = fyEndYear + 1;
+                    var nextFy = ToFinancialYearString(nextStartYear, nextEndYear);
+
+                    membershipReport.Links.Add(new HateoasLink
+                    {
+                        Rel = "next",
+                        Href = Url.ActionLink(
+                            action: nameof(GetMembershipReport),
+                            controller: "Members",
+                            values: new { financialYear = nextFy }) ?? string.Empty,
+                        Method = "GET"
+                    });
                 }
 
                 _logger.LogInformation("Successfully generated the management report.");
@@ -66,6 +135,42 @@ namespace BOTGC.API.Controllers
                 _logger.LogError(ex, "Error retrieving the management report for membership.");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving the management report for membership.");
             }
+        }
+
+        private static bool TryParseFinancialYear(string input, out int startYear, out int endYear)
+        {
+            startYear = 0;
+            endYear = 0;
+
+            if (string.IsNullOrWhiteSpace(input)) return false;
+
+            input = input.Trim();
+
+            if (input.Length != 5) return false;
+            if (input[2] != '/') return false;
+
+            var startPart = input.Substring(0, 2);
+            var endPart = input.Substring(3, 2);
+
+            if (!int.TryParse(startPart, out var startYY)) return false;
+            if (!int.TryParse(endPart, out var endYY)) return false;
+
+            if (((startYY + 1) % 100) != endYY) return false;
+
+            startYear = 2000 + startYY;
+            endYear = 2000 + endYY;
+
+            if (startYear < 2000 || startYear > 2099) return false;
+            if (endYear != startYear + 1) return false;
+
+            return true;
+        }
+
+        private static string ToFinancialYearString(int startYear, int endYear)
+        {
+            var sy = startYear % 100;
+            var ey = endYear % 100;
+            return $"{sy:00}/{ey:00}";
         }
 
         /// <summary>

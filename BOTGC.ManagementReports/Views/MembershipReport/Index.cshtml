@@ -1,12 +1,19 @@
 ﻿@using System.Text.Json
 @using BOTGC.ManagementReports.Models
 
-@model MembershipReportDto
+@model MembershipReportPageViewModel
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
 
 @{
     var nonce = Context.Items["CSPNonce"] as string ?? "";
     var supressLogo = string.Equals(ViewData["SupressLogo"]?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
+}
+
+@{
+    var prev = Model.PageLinks?.FirstOrDefault(l => string.Equals(l.Rel, "previous", StringComparison.OrdinalIgnoreCase));
+    var next = Model.PageLinks?.FirstOrDefault(l => string.Equals(l.Rel, "next", StringComparison.OrdinalIgnoreCase));
+
+    var report = Model.Report;
 }
 
 @{
@@ -33,6 +40,39 @@
 }
 
 <div class="print-wrap">
+    
+    <nav class="fy-nav" aria-label="Financial year navigation">
+        @if (prev != null && !string.IsNullOrWhiteSpace(prev.Href))
+        {
+            <a class="fy-nav__link fy-nav__link--prev" href="@prev.Href" rel="prev" aria-label="Previous financial year">
+                <span aria-hidden="true">←</span>
+                <span class="fy-nav__text">Previous</span>
+            </a>
+        }
+        else
+        {
+            <span class="fy-nav__link fy-nav__link--prev fy-nav__link--disabled" aria-hidden="true">
+                <span aria-hidden="true">←</span>
+                <span class="fy-nav__text">Previous</span>
+            </span>
+        }
+
+        @if (next != null && !string.IsNullOrWhiteSpace(next.Href))
+        {
+            <a class="fy-nav__link fy-nav__link--next" href="@next.Href" rel="next" aria-label="Next financial year">
+                <span class="fy-nav__text">Next</span>
+                <span aria-hidden="true">→</span>
+            </a>
+        }
+        else
+        {
+            <span class="fy-nav__link fy-nav__link--next fy-nav__link--disabled" aria-hidden="true">
+                <span class="fy-nav__text">Next</span>
+                <span aria-hidden="true">→</span>
+            </span>
+        }
+    </nav>
+
     <h1>Membership Report</h1>
 
     <h2 class="keep-with-next">Playing vs Non-Playing Members</h2>
@@ -64,9 +104,9 @@
     </div>
 
     <nav id="quarters-region" class="tabs" role="tablist" aria-label="Quarterly Membership Reports">
-        @for (int i = 0; i < Model.QuarterlyStats.Count; i++)
+        @for (int i = 0; i < report.QuarterlyStats.Count; i++)
         {
-            var quarter = Model.QuarterlyStats[i];
+            var quarter = report.QuarterlyStats[i];
             <button
                 class="tab-button"
                 role="tab"
@@ -80,9 +120,9 @@
         }
     </nav>
 
-    @for (int i = 0; i < Model.QuarterlyStats.Count; i++)
+    @for (int i = 0; i < report.QuarterlyStats.Count; i++)
     {
-        var quarter = Model.QuarterlyStats[i];
+        var quarter = report.QuarterlyStats[i];
         <section class="tab-panel"
                     role="tabpanel"
                     tabindex="0"
@@ -216,7 +256,7 @@
         const __charts = [];
 
         document.addEventListener("DOMContentLoaded", function () {
-            const dataPoints = @Html.Raw(Json.Serialize(Model.DataPoints));
+            const dataPoints = @Html.Raw(Json.Serialize(report.DataPoints));
 
             const tabs = document.querySelectorAll('.tab-button');
             const panels = document.querySelectorAll('.tab-panel');
@@ -270,9 +310,9 @@
             const nonPlayingMembers = dataPoints.map(dp => dp.nonPlayingMembers || 0);
             const targetPlayingMembers = dataPoints.map(dp => dp.targetPlayingMembers !== 0 ? dp.targetPlayingMembers : undefined);
 
-            const fyStart = new Date("@Model.FinancialYearStart.ToString("yyyy-MM-dd")");
-            const fyEnd = new Date("@Model.FinancialYearEnd.ToString("yyyy-MM-dd")");
-            const today = new Date("@Model.Today.ToString("yyyy-MM-dd")");
+            const fyStart = new Date("@report.FinancialYearStart.ToString("yyyy-MM-dd")");
+            const fyEnd = new Date("@report.FinancialYearEnd.ToString("yyyy-MM-dd")");
+            const today = new Date("@report.Today.ToString("yyyy-MM-dd")");
 
             const fmt = d => new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
 

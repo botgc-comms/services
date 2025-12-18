@@ -30,11 +30,16 @@ namespace BOTGC.API.Services.ReportServices
 
         public async Task<MembershipReportDto> GetManagementReport(CancellationToken cancellationToken)
         {
-            return await PrepareManagementReport(null, cancellationToken);
+            return await PrepareManagementReport(null, DateTime.UtcNow.Date, cancellationToken);
         }
 
-        private async Task<MembershipReportDto> PrepareManagementReport(int? filterByMemberId, CancellationToken cancellationToken)
-        { 
+        public async Task<MembershipReportDto> GetManagementReport(DateTime asAtDate, CancellationToken cancellationToken)
+        {
+            return await PrepareManagementReport(null, asAtDate.Date, cancellationToken);
+        }
+
+        private async Task<MembershipReportDto> PrepareManagementReport(int? filterByMemberId, DateTime asAtDate, CancellationToken cancellationToken)
+        {
             var membersQuery = new GetMembershipReportQuery();
             var membershipReport = await _mediator.Send(membersQuery, cancellationToken);
 
@@ -42,42 +47,36 @@ namespace BOTGC.API.Services.ReportServices
             if (filterByMemberId != null) members = members.Where(m => m.MemberNumber == filterByMemberId).ToList();
 
             var report = new MembershipReportDto();
-            var today = DateTime.UtcNow.Date;
+            var today = asAtDate.Date;
 
             var dataPoints = new List<MembershipReportEntryDto>();
 
             report.Anomalies = IdentifyAnomalies(members);
 
-            // Determine the current and previous financial years
             int currentSubsYearStart = today.Month >= 4 ? today.Year : today.Year - 1;
             DateTime startOfPreviousSubsYear = new DateTime(currentSubsYearStart - 1, 4, 1);
             DateTime endOfPreviousSubsYear = new DateTime(currentSubsYearStart, 3, 31);
             DateTime startOfCurrentSubsYear = new DateTime(currentSubsYearStart, 4, 1);
             DateTime endOfCurrentSubsYear = new DateTime(currentSubsYearStart + 1, 3, 31);
 
-            int currentFinancialYearStart = today.Month >= 10 ? today.Year : today.Year - 1;
-            DateTime startOfPreviousFinancialYear = new DateTime(currentFinancialYearStart - 1, 10, 1);
-            DateTime endOfPreviousFinancialYear = new DateTime(currentFinancialYearStart, 9, 30);
-            DateTime startOfCurrentFinancialYear = new DateTime(currentFinancialYearStart, 10, 1);
-            DateTime endOfCurrentFinancialYear = new DateTime(currentFinancialYearStart + 1, 9, 30);
+            int fyStartYear = today.Month >= 10 ? today.Year : today.Year - 1;
+            DateTime fyStart = new DateTime(fyStartYear, 10, 1);
+            DateTime fyEnd = new DateTime(fyStartYear + 1, 9, 30);
+
+            DateTime startOfPreviousFinancialYear = new DateTime(fyStartYear - 1, 10, 1);
 
             report.Today = today;
             report.SubscriptionYearStart = startOfCurrentSubsYear;
             report.SubscriptionYearEnd = endOfCurrentSubsYear;
-            report.FinancialYearStart = startOfCurrentFinancialYear;
-            report.FinancialYearEnd = endOfCurrentFinancialYear;
+            report.FinancialYearStart = fyStart;
+            report.FinancialYearEnd = fyEnd;
 
             var feeCoverageStart = startOfPreviousSubsYear;
-            var feeCoverageEnd = endOfCurrentFinancialYear;
+            var feeCoverageEnd = fyEnd;
 
             var (categoryFees, categoryFeeLookup, dailyTargetRevenue) =
-                await LoadRevenueConfig(feeCoverageStart, feeCoverageEnd, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
+                await LoadRevenueConfig(feeCoverageStart, feeCoverageEnd, fyStart, fyEnd);
 
-
-            //// Load budget and subscription fees
-            //var (categoryFees, categoryFeeLookup, dailyTargetRevenue) = await LoadRevenueConfig(startOfCurrentFinancialYear, endOfCurrentFinancialYear);
-            
-            // Get all of the events that have taken place up to the start of the last financial year
             var memberEventsQuery = new GetMemberEventsQuery
             {
                 FromDate = startOfPreviousSubsYear.AddDays(-1),
@@ -86,10 +85,8 @@ namespace BOTGC.API.Services.ReportServices
 
             var memberEvents = await _mediator.Send(memberEventsQuery);
 
-            // First time a member appears on the waiting list (by event or ApplicationDate)
             var firstAppliedAt = new Dictionary<int, DateTime>();
 
-            // From events: first non-W -> W
             foreach (var ev in memberEvents.Where(e => e.DateOfChange.HasValue)
                                            .OrderBy(e => e.DateOfChange!.Value))
             {
@@ -102,7 +99,6 @@ namespace BOTGC.API.Services.ReportServices
                 }
             }
 
-            // From data: ApplicationDate present (covers members created directly as W)
             foreach (var m in members.Where(m => m.MemberNumber.HasValue && m.MemberNumber.Value != 0 && m.ApplicationDate.HasValue))
             {
                 var id = m.MemberNumber!.Value;
@@ -111,33 +107,30 @@ namespace BOTGC.API.Services.ReportServices
                     firstAppliedAt[id] = d;
             }
 
-            // Get Subscription Payments
             var (previousSubscriptionYearPayments, currentSubscriptionYearPayments)
                 = await GetReportSubscriptionPaymentsAsync(
                       startOfPreviousSubsYear,
                       endOfPreviousSubsYear,
                       startOfCurrentSubsYear,
                       endOfCurrentSubsYear,
-                      startOfPreviousFinancialYear, 
-                      cancellationToken, 
+                      startOfPreviousFinancialYear,
+                      cancellationToken,
                       filterByMemberId);
 
-            // You may keep them separate or merge for the daily-spread step:
             var allPayments = previousSubscriptionYearPayments
                                   .Concat(currentSubscriptionYearPayments);
 
-            if (filterByMemberId != null) allPayments = allPayments.Where(p => p.MemberId == filterByMemberId).ToList();          
+            if (filterByMemberId != null) allPayments = allPayments.Where(p => p.MemberId == filterByMemberId).ToList();
 
-            var (dailyBilled, dailyReceived) = BuildDailyRevenueSpread(allPayments, members, startOfCurrentFinancialYear, endOfCurrentFinancialYear);
+            var (dailyBilled, dailyReceived) = BuildDailyRevenueSpread(allPayments, members, fyStart, fyEnd);
 
-            // Start with todays results
             var todaysResults = GetReportEntry(
                 today,
                 members,
                 categoryFees,
                 categoryFeeLookup,
                 dailyTargetRevenue,
-                dailyReceived, 
+                dailyReceived,
                 dailyBilled
             );
 
@@ -149,7 +142,6 @@ namespace BOTGC.API.Services.ReportServices
                 .Where(m => m.IsActive == true && m.MemberNumber.HasValue && m.MemberNumber.Value != 0)
                 .ToDictionary(m => m.MemberNumber!.Value, m => m.MembershipCategoryGroup);
 
-            // Process each day backwards from yesterday to the start of the previous financial year
             for (var currentDate = today.AddDays(-1); currentDate >= startOfPreviousSubsYear; currentDate = currentDate.AddDays(-1))
             {
                 try
@@ -171,7 +163,6 @@ namespace BOTGC.API.Services.ReportServices
                     {
                         var memberId = byMember.Key;
 
-                        // Sort once (chronological for counting; we’ll use the same array reversed for rewinding)
                         var ordered = byMember
                             .OrderBy(e => e.DateOfChange!.Value)
                             .ThenBy(e => e.ChangeIndex)
@@ -179,11 +170,9 @@ namespace BOTGC.API.Services.ReportServices
 
                         if (ordered.Count == 0) continue;
 
-                        // Have they *ever* applied (by event or ApplicationDate) on/before today?
                         bool everApplied = firstAppliedAt.TryGetValue(memberId, out var firstAppDate)
                                            && firstAppDate <= currentDate.Date;
 
-                        // ── 1) Build reduced path of (Status, Category) with loop-collapsing ──
                         var path = new List<(string S, string C)>();
                         var seen = new Dictionary<(string S, string C), int>();
 
@@ -213,16 +202,13 @@ namespace BOTGC.API.Services.ReportServices
                             }
                         }
 
-                        // Net no-op → ignore for WL counts
                         if (!(path.Count < 2 || (Eq(path[0].S, path[^1].S) && Eq(path[0].C, path[^1].C))))
                         {
-                            // ── Count WL crossings on reduced path (keys = raw category strings) ──
                             for (int i = 1; i < path.Count; i++)
                             {
                                 var prev = path[i - 1];
                                 var next = path[i];
 
-                                // non-W → W  = application (attribute to next category)
                                 if (!Eq(prev.S, "W") && Eq(next.S, "W"))
                                 {
                                     var key = MembershipHelper.ResolveCategoryGroup(next.C);
@@ -231,7 +217,6 @@ namespace BOTGC.API.Services.ReportServices
                                     continue;
                                 }
 
-                                // W → non-W outcome (only if they have a recorded application on/before today)
                                 if (Eq(prev.S, "W") && !Eq(next.S, "W") && everApplied)
                                 {
                                     var key = MembershipHelper.ResolveCategoryGroup(prev.C);
@@ -243,19 +228,16 @@ namespace BOTGC.API.Services.ReportServices
                             }
                         }
 
-                        // ── 2) Rewind this member’s state using the same list, reversed ──
                         for (int i = ordered.Count - 1; i >= 0; i--)
                         {
                             var ev = ordered[i];
                             MemberDto member = null;
 
-                            // First, try to match by PlayerId
                             if (ev.MemberId != 0)
                             {
                                 member = members.SingleOrDefault(m => m.MemberNumber == ev.MemberId);
                             }
 
-                            // Fallback: match by Forename, Surname, and MembershipCategory == ToCategory
                             if (member == null)
                             {
                                 member = members.SingleOrDefault(m =>
@@ -270,13 +252,11 @@ namespace BOTGC.API.Services.ReportServices
                                 continue;
                             }
 
-                            // Reverse category
                             if (member.MembershipCategory == ev.ToCategory)
                                 member.MembershipCategory = ev.FromCategory;
                             else
                                 _logger.LogWarning($"Expected current category to be {ev.ToCategory} but found {member.MembershipCategory} for member id {member.MemberNumber} on {currentDate:yyyy-MM-dd}");
 
-                            // Reverse status
                             if (member.MembershipStatus == ev.ToStatus)
                                 member.MembershipStatus = ev.FromStatus;
                             else
@@ -284,7 +264,6 @@ namespace BOTGC.API.Services.ReportServices
                         }
                     }
 
-                    // Add apps that arrived today via ApplicationDate but had no W-event today
                     foreach (var m in members.Where(m =>
                                  m.MemberNumber.HasValue &&
                                  m.MemberNumber.Value != 0 &&
@@ -296,24 +275,20 @@ namespace BOTGC.API.Services.ReportServices
                         wlApps[g] = wlApps.GetValueOrDefault(g) + 1;
                     }
 
-                    // Update the playing status of all members
                     foreach (var member in members)
                         member.SetPrimaryCategory(currentDate).SetCategoryGroup();
 
-                    // Build today's active members with their current group
                     var todayActiveGroups = members
                          .Where(m => m.IsActive == true && m.MemberNumber.HasValue && m.MemberNumber.Value != 0)
                          .ToDictionary(m => m.MemberNumber!.Value, m => m.MembershipCategoryGroup);
 
                     var (joinersByGroup, leaversByGroup) = ComputeGroupJoinersAndLeavers(previousDayGroupings, todayActiveGroups);
 
-                    // Compute and store the statistics for this day after applying reversals
                     var dailyReportEntry = GetReportEntry(currentDate, members, categoryFees, categoryFeeLookup, dailyTargetRevenue, dailyReceived, dailyBilled);
 
                     dailyReportEntry.DailyJoinersByCategoryGroup = joinersByGroup;
                     dailyReportEntry.DailyLeaversByCategoryGroup = leaversByGroup;
 
-                    // Attach to the daily entry (as you already do after building dailyReportEntry)
                     dailyReportEntry.WaitingListApplicationsByGroup = wlApps;
                     dailyReportEntry.WaitingListConversionsByAppliedGroup = wlConv;
                     dailyReportEntry.WaitingListDropoutsByAppliedGroup = wlDrop;
@@ -336,27 +311,24 @@ namespace BOTGC.API.Services.ReportServices
                 }
             }
 
-            // Pad forward to cover the entire plotting window
-            var plotFrom = startOfCurrentFinancialYear.AddMonths(-6).AddDays(-1); 
-            var plotTo = endOfCurrentFinancialYear.AddMonths(6);                
+            var plotFrom = fyStart.AddMonths(-6).AddDays(-1);
+            var plotTo = fyEnd.AddMonths(6);
 
             EnsureFullYearData(dataPoints, plotTo, dailyTargetRevenue);
-            ApplyGrowthTargets(dataPoints, startOfCurrentFinancialYear, plotTo);
+            ApplyGrowthTargets(dataPoints, fyStart, plotTo);
 
-            // Use the explicit plotting window
             report.DataPoints = dataPoints
                 .Where(dp => dp.Date >= plotFrom && dp.Date <= plotTo)
                 .ToList();
             report.DataPointsCsv = ConvertToCsv(report.DataPoints);
 
-            // Build month/quarter snapshots, then aggregate WL into them
-            EnsureMonthlyAndQuarterlyStats(report, monthlySnapshots);
+            EnsureMonthlyAndQuarterlyStats(report, monthlySnapshots, asAtDate);
             PopulateWaitingListAggregatesForPeriods(report.MonthlyStats, report.DataPoints);
             PopulateWaitingListAggregatesForPeriods(report.QuarterlyStats, report.DataPoints);
 
-            var totalActualRevenue = report.DataPoints.Where(dp => dp.Date >= new DateTime(2024, 10, 1) && dp.Date <= new DateTime(2025, 9, 30)).Select(dp => dp.ActualRevenue).Sum();
-            var totalBilledRevenue = report.DataPoints.Where(dp => dp.Date >= new DateTime(2024, 10, 1) && dp.Date <= new DateTime(2025, 9, 30)).Select(dp => dp.BilledRevenue).Sum();
-            var totalReceivedRevenue = report.DataPoints.Where(dp => dp.Date >= new DateTime(2024, 10, 1) && dp.Date <= new DateTime(2025, 9, 30)).Select(dp => dp.ReceivedRevenue).Sum();
+            var totalActualRevenue = report.DataPoints.Where(dp => dp.Date >= fyStart && dp.Date <= fyEnd).Select(dp => dp.ActualRevenue).Sum();
+            var totalBilledRevenue = report.DataPoints.Where(dp => dp.Date >= fyStart && dp.Date <= fyEnd).Select(dp => dp.BilledRevenue).Sum();
+            var totalReceivedRevenue = report.DataPoints.Where(dp => dp.Date >= fyStart && dp.Date <= fyEnd).Select(dp => dp.ReceivedRevenue).Sum();
 
             _logger.LogInformation(
                 $"Total Actual Revenue: {totalActualRevenue:C}, " +
@@ -364,7 +336,6 @@ namespace BOTGC.API.Services.ReportServices
                 $"Total Received Revenue: {totalReceivedRevenue:C}");
 
             return report;
-
         }
 
         /// <summary>
@@ -379,8 +350,8 @@ namespace BOTGC.API.Services.ReportServices
                 DateTime endOfPreviousSubsYear,
                 DateTime startOfCurrentSubsYear,
                 DateTime endOfCurrentSubsYear,
-                DateTime startOfPreviousFinancialYear, 
-                CancellationToken cancellationToken, 
+                DateTime startOfPreviousFinancialYear,
+                CancellationToken cancellationToken,
                 int? filterByMemberId = null)
         {
             var previousSubscriptionPaymentsQuery = new GetSubscriptionPaymentsByDateRangeQuery() { FromDate = startOfPreviousSubsYear, ToDate = endOfPreviousSubsYear };
@@ -392,7 +363,7 @@ namespace BOTGC.API.Services.ReportServices
             Task<List<SubscriptionPaymentDto>> transitionTask =
                 Task.FromResult(new List<SubscriptionPaymentDto>());
 
-            if (startOfPreviousSubsYear.Year == 2024)          // year we transitioned
+            if (startOfPreviousSubsYear.Year == 2024)
             {
                 var transitionSubscriptionPaymentsQuery = new GetSubscriptionPaymentsByDateRangeQuery() { FromDate = startOfPreviousFinancialYear, ToDate = startOfPreviousSubsYear.AddDays(-1) };
                 transitionTask = _mediator.Send(transitionSubscriptionPaymentsQuery, cancellationToken);
@@ -400,9 +371,9 @@ namespace BOTGC.API.Services.ReportServices
 
             await Task.WhenAll(previousTask, currentTask, transitionTask);
 
-            var previousInvoices = await previousTask;        
-            var currentInvoices = await currentTask;          
-            var transitionInvoices = await transitionTask;     
+            var previousInvoices = await previousTask;
+            var currentInvoices = await currentTask;
+            var transitionInvoices = await transitionTask;
 
             if (filterByMemberId != null)
             {
@@ -416,13 +387,10 @@ namespace BOTGC.API.Services.ReportServices
 
                 transitionInvoices = transitionInvoices
                     .Where(p => p.MemberId == filterByMemberId)
-                    .ToList();  
+                    .ToList();
             }
 
-            // 23/24 was a special year as we transition to a different subscription period
-            // The following code works out how to assign billed and received payyment amounts
-            // to the correct financial year and subscription year.
-            if (startOfPreviousSubsYear.Year == 2024)          
+            if (startOfPreviousSubsYear.Year == 2024)
             {
                 var headline18m = await BuildHeadline18mFeesAsync();
 
@@ -435,30 +403,23 @@ namespace BOTGC.API.Services.ReportServices
             return (previousInvoices, currentInvoices);
         }
 
-
-        /// <summary>
-        /// Fallback: create a synthetic invoice for Apr-24 → Mar-25 by simple
-        /// daily pro-rata when the headline-fee inference fails.
-        /// </summary>
         private SubscriptionPaymentDto MakeDailyProrataSlice(
                 SubscriptionPaymentDto inv,
                 DateTime sliceStart,
                 DateTime sliceEnd)
         {
-            // Work out the coverage window the club intended for this invoice
             var coverStart = inv.DateDue.Day >= 16
                 ? new DateTime(inv.DateDue.Year, inv.DateDue.Month, 1).AddMonths(1)
                 : new DateTime(inv.DateDue.Year, inv.DateDue.Month, 1);
 
-            var coverEnd = new DateTime(2025, 3, 31);          // fixed
-            if (coverStart > coverEnd) coverEnd = coverStart;    // safety
+            var coverEnd = new DateTime(2025, 3, 31);
+            if (coverStart > coverEnd) coverEnd = coverStart;
 
             var totalDays = (coverEnd - coverStart).Days + 1;
-            if (totalDays <= 0) totalDays = 1;                   // guard ÷0
+            if (totalDays <= 0) totalDays = 1;
 
             var dailyRate = inv.BillAmount / totalDays;
 
-            // Slice to Apr-24 → Mar-25
             var sliceCovStart = sliceStart > coverStart ? sliceStart : coverStart;
             var sliceDays = (sliceEnd - sliceCovStart).Days + 1;
             if (sliceDays <= 0) sliceDays = 0;
@@ -470,7 +431,6 @@ namespace BOTGC.API.Services.ReportServices
             var slicePaid = Math.Round((inv.AmountPaid ?? 0m) * paidFactor, 2,
                                         MidpointRounding.AwayFromZero);
 
-            // First payment on/after the slice window
             var payDate = inv.PaymentDate.HasValue && inv.PaymentDate.Value >= sliceStart
                 ? inv.PaymentDate
                 : (DateTime?)null;
@@ -478,7 +438,7 @@ namespace BOTGC.API.Services.ReportServices
             return new SubscriptionPaymentDto
             {
                 MemberId = inv.MemberId,
-                DateDue = sliceStart,          // makes it a 1-Apr-24 bill
+                DateDue = sliceStart,
                 BillAmount = sliceBill,
                 AmountPaid = slicePaid,
                 PaymentDate = slicePaid > 0m ? payDate : null,
@@ -486,26 +446,20 @@ namespace BOTGC.API.Services.ReportServices
             };
         }
 
-        /// <summary>
-        /// Build the table of 18-month "headline" fees that were billed 01-Oct-23.
-        /// Key: trimmed category string   Value: £18-month rounded to nearest £10.
-        /// </summary>
         private async Task<Dictionary<string, decimal>> BuildHeadline18mFeesAsync()
         {
-            // 23/24 subscription year (01-Apr-23 → 31-Mar-24) only
             var (annual, _, _) = await LoadRevenueConfig(
-                                    new DateTime(2023, 4, 1),    // fee coverage start (23/24 subs year)
-                                    new DateTime(2024, 3, 31),   // fee coverage end
-                                    new DateTime(2023, 10, 1),   // budget FY start (23/24 FY)
-                                    new DateTime(2024, 9, 30));  // budget FY end);
+                                    new DateTime(2023, 4, 1),
+                                    new DateTime(2024, 3, 31),
+                                    new DateTime(2023, 10, 1),
+                                    new DateTime(2024, 9, 30));
 
             var result = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var kvp in annual)               // kvp.Value = List<(start,end,Fee[])>
+            foreach (var kvp in annual)
             {
-                // One slice per category in that year – take the first Fee in the array
                 var yearly = kvp.Value[0].fee[0].Amount;
-                if (yearly <= 0m) continue;           // skip honorary / £0 categories
+                if (yearly <= 0m) continue;
 
                 var eighteen = Math.Round(yearly * 1.5m / 10m, 0,
                                            MidpointRounding.AwayFromZero) * 10m;
@@ -516,39 +470,29 @@ namespace BOTGC.API.Services.ReportServices
             return result;
         }
 
-
-        /// <summary>
-        /// Converts the 18-month “transition” invoices (01-Oct-23 → 31-Mar-24)
-        /// into clean 24/25-only synthetic invoices, validating the headline-fee
-        /// rule and falling back to daily pro-rata whenever an invoice cannot be
-        /// matched unambiguously.  _logger warnings are emitted for every
-        /// ambiguous or unmatched bundle so you can audit the raw data later.
-        /// </summary>
         private IEnumerable<SubscriptionPaymentDto> MakeSyntheticInvoices24_25(
             IEnumerable<SubscriptionPaymentDto> transitionInvoices,
             Dictionary<string, decimal> headline18m)
         {
-            var sliceStart = new DateTime(2024, 10, 1); 
-            var sliceEnd = new DateTime(2025, 3, 31);  
+            var sliceStart = new DateTime(2024, 10, 1);
+            var sliceEnd = new DateTime(2025, 3, 31);
 
-            // ───────────────────── STEP 1 – bundle by (MemberId, currentCat) ─────────────────────
             var bundles = transitionInvoices
                 .GroupBy(p => (p.MemberId,
                                (p.MembershipCategory ?? string.Empty).Trim()));
 
             foreach (var bundle in bundles)
             {
-                var (memberId, currentCat) = bundle.Key;      // tuple de-construction
-                string chosenCat = null;                     // decided category
-                decimal head18m = 0m;                       // its 18-month fee
+                var (memberId, currentCat) = bundle.Key;
+                string chosenCat = null;
+                decimal head18m = 0m;
 
                 decimal totalBillAmount = 0m;
 
-                // ───────────────────── STEP 2 – try to infer the category ─────────────────────
                 foreach (var inv in bundle.OrderBy(p => p.DateDue))
                 {
                     totalBillAmount += inv.BillAmount;
-                    if (inv.BillAmount <= 0m) continue;       // ignore zero rows
+                    if (inv.BillAmount <= 0m) continue;
 
                     var candidates = headline18m
                         .Where(kv =>
@@ -559,7 +503,6 @@ namespace BOTGC.API.Services.ReportServices
                             var estMonths = inv.BillAmount / monthly;
                             var nearestMon = Math.Round(estMonths, MidpointRounding.AwayFromZero);
 
-                            // *** new guard: ignore nonsense like 300 or 600 months ***
                             if (nearestMon < 1 || nearestMon > 18) return false;
 
                             var reconFee = Math.Round(nearestMon * monthly / 10m, 0,
@@ -571,7 +514,6 @@ namespace BOTGC.API.Services.ReportServices
 
                     if (candidates.Count == 0)
                     {
-                        // keep looping – maybe another invoice in the bundle helps
                         continue;
                     }
                     else if (candidates.Count == 1)
@@ -580,20 +522,18 @@ namespace BOTGC.API.Services.ReportServices
                         head18m = headline18m[chosenCat];
                         break;
                     }
-                    else  // 2+ matches
+                    else
                     {
                         if (!string.IsNullOrWhiteSpace(currentCat) &&
                             candidates.Contains(currentCat))
                         {
-                            chosenCat = currentCat;           // tie-break with currentCat
+                            chosenCat = currentCat;
                             head18m = headline18m[chosenCat];
                             break;
                         }
-                        // still ambiguous – check next invoice
                     }
                 }
 
-                // ───────────────────── STEP 3 – fall-back if no clear match ─────────────────────
                 if (totalBillAmount > 0 && chosenCat == null)
                 {
                     _logger.LogWarning(
@@ -609,7 +549,6 @@ namespace BOTGC.API.Services.ReportServices
 
                 decimal monthlyRate = head18m / 18m;
 
-                // ───────────────────── STEP 4 – union of all months covered ─────────────────────
                 var monthSet = new HashSet<(int year, int month)>();
 
                 foreach (var inv in bundle)
@@ -622,13 +561,12 @@ namespace BOTGC.API.Services.ReportServices
                         monthSet.Add((m.Year, m.Month));
                 }
 
-                // ─── replace the months-filter (STEP 5) ───────────────────────────────
                 var months24_25 = monthSet.Count(t =>
-                       (t.year > 2024 || (t.year == 2024 && t.month >= 10)) &&   // Oct-24+
-                       (t.year < 2025 || (t.year == 2025 && t.month <= 3)));    // …to Mar-25
+                       (t.year > 2024 || (t.year == 2024 && t.month >= 10)) &&
+                       (t.year < 2025 || (t.year == 2025 && t.month <= 3)));
 
                 if (months24_25 == 0)
-                    continue;        // nothing for this member in 24/25
+                    continue;
 
                 var sliceBill = Math.Round(months24_25 * monthlyRate / 10m, 0,
                                            MidpointRounding.AwayFromZero) * 10m;
@@ -643,18 +581,16 @@ namespace BOTGC.API.Services.ReportServices
                                 p.PaymentDate.Value >= sliceStart)
                     .Min(p => p.PaymentDate) ?? sliceStart;
 
-                // ─────────── STEP 6 – emit synthetic invoice for Apr-24 ────────────
                 yield return new SubscriptionPaymentDto
                 {
                     MemberId = memberId,
-                    DateDue = sliceStart,               // 01-Apr-24
+                    DateDue = sliceStart,
                     BillAmount = sliceBill,
                     AmountPaid = slicePaid,
                     PaymentDate = slicePaid > 0m ? firstPayOnOrAfter : (DateTime?)null,
                     MembershipCategory = chosenCat
                 };
 
-                // Log success if the bundle contained more than one raw invoice
                 if (bundle.Count() > 1)
                 {
                     _logger.LogDebug(
@@ -664,7 +600,7 @@ namespace BOTGC.API.Services.ReportServices
             }
         }
 
-        private (Dictionary<string, int> Joiners, Dictionary<string, int> Leavers) ComputeGroupJoinersAndLeavers(Dictionary<int, string> previousDayGroups,  Dictionary<int, string> todayGroups)
+        private (Dictionary<string, int> Joiners, Dictionary<string, int> Leavers) ComputeGroupJoinersAndLeavers(Dictionary<int, string> previousDayGroups, Dictionary<int, string> todayGroups)
         {
             var joiners = new Dictionary<string, int>();
             var leavers = new Dictionary<string, int>();
@@ -732,10 +668,10 @@ namespace BOTGC.API.Services.ReportServices
 
         private bool IsQuarterEnd(DateTime date)
         {
-            return (date.Month == 3 && date.Day == 31) ||  // Q1 End (Mar 31)
-                   (date.Month == 6 && date.Day == 30) ||  // Q2 End (Jun 30)
-                   (date.Month == 9 && date.Day == 30) ||  // Q3 End (Sep 30)
-                   (date.Month == 12 && date.Day == 31);   // Q4 End (Dec 31)
+            return (date.Month == 3 && date.Day == 31) ||
+                   (date.Month == 6 && date.Day == 30) ||
+                   (date.Month == 9 && date.Day == 30) ||
+                   (date.Month == 12 && date.Day == 31);
         }
 
         private int GetQuarterNumber(DateTime d)
@@ -828,11 +764,10 @@ namespace BOTGC.API.Services.ReportServices
 
             double averageAge = playingMembers
                .Where(m => m.DateOfBirth.HasValue)
-               .Select(m => (date - m.DateOfBirth.Value).TotalDays / 365.25) // Convert days to years
+               .Select(m => (date - m.DateOfBirth.Value).TotalDays / 365.25)
                .DefaultIfEmpty(0)
                .Average();
 
-            // Populate category breakdown
             var playingCategoryBreakdown = members
                 .Where(m => m.PrimaryCategory == MembershipPrimaryCategories.PlayingMember && m.IsActive!.Value)
                 .GroupBy(m => m.MembershipCategory!)
@@ -871,7 +806,6 @@ namespace BOTGC.API.Services.ReportServices
 
                         if (date.Date < new DateTime(2025, 04, 01))
                         {
-                            // Pick based on join date: before 1-Apr-24 ⇒ 23/24 price, else 24/25
                             chosenFee = (member.JoinDate.HasValue &&
                                           member.JoinDate.Value.Date < new DateTime(2024, 4, 1))
                                          ? fees.FirstOrDefault(f => f.YearStart == 23)
@@ -881,7 +815,6 @@ namespace BOTGC.API.Services.ReportServices
                             {
                                 chosenFee = fees.OrderBy(f => f.YearStart).First();
                             }
-
                         }
                         else
                         {
@@ -897,8 +830,6 @@ namespace BOTGC.API.Services.ReportServices
                             _logger.LogWarning("Failed to find fee for category '{Category}' on {Date:yyyy-MM-dd} for member ID {MemberId}",
                                                trimmedCategory, date, member.MemberNumber);
                         }
-
-                        
                     }
                     else
                     {
@@ -908,7 +839,6 @@ namespace BOTGC.API.Services.ReportServices
             }
 
             decimal targetRevenue = dailyTargetRevenue.TryGetValue(date, out var target) ? target[0].Amount : 0;
-            decimal receivedRevenue = dailyReceived.TryGetValue(date, out var r) ? r : 0m;
 
             return new MembershipReportEntryDto
             {
@@ -918,7 +848,7 @@ namespace BOTGC.API.Services.ReportServices
                 AveragePlayingMembersAge = averageAge,
                 PlayingCategoryBreakdown = playingCategoryBreakdown,
                 NonPlayingCategoryBreakdown = nonPlayingCategoryBreakdown,
-                WaitingListCategoryBreakdown = waitingListBreakdown, 
+                WaitingListCategoryBreakdown = waitingListBreakdown,
                 CategoryGroupBreakdown = categoryGroupBreakdown,
                 ActualRevenue = actualRevenue,
                 TargetRevenue = targetRevenue,
@@ -964,7 +894,6 @@ namespace BOTGC.API.Services.ReportServices
             }
         }
 
-
         private void EnsureFullYearData(List<MembershipReportEntryDto> dataPoints, DateTime endOfCurrentFinancialYear, Dictionary<DateTime, Fee[]> dailyTargetRevenue)
         {
             DateTime lastRecordedDate = dataPoints.Last().Date;
@@ -994,18 +923,17 @@ namespace BOTGC.API.Services.ReportServices
                     TargetRevenue = dailyTargetRevenue.TryGetValue(currentDate, out var t) ? t[0].Amount : 0,
                     CategoryGroupBreakdown = new Dictionary<string, int>(lastCategoryGroupBreakdown),
                     PlayingCategoryBreakdown = new Dictionary<string, int>(lastPlayingCategoryBreakdown),
-                    NonPlayingCategoryBreakdown = new Dictionary<string, int>(lastNonPlayingCategoryBreakdown), 
-                    ReceivedRevenue = lastEntry.ReceivedRevenue, 
+                    NonPlayingCategoryBreakdown = new Dictionary<string, int>(lastNonPlayingCategoryBreakdown),
+                    ReceivedRevenue = lastEntry.ReceivedRevenue,
                     BilledRevenue = lastEntry.BilledRevenue
                 });
             }
         }
 
-        private void EnsureMonthlyAndQuarterlyStats(MembershipReportDto report, Dictionary<DateTime, MembershipSnapshotDto> monthlySnapshots)
+        private void EnsureMonthlyAndQuarterlyStats(MembershipReportDto report, Dictionary<DateTime, MembershipSnapshotDto> monthlySnapshots, DateTime asAtDate)
         {
             report.MonthlyStats = new List<MembershipDeltaDto>();
 
-            // **Ensure chronological order**
             var monthEndDates = monthlySnapshots.Keys.OrderBy(d => d).ToList();
 
             for (int i = 1; i < monthEndDates.Count; i++)
@@ -1021,7 +949,6 @@ namespace BOTGC.API.Services.ReportServices
 
             report.QuarterlyStats = new List<MembershipDeltaDto>();
 
-            // **Ensure quarter-end dates are extracted in correct order**
             var quarterEndDates = monthEndDates.Where(IsQuarterEnd).OrderBy(d => d).ToList();
 
             for (int i = 1; i < quarterEndDates.Count; i++)
@@ -1032,42 +959,40 @@ namespace BOTGC.API.Services.ReportServices
                 if (fromSnapshot.SnapshotDate >= toSnapshot.SnapshotDate)
                     throw new InvalidOperationException($"Quarterly snapshots are out of order! {fromSnapshot.SnapshotDate} is not before {toSnapshot.SnapshotDate}");
 
-                report.QuarterlyStats.Add(ComputeMembershipDelta(fromSnapshot, toSnapshot, GetPeriodDescription(toSnapshot.SnapshotDate)));
+                report.QuarterlyStats.Add(ComputeMembershipDelta(fromSnapshot, toSnapshot, GetPeriodDescription(toSnapshot.SnapshotDate, asAtDate)));
             }
 
-            var today = DateTime.UtcNow.Date.AddDays(-1);
+            var toDateMarker = asAtDate.Date.AddDays(-1);
 
-            // only if we have a today-snapshot and it's past the last full quarter
-            if (monthlySnapshots.ContainsKey(today) && today > quarterEndDates.Last())
+            if (quarterEndDates.Count > 0 && monthlySnapshots.ContainsKey(toDateMarker) && toDateMarker > quarterEndDates.Last())
             {
                 var fromSnapshot = monthlySnapshots[quarterEndDates.Last()];
-                var toSnapshot = monthlySnapshots[today];
-                var periodDesc = GetPeriodDescription(today); 
-                
+                var toSnapshot = monthlySnapshots[toDateMarker];
+                var periodDesc = GetPeriodDescription(toDateMarker, asAtDate);
+
                 report.QuarterlyStats.Add(
                     ComputeMembershipDelta(fromSnapshot, toSnapshot, periodDesc)
                 );
             }
         }
 
-        private string GetPeriodDescription(DateTime snapshotDate)
+        private string GetPeriodDescription(DateTime snapshotDate, DateTime asAtDate)
         {
             var sd = snapshotDate;
             int fq = GetQuarterNumber(sd);
 
-            // roll Dec into the next calendar year’s Q1 label
             int labelYear = sd.Month == 12 ? sd.Year + 1 : sd.Year;
-            string suffix = (sd.Date == DateTime.UtcNow.Date.AddDays(-1)) ? " (To Date)" : "";
+            var toDateMarker = asAtDate.Date.AddDays(-1);
+            string suffix = (sd.Date == toDateMarker) ? " (To Date)" : "";
 
             return $"Q{fq} {labelYear % 100:00}{suffix}";
         }
 
         private void ApplyGrowthTargets(List<MembershipReportEntryDto> dataPoints, DateTime start, DateTime end)
         {
-            // Find the last actual recorded playing members count before the start date
             var lastActualEntry = dataPoints.LastOrDefault(dp => dp.Date.Date < start.Date);
-            double startValue = lastActualEntry?.PlayingMembers ?? 0; // ✅ Start from the last actual count
-            double targetValue = startValue * 1.05; // 5% growth target
+            double startValue = lastActualEntry?.PlayingMembers ?? 0;
+            double targetValue = startValue * 1.05;
             int totalDays = (end - start).Days;
 
             for (var i = 0; i <= totalDays; i++)
@@ -1134,7 +1059,7 @@ namespace BOTGC.API.Services.ReportServices
                         list = new List<(DateTime start, DateTime end, Fee[] fee)>();
                         categoryFees[kvp.Key] = list;
                     }
-                    list.Add((subStart, subEnd, [ new Fee(startYear - 2000, endYear - 2000, kvp.Value) ]));
+                    list.Add((subStart, subEnd, [new Fee(startYear - 2000, endYear - 2000, kvp.Value)]));
                 }
             }
 
@@ -1161,9 +1086,7 @@ namespace BOTGC.API.Services.ReportServices
 
             if (File.Exists(budgetPath))
             {
-
                 var monthlyBudget = JsonSerializer.Deserialize<Dictionary<string, decimal>>(await File.ReadAllTextAsync(budgetPath))!;
-
 
                 foreach (var month in monthlyBudget)
                 {
@@ -1185,7 +1108,7 @@ namespace BOTGC.API.Services.ReportServices
             }
 
             if (feeCoverageStart <= new DateTime(2024, 10, 1) &&
-                feeCoverageEnd >= new DateTime(2025, 3, 31))    
+                feeCoverageEnd >= new DateTime(2025, 3, 31))
             {
                 var legacyTblPath = Path.Combine(basePath, "MembershipFees 2324.json");
                 if (File.Exists(legacyTblPath))
@@ -1202,7 +1125,6 @@ namespace BOTGC.API.Services.ReportServices
 
                         for (var d = overlapStart; d <= overlapEnd; d = d.AddDays(1))
                         {
-                            // There is already a 24/25 Fee[] there – append legacy one
                             if (categoryFeeLookup.TryGetValue((cat, d), out var arr))
                             {
                                 var combined = new Fee[arr.Length + 1];
@@ -1212,7 +1134,6 @@ namespace BOTGC.API.Services.ReportServices
                             }
                             else
                             {
-                                // Rare: category existed only in 23/24
                                 categoryFeeLookup[(cat, d)] = [legacyFee];
                             }
                         }
@@ -1227,10 +1148,6 @@ namespace BOTGC.API.Services.ReportServices
             return (categoryFees, categoryFeeLookup, dailyTargetRevenue);
         }
 
-        /// <summary>
-        /// Converts every subscription invoice / payment into daily values **only for
-        /// the part that falls inside the current financial year (fyStart → fyEnd)**.
-        /// </summary>
         private (Dictionary<DateTime, decimal> dailyBilled,
                  Dictionary<DateTime, decimal> dailyReceived)
             BuildDailyRevenueSpread(IEnumerable<SubscriptionPaymentDto> payments,
@@ -1245,7 +1162,6 @@ namespace BOTGC.API.Services.ReportServices
             {
                 if (p.BillAmount == 0m && (p.AmountPaid ?? 0m) == 0m) continue;
 
-                // ----- 1.  Determine the invoice’s *intended* coverage window ----------
                 var subStart = new DateTime(p.DateDue.Year, 4, 1);
                 var subEnd = subStart.AddYears(1).AddDays(-1);
 
@@ -1260,7 +1176,6 @@ namespace BOTGC.API.Services.ReportServices
                                ? subStart
                                : m.JoinDate?.Date ?? subStart;
 
-                // Transition invoices dated 01-Oct-24 start exactly on the due-date
                 if (p.DateDue == new DateTime(2024, 10, 1))
                     coverStart = p.DateDue;
 
@@ -1268,33 +1183,28 @@ namespace BOTGC.API.Services.ReportServices
                              ? subEnd
                              : m.LeaveDate?.Date ?? subEnd;
 
-                // No sensible window?
                 if (coverStart > coverEnd) continue;
 
-                // ----- 2.  Remember original window length for scaling  -----------------
                 var origDays = Math.Max((coverEnd - coverStart).Days + 1, 1);
 
-                // ----- 3.  Clip to FY window -------------------------------------------
                 if (coverStart < fyStart) coverStart = fyStart;
                 if (coverEnd > fyEnd) coverEnd = fyEnd;
-                if (coverStart > coverEnd) continue;          // fell completely outside FY
+                if (coverStart > coverEnd) continue;
 
                 var clipDays = Math.Max((coverEnd - coverStart).Days + 1, 1);
                 var clipRatio = clipDays / (decimal)origDays;
 
-                // ----- 4.  BILLED (pro-rata slice) --------------------------------------
                 var billSlice = p.BillAmount * clipRatio;
                 var perDayBill = billSlice / clipDays;
 
                 for (var d = coverStart; d <= coverEnd; d = d.AddDays(1))
                     billed[d] = billed.GetValueOrDefault(d) + perDayBill;
 
-                // ----- 5.  RECEIVED (pro-rata slice from PaymentDate onward) ------------
                 if (p.AmountPaid is decimal paid && paid > 0m && p.PaymentDate.HasValue)
                 {
                     var payStart = p.PaymentDate.Value.Date;
                     if (payStart < coverStart) payStart = coverStart;
-                    if (payStart > coverEnd) continue;      // payment after FY
+                    if (payStart > coverEnd) continue;
 
                     var payDays = Math.Max((coverEnd - payStart).Days + 1, 1);
                     var payRatio = payDays / (decimal)origDays;
@@ -1309,133 +1219,15 @@ namespace BOTGC.API.Services.ReportServices
             return (billed, received);
         }
 
-        /// <summary>
-        /// Per-member billing sanity-check for the current FY.
-        /// Walks their category history, computes what they *should* have paid,
-        /// compares with what we actually billed, and returns a list of deltas.
-        /// </summary>
-        private IEnumerable<MemberBillingCheckDto> CheckMemberBillingAccuracy(
-                IEnumerable<MemberDto> members,
-                IEnumerable<MemberEventDto> memberEvents,   // category / status change feed
-                IEnumerable<SubscriptionPaymentDto> payments,       // real + synthetic
-                Dictionary<(string, DateTime), decimal> categoryFeeLookup,
-                DateTime fyStart,
-                DateTime fyEnd,
-                decimal tolerance = 1m)                            // £1 default tolerance
+        private void AddToCount(Dictionary<string, int> dict, string key)
         {
-            // Build quick look-ups
-            var paymentsByMember = payments
-                .GroupBy(p => p.MemberId)
-                .ToDictionary(g => g.Key, g => g.ToList());
-
-            var eventsByMember = memberEvents
-                .GroupBy(e => e.MemberId)
-                .ToDictionary(g => g.Key, g => g
-                    .Where(e => e.DateOfChange.HasValue)
-                    .OrderBy(e => e.DateOfChange!.Value)
-                    .ToList());
-
-            foreach (var m in members.Where(m => m.MemberNumber > 0))
-            {
-                var memberId = m.MemberNumber!.Value;
-                var expected = 0m;
-
-                // Build a timeline of (from, to, category) inside FY
-                var slices = new List<(DateTime from, DateTime to, string category)>();
-                var currentCat = m.MembershipCategory?.Trim() ?? "";
-                var cursor = fyEnd;               // rewind cursor
-
-                if (eventsByMember.TryGetValue(memberId, out var evts))
-                {
-                    // Traverse events backwards so we can build contiguous slices
-                    foreach (var ev in evts.OrderByDescending(e => e.DateOfChange!.Value))
-                    {
-                        var changeDate = ev.DateOfChange!.Value.Date;
-
-                        if (changeDate > cursor) continue;           // event after FY
-                        var sliceStart = changeDate.AddDays(1);      // day *after* change
-                        var sliceEnd = cursor;
-                        if (sliceEnd >= fyStart && sliceStart <= fyEnd)
-                        {
-                            slices.Add((sliceStart < fyStart ? fyStart : sliceStart,
-                                        sliceEnd,
-                                        currentCat));
-                        }
-                        cursor = changeDate;
-                        currentCat = ev.FromCategory?.Trim() ?? currentCat;
-                    }
-                }
-
-                // Final slice back to either join date or fyStart
-                var fySliceStart = fyStart;
-                if (m.JoinDate.HasValue && m.JoinDate.Value.Date > fySliceStart)
-                    fySliceStart = m.JoinDate.Value.Date;
-
-                if (cursor >= fySliceStart)
-                    slices.Add((fySliceStart, cursor, currentCat));
-
-                // Trim against leave-date if present
-                if (m.LeaveDate.HasValue && m.LeaveDate.Value.Date < fyEnd)
-                {
-                    slices = slices
-                             .Where(s => s.from <= m.LeaveDate.Value.Date)
-                             .Select(s =>
-                               (s.from,
-                                s.to <= m.LeaveDate.Value.Date ? s.to : m.LeaveDate.Value.Date,
-                                s.category))
-                             .ToList();
-                }
-
-                // ---------- expected = Σ daily fee over slices ----------
-                foreach (var s in slices)
-                {
-                    for (var d = s.from.Date; d <= s.to.Date; d = d.AddDays(1))
-                    {
-                        if (categoryFeeLookup.TryGetValue((s.category, d), out var annualFee))
-                            expected += annualFee / 365m;
-                        else
-                            _logger.LogWarning($"No fee for {s.category} on {d:yyyy-MM-dd}");
-                    }
-                }
-
-                // ---------- billed = Σ invoice coverage over same window ----------
-                decimal billed = 0m;
-                if (paymentsByMember.TryGetValue(memberId, out var invs))
-                {
-                    foreach (var p in invs)
-                    {
-                        var invStart = new DateTime(p.DateDue.Year, 4, 1);
-                        var invEnd = invStart.AddYears(1).AddDays(-1);
-
-                        var covStart = invStart;
-                        if (p.DateDue == new DateTime(2024, 10, 1))        // synthetic split
-                            covStart = p.DateDue;
-
-                        var from = covStart < fyStart ? fyStart : covStart;
-                        var to = invEnd > fyEnd ? fyEnd : invEnd;
-                        if (from > to) continue;
-
-                        var days = (to - from).Days + 1;
-                        billed += p.BillAmount * (days / (decimal)((invEnd - covStart).Days + 1));
-                    }
-                }
-
-                var delta = billed - expected;
-                if (Math.Abs(delta) > tolerance)
-                {
-                    yield return new MemberBillingCheckDto(
-                        memberId,
-                        $"{m.FirstName} {m.LastName}",
-                        Math.Round(expected, 2),
-                        Math.Round(billed, 2),
-                        Math.Round(delta, 2));
-                }
-            }
+            if (string.IsNullOrWhiteSpace(key)) return;
+            if (!dict.TryAdd(key, 1))
+                dict[key]++;
         }
 
         private MembershipDeltaDto ComputeMembershipDelta(MembershipSnapshotDto fromSnapshot, MembershipSnapshotDto toSnapshot, string periodDescription)
         {
-            // Filter out future joiners from both snapshots**
             var filteredFromMembers = fromSnapshot.Members
                 .Where(m => !m.JoinDate.HasValue || m.JoinDate!.Value <= fromSnapshot.SnapshotDate)
                 .Where(m => m.MemberNumber != 0)
@@ -1446,17 +1238,14 @@ namespace BOTGC.API.Services.ReportServices
                 .Where(m => m.MemberNumber != 0)
                 .ToDictionary(m => m.MemberNumber!.Value);
 
-            // Identify new members: They exist in `toSnapshot` but NOT in `fromSnapshot`**
             var newMembers = filteredToMembers.Keys.Except(filteredFromMembers.Keys).ToList();
 
-            // Identify leavers: They now have status "L" but did NOT in `fromSnapshot`**
             var leavers = filteredToMembers.Values
                 .Where(m => m.MembershipStatus == "L"
                             && filteredFromMembers.TryGetValue(m.MemberNumber!.Value, out var prevMember)
                             && prevMember.MembershipStatus != "L")
                 .ToList();
 
-            // Identify deaths: They now have status "D" but did NOT in `fromSnapshot`**
             var deaths = filteredToMembers.Values
                 .Where(m => m.MembershipStatus == "D"
                             && filteredFromMembers.TryGetValue(m.MemberNumber!.Value, out var prevMember)
@@ -1468,12 +1257,10 @@ namespace BOTGC.API.Services.ReportServices
                 .GroupBy(m => m.MembershipCategoryGroup ?? "Other")
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            // Category Changes: Members who exist in both but changed category**
             var categoryChanges = new Dictionary<string, int>();
 
             foreach (var member in filteredToMembers.Values)
             {
-                // Show movement between category groups
                 if (filteredFromMembers.TryGetValue(member.MemberNumber!.Value, out var prevMember))
                 {
                     string prevGroup = prevMember.MembershipCategoryGroup ?? "Other";
@@ -1500,13 +1287,5 @@ namespace BOTGC.API.Services.ReportServices
                 CategoryGroupTotals = categoryGroupTotals
             };
         }
-
-        private void AddToCount(Dictionary<string, int> dict, string key)
-        {
-            if (string.IsNullOrWhiteSpace(key)) return;
-            if (!dict.TryAdd(key, 1))
-                dict[key]++;
-        }
-
     }
 }

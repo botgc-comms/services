@@ -42,6 +42,34 @@ input, select, textarea {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
+.fy-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 1rem 0;
+}
+
+.fy-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #b1b4b6;
+  border-radius: 4px;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+}
+
+.fy-nav__link--disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.fy-nav__text {
+  font-weight: 600;
+}
+
 .print-wrap {
   max-width: 1200px;
   margin: 0 auto;

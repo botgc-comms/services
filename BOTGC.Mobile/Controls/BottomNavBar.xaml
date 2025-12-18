@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="BOTGC.Mobile.Controls.BottomNavBar"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <Border
+        HeightRequest="70"
+        Padding="8,5,8,5"
+        BackgroundColor="#F6F6F1"
+        StrokeThickness="0"
+        HorizontalOptions="Fill"
+        VerticalOptions="End">
+
+        <Grid ColumnSpacing="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- HOME -->
+            <Grid Grid.Column="0">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnHomeTapped" />
+                </Grid.GestureRecognizers>
+                <VerticalStackLayout Spacing="4"
+                                     HorizontalOptions="Center"
+                                     VerticalOptions="Center">
+                    <Image x:Name="HomeIcon"
+                           HeightRequest="24"
+                           WidthRequest="24" />
+                    <Label x:Name="HomeLabel"
+                           Text="Home"
+                           FontSize="13"
+                           FontAttributes="None"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- PROGRESS -->
+            <Grid Grid.Column="1">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnProgressTapped" />
+                </Grid.GestureRecognizers>
+                <VerticalStackLayout Spacing="4"
+                                     HorizontalOptions="Center"
+                                     VerticalOptions="Center">
+                    <Image x:Name="ProgressIcon"
+                           HeightRequest="24"
+                           WidthRequest="24" />
+                    <Label x:Name="ProgressLabel"
+                           Text="Progress"
+                           FontSize="13"
+                           FontAttributes="None"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- VOUCHERS -->
+            <Grid Grid.Column="2">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnVouchersTapped" />
+                </Grid.GestureRecognizers>
+                <VerticalStackLayout Spacing="4"
+                                     HorizontalOptions="Center"
+                                     VerticalOptions="Center">
+                    <Image x:Name="VouchersIcon"
+                           HeightRequest="24"
+                           WidthRequest="24" />
+                    <Label x:Name="VouchersLabel"
+                           Text="Vouchers"
+                           FontSize="13"
+                           FontAttributes="None"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- MENTOR -->
+            <Grid Grid.Column="3">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnMentorTapped" />
+                </Grid.GestureRecognizers>
+                <VerticalStackLayout Spacing="4"
+                                     HorizontalOptions="Center"
+                                     VerticalOptions="Center">
+                    <Image x:Name="MentorIcon"
+                           HeightRequest="24"
+                           WidthRequest="24" />
+                    <Label x:Name="MentorLabel"
+                           Text="Mentor"
+                           FontSize="13"
+                           FontAttributes="None"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- PLAY -->
+            <Grid Grid.Column="4">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPlayTapped" />
+                </Grid.GestureRecognizers>
+                <VerticalStackLayout Spacing="4"
+                                     HorizontalOptions="Center"
+                                     VerticalOptions="Center">
+                    <Image x:Name="PlayIcon"
+                           HeightRequest="24"
+                           WidthRequest="24" />
+                    <Label x:Name="PlayLabel"
+                           Text="Play"
+                           FontSize="13"
+                           FontAttributes="None"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Grid>
+
+        </Grid>
+    </Border>
+</ContentView>

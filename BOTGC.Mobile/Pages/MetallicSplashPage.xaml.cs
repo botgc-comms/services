@@ -2,7 +2,7 @@
 using SkiaSharp.Views.Maui;
 using SkiaSharp.Views.Maui.Controls;
 
-namespace BOTGC.Mobile;
+namespace BOTGC.Mobile.Pages;
 
 public partial class MetallicSplashPage : ContentPage
 {
@@ -15,15 +15,9 @@ public partial class MetallicSplashPage : ContentPage
         InitializeComponent();
     }
 
-    protected override async void OnAppearing()
+    protected override void OnAppearing()
     {
         base.OnAppearing();
-
-        if (_logo is null)
-        {
-            await using var s = await FileSystem.OpenAppPackageFileAsync("splash_crest.png");
-            _logo = SKBitmap.Decode(s);
-        }
 
         if (_running)
         {
@@ -32,26 +26,47 @@ public partial class MetallicSplashPage : ContentPage
 
         _running = true;
 
-        _ = Task.Run(async () =>
-        {
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-
-            while (_running)
-            {
-                var seconds = (float)sw.Elapsed.TotalSeconds;
-                _t = seconds % 1.6f;
-
-                MainThread.BeginInvokeOnMainThread(() => Canvas.InvalidateSurface());
-
-                await Task.Delay(16);
-            }
-        });
+        _ = RunAsync();
     }
 
     protected override void OnDisappearing()
     {
         _running = false;
         base.OnDisappearing();
+    }
+
+    private async Task RunAsync()
+    {
+        if (_logo is null)
+        {
+            await using var s = await FileSystem.OpenAppPackageFileAsync("splash_crest.png");
+            _logo = SKBitmap.Decode(s);
+        }
+
+        var start = DateTimeOffset.UtcNow;
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+
+        while (_running)
+        {
+            var seconds = (float)sw.Elapsed.TotalSeconds;
+            _t = seconds % 1.6f;
+
+            MainThread.BeginInvokeOnMainThread(() => Canvas.InvalidateSurface());
+
+            if (DateTimeOffset.UtcNow - start >= TimeSpan.FromSeconds(3))
+            {
+                _running = false;
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    Application.Current!.MainPage = new NavigationPage(new WebShellPage());
+                });
+
+                return;
+            }
+
+            await Task.Delay(16);
+        }
     }
 
     private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
@@ -78,11 +93,6 @@ public partial class MetallicSplashPage : ContentPage
 
         canvas.DrawBitmap(_logo, dest);
 
-        using var logoAlpha = new SKPaint
-        {
-            BlendMode = SKBlendMode.DstIn
-        };
-
         using var brighten = new SKPaint
         {
             BlendMode = SKBlendMode.Screen,
@@ -91,8 +101,7 @@ public partial class MetallicSplashPage : ContentPage
 
         canvas.SaveLayer(dest, null);
 
-        var sweep = BuildMetallicSweepShader(dest, _t);
-        brighten.Shader = sweep;
+        brighten.Shader = BuildMetallicSweepShader(dest, _t);
         canvas.DrawRect(dest, brighten);
 
         using var alphaLayerPaint = new SKPaint { BlendMode = SKBlendMode.DstIn };

@@ -64,6 +64,12 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <Compile Update="Pages\WebShellPage.xaml.cs">
+	    <DependentUpon>WebShellPage.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+	
+	<ItemGroup>
 	  <MauiImage Update="Resources\Images\login_logo.png">
 	    <Color>#000000</Color>
 	    <BaseSize>512,512</BaseSize>
@@ -71,7 +77,13 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <MauiXaml Update="MetallicSplashPage.xaml">
+	  <MauiXaml Update="Controls\BottomNavBar.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\MetallicSplashPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\WebShellPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

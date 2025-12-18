@@ -1,4 +1,6 @@
-﻿namespace BOTGC.Mobile;
+﻿using BOTGC.Mobile.Pages;
+
+namespace BOTGC.Mobile;
 
 public partial class App : Application
 {

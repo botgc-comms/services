@@ -8,7 +8,7 @@
         StatusWithoutJoinDate
     }
 
-    public class MembershipReportDto
+    public class MembershipReportDto: HateoasResource
     {
         public List<MembershipReportEntryDto> DataPoints { get; set; } = new();
         public string DataPointsCsv { get; set; }
