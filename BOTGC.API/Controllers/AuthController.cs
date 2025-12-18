@@ -41,102 +41,41 @@ namespace BOTGC.API.Controllers
         }
 
         /// <summary>
-        /// Generates a QR code image that can be scanned by the iPhone app to start an app sign-in session.
+        /// Creates an app sign-in code from the probe payload, and either:
+        /// - returns a PNG QR code (mode=qr), or
+        /// - redirects to a Universal Link (mode=activate).
         /// </summary>
         /// <param name="q">
         /// Base64-encoded JSON object (URL-encoded in the query string).
         /// Expected shape: <c>{"id":"646-83642","name":"...","user_level":"...","membertype":"..."}</c>.
-        /// The <c>id</c> field is used to resolve the member.
         /// </param>
-        /// <remarks>
-        /// The QR code does not contain member PII; PII is held server-side for the short session TTL.
-        /// </remarks>
-        /// <response code="200">Returns a PNG image containing the QR code.</response>
-        /// <response code="400">The payload is missing/invalid, or does not contain a usable member identifier.</response>
-        /// <response code="403">The identified member is not eligible for app access.</response>
-        /// <response code="404">No member could be found for the identifier provided.</response>
-        [HttpGet("app/qr")]
+        /// <param name="mode">qr | activate</param>
+        [HttpGet("app/code")]
         [AllowAnonymous]
-        [Produces("image/png")]
         [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status302Found)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetAppAuthQr([FromQuery] string q)
+        public async Task<IActionResult> GetAppAuthCode([FromQuery] string q, [FromQuery] string? mode)
         {
-            if (string.IsNullOrWhiteSpace(q))
+            Response.Headers.CacheControl = "no-store";
+
+            mode = (mode ?? "qr").Trim().ToLowerInvariant();
+            if (mode != "qr" && mode != "activate")
             {
-                return BadRequest(Problem(title: "Missing payload.", detail: "Query string parameter 'q' is required."));
+                return BadRequest(Problem(title: "Invalid mode.", detail: "Query string parameter 'mode' must be 'qr' or 'activate'."));
             }
 
-            AppAuthProbeProperties props;
-            try
+            var codeRecord = await CreateCodeRecordFromProbeAsync(q, HttpContext.RequestAborted);
+            var code = codeRecord.Code;
+
+            if (mode == "activate")
             {
-                var json = Encoding.UTF8.GetString(DecodeBase64Lenient(q));
-                props = JsonSerializer.Deserialize<AppAuthProbeProperties>(json, JsonOptions()) ?? new AppAuthProbeProperties();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Invalid base64/JSON in app auth probe.");
-                return BadRequest(Problem(title: "Invalid payload.", detail: "Parameter 'q' must be valid base64-encoded JSON."));
+                var openUrl = BuildUniversalOpenUrl(code);
+                return Redirect(openUrl);
             }
 
-            if (string.IsNullOrWhiteSpace(props.Id))
-            {
-                return BadRequest(Problem(title: "Missing member identifier.", detail: "The decoded JSON must contain 'id'."));
-            }
-
-            var (left, right) = ParseTwoPartNumericId(props.Id);
-            if (left == null && right == null)
-            {
-                return BadRequest(Problem(title: "Invalid member identifier.", detail: "Expected 'id' in the form '646-83642' or a single numeric value."));
-            }
-
-            var query = new GetCurrentMembersQuery();
-            var currentMembers = await _mediator.Send(query, HttpContext.RequestAborted);
-
-            if (currentMembers == null || currentMembers.Count == 0)
-            {
-                return NotFound(Problem(title: "Not found.", detail: "Member not found."));
-            }
-
-            var member = ResolveMember(currentMembers, left, right);
-            if (member == null)
-            {
-                return NotFound(Problem(title: "Not found.", detail: "Member not found."));
-            }
-
-            if (!ProbeMatchesMember(props, member))
-            {
-                return NotFound(Problem(title: "Not found.", detail: "Member not found."));
-            }
-
-            if (!IsEligibleForApp(member))
-            {
-                return NotFound(Problem(title: "Not found.", detail: "Member not found."));
-            }
-
-            if (member.MemberNumber == null || member.PlayerId == null || member.DateOfBirth == null)
-            {
-                return NotFound(Problem(title: "Not found.", detail: "Member not found."));
-            }
-
-            var payload = BuildPayload(member);
-
-            var code = Guid.NewGuid().ToString("N");
-            var cacheKey = CacheKeyPrefixCode + code;
-
-            var codeRecord = new AppAuthCodeRecord
-            {
-                Code = code,
-                CreatedUtc = DateTimeOffset.UtcNow,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(_settings.Auth.App.QrCodeTtlMinutes),
-                Payload = payload,
-                Redeemed = false
-            };
-
-            await _cacheService.SetAsync(cacheKey, codeRecord, TimeSpan.FromMinutes(_settings.Auth.App.QrCodeTtlMinutes));
-
-            var qrText = BuildQrText(code);
+            var qrText = BuildRedeemUrl(code);
 
             byte[] png;
             using (var generator = new QRCodeGenerator())
@@ -148,46 +87,6 @@ namespace BOTGC.API.Controllers
 
             return File(png, "image/png");
         }
-
-        private static bool ProbeMatchesMember(AppAuthProbeProperties props, MemberDto member)
-        {
-            if (!string.IsNullOrWhiteSpace(props.Name))
-            {
-                var probeName = NormaliseName(props.Name);
-                var memberName = NormaliseName(member.FullName ?? $"{member.FirstName} {member.LastName}");
-                if (!string.Equals(probeName, memberName, StringComparison.Ordinal))
-                {
-                    return false;
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(props.MemberType))
-            {
-                var probeType = NormaliseMemberType(props.MemberType);
-                var memberType = NormaliseMemberType(member.MembershipCategory ?? string.Empty);
-                if (!string.Equals(probeType, memberType, StringComparison.Ordinal))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static string NormaliseName(string value)
-        {
-            var s = value.Trim();
-            s = string.Join(" ", s.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
-            return s.ToUpperInvariant();
-        }
-
-        private static string NormaliseMemberType(string value)
-        {
-            var s = value.Trim();
-            s = string.Join(" ", s.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
-            return s.ToUpperInvariant();
-        }
-
 
         [HttpPost("app/redeem")]
         [AllowAnonymous]
@@ -247,17 +146,72 @@ namespace BOTGC.API.Controllers
             }
         }
 
-        /// <summary>
-        /// Exchanges a redeemed app sign-in session and date of birth for an app auth token.
-        /// </summary>
-        /// <param name="request">The token request containing the session identifier and date of birth.</param>
-        /// <remarks>
-        /// This endpoint is intended to be called by the mobile app. It relies on the API key middleware plus an
-        /// allow-listed client identifier (X-CLIENT-ID) as an additional speed bump.
-        /// </remarks>
-        /// <response code="200">Tokens were issued.</response>
-        /// <response code="400">The session is invalid, expired, or the date of birth does not match.</response>
-        /// <response code="401">The client identifier was missing or not allowed.</response>
+        [HttpPost("app/refresh")]
+[Consumes("application/json")]
+[Produces("application/json")]
+[ProducesResponseType(typeof(AppAuthTokenResponse), StatusCodes.Status200OK)]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+public async Task<IActionResult> Refresh([FromHeader(Name = "X-CLIENT-ID")] string clientId, [FromBody] AppAuthRefreshRequest request)
+{
+    Response.Headers.CacheControl = "no-store";
+
+    clientId = clientId?.Trim() ?? string.Empty;
+    if (string.IsNullOrWhiteSpace(clientId))
+    {
+        return Unauthorized(Problem(title: "Unauthorised.", detail: "Missing X-CLIENT-ID header."));
+    }
+
+    if (_settings.Auth.App.AllowedClientIds == null
+        || _settings.Auth.App.AllowedClientIds.Length == 0
+        || !_settings.Auth.App.AllowedClientIds.Contains(clientId, StringComparer.OrdinalIgnoreCase))
+    {
+        return Unauthorized(Problem(title: "Unauthorised.", detail: "Client is not allowed."));
+    }
+
+    if (request == null || string.IsNullOrWhiteSpace(request.RefreshToken))
+    {
+        return BadRequest(Problem(title: "Invalid request.", detail: "refreshToken is required."));
+    }
+
+    var nowUtc = DateTimeOffset.UtcNow;
+
+    var oldToken = request.RefreshToken.Trim();
+    var oldKey = CacheKeyPrefixRefresh + oldToken;
+
+    var record = await _cacheService.GetAsync<AppAuthRefreshRecord>(oldKey);
+    if (record == null || record.ExpiresUtc <= nowUtc)
+    {
+        return Unauthorized(Problem(title: "Unauthorised.", detail: "Refresh token is invalid or expired."));
+    }
+
+    var accessToken = CreateJwtAccessToken(record.Payload);
+
+    var newRefreshToken = CreateRefreshToken();
+    var newKey = CacheKeyPrefixRefresh + newRefreshToken;
+
+    var newRecord = new AppAuthRefreshRecord
+    {
+        RefreshToken = newRefreshToken,
+        IssuedUtc = nowUtc,
+        ExpiresUtc = nowUtc.AddDays(_settings.Auth.App.RefreshTokenTtlDays),
+        MembershipNumber = record.MembershipNumber,
+        Payload = record.Payload
+    };
+
+    await _cacheService.RemoveAsync(oldKey);
+    await _cacheService.SetAsync(newKey, newRecord, TimeSpan.FromDays(_settings.Auth.App.RefreshTokenTtlDays));
+
+    return Ok(new AppAuthTokenResponse
+    {
+        AccessToken = accessToken,
+        AccessTokenExpiresUtc = nowUtc.AddMinutes(_settings.Auth.App.AccessTokenTtlMinutes),
+        RefreshToken = newRefreshToken,
+        RefreshTokenExpiresUtc = newRecord.ExpiresUtc
+    });
+}
+
+
         [HttpPost("app/token")]
         [Consumes("application/json")]
         [Produces("application/json")]
@@ -322,7 +276,8 @@ namespace BOTGC.API.Controllers
                 RefreshToken = refreshToken,
                 IssuedUtc = nowUtc,
                 ExpiresUtc = nowUtc.AddDays(_settings.Auth.App.RefreshTokenTtlDays),
-                MembershipNumber = session.Payload.MembershipNumber
+                MembershipNumber = session.Payload.MembershipNumber,
+                Payload = session.Payload
             };
 
             await _cacheService.SetAsync(refreshKey, refreshRecord, TimeSpan.FromDays(_settings.Auth.App.RefreshTokenTtlDays));
@@ -336,20 +291,153 @@ namespace BOTGC.API.Controllers
             });
         }
 
+        [HttpPut("app/linkpage")]
+        public async Task<IActionResult> UpdateAppLinkPage()
+        {
+            var updateAppLinkPageCommand = new UpdateAppLinkPageCommand();
+            var results = await _mediator.Send(updateAppLinkPageCommand, HttpContext.RequestAborted);
+            return Ok(results);
+        }
+
+        private async Task<AppAuthCodeRecord> CreateCodeRecordFromProbeAsync(string q, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+            {
+                throw new InvalidOperationException("Missing payload.");
+            }
+
+            AppAuthProbeProperties props;
+            try
+            {
+                var json = Encoding.UTF8.GetString(DecodeBase64Lenient(q));
+                props = JsonSerializer.Deserialize<AppAuthProbeProperties>(json, JsonOptions()) ?? new AppAuthProbeProperties();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Invalid base64/JSON in app auth probe.");
+                throw new ArgumentException("Invalid payload.");
+            }
+
+            if (string.IsNullOrWhiteSpace(props.Id))
+            {
+                throw new ArgumentException("Missing member identifier.");
+            }
+
+            var (left, right) = ParseTwoPartNumericId(props.Id);
+            if (left == null && right == null)
+            {
+                throw new ArgumentException("Invalid member identifier.");
+            }
+
+            var currentMembers = await _mediator.Send(new GetCurrentMembersQuery(), cancellationToken);
+            if (currentMembers == null || currentMembers.Count == 0)
+            {
+                throw new KeyNotFoundException("Member not found.");
+            }
+
+            var member = ResolveMember(currentMembers, left, right);
+            if (member == null || !ProbeMatchesMember(props, member) || !IsEligibleForApp(member))
+            {
+                throw new KeyNotFoundException("Member not found.");
+            }
+
+            if (member.MemberNumber == null || member.PlayerId == null || member.DateOfBirth == null)
+            {
+                throw new KeyNotFoundException("Member not found.");
+            }
+
+            var payload = BuildPayload(member);
+
+            var code = Guid.NewGuid().ToString("N");
+            var cacheKey = CacheKeyPrefixCode + code;
+
+            var codeRecord = new AppAuthCodeRecord
+            {
+                Code = code,
+                CreatedUtc = DateTimeOffset.UtcNow,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(_settings.Auth.App.QrCodeTtlMinutes),
+                Payload = payload,
+                Redeemed = false
+            };
+
+            await _cacheService.SetAsync(cacheKey, codeRecord, TimeSpan.FromMinutes(_settings.Auth.App.QrCodeTtlMinutes));
+
+            return codeRecord;
+        }
+
+        private static bool ProbeMatchesMember(AppAuthProbeProperties props, MemberDto member)
+        {
+            if (!string.IsNullOrWhiteSpace(props.Name))
+            {
+                var probeName = NormaliseName(props.Name);
+                var memberName = NormaliseName(member.FullName ?? $"{member.FirstName} {member.LastName}");
+                if (!string.Equals(probeName, memberName, StringComparison.Ordinal))
+                {
+                    return false;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(props.MemberType))
+            {
+                var probeType = NormaliseMemberType(props.MemberType);
+                var memberType = NormaliseMemberType(member.MembershipCategory ?? string.Empty);
+                if (!string.Equals(probeType, memberType, StringComparison.Ordinal))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static string NormaliseName(string value)
+        {
+            var s = value.Trim();
+            s = string.Join(" ", s.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+            return s.ToUpperInvariant();
+        }
+
+        private static string NormaliseMemberType(string value)
+        {
+            var s = value.Trim();
+            s = string.Join(" ", s.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+            return s.ToUpperInvariant();
+        }
 
         private async Task<AppAuthRedeemResponse> RedeemInternal(string code, CancellationToken cancellationToken)
         {
             code = code.Trim();
+            var nowUtc = DateTimeOffset.UtcNow;
+
             var codeKey = CacheKeyPrefixCode + code;
 
             var codeRecord = await _cacheService.GetAsync<AppAuthCodeRecord>(codeKey);
-            if (codeRecord == null || codeRecord.Redeemed || codeRecord.ExpiresUtc <= DateTimeOffset.UtcNow)
+            if (codeRecord == null || codeRecord.ExpiresUtc <= nowUtc)
             {
                 throw new KeyNotFoundException("Code not found.");
             }
 
-            codeRecord.Redeemed = true;
-            await _cacheService.SetAsync(codeKey, codeRecord, TimeSpan.FromMinutes(_settings.Auth.App.QrCodeTtlMinutes));
+            if (codeRecord.Redeemed)
+            {
+                if (string.IsNullOrWhiteSpace(codeRecord.SessionId))
+                {
+                    throw new KeyNotFoundException("Code not found.");
+                }
+
+                var existingSessionKey = CacheKeyPrefixSession + codeRecord.SessionId;
+                var existingSession = await _cacheService.GetAsync<AppAuthSessionRecord>(existingSessionKey);
+
+                if (existingSession == null || existingSession.ExpiresUtc <= nowUtc)
+                {
+                    throw new KeyNotFoundException("Code not found.");
+                }
+
+                return new AppAuthRedeemResponse
+                {
+                    SessionId = existingSession.SessionId,
+                    ExpiresUtc = existingSession.ExpiresUtc
+                };
+            }
 
             var sessionId = Guid.NewGuid().ToString("N");
             var sessionKey = CacheKeyPrefixSession + sessionId;
@@ -357,13 +445,24 @@ namespace BOTGC.API.Controllers
             var session = new AppAuthSessionRecord
             {
                 SessionId = sessionId,
-                CreatedUtc = DateTimeOffset.UtcNow,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(_settings.Auth.App.SessionTtlMinutes),
+                CreatedUtc = nowUtc,
+                ExpiresUtc = nowUtc.AddMinutes(_settings.Auth.App.SessionTtlMinutes),
                 Payload = codeRecord.Payload,
                 FailedDobAttempts = 0
             };
 
             await _cacheService.SetAsync(sessionKey, session, TimeSpan.FromMinutes(_settings.Auth.App.SessionTtlMinutes));
+
+            codeRecord.Redeemed = true;
+            codeRecord.SessionId = sessionId;
+
+            var remainingCodeTtl = codeRecord.ExpiresUtc - nowUtc;
+            if (remainingCodeTtl < TimeSpan.Zero)
+            {
+                remainingCodeTtl = TimeSpan.Zero;
+            }
+
+            await _cacheService.SetAsync(codeKey, codeRecord, remainingCodeTtl);
 
             return new AppAuthRedeemResponse
             {
@@ -484,7 +583,7 @@ namespace BOTGC.API.Controllers
             };
         }
 
-        private string BuildQrText(string code)
+        private string BuildRedeemUrl(string code)
         {
             if (!string.IsNullOrWhiteSpace(_settings.Auth.App.QrBaseUrl))
             {
@@ -493,6 +592,19 @@ namespace BOTGC.API.Controllers
 
             var host = $"{Request.Scheme}://{Request.Host.Value}";
             return $"{host}/api/auth/app/redeem?code={Uri.EscapeDataString(code)}";
+        }
+
+        private string BuildUniversalOpenUrl(string code)
+        {
+            var baseUrl = (_settings.Auth.App.UniversalLinkBaseUrl ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                var host = $"{Request.Scheme}://{Request.Host.Value}";
+                baseUrl = $"{host}/appauth/open";
+            }
+
+            var sep = baseUrl.Contains('?', StringComparison.Ordinal) ? "&" : "?";
+            return $"{baseUrl.TrimEnd('/')}{sep}code={Uri.EscapeDataString(code)}";
         }
 
         private string CreateJwtAccessToken(AppAuthPayload payload)
@@ -507,12 +619,12 @@ namespace BOTGC.API.Controllers
             var claims = new List<Claim>
             {
                 new Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub, payload.MembershipNumber.ToString()),
+                new Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
                 new Claim("memberNumber", payload.MembershipNumber.ToString()),
                 new Claim("memberId", payload.MembershipId.ToString()),
                 new Claim("firstName", payload.FirstName),
                 new Claim("surname", payload.Surname),
-                new Claim("category", payload.CurrentCategory),
-                new Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
+                new Claim("category", payload.CurrentCategory)
             };
 
             var descriptor = new SecurityTokenDescriptor
@@ -598,6 +710,7 @@ namespace BOTGC.API.Controllers
         public DateTimeOffset CreatedUtc { get; set; }
         public DateTimeOffset ExpiresUtc { get; set; }
         public bool Redeemed { get; set; }
+        public string? SessionId { get; set; }
         public AppAuthPayload Payload { get; set; } = new AppAuthPayload();
     }
 
@@ -616,11 +729,17 @@ namespace BOTGC.API.Controllers
         public DateTimeOffset IssuedUtc { get; set; }
         public DateTimeOffset ExpiresUtc { get; set; }
         public int MembershipNumber { get; set; }
+        public AppAuthPayload Payload { get; set; } = new AppAuthPayload();
     }
 
     public sealed class AppAuthRedeemRequest
     {
         public string Code { get; set; } = string.Empty;
+    }
+
+    public sealed class AppAuthRefreshRequest
+    {
+        public string RefreshToken { get; set; } = string.Empty;
     }
 
     public sealed class AppAuthRedeemResponse

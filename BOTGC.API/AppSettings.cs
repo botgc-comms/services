@@ -89,9 +89,9 @@ namespace BOTGC.API
         public int QrCodeTtlMinutes { get; set; } = 2;
         public int SessionTtlMinutes { get; set; } = 5;
         public int MaxDobAttempts { get; set; } = 5;
-
+        public string UniversalLinkBaseUrl { get; set; } = "https://app.botgc.co.uk/link/"; 
         public int AccessTokenTtlMinutes { get; set; } = 60;
-        public int RefreshTokenTtlDays { get; set; } = 365;
+        public int RefreshTokenTtlDays { get; set; } = 3650;
 
         public string JwtSigningKey { get; set; } = string.Empty;
         public string JwtIssuer { get; set; } = "BOTGC";
@@ -140,6 +140,7 @@ namespace BOTGC.API
         public string AdminPassword { get; set; }
 
         public int CompetitionResultsPageId { get; set; } 
+        public int AppLinkPageId { get; set; }
 
         public IGEndpoints Urls { get; set; } = new IGEndpoints();
 

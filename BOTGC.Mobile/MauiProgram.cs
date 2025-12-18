@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using ZXing.Net.Maui.Controls;
 
 namespace BOTGC.Mobile;
 
@@ -12,6 +13,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseSkiaSharp()
+            .UseBarcodeReader()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BOTGC.Mobile.Pages.AppAuthPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="White"
+    Title="Sign in">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="24" RowSpacing="18">
+
+        <VerticalStackLayout Spacing="6">
+            <Label Text="QR Code Camera"
+                   FontSize="26"
+                   FontAttributes="Bold"
+                   TextColor="Black" />
+
+            <Label x:Name="StatusLabel"
+                   Text="Checking sign-in..."
+                   FontSize="14"
+                   TextColor="#444444" />
+        </VerticalStackLayout>
+
+        <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*" RowSpacing="14">
+
+            <Label x:Name="ScannerHelpLabel"
+                   Text="Use the camera to scan your QR code."
+                   FontSize="14"
+                   TextColor="#444444" />
+
+            <Border Grid.Row="1"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Start"
+                    StrokeThickness="3"
+                    Stroke="#F5A623"
+                    BackgroundColor="White"
+                    StrokeShape="RoundRectangle 18">
+
+                <Grid WidthRequest="280"
+                      HeightRequest="280"
+                      IsClippedToBounds="True">
+
+                    <Grid x:Name="ScannerHost" />
+
+                    <Border Margin="14"
+                            StrokeThickness="2"
+                            Stroke="#F5A623"
+                            BackgroundColor="Transparent"
+                            StrokeShape="RoundRectangle 14" />
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="2"
+                  x:Name="DobPanel"
+                  IsVisible="False"
+                  RowDefinitions="Auto,Auto,Auto"
+                  RowSpacing="12">
+
+                <Label Text="Enter your date of birth to finish signing in."
+                       FontSize="16"
+                       TextColor="Black" />
+
+                <DatePicker x:Name="DobPicker" />
+
+                <Button Text="Continue"
+                        Clicked="ContinueButton_Clicked" />
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="2"
+              x:Name="ManualPanel"
+              IsVisible="False"
+              RowDefinitions="Auto,Auto"
+              RowSpacing="10">
+
+            <Entry x:Name="RedeemUrlEntry"
+                   Placeholder="Paste redeem URL (contains ?code=...)"
+                   ClearButtonVisibility="WhileEditing" />
+
+            <Button Text="Continue"
+                    Clicked="ManualContinueButton_Clicked" />
+        </Grid>
+
+    </Grid>
+</ContentPage>

@@ -133,9 +133,6 @@ namespace BOTGC.API.Services.QueryHandlers
             </style>");
 
             page.AppendLine(@"<div class=""inner-page-wrapper"">");
-            //page.AppendLine(@"  <div class=""inner-slideshow"">");
-            //page.AppendLine(@"    <div class=""wysiwyg-editable"">{NEWSLIDESHOW=New Inner Slideshow}</div>");
-            //page.AppendLine(@"  </div>");
             page.AppendLine(@"  <div class=""inner-main"">");
             page.AppendLine(@"    <div class=""page-space"">");
             page.AppendLine(@"      <div class=""inner-nav"">");
@@ -148,15 +145,9 @@ namespace BOTGC.API.Services.QueryHandlers
             page.AppendLine(table);
             page.AppendLine(@"        </div>");
             page.AppendLine(@"      </div>");
-            //page.AppendLine(@"      <div class=""inner-carousel-block"">");
-            //page.AppendLine(@"        <div class=""wysiwyg-editable"">{INCLUDE=Inner Carousel}</div>");
-            //page.AppendLine(@"      </div>");
             page.AppendLine(@"    </div>");
             page.AppendLine(@"  </div>");
             page.AppendLine(@"</div>");
-            //page.AppendLine(@"<div class=""page-footer"">");
-            //page.AppendLine(@"  <div class=""wysiwyg-editable"">{INCLUDE=Public Footer}</div>");
-            //page.AppendLine(@"</div>");
 
             var html = page.ToString();
 

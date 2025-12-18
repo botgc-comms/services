@@ -9,6 +9,8 @@
 		<integer>1</integer>
 		<integer>2</integer>
 	</array>
+	<key>NSCameraUsageDescription</key>
+    <string>Camera access is required to scan your BOTGC QR code.</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>arm64</string>

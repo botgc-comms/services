@@ -7,7 +7,7 @@
     BackgroundColor="White">
 
     <Grid>
-        <skia:SKCanvasView x:Name="Canvas" PaintSurface="OnPaintSurface" />
+        <skia:SKCanvasView x:Name="Canvas" BackgroundColor="White" PaintSurface="OnPaintSurface" />
     </Grid>
 
 </ContentPage>

@@ -185,7 +185,7 @@ app.UseWhen(context =>
     !context.Request.Path.StartsWithSegments("/health") &&
     !context.Request.Path.StartsWithSegments("/version") &&
     !context.Request.Path.StartsWithSegments("/_diag") &&
-    !context.Request.Path.StartsWithSegments("/api/auth/app/qr") &&
+    !context.Request.Path.StartsWithSegments("/api/auth/app/code") &&
     !context.Request.Path.StartsWithSegments("/api/auth/app/redeem") &&
     context.Request.Path != "/", 
     appBuilder =>

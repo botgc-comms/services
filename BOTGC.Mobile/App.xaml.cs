@@ -7,7 +7,7 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
-        MainPage = new MetallicSplashPage();
+        MainPage = new NavigationPage(new MetallicSplashPage());
     }
 
     protected override Window CreateWindow(IActivationState? activationState)

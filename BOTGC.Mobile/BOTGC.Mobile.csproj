@@ -61,6 +61,8 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
+		<PackageReference Include="ZXing.Net.Maui" Version="0.6.0" />
+		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.6.0" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -78,6 +80,9 @@
 	
 	<ItemGroup>
 	  <MauiXaml Update="Controls\BottomNavBar.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\AppAuthPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\MetallicSplashPage.xaml">

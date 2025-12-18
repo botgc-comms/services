@@ -6,6 +6,8 @@ namespace BOTGC.Mobile.Pages;
 
 public partial class MetallicSplashPage : ContentPage
 {
+    private const float FadeInSeconds = 0.8f;
+
     private SKBitmap? _logo;
     private float _t;
     private bool _running;
@@ -25,7 +27,6 @@ public partial class MetallicSplashPage : ContentPage
         }
 
         _running = true;
-
         _ = RunAsync();
     }
 
@@ -39,7 +40,7 @@ public partial class MetallicSplashPage : ContentPage
     {
         if (_logo is null)
         {
-            await using var s = await FileSystem.OpenAppPackageFileAsync("splash_crest.png");
+            await using var s = await FileSystem.OpenAppPackageFileAsync("splash_crest_ds.png");
             _logo = SKBitmap.Decode(s);
         }
 
@@ -53,13 +54,13 @@ public partial class MetallicSplashPage : ContentPage
 
             MainThread.BeginInvokeOnMainThread(() => Canvas.InvalidateSurface());
 
-            if (DateTimeOffset.UtcNow - start >= TimeSpan.FromSeconds(3))
+            if (DateTimeOffset.UtcNow - start >= TimeSpan.FromSeconds(5))
             {
                 _running = false;
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    Application.Current!.MainPage = new NavigationPage(new WebShellPage());
+                    Application.Current!.MainPage!.Navigation.PushAsync(new AppAuthPage());
                 });
 
                 return;
@@ -72,7 +73,7 @@ public partial class MetallicSplashPage : ContentPage
     private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
     {
         var canvas = e.Surface.Canvas;
-        canvas.Clear(SKColors.Black);
+        canvas.Clear(SKColors.White);
 
         if (_logo is null)
         {
@@ -91,12 +92,42 @@ public partial class MetallicSplashPage : ContentPage
 
         var dest = new SKRect(x, y, x + targetLogoWidth, y + targetLogoHeight);
 
-        canvas.DrawBitmap(_logo, dest);
+        var fade = Math.Clamp(_t / FadeInSeconds, 0f, 1f);
+        var alpha = (byte)(fade * 255f);
 
+        //// Drop shadow (behind logo)
+        //using (var shadowPaint = new SKPaint
+        //{
+        //    IsAntialias = true,
+        //    ImageFilter = SKImageFilter.CreateDropShadow(
+        //        dx: 0,
+        //        dy: 14,
+        //        sigmaX: 22,
+        //        sigmaY: 22,
+        //        color: new SKColor(0, 0, 0, (byte)(alpha * 0.6f))
+        //    )
+        //})
+        //{
+        //    canvas.DrawBitmap(_logo, dest, shadowPaint);
+        //}
+
+        // Logo with fade-in
+        using (var logoPaint = new SKPaint
+        {
+            IsAntialias = true,
+            FilterQuality = SKFilterQuality.High,
+            Color = new SKColor(255, 255, 255, alpha)
+        })
+        {
+            canvas.DrawBitmap(_logo, dest, logoPaint);
+        }
+
+        // Metallic sweep (masked to logo alpha)
         using var brighten = new SKPaint
         {
             BlendMode = SKBlendMode.Screen,
-            IsAntialias = true
+            IsAntialias = true,
+            Color = new SKColor(255, 255, 255, alpha)
         };
 
         canvas.SaveLayer(dest, null);
