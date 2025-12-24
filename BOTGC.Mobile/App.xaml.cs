@@ -1,13 +1,23 @@
-﻿using BOTGC.Mobile.Pages;
+﻿// App.xaml.cs
+using BOTGC.Mobile.Pages;
+using BOTGC.Mobile.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BOTGC.Mobile;
 
 public partial class App : Application
 {
-    public App()
+    private readonly IServiceProvider _services;
+
+    public App(IServiceProvider services, AppNavigationCoordinator coordinator)
     {
+        _services = services;
+
         InitializeComponent();
-        MainPage = new NavigationPage(new MetallicSplashPage());
+
+        MainPage = new NavigationPage(_services.GetRequiredService<MetallicSplashPage>());
+
+        _ = coordinator;
     }
 
     protected override Window CreateWindow(IActivationState? activationState)

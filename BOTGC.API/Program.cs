@@ -1,18 +1,19 @@
+using System.Globalization;
+using System.Text.Json.Serialization;
+using System.Text;
 using BOTGC.API;
 using BOTGC.API.Common;
 using BOTGC.API.Extensions;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services;
 using BOTGC.API.Services.ReportServices;
-using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RedLockNet.SERedis;
 using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
-using System.Globalization;
-using System.Text.Json.Serialization;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +27,7 @@ builder.Services
     {
         o.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -65,14 +66,17 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<AllowAnonymousOperationFilter>();
 });
 
-// Setup application configuration
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
-builder.Services.AddSingleton<IConfiguration>(builder.Configuration.GetSection("AppSettings"));
-
 var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
+if (appSettings == null)
+{
+    throw new InvalidOperationException("AppSettings configuration is missing or invalid.");
+}
+
+builder.Services.AddSingleton(appSettings);
+
 MembershipHelper.Configure(appSettings);
 
-// Conditionally enable Application Insights in non-development environments
 if (!builder.Environment.IsDevelopment())
 {
     builder.Services.AddApplicationInsightsTelemetry(options =>
@@ -87,7 +91,7 @@ if (!builder.Environment.IsDevelopment())
         },
         configureApplicationInsightsLoggerOptions: options =>
         {
-            options.IncludeScopes = true; 
+            options.IncludeScopes = true;
             options.TrackExceptionsAsExceptionTelemetry = true;
         }
     );
@@ -96,7 +100,6 @@ if (!builder.Environment.IsDevelopment())
         "", LogLevel.Information);
 }
 
-//builder.Services.AddSingleton<TrophyFilesDiskStorage>();
 builder.Services.AddSingleton<ITrophyFiles, TrophyFilesGitHub>();
 builder.Services.AddSingleton<ITrophyDataStore, TrophyDataStore>();
 builder.Services.AddSingleton<ITrophyService, TrophyService>();
@@ -112,7 +115,7 @@ builder.Services.AddHealthChecks();
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.Limits.MaxRequestBodySize = null; // Unlimited
+    serverOptions.Limits.MaxRequestBodySize = null;
     serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5);
     serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(2);
 });
@@ -121,7 +124,6 @@ var cacheServiceType = appSettings.Cache.Type;
 
 if (string.Equals(cacheServiceType, "Redis", StringComparison.OrdinalIgnoreCase))
 {
-    // Register Redis distributed cache provider so IDistributedCache is available.
     builder.Services.AddStackExchangeRedisCache(options =>
     {
         options.Configuration = appSettings.Cache.RedisCache.ConnectionString;
@@ -140,20 +142,45 @@ else if (string.Equals(cacheServiceType, "Memory", StringComparison.OrdinalIgnor
 {
     builder.Services.AddMemoryCache();
     builder.Services.AddScoped<ICacheService, MemoryCacheService>();
-
     builder.Services.AddSingleton<IDistributedLockManager, NoOpDistributedLockManager>();
 }
 else
 {
     builder.Services.AddScoped<ICacheService, FileCacheService>();
-
     builder.Services.AddSingleton<IDistributedLockManager, NoOpDistributedLockManager>();
 }
 
-// Add support for interacting with IG
 builder.Services.AddIGSupport();
 
 builder.Services.AddHttpClient();
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        var keyBytes = Encoding.UTF8.GetBytes(appSettings.Auth.App.JwtSigningKey);
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = appSettings.Auth.App.JwtIssuer,
+
+            ValidateAudience = true,
+            ValidAudience = appSettings.Auth.App.JwtAudience,
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromSeconds(30)
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -166,8 +193,8 @@ var locOptions = new RequestLocalizationOptions
 app.UseRequestLocalization(locOptions);
 
 app.MapGet("/", () => Results.Ok("Service is running"))
-   .AllowAnonymous()
-   .ExcludeFromDescription();
+    .AllowAnonymous()
+    .ExcludeFromDescription();
 
 app.MapHealthChecks("/health")
     .ExcludeFromDescription();
@@ -187,17 +214,18 @@ app.UseWhen(context =>
     !context.Request.Path.StartsWithSegments("/_diag") &&
     !context.Request.Path.StartsWithSegments("/api/auth/app/code") &&
     !context.Request.Path.StartsWithSegments("/api/auth/app/redeem") &&
-    context.Request.Path != "/", 
+    context.Request.Path != "/",
     appBuilder =>
     {
         appBuilder.UseMiddleware<AuthKeyMiddleware>();
-});
+    });
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

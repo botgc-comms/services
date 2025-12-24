@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BOTGC.Mobile.Pages.DateOfBirthPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Confirm your date of birth">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <Label
+                Text="Confirm your date of birth"
+                FontSize="24"
+                FontAttributes="Bold" />
+
+            <Label
+                Text="We use your date of birth to confirm this device is being paired to the correct member account."
+                FontSize="14" />
+
+            <DatePicker
+                x:Name="DobPicker"
+                FontSize="16" />
+
+            <Button
+                x:Name="ContinueButton"
+                Text="Continue" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

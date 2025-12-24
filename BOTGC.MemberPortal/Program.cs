@@ -6,6 +6,7 @@ using BOTGC.MemberPortal.Services.TileAdapters;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,44 +15,6 @@ builder.Services.AddHttpClient();
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<AppSettings>>().Value);
-
-builder.Services.AddSingleton<NgrokState>();
-
-builder.Services.AddPosApiClients(builder.Configuration);
-
-var signalR = builder.Services.AddSignalR();
-var redisConn = builder.Configuration["AppSettings:Redis:ConnectionString"];
-if (!string.IsNullOrWhiteSpace(redisConn))
-{
-    signalR.AddStackExchangeRedis(redisConn, o => { o.Configuration.ChannelPrefix = "member-portal"; });
-}
-
-builder.Services.AddHttpContextAccessor();
-
-// Auth + current user
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-        options.AccessDeniedPath = "/Account/Login";
-    });
-
-builder.Services.AddAuthorization();
-
-builder.Services.AddScoped<IUserAuthenticationService, InMemoryUserAuthenticationService>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-
-builder.Services.AddScoped<IVoucherService, ApiVoucherService>();
-
-builder.Services.AddScoped<ITileService, TileService>();
-
-builder.Services.AddScoped<ITileAdapter, CadetVouchersTileAdapter>();
-builder.Services.AddScoped<ITileAdapter, JuniorMentorTileAdapter>();
-builder.Services.AddScoped<ITileAdapter, RulesQuizTileAdapter>();
-builder.Services.AddScoped<ITileAdapter, HandicapSessionTileAdapter>();
-builder.Services.AddScoped<ITileAdapter, CategoryProgressTileAdapter>();
-
 
 builder.Services.Configure<ForwardedHeadersOptions>(o =>
 {
@@ -62,22 +25,58 @@ builder.Services.Configure<ForwardedHeadersOptions>(o =>
     o.KnownProxies.Clear();
 });
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/Login";
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddSingleton<NgrokState>();
+
+builder.Services.AddPosApiClients(builder.Configuration);
+
+builder.Services.AddSignalR();
+
+builder.Services.AddScoped<IUserAuthenticationService, InMemoryUserAuthenticationService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+builder.Services.AddScoped<IVoucherService, ApiVoucherService>();
+
+builder.Services.AddScoped<ITileService, TileService>();
+builder.Services.AddScoped<ITileAdapter, CadetVouchersTileAdapter>();
+builder.Services.AddScoped<ITileAdapter, JuniorMentorTileAdapter>();
+builder.Services.AddScoped<ITileAdapter, RulesQuizTileAdapter>();
+builder.Services.AddScoped<ITileAdapter, HandicapSessionTileAdapter>();
+builder.Services.AddScoped<ITileAdapter, CategoryProgressTileAdapter>();
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    var settings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
+
+    if (string.IsNullOrWhiteSpace(settings?.Cache?.ConnectionString))
+    {
+        throw new InvalidOperationException("AppSettings:Cache:ConnectionString is required.");
+    }
+
+    options.Configuration = settings.Cache.ConnectionString;
+
+    if (!string.IsNullOrWhiteSpace(settings.Cache.InstanceName))
+    {
+        options.InstanceName = $"{settings.Cache.InstanceName}:";
+    }
+});
+
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
+
 var app = builder.Build();
 
 app.UseForwardedHeaders();
-
-var appSettings = app.Services.GetRequiredService<AppSettings>();
-var accessSettings = appSettings.Access ?? new Access();
-
-//var gatekeeper = new GatekeeperOptions
-//{
-//    QueryKey = "k",
-//    SharedSecret = accessSettings.SharedSecret ?? string.Empty,
-//    CookieName = accessSettings.CookieName ?? "pos_access",
-//    RedirectUrl = "/access?returnUrl={returnUrl}"
-//};
-
-//app.UseMiddleware<GatekeeperMiddleware>(gatekeeper);
 
 app.UseStaticFiles();
 app.UseRouting();
@@ -87,43 +86,6 @@ app.UseAuthorization();
 
 app.MapHub<NgrokHub>("/hubs/ngrok");
 app.MapHub<VoucherHub>("/hubs/voucherHub");
-
-//app.MapGet("/access", (HttpContext ctx, AppSettings settings) =>
-//{
-//    var access = settings.Access;
-//    if (access is null || string.IsNullOrEmpty(access.SharedSecret))
-//    {
-//        return Results.Content("Access not configured.");
-//    }
-
-//    var secret = access.SharedSecret;
-//    var cookieName = access.CookieName ?? "pos_access";
-//    var ttlDays = access.CookieTtlDays <= 0 ? 365 : access.CookieTtlDays;
-
-//    var provided = ctx.Request.Query["k"].ToString();
-//    var returnUrl = ctx.Request.Query["returnUrl"].ToString();
-
-//    if (!string.IsNullOrEmpty(provided) && provided == secret)
-//    {
-//        ctx.Response.Cookies.Append(cookieName, secret, new CookieOptions
-//        {
-//            HttpOnly = true,
-//            Secure = ctx.Request.IsHttps,
-//            SameSite = SameSiteMode.Lax,
-//            Path = "/",
-//            Expires = DateTimeOffset.UtcNow.AddDays(ttlDays)
-//        });
-
-//        return Results.Redirect(string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl);
-//    }
-
-//    return Results.Content("Not authorised. Append ?k=<key> (use your QR) to gain access.");
-//});
-
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{controller=Wastage}/{action=Index}/{id?}"
-//);
 
 app.MapControllerRoute(
     name: "default",

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using BOTGC.MemberPortal.Interfaces;
+﻿using BOTGC.MemberPortal.Interfaces;
 using BOTGC.MemberPortal.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,16 +9,11 @@ namespace BOTGC.MemberPortal.Controllers;
 [Authorize]
 public sealed class VouchersController : Controller
 {
-    private readonly ILogger<VouchersController> _logger;
     private readonly ICurrentUserService _currentUserService;
     private readonly IVoucherService _voucherService;
 
-    public VouchersController(
-        ILogger<VouchersController> logger,
-        ICurrentUserService currentUserService,
-        IVoucherService voucherService)
+    public VouchersController(ICurrentUserService currentUserService, IVoucherService voucherService)
     {
-        _logger = logger;
         _currentUserService = currentUserService;
         _voucherService = voucherService;
     }
@@ -97,6 +88,7 @@ public sealed class VouchersController : Controller
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult Qr(string code)
     {
         if (string.IsNullOrWhiteSpace(code))

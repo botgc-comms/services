@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BOTGC.Mobile.Pages.PairingInfoPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Link this phone"
+    BackgroundColor="White">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="18">
+
+            <Label
+                Text="BOTGC"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="#111111" />
+
+            <Label
+                Text="Link this phone to your account"
+                FontSize="22"
+                FontAttributes="Bold"
+                TextColor="#111111" />
+
+            <Label
+                Text="You only need to do this once. We use it to make sure this phone is linked to the right member account before you can use the app."
+                FontSize="15"
+                LineHeight="1.25"
+                TextColor="#333333" />
+
+            <Frame
+                BackgroundColor="#F5F7FA"
+                BorderColor="#E3E7EE"
+                CornerRadius="16"
+                Padding="16"
+                HasShadow="False">
+
+                <VerticalStackLayout Spacing="12">
+
+                    <Image
+                        Source="pairing_illustration.png"
+                        Aspect="AspectFit"
+                        HeightRequest="180" />
+
+                    <Label
+                        Text="What you need to do"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="#111111" />
+
+                    <VerticalStackLayout Spacing="10">
+
+                        <HorizontalStackLayout Spacing="10">
+                            <Frame
+                                WidthRequest="28"
+                                HeightRequest="28"
+                                CornerRadius="14"
+                                BackgroundColor="White"
+                                BorderColor="#D7DDE6"
+                                Padding="0"
+                                HasShadow="False">
+                                <Label
+                                    Text="1"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    HorizontalTextAlignment="Center"
+                                    VerticalTextAlignment="Center"
+                                    FontAttributes="Bold"
+                                    TextColor="#111111" />
+                            </Frame>
+                            <Label
+                                Text="Open the BOTGC website on this phone and sign in."
+                                FontSize="15"
+                                LineHeight="1.25"
+                                TextColor="#333333"
+                                VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="10">
+                            <Frame
+                                WidthRequest="28"
+                                HeightRequest="28"
+                                CornerRadius="14"
+                                BackgroundColor="White"
+                                BorderColor="#D7DDE6"
+                                Padding="0"
+                                HasShadow="False">
+                                <Label
+                                    Text="2"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    HorizontalTextAlignment="Center"
+                                    VerticalTextAlignment="Center"
+                                    FontAttributes="Bold"
+                                    TextColor="#111111" />
+                            </Frame>
+                            <Label
+                                Text="Go to your pairing page to see your QR code and a 'Pair this phone' link."
+                                FontSize="15"
+                                LineHeight="1.25"
+                                TextColor="#333333"
+                                VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="10">
+                            <Frame
+                                WidthRequest="28"
+                                HeightRequest="28"
+                                CornerRadius="14"
+                                BackgroundColor="White"
+                                BorderColor="#D7DDE6"
+                                Padding="0"
+                                HasShadow="False">
+                                <Label
+                                    Text="3"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    HorizontalTextAlignment="Center"
+                                    VerticalTextAlignment="Center"
+                                    FontAttributes="Bold"
+                                    TextColor="#111111" />
+                            </Frame>
+                            <Label
+                                Text="If you�re on this phone, tap the link. If you�re on another device, scan the QR code with the camera on this screen."
+                                FontSize="15"
+                                LineHeight="1.25"
+                                TextColor="#333333"
+                                VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label
+                Text="Tip: If you open the website on the same phone, you won�t need to scan anything � just tap the pairing link and the app will do the rest."
+                FontSize="14"
+                LineHeight="1.25"
+                TextColor="#333333" />
+
+            <Button
+                Text="Open BOTGC website"
+                Clicked="OpenWebsiteButton_Clicked"
+                FontAttributes="Bold"
+                CornerRadius="14"
+                HeightRequest="52"
+                BackgroundColor="#0B5FFF"
+                TextColor="White" />
+
+            <Button
+                Text="Continue to camera scanner"
+                Clicked="ContinueToScannerButton_Clicked"
+                CornerRadius="14"
+                HeightRequest="52"
+                BackgroundColor="#E9EEF5"
+                TextColor="#111111" />
+
+            <Label
+                Text="If you get stuck, ask a parent/guardian or the club for help."
+                FontSize="13"
+                TextColor="#666666"
+                HorizontalTextAlignment="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

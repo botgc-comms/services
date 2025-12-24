@@ -1,23 +1,24 @@
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using BOTGC.MemberPortal.Interfaces;
 using BOTGC.MemberPortal.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BOTGC.ManagementReports.Controllers;
+namespace BOTGC.MemberPortal.Controllers;
 
 [Authorize]
-public class HomeController(
-    ILogger<HomeController> logger,
-    ICurrentUserService currentUserService,
-    ITileService tileService) : Controller
+public sealed class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger = logger;
-    private readonly ICurrentUserService _currentUserService = currentUserService;
-    private readonly ITileService _tileService = tileService;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ITileService _tileService;
 
+    public HomeController(ICurrentUserService currentUserService, ITileService tileService)
+    {
+        _currentUserService = currentUserService;
+        _tileService = tileService;
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         if (!_currentUserService.UserId.HasValue)
@@ -45,11 +46,13 @@ public class HomeController(
         return View(model);
     }
 
+    [HttpGet]
     public IActionResult Privacy()
     {
         return View();
     }
 
+    [HttpGet]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

@@ -9,6 +9,7 @@ public class AppSettings
     public ApiSettings API { get; set; } = new();
     public Access? Access { get; set; }
     public List<TileDefinition> Tiles { get; set; } = new List<TileDefinition>();
+    public Cache Cache { get; set; } = new();
 }
 
 public class ApiSettings
@@ -22,5 +23,11 @@ public class Access
     public string? SharedSecret { get; set; }
     public string? CookieName { get; set; }
     public int CookieTtlDays { get; set; } = 365;
+}
+
+public class Cache
+{
+    public string ConnectionString { get; set; }
+    public string InstanceName { get; set; } = "BOTGC.API";
 }
 

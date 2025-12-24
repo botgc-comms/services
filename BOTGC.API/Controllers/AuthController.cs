@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using QRCoder;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace BOTGC.API.Controllers
 {
@@ -19,9 +20,10 @@ namespace BOTGC.API.Controllers
     [Route("api/auth")]
     public sealed class AuthController : ControllerBase
     {
-        private const string CacheKeyPrefixCode = "AppAuth-Code-";
-        private const string CacheKeyPrefixSession = "AppAuth-Session-";
-        private const string CacheKeyPrefixRefresh = "AppAuth-Refresh-";
+        private const string CacheKeyPrefixCode = "AppAuth:Code-";
+        private const string CacheKeyPrefixSession = "AppAuth:Session-";
+        private const string CacheKeyPrefixRefresh = "AppAuth:Refresh-";
+        private const string CacheKeyPrefixWebSso = "AppAuth:WebSSO-";
 
         private readonly ILogger<AuthController> _logger;
         private readonly IMediator _mediator;
@@ -38,6 +40,86 @@ namespace BOTGC.API.Controllers
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+        }
+
+        [HttpPost("app/web-sso")]
+        [Authorize]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(AppAuthWebSsoResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> IssueWebSso([FromHeader(Name = "X-CLIENT-ID")] string clientId)
+        {
+            Response.Headers.CacheControl = "no-store";
+
+            clientId = clientId?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                return Unauthorized(Problem(title: "Unauthorised.", detail: "Missing X-CLIENT-ID header."));
+            }
+
+            if (_settings.Auth.App.AllowedClientIds == null
+                || _settings.Auth.App.AllowedClientIds.Length == 0
+                || !_settings.Auth.App.AllowedClientIds.Contains(clientId, StringComparer.OrdinalIgnoreCase))
+            {
+                return Unauthorized(Problem(title: "Unauthorised.", detail: "Client is not allowed."));
+            }
+
+            int memberNumber;
+            int memberId;
+
+            string firstName;
+            string surname;
+            string category;
+            string jti;
+
+            string sub;
+            try
+            {
+                memberNumber = GetRequiredClaimInt("memberNumber");
+                memberId = GetRequiredClaimInt("memberId");
+
+                firstName = GetOptionalClaim("firstName") ?? string.Empty;
+                surname = GetOptionalClaim("surname") ?? string.Empty;
+                category = GetOptionalClaim("category") ?? string.Empty;
+
+                jti = GetOptionalClaim(JwtRegisteredClaimNames.Jti) ?? string.Empty;
+                sub = GetOptionalClaim(JwtRegisteredClaimNames.Sub) ?? string.Empty;
+            }
+            catch
+            {
+                return Unauthorized(Problem(title: "Unauthorised.", detail: "Access token is missing required claims."));
+            }
+
+            var nowUtc = DateTimeOffset.UtcNow;
+
+            var ttlSeconds = 60;
+            var expiresUtc = nowUtc.AddSeconds(ttlSeconds);
+
+            var code = Guid.NewGuid().ToString("N");
+            var key = CacheKeyPrefixWebSso + code;
+
+            var record = new AppAuthWebSsoRecord
+            {
+                Code = code,
+                IssuedUtc = nowUtc,
+                ExpiresUtc = expiresUtc,
+                ClientId = clientId,
+                JwtJti = jti,
+                JwtSub = sub,
+                MembershipNumber = memberNumber,
+                MembershipId = memberId,
+                FirstName = firstName,
+                Surname = surname,
+                Category = category
+            };
+
+            await _cacheService.SetAsync(key, record, TimeSpan.FromSeconds(ttlSeconds));
+
+            return Ok(new AppAuthWebSsoResponse
+            {
+                Code = code,
+                ExpiresUtc = expiresUtc
+            });
         }
 
         /// <summary>
@@ -147,70 +229,69 @@ namespace BOTGC.API.Controllers
         }
 
         [HttpPost("app/refresh")]
-[Consumes("application/json")]
-[Produces("application/json")]
-[ProducesResponseType(typeof(AppAuthTokenResponse), StatusCodes.Status200OK)]
-[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-public async Task<IActionResult> Refresh([FromHeader(Name = "X-CLIENT-ID")] string clientId, [FromBody] AppAuthRefreshRequest request)
-{
-    Response.Headers.CacheControl = "no-store";
+        [Consumes("application/json")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(AppAuthTokenResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Refresh([FromHeader(Name = "X-CLIENT-ID")] string clientId, [FromBody] AppAuthRefreshRequest request)
+        {
+            Response.Headers.CacheControl = "no-store";
 
-    clientId = clientId?.Trim() ?? string.Empty;
-    if (string.IsNullOrWhiteSpace(clientId))
-    {
-        return Unauthorized(Problem(title: "Unauthorised.", detail: "Missing X-CLIENT-ID header."));
-    }
+            clientId = clientId?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                return Unauthorized(Problem(title: "Unauthorised.", detail: "Missing X-CLIENT-ID header."));
+            }
 
-    if (_settings.Auth.App.AllowedClientIds == null
-        || _settings.Auth.App.AllowedClientIds.Length == 0
-        || !_settings.Auth.App.AllowedClientIds.Contains(clientId, StringComparer.OrdinalIgnoreCase))
-    {
-        return Unauthorized(Problem(title: "Unauthorised.", detail: "Client is not allowed."));
-    }
+            if (_settings.Auth.App.AllowedClientIds == null
+                || _settings.Auth.App.AllowedClientIds.Length == 0
+                || !_settings.Auth.App.AllowedClientIds.Contains(clientId, StringComparer.OrdinalIgnoreCase))
+            {
+                return Unauthorized(Problem(title: "Unauthorised.", detail: "Client is not allowed."));
+            }
 
-    if (request == null || string.IsNullOrWhiteSpace(request.RefreshToken))
-    {
-        return BadRequest(Problem(title: "Invalid request.", detail: "refreshToken is required."));
-    }
+            if (request == null || string.IsNullOrWhiteSpace(request.RefreshToken))
+            {
+                return BadRequest(Problem(title: "Invalid request.", detail: "refreshToken is required."));
+            }
 
-    var nowUtc = DateTimeOffset.UtcNow;
+            var nowUtc = DateTimeOffset.UtcNow;
 
-    var oldToken = request.RefreshToken.Trim();
-    var oldKey = CacheKeyPrefixRefresh + oldToken;
+            var oldToken = request.RefreshToken.Trim();
+            var oldKey = CacheKeyPrefixRefresh + oldToken;
 
-    var record = await _cacheService.GetAsync<AppAuthRefreshRecord>(oldKey);
-    if (record == null || record.ExpiresUtc <= nowUtc)
-    {
-        return Unauthorized(Problem(title: "Unauthorised.", detail: "Refresh token is invalid or expired."));
-    }
+            var record = await _cacheService.GetAsync<AppAuthRefreshRecord>(oldKey);
+            if (record == null || record.ExpiresUtc <= nowUtc)
+            {
+                return Unauthorized(Problem(title: "Unauthorised.", detail: "Refresh token is invalid or expired."));
+            }
 
-    var accessToken = CreateJwtAccessToken(record.Payload);
+            var accessToken = CreateJwtAccessToken(record.Payload);
 
-    var newRefreshToken = CreateRefreshToken();
-    var newKey = CacheKeyPrefixRefresh + newRefreshToken;
+            var newRefreshToken = CreateRefreshToken();
+            var newKey = CacheKeyPrefixRefresh + newRefreshToken;
 
-    var newRecord = new AppAuthRefreshRecord
-    {
-        RefreshToken = newRefreshToken,
-        IssuedUtc = nowUtc,
-        ExpiresUtc = nowUtc.AddDays(_settings.Auth.App.RefreshTokenTtlDays),
-        MembershipNumber = record.MembershipNumber,
-        Payload = record.Payload
-    };
+            var newRecord = new AppAuthRefreshRecord
+            {
+                RefreshToken = newRefreshToken,
+                IssuedUtc = nowUtc,
+                ExpiresUtc = nowUtc.AddDays(_settings.Auth.App.RefreshTokenTtlDays),
+                MembershipNumber = record.MembershipNumber,
+                Payload = record.Payload
+            };
 
-    await _cacheService.RemoveAsync(oldKey);
-    await _cacheService.SetAsync(newKey, newRecord, TimeSpan.FromDays(_settings.Auth.App.RefreshTokenTtlDays));
+            await _cacheService.RemoveAsync(oldKey);
+            await _cacheService.SetAsync(newKey, newRecord, TimeSpan.FromDays(_settings.Auth.App.RefreshTokenTtlDays));
 
-    return Ok(new AppAuthTokenResponse
-    {
-        AccessToken = accessToken,
-        AccessTokenExpiresUtc = nowUtc.AddMinutes(_settings.Auth.App.AccessTokenTtlMinutes),
-        RefreshToken = newRefreshToken,
-        RefreshTokenExpiresUtc = newRecord.ExpiresUtc
-    });
-}
-
+            return Ok(new AppAuthTokenResponse
+            {
+                AccessToken = accessToken,
+                AccessTokenExpiresUtc = nowUtc.AddMinutes(_settings.Auth.App.AccessTokenTtlMinutes),
+                RefreshToken = newRefreshToken,
+                RefreshTokenExpiresUtc = newRecord.ExpiresUtc
+            });
+        }
 
         [HttpPost("app/token")]
         [Consumes("application/json")]
@@ -298,6 +379,8 @@ public async Task<IActionResult> Refresh([FromHeader(Name = "X-CLIENT-ID")] stri
             var results = await _mediator.Send(updateAppLinkPageCommand, HttpContext.RequestAborted);
             return Ok(results);
         }
+
+        #region Helper Methods
 
         private async Task<AppAuthCodeRecord> CreateCodeRecordFromProbeAsync(string q, CancellationToken cancellationToken)
         {
@@ -470,7 +553,6 @@ public async Task<IActionResult> Refresh([FromHeader(Name = "X-CLIENT-ID")] stri
                 ExpiresUtc = session.ExpiresUtc
             };
         }
-
 
         private static (int? Left, int? Right) ParseTwoPartNumericId(string id)
         {
@@ -668,6 +750,49 @@ public async Task<IActionResult> Refresh([FromHeader(Name = "X-CLIENT-ID")] stri
 
             return Convert.FromBase64String(value);
         }
+
+        private string? GetOptionalClaim(string type)
+        {
+            return User?.Claims?.FirstOrDefault(c => string.Equals(c.Type, type, StringComparison.Ordinal))?.Value;
+        }
+
+        private int GetRequiredClaimInt(string type)
+        {
+            var value = GetOptionalClaim(type);
+            if (string.IsNullOrWhiteSpace(value) || !int.TryParse(value, out var parsed))
+            {
+                throw new SecurityTokenException($"Missing or invalid claim '{type}'.");
+            }
+
+            return parsed;
+        }
+
+        #endregion
+    }
+
+    public sealed class AppAuthWebSsoRecord
+    {
+        public string Code { get; set; } = string.Empty;
+        public DateTimeOffset IssuedUtc { get; set; }
+        public DateTimeOffset ExpiresUtc { get; set; }
+
+        public string ClientId { get; set; } = string.Empty;
+
+        public string JwtJti { get; set; } = string.Empty;
+        public string JwtSub { get; set; } = string.Empty;
+
+        public int MembershipNumber { get; set; }
+        public int MembershipId { get; set; }
+
+        public string FirstName { get; set; } = string.Empty;
+        public string Surname { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+    }
+
+    public sealed class AppAuthWebSsoResponse
+    {
+        public string Code { get; set; } = string.Empty;
+        public DateTimeOffset ExpiresUtc { get; set; }
     }
 
     public sealed class AppAuthProbeProperties
