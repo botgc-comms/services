@@ -429,7 +429,10 @@ namespace BOTGC.API.Controllers
                 throw new KeyNotFoundException("Member not found.");
             }
 
-            var payload = BuildPayload(member);
+            var getMemberQuery = new GetMemberQuery() { MemberNumber = member.MemberNumber };
+            var memberDetails = await _mediator.Send(getMemberQuery, cancellationToken);   
+
+            var payload = BuildPayload(memberDetails);
 
             var code = Guid.NewGuid().ToString("N");
             var cacheKey = CacheKeyPrefixCode + code;
@@ -650,15 +653,15 @@ namespace BOTGC.API.Controllers
             return true;
         }
 
-        private static AppAuthPayload BuildPayload(MemberDto member)
+        private static AppAuthPayload BuildPayload(MemberDetailsDto member)
         {
             return new AppAuthPayload
             {
-                FirstName = member.FirstName ?? string.Empty,
-                Surname = member.LastName ?? string.Empty,
+                FirstName = member.Forename ?? string.Empty,
+                Surname = member.Surname ?? string.Empty,
                 DateOfBirth = member.DateOfBirth!.Value,
-                MembershipId = member.PlayerId!.Value,
-                MembershipNumber = member.MemberNumber!.Value,
+                MembershipId = member.ID,
+                MembershipNumber = member.MemberNumber,
                 CurrentCategory = member.MembershipCategory ?? string.Empty,
                 EmailAddress = member.Email ?? string.Empty,
                 Parents = Array.Empty<AppAuthParentPayload>()

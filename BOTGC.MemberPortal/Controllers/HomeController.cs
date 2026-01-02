@@ -10,12 +10,14 @@ namespace BOTGC.MemberPortal.Controllers;
 public sealed class HomeController : Controller
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly ITileService _tileService;
+    private readonly IDashboardService _whatsNextService;
 
-    public HomeController(ICurrentUserService currentUserService, ITileService tileService)
+    public HomeController(
+        ICurrentUserService currentUserService,
+        IDashboardService whatsNextService)
     {
         _currentUserService = currentUserService;
-        _tileService = tileService;
+        _whatsNextService = whatsNextService;
     }
 
     [HttpGet]
@@ -26,21 +28,23 @@ public sealed class HomeController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        var juniorCategory = "Junior 12-18";
-
         var memberContext = new MemberContext
         {
             MemberId = _currentUserService.UserId.Value,
-            JuniorCategory = juniorCategory
+            JuniorCategory = "Junior 12-18"
         };
 
-        var tiles = await _tileService.GetTilesForMemberAsync(memberContext, cancellationToken);
+        var dashboard = await _whatsNextService.BuildDashboardAsync(memberContext, cancellationToken);
 
         var model = new DashboardViewModel
         {
             DisplayName = _currentUserService.DisplayName ?? "Junior member",
-            JuniorCategory = juniorCategory,
-            Tiles = tiles
+            AvatarUrl = dashboard.AvatarUrl,
+            LevelLabel = dashboard.LevelLabel,
+            LevelName = dashboard.LevelName,
+            LevelProgressPercent = dashboard.LevelProgressPercent,
+            QuickActions = dashboard.QuickActions,
+            WhatsNext = dashboard.WhatsNext
         };
 
         return View(model);

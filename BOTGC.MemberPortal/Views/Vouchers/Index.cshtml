@@ -1,56 +1,135 @@
-﻿@model IReadOnlyList<BOTGC.MemberPortal.Models.VoucherTypeSummaryViewModel>
+﻿@model BOTGC.MemberPortal.Models.VouchersPageViewModel
 
 @{
-    ViewData["Title"] = "Your vouchers";
+    ViewData["Title"] = "My Vouchers";
 }
 
-<div class="app-wrap dashboard">
-    <header class="dashboard-header">
-        <h1 class="dashboard-header__title">Your vouchers</h1>
-        <p class="dashboard-header__subtitle">
-            Tap a voucher type to show the code to the shop.
-        </p>
+<div class="vouchers">
+    <header class="vouchers__header">
+        <a class="vouchers__back app-link" href="/" aria-label="Back">‹</a>
+        <h1 class="vouchers__title">My Vouchers</h1>
+        <span class="vouchers__spacer" aria-hidden="true"></span>
     </header>
 
-    @if (Model == null || !Model.Any())
-    {
-        <p>You do not have any vouchers at the moment.</p>
-    }
-    else
-    {
-        <section class="dashboard-section">
-            <div class="tiles tiles--dashboard tiles--vouchers">
-                @foreach (var t in Model)
-                {
-                    var imageUrl = string.IsNullOrWhiteSpace(t.Image) ? "/img/qrcode.jpg" : $"/img/products/{t.Image}";
+    <nav class="vouchers__tabs" aria-label="Voucher filters">
+        <button type="button" class="vouchers__tab is-active" data-tab="active">Active</button>
+        <button type="button" class="vouchers__tab" data-tab="used">Used</button>
+        <button type="button" class="vouchers__tab" data-tab="expired">Expired</button>
+    </nav>
 
-                    var bg = string.IsNullOrWhiteSpace(t.BackgroundColor)
-                    ? "#d6f4e6"
-                    : t.BackgroundColor;
-
-                    var style = $"--bg:{bg};";
-
-                    <a asp-controller="Vouchers"
-                       asp-action="Show"
-                       asp-route-typeKey="@t.TypeKey"
-                       class="tile tile--dash tile--dash-vouchers"
-                       style="@style">
-
-                        <div class="tile__avatar">
-                            <img src="@imageUrl" alt="" aria-hidden="true" />
-                        </div>
-
-                        <div class="tile__text">
-                            <div class="tile__name">
-                                @(string.IsNullOrWhiteSpace(t.Title) ? "Your vouchers" : t.Title)
-                            </div>
-                            <div class="tile__hint">
-                                @t.Description
-                            </div>
-                        </div>
-                    </a>
-                }
+    <section class="vouchers__panel is-active" data-panel="active" aria-label="Active vouchers">
+        @if (Model.Active.Count == 0)
+        {
+            <div class="vouchers__empty">
+                <img class="vouchers__empty-img" src="/img/vouchers/gift.png" alt="" />
+                <h2 class="vouchers__empty-title">No vouchers yet</h2>
+                <p class="vouchers__empty-subtitle">Complete activities to earn rewards</p>
+                <a class="vouchers__cta app-link" href="/activities">View Activities</a>
             </div>
-        </section>
-    }
+        }
+        else
+        {
+            <ul class="vlist">
+                @foreach (var v in Model.Active)
+                {
+                    <li class="vlist__item">
+                        <a class="vcard app-link" href="/vouchers/@v.Id">
+                            <div class="vcard__date">
+                                <div class="vcard__day">@DateTime.UtcNow.Day</div>
+                                <div class="vcard__month">@DateTime.UtcNow.ToString("MMMM")</div>
+                            </div>
+
+                            <div class="vcard__main">
+                                <div class="vcard__title">@v.TypeTitle</div>
+                                <div class="vcard__subtitle">@v.TypeDescription</div>
+                                <span class="vcard__btn">View Details</span>
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="vouchers__panel" data-panel="used" aria-label="Used vouchers">
+        @if (Model.Used.Count == 0)
+        {
+            <div class="vouchers__empty">
+                <img class="vouchers__empty-img" src="/img/vouchers/gift.png" alt="" />
+                <h2 class="vouchers__empty-title">No used vouchers</h2>
+                <p class="vouchers__empty-subtitle">Vouchers you’ve spent will appear here</p>
+            </div>
+        }
+        else
+        {
+            <ul class="vlist">
+                @foreach (var v in Model.Used)
+                {
+                    <li class="vlist__item">
+                        <a class="vcard app-link" href="/vouchers/@v.Id">
+                            <div class="vcard__date vcard__date--muted">
+                                <div class="vcard__day">@DateTime.UtcNow.Day</div>
+                                <div class="vcard__month">@DateTime.UtcNow.ToString("MMMM")</div>
+                            </div>
+
+                            <div class="vcard__main">
+                                <div class="vcard__title">@v.TypeTitle</div>
+                                <div class="vcard__subtitle">@v.TypeDescription</div>
+                                <span class="vcard__btn">View Details</span>
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="vouchers__panel" data-panel="expired" aria-label="Expired vouchers">
+        @if (Model.Expired.Count == 0)
+        {
+            <div class="vouchers__empty">
+                <img class="vouchers__empty-img" src="/img/vouchers/gift.png" alt="" />
+                <h2 class="vouchers__empty-title">No expired vouchers</h2>
+                <p class="vouchers__empty-subtitle">Expired vouchers will appear here</p>
+            </div>
+        }
+        else
+        {
+            <ul class="vlist">
+                @foreach (var v in Model.Expired)
+                {
+                    <li class="vlist__item">
+                        <a class="vcard app-link" href="/vouchers/@v.Id">
+                            <div class="vcard__date vcard__date--muted">
+                                <div class="vcard__day">@DateTime.UtcNow.Day</div>
+                                <div class="vcard__month">@DateTime.UtcNow.ToString("MMMM")</div>
+                            </div>
+
+                            <div class="vcard__main">
+                                <div class="vcard__title">@v.TypeTitle</div>
+                                <div class="vcard__subtitle">@v.TypeDescription</div>
+                                <span class="vcard__btn">View Details</span>
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
 </div>
+
+<script>
+    (() => {
+        const tabs = Array.from(document.querySelectorAll(".vouchers__tab"));
+        const panels = Array.from(document.querySelectorAll(".vouchers__panel"));
+
+        const activate = (key) => {
+            tabs.forEach(t => t.classList.toggle("is-active", t.dataset.tab === key));
+            panels.forEach(p => p.classList.toggle("is-active", p.dataset.panel === key));
+        };
+
+        tabs.forEach(t => {
+            t.addEventListener("click", () => activate(t.dataset.tab));
+        });
+    })();
+</script>

@@ -48,11 +48,14 @@ public sealed class AccountController : Controller
             return View(model);
         }
 
+
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString(CultureInfo.InvariantCulture)),
             new Claim(ClaimTypes.Name, user.Username),
-            new Claim("display_name", user.DisplayName)
+            new Claim("display_name", user.DisplayName), 
+            new Claim("firstName", user.FirstName), 
+            new Claim("lastName", user.LastName)
         };
 
         var identity = new ClaimsIdentity(

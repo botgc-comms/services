@@ -1,5 +1,4 @@
 ﻿namespace BOTGC.MemberPortal.Models;
-
 public sealed class DashboardTileViewModel
 {
     public string Type { get; init; } = string.Empty;

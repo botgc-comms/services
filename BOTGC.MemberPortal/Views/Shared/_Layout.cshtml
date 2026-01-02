@@ -191,8 +191,91 @@
         }
     </script>
 
+    <script>
+        (function () {
+            const selector = "a[data-app-link]";
+
+            function getHref(a) {
+                return a.getAttribute("data-app-href") || a.dataset.appHref;
+            }
+
+            function upgrade(a) {
+                if (!a || a.dataset.appLinkUpgraded === "1") return;
+
+                const href = a.getAttribute("href");
+                if (href) {
+                    a.setAttribute("data-app-href", href);
+                    a.removeAttribute("href");
+                }
+
+                a.setAttribute("data-app-link", "");
+
+                if (!a.hasAttribute("role")) {
+                    a.setAttribute("role", "link");
+                }
+
+                if (!a.hasAttribute("tabindex")) {
+                    a.setAttribute("tabindex", "0");
+                }
+
+                a.dataset.appLinkUpgraded = "1";
+            }
+
+            function activate(a) {
+                const href = getHref(a);
+                if (!href) return;
+
+                window.location.assign(href);
+            }
+
+            function upgradeAll(root) {
+                const scope = root || document;
+                scope.querySelectorAll(selector + ", a[href].app-link").forEach(upgrade);
+            }
+
+            upgradeAll();
+
+            document.addEventListener("click", (e) => {
+                const a = e.target.closest(selector + ", a.app-link");
+                if (!a) return;
+
+                upgrade(a);
+
+                e.preventDefault();
+                activate(a);
+            }, { capture: true });
+
+            document.addEventListener("keydown", (e) => {
+                if (e.key !== "Enter" && e.key !== " ") return;
+
+                const a = e.target.closest(selector + ", a.app-link");
+                if (!a) return;
+
+                upgrade(a);
+
+                e.preventDefault();
+                activate(a);
+            }, { capture: true });
+
+            const mo = new MutationObserver((mutations) => {
+                for (const m of mutations) {
+                    for (const n of m.addedNodes) {
+                        if (n.nodeType !== 1) continue;
+                        if (n.matches && (n.matches(selector) || n.matches("a[href].app-link"))) {
+                            upgrade(n);
+                        }
+                        if (n.querySelectorAll) {
+                            n.querySelectorAll(selector + ", a[href].app-link").forEach(upgrade);
+                        }
+                    }
+                }
+            });
+
+            mo.observe(document.documentElement, { childList: true, subtree: true });
+        })();
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
-
+        
 </body>
 </html>

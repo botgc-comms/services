@@ -1,4 +1,420 @@
 @charset "UTF-8";
+/* Variable fonts usage:
+:root { font-family: "Inter", sans-serif; }
+@supports (font-variation-settings: normal) {
+  :root { font-family: "InterVariable", sans-serif; font-optical-sizing: auto; }
+} */
+@font-face {
+  font-family: InterVariable;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/InterVariable.woff2") format("woff2");
+}
+@font-face {
+  font-family: InterVariable;
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/InterVariable-Italic.woff2") format("woff2");
+}
+/* static fonts */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url("/fonts/Inter-Thin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 100;
+  font-display: swap;
+  src: url("/fonts/Inter-ThinItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url("/fonts/Inter-ExtraLight.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 200;
+  font-display: swap;
+  src: url("/fonts/Inter-ExtraLightItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/Inter-Light.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/Inter-LightItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Inter-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Inter-Italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/Inter-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/Inter-MediumItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/Inter-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/Inter-SemiBoldItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/Inter-Bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/Inter-BoldItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/Inter-ExtraBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/Inter-ExtraBoldItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("/fonts/Inter-Black.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 900;
+  font-display: swap;
+  src: url("/fonts/Inter-BlackItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-Thin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: italic;
+  font-weight: 100;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-ThinItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-ExtraLight.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: italic;
+  font-weight: 200;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-ExtraLightItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-Light.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-LightItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-Italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-MediumItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-SemiBoldItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-Bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-BoldItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-ExtraBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: italic;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-ExtraBoldItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-Black.woff2") format("woff2");
+}
+@font-face {
+  font-family: "InterDisplay";
+  font-style: italic;
+  font-weight: 900;
+  font-display: swap;
+  src: url("/fonts/InterDisplay-BlackItalic.woff2") format("woff2");
+}
+@font-feature-values InterVariable {
+  @character-variant {
+    cv01: 1;
+    cv02: 2;
+    cv03: 3;
+    cv04: 4;
+    cv05: 5;
+    cv06: 6;
+    cv07: 7;
+    cv08: 8;
+    cv09: 9;
+    cv10: 10;
+    cv11: 11;
+    cv12: 12;
+    cv13: 13;
+    alt-1: 1; /* Alternate one */
+    alt-3: 9; /* Flat-top three */
+    open-4: 2; /* Open four */
+    open-6: 3; /* Open six */
+    open-9: 4; /* Open nine */
+    lc-l-with-tail: 5; /* Lower-case L with tail */
+    simplified-u: 6; /* Simplified u */
+    alt-double-s: 7; /* Alternate German double s */
+    uc-i-with-serif: 8; /* Upper-case i with serif */
+    uc-g-with-spur: 10; /* Capital G with spur */
+    single-story-a: 11; /* Single-story a */
+    compact-lc-f: 12; /* Compact f */
+    compact-lc-t: 13; /* Compact t */
+  }
+  @styleset {
+    ss01: 1;
+    ss02: 2;
+    ss03: 3;
+    ss04: 4;
+    ss05: 5;
+    ss06: 6;
+    ss07: 7;
+    ss08: 8;
+    open-digits: 1; /* Open digits */
+    disambiguation: 2; /* Disambiguation (with zero) */
+    disambiguation-except-zero: 4; /* Disambiguation (no zero) */
+    round-quotes-and-commas: 3; /* Round quotes &amp; commas */
+    square-punctuation: 7; /* Square punctuation */
+    square-quotes: 8; /* Square quotes */
+    circled-characters: 5; /* Circled characters */
+    squared-characters: 6; /* Squared characters */
+  }
+}
+@font-feature-values Inter {
+  @character-variant {
+    cv01: 1;
+    cv02: 2;
+    cv03: 3;
+    cv04: 4;
+    cv05: 5;
+    cv06: 6;
+    cv07: 7;
+    cv08: 8;
+    cv09: 9;
+    cv10: 10;
+    cv11: 11;
+    cv12: 12;
+    cv13: 13;
+    alt-1: 1; /* Alternate one */
+    alt-3: 9; /* Flat-top three */
+    open-4: 2; /* Open four */
+    open-6: 3; /* Open six */
+    open-9: 4; /* Open nine */
+    lc-l-with-tail: 5; /* Lower-case L with tail */
+    simplified-u: 6; /* Simplified u */
+    alt-double-s: 7; /* Alternate German double s */
+    uc-i-with-serif: 8; /* Upper-case i with serif */
+    uc-g-with-spur: 10; /* Capital G with spur */
+    single-story-a: 11; /* Single-story a */
+    compact-lc-f: 12; /* Compact f */
+    compact-lc-t: 13; /* Compact t */
+  }
+  @styleset {
+    ss01: 1;
+    ss02: 2;
+    ss03: 3;
+    ss04: 4;
+    ss05: 5;
+    ss06: 6;
+    ss07: 7;
+    ss08: 8;
+    open-digits: 1; /* Open digits */
+    disambiguation: 2; /* Disambiguation (with zero) */
+    disambiguation-except-zero: 4; /* Disambiguation (no zero) */
+    round-quotes-and-commas: 3; /* Round quotes &amp; commas */
+    square-punctuation: 7; /* Square punctuation */
+    square-quotes: 8; /* Square quotes */
+    circled-characters: 5; /* Circled characters */
+    squared-characters: 6; /* Squared characters */
+  }
+}
+@font-feature-values InterDisplay {
+  @character-variant {
+    cv01: 1;
+    cv02: 2;
+    cv03: 3;
+    cv04: 4;
+    cv05: 5;
+    cv06: 6;
+    cv07: 7;
+    cv08: 8;
+    cv09: 9;
+    cv10: 10;
+    cv11: 11;
+    cv12: 12;
+    cv13: 13;
+    alt-1: 1; /* Alternate one */
+    alt-3: 9; /* Flat-top three */
+    open-4: 2; /* Open four */
+    open-6: 3; /* Open six */
+    open-9: 4; /* Open nine */
+    lc-l-with-tail: 5; /* Lower-case L with tail */
+    simplified-u: 6; /* Simplified u */
+    alt-double-s: 7; /* Alternate German double s */
+    uc-i-with-serif: 8; /* Upper-case i with serif */
+    uc-g-with-spur: 10; /* Capital G with spur */
+    single-story-a: 11; /* Single-story a */
+    compact-lc-f: 12; /* Compact f */
+    compact-lc-t: 13; /* Compact t */
+  }
+  @styleset {
+    ss01: 1;
+    ss02: 2;
+    ss03: 3;
+    ss04: 4;
+    ss05: 5;
+    ss06: 6;
+    ss07: 7;
+    ss08: 8;
+    open-digits: 1; /* Open digits */
+    disambiguation: 2; /* Disambiguation (with zero) */
+    disambiguation-except-zero: 4; /* Disambiguation (no zero) */
+    round-quotes-and-commas: 3; /* Round quotes &amp; commas */
+    square-punctuation: 7; /* Square punctuation */
+    square-quotes: 8; /* Square quotes */
+    circled-characters: 5; /* Circled characters */
+    squared-characters: 6; /* Squared characters */
+  }
+}
 * {
   box-sizing: border-box;
 }
@@ -9,10 +425,10 @@ html, body {
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   line-height: 1.4;
   background: #fafafa;
-  color: #111;
+  color: #333333;
 }
 
 .app-wrap {
@@ -175,25 +591,25 @@ button:disabled {
 .tiles--dashboard .tile--dash-buddy {
   --stripe: #e86a8d;
   --bg: #fbe1ea;
-  --fg: #111;
+  --fg: #333333;
 }
 
 .tiles--dashboard .tile--dash-rules {
   --stripe: #f59e0b;
   --bg: #ffe39a;
-  --fg: #111;
+  --fg: #333333;
 }
 
 .tiles--dashboard .tile--dash-handicap {
   --stripe: #3b82f6;
   --bg: #e0e4ff;
-  --fg: #111;
+  --fg: #333333;
 }
 
 .tiles--dashboard .tile--dash-progress {
   --stripe: #16a34a;
   --bg: #d7f3d2;
-  --fg: #111;
+  --fg: #333333;
 }
 
 /* Mobile: single column, still equal height */
@@ -308,143 +724,7 @@ dialog article footer {
   border-radius: 16px;
 }
 
-.tile.cat-minerals {
-  --bg: #d6f4e6;
-  --fg: #111;
-  --badge: rgb(188.32, 214.72, 202.4);
-  background: #d6f4e6 !important;
-  color: #111 !important;
-}
-
-.tile.cat-wines {
-  --bg: #f2c7cf;
-  --fg: #111;
-  --badge: rgb(212.96, 175.12, 182.16);
-  background: #f2c7cf !important;
-  color: #111 !important;
-}
-
-.tile.cat-draught-beer {
-  --bg: #ffe39a;
-  --fg: #111;
-  --badge: rgb(224.4, 199.76, 135.52);
-  background: #ffe39a !important;
-  color: #111 !important;
-}
-
-.tile.cat-spirits {
-  --bg: #e0e4ff;
-  --fg: #111;
-  --badge: rgb(197.12, 200.64, 224.4);
-  background: #e0e4ff !important;
-  color: #111 !important;
-}
-
-.tile.cat-snacks {
-  --bg: #ffe6cc;
-  --fg: #111;
-  --badge: rgb(224.4, 202.4, 179.52);
-  background: #ffe6cc !important;
-  color: #111 !important;
-}
-
-.tile.cat-bottled-beer {
-  --bg: #fff0c9;
-  --fg: #111;
-  --badge: rgb(224.4, 211.2, 176.88);
-  background: #fff0c9 !important;
-  color: #111 !important;
-}
-
-.tile.cat-beer-cans {
-  --bg: #ffd6d6;
-  --fg: #111;
-  --badge: rgb(224.4, 188.32, 188.32);
-  background: #ffd6d6 !important;
-  color: #111 !important;
-}
-
-.tile.cat-fortified-wines {
-  --bg: #f3bfd0;
-  --fg: #111;
-  --badge: rgb(213.84, 168.08, 183.04);
-  background: #f3bfd0 !important;
-  color: #111 !important;
-}
-
-.tile.cat-bakery {
-  --bg: #ffe8cc;
-  --fg: #111;
-  --badge: rgb(224.4, 204.16, 179.52);
-  background: #ffe8cc !important;
-  color: #111 !important;
-}
-
-.tile.cat-dairy {
-  --bg: #fff6d8;
-  --fg: #111;
-  --badge: rgb(224.4, 216.48, 190.08);
-  background: #fff6d8 !important;
-  color: #111 !important;
-}
-
-.tile.cat-meat-poultry {
-  --bg: #ffd6b8;
-  --fg: #111;
-  --badge: rgb(224.4, 188.32, 161.92);
-  background: #ffd6b8 !important;
-  color: #111 !important;
-}
-
-.tile.cat-fish {
-  --bg: #d4f5f9;
-  --fg: #111;
-  --badge: rgb(186.56, 215.6, 219.12);
-  background: #d4f5f9 !important;
-  color: #111 !important;
-}
-
-.tile.cat-fruit-veg {
-  --bg: #d7f3d2;
-  --fg: #111;
-  --badge: rgb(189.2, 213.84, 184.8);
-  background: #d7f3d2 !important;
-  color: #111 !important;
-}
-
-.tile.cat-prepared-meals {
-  --bg: #ece4ff;
-  --fg: #111;
-  --badge: rgb(207.68, 200.64, 224.4);
-  background: #ece4ff !important;
-  color: #111 !important;
-}
-
-.tile.cat-hot-drinks {
-  --bg: #f1e0d2;
-  --fg: #111;
-  --badge: rgb(212.08, 197.12, 184.8);
-  background: #f1e0d2 !important;
-  color: #111 !important;
-}
-
-.tile.cat-sauces {
-  --bg: #e0f2e2;
-  --fg: #111;
-  --badge: rgb(197.12, 212.96, 198.88);
-  background: #e0f2e2 !important;
-  color: #111 !important;
-}
-
-.tile.cat-dry-goods {
-  --bg: #f3e9d7;
-  --fg: #111;
-  --badge: rgb(213.84, 205.04, 189.2);
-  background: #f3e9d7 !important;
-  color: #111 !important;
-}
-
-.tile.cat-desserts-ice-cream {
+.tile.cat-DEFAULT {
   --bg: #ffdde9;
   --fg: #111;
   --badge: rgb(224.4, 194.48, 205.04);
@@ -452,318 +732,751 @@ dialog article footer {
   color: #111 !important;
 }
 
-/* === PRODUCT TILES (scoped only to the products grid) === */
-.tiles--products .tile {
-  min-height: 101px;
-  position: relative;
+.dashboard {
+  padding: 18px 16px 26px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.dashboard__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.dashboard__title {
+  margin: 0 0 10px;
+  font-size: 3rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  padding-bottom: 10px;
+}
+
+.dashboard__name {
+  color: #f59e0b;
+}
+
+.dashboard__avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 999px;
+  object-fit: cover;
+  flex: 0 0 auto;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard__meta-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px 14px 14px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: none;
-  /* use same var approach as category tiles */
-  --bg: #f3f4f6; /* default: soft grey */
-  --fg: #111;
-  --badge: #d6dae0; /* darker shade for the small label */
-  background: var(--bg);
-  color: var(--fg);
 }
 
-/* PARTIAL = AMBER */
-.tiles--products .tile.tile--partial {
-  --bg: #ffd166; /* amber */
-  --fg: #111;
-  --badge: #caa24a; /* darker amber for the small label */
-  background: var(--bg);
-  color: var(--fg);
-}
-
-/* COMPLETE = GREEN */
-.tiles--products .tile.tile--complete {
-  --bg: #adddc4; /* your chosen green */
-  --fg: #111;
-  --badge: #7cc8a7; /* darker green for the small label */
-  background: var(--bg);
-  color: var(--fg);
-}
-
-/* small text colour uses the badge shade, same as cat tiles */
-.tiles--products .tile .tile__division {
-  color: var(--badge) !important;
-}
-
-/* only show the green tick when complete */
-.tiles--products .tile::after {
-  content: none;
-}
-
-.tiles--products .tile.tile--complete::after {
-  content: "✓";
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  font-size: 0.9rem;
-  font-weight: 800;
-  background: #14a44d;
-  color: #fff;
-}
-
-/* optional “N left” badge (JS adds .tile__badge when partial) */
-.tile__badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  font-size: 0.72rem;
-  line-height: 1;
-  background: #111;
-  color: #fff;
-  padding: 0.15rem 0.4rem;
-  border-radius: 999px;
-  opacity: 0.9;
-}
-
-/* LOW CONFIDENCE / UNKNOWN calibration */
-.tiles--products .tile.tile--uncertain {
-  outline: 2px dashed #e67e22; /* amber/orange */
-  outline-offset: -3px;
-}
-
-.tiles--products .tile.tile--uncertain::before {
-  content: "?";
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  font-weight: 800;
-  font-size: 0.85rem;
-  background: #e67e22;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 999px;
-}
-
-/* === TABLE (observed items) === */
-.sheet__table {
-  width: 100%;
-  max-width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-}
-.sheet__table th, .sheet__table td {
-  padding: 0.6rem 0.7rem;
-  border-bottom: 1px solid #eee;
-  text-align: left;
-  font-size: 0.95rem;
-  vertical-align: top;
-  overflow-wrap: anywhere;
-}
-.sheet__table thead th {
-  background: #f6f6f6;
-  font-weight: 700;
-}
-.sheet__table tbody tr:hover {
-  background: #fafafa;
-}
-
-/* icon buttons in table */
-.btn-icon {
-  border: none;
-  background: transparent;
-  padding: 0 0.25rem;
-  cursor: pointer;
-}
-
-/* ===== OBS DIALOG (grouped by location) ===== */
-#obsTitle.obs-title {
-  font-size: 1.25rem;
-  line-height: 1.2;
-  font-weight: 800;
-}
-
-.obs-groups {
-  display: grid;
-  gap: 16px;
-  margin: 12px 0; /* space above/below the block */
-  padding: 12px 0; /* breathing room inside */
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-}
-
-.obs-group {
-  display: grid;
-  gap: 8px; /* tighter inside each group */
-}
-
-/* Title: more presence + better spacing */
-.obs-group__title {
-  font-weight: 800;
-  font-size: 1.05rem;
-  margin: 10px 0 6px;
-}
-
-/* Subtle divider between groups (not the first) */
-.obs-group + .obs-group {
-  border-top: 1px solid #eee;
-  padding-top: 12px;
-}
-
-/* Row of inputs inside a group */
-.obs-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(140px, 1fr));
+.dashboard__meta-row {
+  display: flex;
+  align-items: center;
   gap: 10px;
+  font-weight: 800;
+  margin-bottom: 10px;
 }
 
-@media (max-width: 540px) {
-  .obs-row {
-    grid-template-columns: 1fr;
-  }
-}
-.obs-field {
-  display: grid;
-  gap: 6px;
+.dashboard__meta-label {
+  font-size: 1rem;
 }
 
-.obs-label {
-  font-size: 0.9rem;
-  color: #333;
+.dashboard__meta-sep {
+  opacity: 0.35;
+  font-weight: 900;
 }
 
-/* Input & quick “None” button — identical height */
-.obs-input-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+.dashboard__meta-value {
+  font-size: 1rem;
+  opacity: 0.85;
 }
 
-.obs-input {
-  width: 100%;
-  height: 44px;
-  padding: 0.5rem 0.55rem;
-  border: 1px solid #d9d9d9;
-  border-radius: 8px;
+.dashboard__progress {
+  padding-top: 2px;
 }
 
-.obs-input:focus {
-  outline: 2px solid #9ecbff;
-  border-color: #9ecbff;
+.dashboard__progress-track {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: visible;
 }
 
-.btn-quick-zero {
-  height: 44px;
-  padding: 0 0.8rem;
-  border: 1px solid #d9d9d9;
-  border-radius: 8px;
-  background: #fff;
-  cursor: pointer;
+.dashboard__progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #f59e0b;
 }
 
-.btn-quick-zero:hover {
-  background: #f6f6f6;
+.dashboard__progress-knob {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #f59e0b;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
 }
 
-/* Progress + hint */
-.obs-progress {
+.dashboard__section {
+  margin-top: 16px;
+}
+
+.dashboard__section-title {
+  margin: 0 0 10px;
+  font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 0.25rem;
 }
 
-.obs-hint {
-  font-size: 0.9rem;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
+.dashboard__card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
 
-/* Footer note at the bottom of the dialog */
-.obs-note {
-  margin-top: 10px;
-  font-size: 0.9rem;
-  color: #6b7280;
-  width: 66%;
-  max-width: 66%;
+.qa {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-/* Footer row: note on left (2/3 width), buttons on right */
-.obs-footer {
-  display: flex;
-  align-items: center;
+.qa__item + .qa__item {
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.qa__link {
+  display: grid;
+  grid-template-columns: 52px 1fr 18px;
   gap: 12px;
-  margin-top: 10px; /* slight space from fields block */
-}
-
-.obs-footer .obs-note {
-  flex: 0 1 66%;
-  max-width: 66%;
-  margin-top: 0; /* override any earlier margins */
-}
-
-.obs-footer .obs-btns {
-  display: flex;
-  gap: 0.5rem;
-  margin-left: auto; /* push buttons to the right */
-}
-
-/* Stack nicely on small screens */
-@media (max-width: 640px) {
-  .obs-footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .obs-footer .obs-note {
-    flex: 0 1 auto;
-    max-width: 100%;
-    width: 100%;
-  }
-  .obs-footer .obs-btns {
-    margin-left: 0;
-    justify-content: flex-end;
-  }
-}
-.obs-estimate {
-  font-weight: 600;
-  margin: 4px 0 8px;
-  color: #374151; /* slate-700-ish */
-}
-
-.qr-link {
+  align-items: center;
+  padding: 14px 14px;
   text-decoration: none;
-  color: inherit; /* ensures :visited doesn’t change color */
-  -webkit-tap-highlight-color: transparent; /* mobile tap highlight off */
-}
-
-.qr-link:visited {
   color: inherit;
 }
 
-.qr-link:focus {
-  outline: none;
+.qa__link:focus {
+  outline: 3px solid #9ecbff;
+  outline-offset: 2px;
+  border-radius: 12px;
 }
 
-/* remove focus ring (if desired) */
-.qr-link img.qr-img {
+.qa__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #f59e0b;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.qa__icon img {
+  width: 22px;
+  height: 22px;
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
+.qa__text {
+  display: grid;
+  gap: 2px;
+}
+
+.qa__title {
+  font-weight: 600;
+  font-size: 1.35rem;
+}
+
+.qa__subtitle {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #6b7280;
+}
+
+.qa__chev {
+  font-size: 1.5rem;
+  opacity: 0.35;
+  justify-self: end;
+}
+
+.wn {
+  display: grid;
+  gap: 10px;
+}
+
+.wn__item {
+  display: grid;
+  grid-template-columns: 54px 1fr 22px;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 14px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+  text-decoration: none;
+  color: inherit;
+}
+
+.wn__item:focus {
+  outline: 3px solid #9ecbff;
+  outline-offset: 2px;
+}
+
+.wn__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #d1fae5;
+}
+
+.wn__icon img {
+  width: 22px;
+  height: 22px;
   display: block;
 }
 
-/* nixes inline-gap */
-@media (max-width: 640px) {
-  .obs-note {
+.wn__text {
+  display: grid;
+  gap: 2px;
+}
+
+.wn__title {
+  font-weight: 900;
+  font-size: 1.02rem;
+}
+
+.wn__subtitle {
+  font-size: 0.92rem;
+  color: #6b7280;
+}
+
+.wn__arrow {
+  justify-self: end;
+  font-size: 1.35rem;
+  opacity: 0.55;
+}
+
+/*@use "./shared/index";*/
+/* === PRODUCT TILES (scoped only to the products grid) === */
+/*.tiles--products .tile {
+    min-height: 101px;
+    position: relative;
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: none;*/
+/* use same var approach as category tiles */
+/*--bg: #f3f4f6;*/ /* default: soft grey */
+/*--fg: #111;
+--badge: #d6dae0;*/ /* darker shade for the small label */
+/*background: var(--bg);
+    color: var(--fg);
+}*/
+/* PARTIAL = AMBER */
+/*.tiles--products .tile.tile--partial {
+    --bg: #ffd166;*/ /* amber */
+/*--fg: #111;
+--badge: #caa24a;*/ /* darker amber for the small label */
+/*background: var(--bg);
+    color: var(--fg);
+}*/
+/* COMPLETE = GREEN */
+/*.tiles--products .tile.tile--complete {
+    --bg: #adddc4;*/ /* your chosen green */
+/*--fg: #111;
+--badge: #7cc8a7;*/ /* darker green for the small label */
+/*background: var(--bg);
+    color: var(--fg);
+}*/
+/* small text colour uses the badge shade, same as cat tiles */
+/*.tiles--products .tile .tile__division {
+    color: var(--badge) !important;
+}*/
+/* only show the green tick when complete */
+/*.tiles--products .tile::after {
+    content: none;
+}
+
+.tiles--products .tile.tile--complete::after {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-size: .9rem;
+    font-weight: 800;
+    background: #14a44d;
+    color: #fff;
+}*/
+/* optional “N left” badge (JS adds .tile__badge when partial) */
+/*.tile__badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: .72rem;
+    line-height: 1;
+    background: #111;
+    color: #fff;
+    padding: .15rem .4rem;
+    border-radius: 999px;
+    opacity: .9;
+}*/
+/* LOW CONFIDENCE / UNKNOWN calibration */
+/*.tiles--products .tile.tile--uncertain {
+    outline: 2px dashed #e67e22;*/ /* amber/orange */
+/*outline-offset: -3px;
+}
+
+.tiles--products .tile.tile--uncertain::before {
+    content: "?";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-weight: 800;
+    font-size: .85rem;
+    background: #e67e22;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 999px;
+}*/
+/* === TABLE (observed items) === */
+/*.sheet__table {
     width: 100%;
     max-width: 100%;
-  }
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: index.$radius;
+    overflow: hidden;
+    box-shadow: index.$shadow;
+
+    th, td {
+        padding: .6rem .7rem;
+        border-bottom: 1px solid #eee;
+        text-align: left;
+        font-size: .95rem;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+    }
+
+    thead th {
+        background: #f6f6f6;
+        font-weight: 700;
+    }
+
+    tbody tr:hover {
+        background: #fafafa;
+    }
+}*/
+/* icon buttons in table */
+/*.btn-icon {
+    border: none;
+    background: transparent;
+    padding: 0 .25rem;
+    cursor: pointer;
+}*/
+/* ===== OBS DIALOG (grouped by location) ===== */
+/*#obsTitle.obs-title {
+    font-size: 1.25rem;
+    line-height: 1.2;
+    font-weight: 800;
 }
-/* responsive */
-@media (max-width: 860px) {
-  .obs-grid {
+
+.obs-groups {
+    display: grid;
+    gap: 16px;
+    margin: 12px 0;*/ /* space above/below the block */
+/*padding: 12px 0;*/ /* breathing room inside */
+/*border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.obs-group {
+    display: grid;
+    gap: 8px;*/ /* tighter inside each group */
+/*}*/
+/* Title: more presence + better spacing */
+/*.obs-group__title {
+    font-weight: 800;
+    font-size: 1.05rem;
+    margin: 10px 0 6px;
+}*/
+/* Subtle divider between groups (not the first) */
+/*.obs-group + .obs-group {
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+}*/
+/* Row of inputs inside a group */
+/*.obs-row {
+    display: grid;
     grid-template-columns: repeat(2, minmax(140px, 1fr));
-  }
+    gap: 10px;
 }
+
+@media (max-width: 540px) {
+    .obs-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.obs-field {
+    display: grid;
+    gap: 6px;
+}
+
+.obs-label {
+    font-size: .9rem;
+    color: #333;
+}*/
+/* Input & quick “None” button — identical height */
+/*.obs-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.obs-input {
+    width: 100%;
+    height: 44px;
+    padding: .5rem .55rem;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+}
+
+.obs-input:focus {
+    outline: 2px solid #9ecbff;
+    border-color: #9ecbff;
+}
+
+.btn-quick-zero {
+    height: 44px;
+    padding: 0 .8rem;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.btn-quick-zero:hover {
+    background: #f6f6f6;
+}*/
+/* Progress + hint */
+/*.obs-progress {
+    font-weight: 700;
+    margin-bottom: .25rem;
+}
+
+.obs-hint {
+    font-size: .9rem;
+    color: #6b7280;
+    margin-bottom: .25rem;
+}*/
+/* Footer note at the bottom of the dialog */
+/*.obs-note {
+    margin-top: 10px;
+    font-size: .9rem;
+    color: #6b7280;
+    width: 66%;
+    max-width: 66%;
+}*/
+/* Footer row: note on left (2/3 width), buttons on right */
+/*.obs-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;*/ /* slight space from fields block */
+/*}
+
+.obs-footer .obs-note {
+    flex: 0 1 66%;
+    max-width: 66%;
+    margin-top: 0;*/ /* override any earlier margins */
+/*}
+
+.obs-footer .obs-btns {
+    display: flex;
+    gap: .5rem;
+    margin-left: auto;*/ /* push buttons to the right */
+/*}*/
+/* Stack nicely on small screens */
+/*@media (max-width: 640px) {
+    .obs-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .obs-footer .obs-note {
+        flex: 0 1 auto;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .obs-footer .obs-btns {
+        margin-left: 0;
+        justify-content: flex-end;
+    }
+}
+
+.obs-estimate {
+    font-weight: 600;
+    margin: 4px 0 8px;
+    color: #374151;*/ /* slate-700-ish */
+/*}
+
+.qr-link {
+    text-decoration: none;
+    color: inherit;*/ /* ensures :visited doesn’t change color */
+/*-webkit-tap-highlight-color: transparent;*/ /* mobile tap highlight off */
+/*}
+
+.qr-link:visited {
+    color: inherit;
+}
+
+.qr-link:focus {
+    outline: none;
+}*/
+/* remove focus ring (if desired) */
+/*.qr-link img.qr-img {
+    display: block;
+}*/
+/* nixes inline-gap */
+/*@media (max-width: 640px) {
+    .obs-note {
+        width: 100%;
+        max-width: 100%;
+    }
+}*/
+/* responsive */
+/*@media (max-width: 860px) {
+    .obs-grid {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+    }
+}
+
 @media (max-width: 520px) {
-  .obs-grid {
-    grid-template-columns: 1fr;
-  }
+    .obs-grid {
+        grid-template-columns: 1fr;
+    }
+}*/
+.vouchers {
+  padding: 18px 16px 26px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.vouchers__header {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.vouchers__title {
+  margin: 0;
+  text-align: centre;
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.vouchers__back {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: grid;
+  place-items: centre;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.vouchers__spacer {
+  width: 40px;
+  height: 40px;
+}
+
+.vouchers__tabs {
+  background: #f59e0b;
+  border-radius: 999px;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+}
+
+.vouchers__tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.vouchers__tab.is-active {
+  background: #fff;
+  color: #111827;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.1);
+}
+
+.vouchers__panel {
+  display: none;
+}
+
+.vouchers__panel.is-active {
+  display: block;
+}
+
+.vlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.vcard {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 12px;
+  align-items: centre;
+  padding: 12px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+  text-decoration: none;
+  color: inherit;
+}
+
+.vcard:focus {
+  outline: 3px solid #9ecbff;
+  outline-offset: 2px;
+}
+
+.vcard__date {
+  height: 100%;
+  background: #f59e0b;
+  border-radius: 14px;
+  display: grid;
+  align-content: centre;
+  justify-items: centre;
+  padding: 10px 8px;
+  color: #fff;
+}
+
+.vcard__date--muted {
+  opacity: 0.6;
+}
+
+.vcard__day {
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.vcard__month {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  opacity: 0.95;
+}
+
+.vcard__main {
+  display: grid;
+  gap: 4px;
+}
+
+.vcard__title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.vcard__subtitle {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.vcard__btn {
+  margin-top: 6px;
+  display: inline-block;
+  width: fit-content;
+  background: #111827;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  opacity: 0.9;
+}
+
+.vouchers__empty {
+  margin-top: 34px;
+  text-align: centre;
+  display: grid;
+  justify-items: centre;
+  gap: 10px;
+}
+
+.vouchers__empty-img {
+  width: 120px;
+  height: auto;
+  display: block;
+}
+
+.vouchers__empty-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+
+.vouchers__empty-subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.vouchers__cta {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: centre;
+  justify-content: centre;
+  height: 46px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #111827;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }

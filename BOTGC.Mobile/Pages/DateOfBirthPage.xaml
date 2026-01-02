@@ -3,28 +3,75 @@
     x:Class="BOTGC.Mobile.Pages.DateOfBirthPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Confirm your date of birth">
+    Title=""
+    NavigationPage.HasNavigationBar="False">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="24" Spacing="20">
+    <Grid RowDefinitions="Auto,*,Auto">
 
+        <VerticalStackLayout Grid.Row="0" Padding="22,22,22,12" Spacing="8">
             <Label
                 Text="Confirm your date of birth"
-                FontSize="24"
-                FontAttributes="Bold" />
+                FontSize="30"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextPrimary}" />
 
             <Label
-                Text="We use your date of birth to confirm this device is being paired to the correct member account."
-                FontSize="14" />
+                Text="We use this to make sure the phone is being linked to the correct member account."
+                FontSize="15"
+                LineHeight="1.25"
+                TextColor="{StaticResource TextSecondary}" />
+        </VerticalStackLayout>
 
-            <DatePicker
-                x:Name="DobPicker"
-                FontSize="16" />
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="22,0,22,0" Spacing="16">
 
+                <Frame
+                    BackgroundColor="{StaticResource CardBackground}"
+                    BorderColor="{StaticResource CardBorder}"
+                    CornerRadius="20"
+                    Padding="14"
+                    HasShadow="False">
+
+                    <VerticalStackLayout Spacing="14">
+
+                        <Label
+                            Text="Your date of birth"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextPrimary}" />
+
+                        <Frame
+                            BackgroundColor="{StaticResource PageBackground}"
+                            BorderColor="{StaticResource CardBorder}"
+                            CornerRadius="16"
+                            Padding="16"
+                            HasShadow="False">
+
+                            <DatePicker
+                                x:Name="DobPicker"
+                                FontSize="18"
+                                TextColor="{StaticResource TextPrimary}" />
+                        </Frame>
+
+                        <Label
+                            Text="This should match the details held by the club. If it doesn't, ask the club to update your account."
+                            FontSize="14"
+                            LineHeight="1.25"
+                            TextColor="{StaticResource TextSecondary}" />
+
+                    </VerticalStackLayout>
+                </Frame>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid Grid.Row="2" Padding="22,12,22,22">
+            
             <Button
                 x:Name="ContinueButton"
-                Text="Continue" />
+                Text="Continue"
+                Style="{StaticResource PrimaryCtaButton}" />
+        </Grid>
 
-        </VerticalStackLayout>
-    </ScrollView>
+    </Grid>
 </ContentPage>

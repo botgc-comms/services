@@ -581,9 +581,19 @@
                 if (reasonIdToSend) fd.append("reasonId", reasonIdToSend);
                 else if (custom) fd.append("customReason", custom);
 
-                const res = await fetch("/wastage/log-product", { method: "POST", body: fd });
-                if (res.status === 401) { clearOperatorSelection(); ensureOperatorSelected(); return; }
-                if (!res.ok) { alert("Failed to log waste."); return; }
+                let url = "/wastage/log";
+                const hasComponents = Array.isArray(selectedProduct.components) && selectedProduct.components.length > 0;
+                const isComposite = hasComponents && selectedProduct.components.length > 1;
+
+                if (isComposite) {
+                    url = "/wastage/log-product";
+                } else {
+                    fd.append("igProductId", (selectedProduct.igid || 0).toString());
+                    fd.append("unit", selectedProduct.unit || "");
+                    fd.append("productName", selectedProduct.name || "");
+                }
+
+                const res = await fetch(url, { method: "POST", body: fd });
 
                 markOperatorActivity();
                 document.getElementById("reasonModal").close();
@@ -609,7 +619,6 @@
         let connection = null;
         function startSignalR() {
             connection = new signalR.HubConnectionBuilder()
-                .withUrl("/hubs/wastage")
                 .withUrl("/hubs/wastage")
                 .withAutomaticReconnect()
                 .build();

@@ -15,7 +15,9 @@ public sealed class InMemoryUserAuthenticationService : IUserAuthenticationServi
             {
                 Id = 3677,
                 Username = "3677",
-                DisplayName = "Seth Parsons"
+                DisplayName = "Seth Parsons", 
+                FirstName = "Seth", 
+                LastName = "Parsons"
             }
         };
     }

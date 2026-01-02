@@ -3,15 +3,28 @@
     x:Class="BOTGC.Mobile.WebShellPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:controls="clr-namespace:BOTGC.Mobile.Controls">
+    xmlns:controls="clr-namespace:BOTGC.Mobile.Controls"
+    NavigationPage.HasNavigationBar="False">
 
-    <Grid RowSpacing="0">
+    <Grid RowSpacing="0" BackgroundColor="{StaticResource PageBackground}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <WebView x:Name="Browser" Grid.Row="0" />
+        <Grid Grid.Row="0" BackgroundColor="{StaticResource PageBackground}">
+            <WebView x:Name="Browser"
+                     BackgroundColor="{StaticResource PageBackground}" />
+
+            <Grid x:Name="LoadingOverlay"
+                  BackgroundColor="{StaticResource PageBackground}"
+                  IsVisible="True"
+                  Opacity="1">
+                <ActivityIndicator IsRunning="True"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center" />
+            </Grid>
+        </Grid>
 
         <controls:BottomNavBar x:Name="BottomNav" Grid.Row="1" />
     </Grid>

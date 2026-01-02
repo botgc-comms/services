@@ -1,4 +1,6 @@
-﻿using BOTGC.Mobile.Pages;
+﻿// Pages/PairingInfoPage.xaml.cs
+using BOTGC.Mobile.Pages;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BOTGC.Mobile.Pages;
 
@@ -11,10 +13,10 @@ public partial class PairingInfoPage : ContentPage
 
     private async void OpenWebsiteButton_Clicked(object? sender, EventArgs e)
     {
-        await Launcher.Default.OpenAsync(new Uri("https://botgc.co.uk/login"));
+        await Launcher.Default.OpenAsync(new Uri("https://www.botgc.co.uk/the_botgc_app"));
     }
 
-    private async void ContinueToScannerButton_Clicked(object? sender, EventArgs e)
+    private async void ContinueButton_Clicked(object? sender, EventArgs e)
     {
         var services = Application.Current!.Handler!.MauiContext!.Services;
         await Navigation.PushAsync(services.GetRequiredService<AppAuthPage>());

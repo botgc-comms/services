@@ -54,6 +54,7 @@ builder.Services.AddScoped<ITileAdapter, JuniorMentorTileAdapter>();
 builder.Services.AddScoped<ITileAdapter, RulesQuizTileAdapter>();
 builder.Services.AddScoped<ITileAdapter, HandicapSessionTileAdapter>();
 builder.Services.AddScoped<ITileAdapter, CategoryProgressTileAdapter>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
@@ -73,6 +74,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
 });
 
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
+
+builder.Services.AddJuniorQuizFromGitHub(builder.Configuration);
 
 var app = builder.Build();
 

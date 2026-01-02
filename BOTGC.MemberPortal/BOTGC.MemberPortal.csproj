@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\css\" />
+    <Folder Include="wwwroot\fonts\" />
     <Folder Include="wwwroot\img\products\" />
     <Folder Include="wwwroot\js\dist\" />
     <Folder Include="wwwroot\audio\" />

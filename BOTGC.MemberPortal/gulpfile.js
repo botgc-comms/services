@@ -51,7 +51,7 @@ function memberPortalScripts() {
 }
 
 function memberPortalSASSTasks() {
-    return gulp.src('./wwwroot/scss/member-portal.scss')
+    return gulp.src('./wwwroot/scss/index.scss')
         .pipe(gulpSass({ outputStyle: 'compressed' }).on('error', gulpSass.logError))
         .pipe(rename('member-portal.css'))
         .pipe(gulp.dest('./wwwroot/css/'));

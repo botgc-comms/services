@@ -23,6 +23,15 @@
         public DateTime SubscriptionYearEnd { get; set; }
         public DateTime FinancialYearStart { get; set; }
         public DateTime FinancialYearEnd { get; set; }
+
+        public LostRevenueBreakdownDto? LostRevenueAprToSep { get; set; }
+
+    }
+
+    public sealed class LostRevenueBreakdownDto
+    {
+        public decimal Total { get; set; }
+        public Dictionary<string, decimal> ByMonth { get; set; } = new(StringComparer.Ordinal);
     }
 
     public class MembershipReportEntryDto

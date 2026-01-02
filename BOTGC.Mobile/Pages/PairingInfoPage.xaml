@@ -3,164 +3,150 @@
     x:Class="BOTGC.Mobile.Pages.PairingInfoPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Link this phone"
-    BackgroundColor="White">
+    xmlns:NavigationPage="http://schemas.microsoft.com/dotnet/2021/maui"
+    NavigationPage.HasNavigationBar="False">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="18">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="SecondaryButton" TargetType="Button">
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="CornerRadius" Value="16" />
+                <Setter Property="HeightRequest" Value="48" />
+                <Setter Property="BackgroundColor" Value="{StaticResource ButtonSecondaryBackground}" />
+                <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+                <Setter Property="TextTransform" Value="None" />
+                <Setter Property="HorizontalOptions" Value="Start" />
+            </Style>
 
+            <Style x:Key="StepNumberPill" TargetType="Frame">
+                <Setter Property="WidthRequest" Value="28" />
+                <Setter Property="HeightRequest" Value="28" />
+                <Setter Property="CornerRadius" Value="14" />
+                <Setter Property="BackgroundColor" Value="{StaticResource PageBackground}" />
+                <Setter Property="BorderColor" Value="{StaticResource CardBorder}" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="HasShadow" Value="False" />
+                <Setter Property="VerticalOptions" Value="Start" />
+            </Style>
+
+            <Style x:Key="StepText" TargetType="Label">
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="LineHeight" Value="1.25" />
+                <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+                <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+                <Setter Property="VerticalOptions" Value="Start" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Title + intro -->
+        <VerticalStackLayout Grid.Row="0" Padding="22,22,22,12" Spacing="8">
             <Label
-                Text="BOTGC"
-                FontSize="28"
+                Text="Link this phone"
+                FontSize="30"
                 FontAttributes="Bold"
-                TextColor="#111111" />
+                TextColor="{StaticResource TextPrimary}" />
 
             <Label
-                Text="Link this phone to your account"
-                FontSize="22"
-                FontAttributes="Bold"
-                TextColor="#111111" />
-
-            <Label
-                Text="You only need to do this once. We use it to make sure this phone is linked to the right member account before you can use the app."
+                Text="Pair this device to your Burton on Trent Golf Club account so you can use the app."
                 FontSize="15"
                 LineHeight="1.25"
-                TextColor="#333333" />
+                TextColor="{StaticResource TextSecondary}" />
+        </VerticalStackLayout>
 
-            <Frame
-                BackgroundColor="#F5F7FA"
-                BorderColor="#E3E7EE"
-                CornerRadius="16"
-                Padding="16"
-                HasShadow="False">
+        <!-- Card -->
+        <Frame
+            Grid.Row="1"
+            Margin="22,0"
+            BackgroundColor="{StaticResource CardBackground}"
+            BorderColor="{StaticResource CardBorder}"
+            CornerRadius="20"
+            Padding="16"
+            HasShadow="False"
+            VerticalOptions="FillAndExpand">
 
-                <VerticalStackLayout Spacing="12">
+            <VerticalStackLayout Spacing="28" VerticalOptions="FillAndExpand">
 
-                    <Image
-                        Source="pairing_illustration.png"
-                        Aspect="AspectFit"
-                        HeightRequest="180" />
+                <Label
+                    Text="What you need to do"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextPrimary}" />
+
+                <!-- Step 1 -->
+                <Grid ColumnDefinitions="28,12,*">
+                    <Frame Style="{StaticResource StepNumberPill}">
+                        <Label
+                            Text="1"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextPrimary}" />
+                    </Frame>
 
                     <Label
-                        Text="What you need to do"
-                        FontSize="16"
-                        FontAttributes="Bold"
-                        TextColor="#111111" />
+                        Grid.Column="2"
+                        Style="{StaticResource StepText}"
+                        Text="Open the Burton on Trent Golf Club website on this phone using the button below. This will take you directly to the page needed to link your phone." />
+                </Grid>
 
-                    <VerticalStackLayout Spacing="10">
+                <Grid ColumnDefinitions="28,12,*">
+                    <Button
+                        Grid.Column="2"
+                        Text="Open botgc.co.uk"
+                        Style="{StaticResource SecondaryButton}"
+                        HorizontalOptions="Fill"
+                        Clicked="OpenWebsiteButton_Clicked" />
+                </Grid>
 
-                        <HorizontalStackLayout Spacing="10">
-                            <Frame
-                                WidthRequest="28"
-                                HeightRequest="28"
-                                CornerRadius="14"
-                                BackgroundColor="White"
-                                BorderColor="#D7DDE6"
-                                Padding="0"
-                                HasShadow="False">
-                                <Label
-                                    Text="1"
-                                    HorizontalOptions="Center"
-                                    VerticalOptions="Center"
-                                    HorizontalTextAlignment="Center"
-                                    VerticalTextAlignment="Center"
-                                    FontAttributes="Bold"
-                                    TextColor="#111111" />
-                            </Frame>
-                            <Label
-                                Text="Open the BOTGC website on this phone and sign in."
-                                FontSize="15"
-                                LineHeight="1.25"
-                                TextColor="#333333"
-                                VerticalOptions="Center" />
-                        </HorizontalStackLayout>
+                <!-- Step 2 -->
+                <Grid ColumnDefinitions="28,12,*">
+                    <Frame Style="{StaticResource StepNumberPill}">
+                        <Label
+                            Text="2"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextPrimary}" />
+                    </Frame>
 
-                        <HorizontalStackLayout Spacing="10">
-                            <Frame
-                                WidthRequest="28"
-                                HeightRequest="28"
-                                CornerRadius="14"
-                                BackgroundColor="White"
-                                BorderColor="#D7DDE6"
-                                Padding="0"
-                                HasShadow="False">
-                                <Label
-                                    Text="2"
-                                    HorizontalOptions="Center"
-                                    VerticalOptions="Center"
-                                    HorizontalTextAlignment="Center"
-                                    VerticalTextAlignment="Center"
-                                    FontAttributes="Bold"
-                                    TextColor="#111111" />
-                            </Frame>
-                            <Label
-                                Text="Go to your pairing page to see your QR code and a 'Pair this phone' link."
-                                FontSize="15"
-                                LineHeight="1.25"
-                                TextColor="#333333"
-                                VerticalOptions="Center" />
-                        </HorizontalStackLayout>
+                    <Label
+                        Grid.Column="2"
+                        Style="{StaticResource StepText}"
+                        Text="If you’re using another phone, tablet, or laptop, sign in using your PIN number and password. You can find the page in the ‘My Golf’ menu under ‘Pair my phone’." />
+                </Grid>
 
-                        <HorizontalStackLayout Spacing="10">
-                            <Frame
-                                WidthRequest="28"
-                                HeightRequest="28"
-                                CornerRadius="14"
-                                BackgroundColor="White"
-                                BorderColor="#D7DDE6"
-                                Padding="0"
-                                HasShadow="False">
-                                <Label
-                                    Text="3"
-                                    HorizontalOptions="Center"
-                                    VerticalOptions="Center"
-                                    HorizontalTextAlignment="Center"
-                                    VerticalTextAlignment="Center"
-                                    FontAttributes="Bold"
-                                    TextColor="#111111" />
-                            </Frame>
-                            <Label
-                                Text="If you�re on this phone, tap the link. If you�re on another device, scan the QR code with the camera on this screen."
-                                FontSize="15"
-                                LineHeight="1.25"
-                                TextColor="#333333"
-                                VerticalOptions="Center" />
-                        </HorizontalStackLayout>
+                <!-- Step 3 -->
+                <Grid ColumnDefinitions="28,12,*">
+                    <Frame Style="{StaticResource StepNumberPill}">
+                        <Label
+                            Text="3"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextPrimary}" />
+                    </Frame>
 
-                    </VerticalStackLayout>
+                    <Label
+                        Grid.Column="2"
+                        Style="{StaticResource StepText}"
+                        Text="On the pairing page, either scan the QR code shown, or tap the ‘Pair device’ button. If you tap it on this phone, the app will open automatically." />
+                </Grid>
 
-                </VerticalStackLayout>
-            </Frame>
+                <Grid VerticalOptions="FillAndExpand" />
 
-            <Label
-                Text="Tip: If you open the website on the same phone, you won�t need to scan anything � just tap the pairing link and the app will do the rest."
-                FontSize="14"
-                LineHeight="1.25"
-                TextColor="#333333" />
+            </VerticalStackLayout>
+        </Frame>
 
+        <!-- Continue -->
+        <Grid Grid.Row="2" Padding="22">
             <Button
-                Text="Open BOTGC website"
-                Clicked="OpenWebsiteButton_Clicked"
-                FontAttributes="Bold"
-                CornerRadius="14"
-                HeightRequest="52"
-                BackgroundColor="#0B5FFF"
-                TextColor="White" />
+                Text="Continue"
+                Style="{StaticResource PrimaryCtaButton}"
+                Clicked="ContinueButton_Clicked" />
+        </Grid>
 
-            <Button
-                Text="Continue to camera scanner"
-                Clicked="ContinueToScannerButton_Clicked"
-                CornerRadius="14"
-                HeightRequest="52"
-                BackgroundColor="#E9EEF5"
-                TextColor="#111111" />
-
-            <Label
-                Text="If you get stuck, ask a parent/guardian or the club for help."
-                FontSize="13"
-                TextColor="#666666"
-                HorizontalTextAlignment="Center" />
-
-        </VerticalStackLayout>
-    </ScrollView>
+    </Grid>
 </ContentPage>

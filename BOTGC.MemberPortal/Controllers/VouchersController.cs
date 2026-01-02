@@ -2,7 +2,6 @@
 using BOTGC.MemberPortal.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using QRCoder;
 
 namespace BOTGC.MemberPortal.Controllers;
 
@@ -12,13 +11,15 @@ public sealed class VouchersController : Controller
     private readonly ICurrentUserService _currentUserService;
     private readonly IVoucherService _voucherService;
 
-    public VouchersController(ICurrentUserService currentUserService, IVoucherService voucherService)
+    public VouchersController(
+        ICurrentUserService currentUserService,
+        IVoucherService voucherService)
     {
         _currentUserService = currentUserService;
         _voucherService = voucherService;
     }
 
-    [HttpGet]
+    [HttpGet("/vouchers")]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         if (!_currentUserService.UserId.HasValue)
@@ -26,81 +27,15 @@ public sealed class VouchersController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        var memberId = _currentUserService.UserId.Value;
-        var vouchers = await _voucherService.GetVouchersForMemberAsync(memberId, cancellationToken);
+        var vouchers = await _voucherService.GetVouchersForMemberAsync(_currentUserService.UserId.Value, cancellationToken);
 
-        var summaries = vouchers
-            .Where(v => v.IsActive)
-            .GroupBy(v => v.TypeKey, StringComparer.OrdinalIgnoreCase)
-            .Select(g =>
-            {
-                var first = g.First();
-                return new VoucherTypeSummaryViewModel
-                {
-                    TypeKey = g.Key,
-                    Title = first.TypeTitle,
-                    Description = first.TypeDescription,
-                    Image = first.Image,
-                    AvailableCount = g.Count(v => v.IsActive),
-                    BackgroundColor = null
-                };
-            })
-            .OrderBy(x => x.Title)
-            .ToList();
-
-        return View(summaries);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Show(string typeKey, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(typeKey))
+        var model = new VouchersPageViewModel
         {
-            return RedirectToAction(nameof(Index));
-        }
-
-        if (!_currentUserService.UserId.HasValue)
-        {
-            return RedirectToAction("Login", "Account");
-        }
-
-        var memberId = _currentUserService.UserId.Value;
-        var vouchers = await _voucherService.GetVouchersForMemberAsync(memberId, cancellationToken);
-
-        var voucher = vouchers
-            .Where(v => v.IsActive)
-            .FirstOrDefault(v => string.Equals(v.TypeKey, typeKey, StringComparison.OrdinalIgnoreCase));
-
-        if (voucher == null)
-        {
-            return RedirectToAction(nameof(Index));
-        }
-
-        var model = new VoucherDisplayViewModel
-        {
-            TypeKey = voucher.TypeKey,
-            Title = voucher.TypeTitle,
-            Description = voucher.TypeDescription,
-            Code = voucher.Code
+            Active = vouchers.Where(v => !v.IsUsed).OrderBy(v => v.TypeTitle).ToList(),
+            Used = vouchers.Where(v => v.IsUsed).OrderByDescending(v => v.TypeTitle).ToList(),
+            Expired = new List<VoucherViewModel>()
         };
 
         return View(model);
-    }
-
-    [HttpGet]
-    [AllowAnonymous]
-    public IActionResult Qr(string code)
-    {
-        if (string.IsNullOrWhiteSpace(code))
-        {
-            return NotFound();
-        }
-
-        using var generator = new QRCodeGenerator();
-        using var data = generator.CreateQrCode(code, QRCodeGenerator.ECCLevel.Q);
-        var png = new PngByteQRCode(data);
-        var bytes = png.GetGraphic(20);
-
-        return File(bytes, "image/png");
     }
 }

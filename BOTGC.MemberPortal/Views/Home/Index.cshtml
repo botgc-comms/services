@@ -4,34 +4,85 @@
     ViewData["Title"] = "Junior dashboard";
 }
 
-<div class="app-wrap dashboard">
-    <header class="dashboard-header">
-        <h1 class="dashboard-header__title">
-            Hi, @Model.DisplayName
-        </h1>
-        <p class="dashboard-header__subtitle">
-            Your current junior category:
-            <strong>@Model.JuniorCategory</strong>
-        </p>
+<div class="dashboard">
+    <header class="dashboard__header">
+        <div class="dashboard__greeting">
+            <h1 class="dashboard__title">
+                Hi, <span class="dashboard__name">@Model.DisplayName</span>!
+            </h1>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.AvatarUrl))
+        {
+            <img class="dashboard__avatar" src="@Model.AvatarUrl" alt="" />
+        }
     </header>
 
-    <section class="dashboard-section">
-        <h2 class="visually-hidden">What would you like to do?</h2>
+    <section class="dashboard_section">
+        <div class="dashboard__meta-card">
+            <div class="dashboard__meta-row">
+                <span class="dashboard__meta-label">@Model.LevelLabel</span>
+                <span class="dashboard__meta-sep">|</span>
+                <span class="dashboard__meta-value">@Model.LevelName</span>
+            </div>
 
-        <div class="tiles tiles--dashboard">
-            @foreach (var tile in Model.Tiles)
-            {
-                var partialName = tile.Type switch
+            <div class="dashboard__progress">
+                <div class="dashboard__progress-track" role="progressbar"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     aria-valuenow="@Model.LevelProgressPercent"
+                     aria-label="Cadet progress">
+                    <div class="dashboard__progress-fill" style="width:@Model.LevelProgressPercent%"></div>
+                    <div class="dashboard__progress-knob" style="left:@Model.LevelProgressPercent%"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard__section">
+        <h2 class="dashboard__section-title">Quick Actions</h2>
+
+        <div class="dashboard__card">
+            <ul class="qa">
+                @foreach (var action in Model.QuickActions)
                 {
-                    "cadet_vouchers"      => "_Tile_CadetVouchers",
-                    "junior_mentor"       => "_Tile_JuniorMentor",
-                    "rules_quiz"          => "_Tile_RulesQuiz",
-                    "handicap_session"    => "_Tile_HandicapSession",
-                    "category_progress"   => "_Tile_CategoryProgress",
-                    _                     => "_Tile_Default"
-                };
+                    <li class="qa__item">
+                        <a class="qa__link app-link" href="@action.Href">
+                            <span class="qa__icon" aria-hidden="true">
+                                <img src="@action.IconUrl" alt="" />
+                            </span>
 
-                @await Html.PartialAsync(partialName, tile)
+                            <span class="qa__text">
+                                <span class="qa__title">@action.Title</span>
+                                <span class="qa__subtitle">@action.Subtitle</span>
+                            </span>
+
+                            <span class="qa__chev" aria-hidden="true">›</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </section>
+
+    <section class="dashboard__section">
+        <h2 class="dashboard__section-title">What’s Next</h2>
+
+        <div class="wn">
+            @foreach (var item in Model.WhatsNext)
+            {
+                <a class="wn__item app-link" href="@item.Href">
+                    <span class="wn__icon" aria-hidden="true">
+                        <img src="@item.IconUrl" alt="" />
+                    </span>
+
+                    <span class="wn__text">
+                        <span class="wn__title">@item.Title</span>
+                        <span class="wn__subtitle">@item.Subtitle</span>
+                    </span>
+
+                    <span class="wn__arrow" aria-hidden="true">↗</span>
+                </a>
             }
         </div>
     </section>

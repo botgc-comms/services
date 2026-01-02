@@ -3,11 +3,10 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:skia="clr-namespace:SkiaSharp.Views.Maui.Controls;assembly=SkiaSharp.Views.Maui.Controls"
-    x:Class="BOTGC.Mobile.Pages.MetallicSplashPage"
-    BackgroundColor="White">
+    x:Class="BOTGC.Mobile.Pages.MetallicSplashPage">
 
     <Grid>
-        <skia:SKCanvasView x:Name="Canvas" BackgroundColor="White" PaintSurface="OnPaintSurface" />
+        <skia:SKCanvasView x:Name="Canvas" BackgroundColor="{StaticResource PageBackground}" PaintSurface="OnPaintSurface" />
     </Grid>
 
 </ContentPage>

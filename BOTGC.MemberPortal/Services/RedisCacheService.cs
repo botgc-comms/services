@@ -23,12 +23,12 @@ public class RedisCacheService : ICacheService
         _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
     }
 
-    public async Task<T?> GetAsync<T>(string key, bool force = false) where T : class
+    public async Task<T?> GetAsync<T>(string key, bool force = false, CancellationToken ct = default) where T : class
     {
         T retVal = null;
 
         var gate = KeyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
-        await gate.WaitAsync().ConfigureAwait(false);
+        await gate.WaitAsync(ct).ConfigureAwait(false);
 
         try
         {
@@ -56,10 +56,10 @@ public class RedisCacheService : ICacheService
         return retVal;
     }
 
-    public async Task SetAsync<T>(string key, T value, TimeSpan expiration) where T : class
+    public async Task SetAsync<T>(string key, T value, TimeSpan expiration, CancellationToken ct = default) where T : class
     {
         var gate = KeyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
-        await gate.WaitAsync().ConfigureAwait(false);
+        await gate.WaitAsync(ct).ConfigureAwait(false);
         try
         {
             var json = JsonSerializer.Serialize(value, new JsonSerializerOptions { WriteIndented = true });
@@ -77,13 +77,13 @@ public class RedisCacheService : ICacheService
         }
     }
 
-    public async Task RemoveAsync(string key)
+    public async Task RemoveAsync(string key, CancellationToken ct = default)
     {
         var gate = KeyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
         await gate.WaitAsync().ConfigureAwait(false);
         try
         {
-            await _cache.RemoveAsync(key).ConfigureAwait(false);
+            await _cache.RemoveAsync(key, ct).ConfigureAwait(false);
             UnmarkKeyWarmedForThisRequest(key);
         }
         finally

@@ -83,20 +83,8 @@ public sealed class CurrentUserService : ICurrentUserService
         }
     }
 
-    public string? DisplayName
-    {
-        get
-        {
-            var user = _httpContextAccessor.HttpContext?.User;
-            if (user?.Identity?.IsAuthenticated != true)
-            {
-                return null;
-            }
-
-            return user.FindFirstValue("display_name")
-                ?? user.FindFirstValue(ClaimTypes.Name);
-        }
-    }
+    public string? DisplayName =>
+        _httpContextAccessor.HttpContext?.User?.FindFirstValue("firstName");
 
     public string? FirstName =>
         _httpContextAccessor.HttpContext?.User?.FindFirstValue("firstName");

@@ -323,6 +323,34 @@ namespace BOTGC.API.Services.ReportServices
             report.DataPointsCsv = ConvertToCsv(report.DataPoints);
 
             EnsureMonthlyAndQuarterlyStats(report, monthlySnapshots, asAtDate);
+
+
+            var aprSepYear = report.FinancialYearEnd.Year;
+
+            //var windowStart = new DateTime(aprSepYear, 4, 1);
+            //var windowEnd = new DateTime(aprSepYear, 9, 30);
+            //var baselineDate = windowStart.AddDays(-1);
+
+            var baselineDate = report.FinancialYearStart.Date;
+            var windowStart = new DateTime(report.FinancialYearEnd.Year, 4, 1);
+            var windowEnd = new DateTime(report.FinancialYearEnd.Year, 9, 30);
+
+            if (monthlySnapshots.TryGetValue(baselineDate.Date, out var baselineSnapshot))
+            {
+                report.LostRevenueAprToSep = CalculateAprToSepLostRevenueByMonth_ActualSums(
+                    report.DataPoints,
+                    baselineSnapshot.Members,
+                    baselineDate,
+                    windowStart,
+                    windowEnd,
+                    categoryFeeLookup);
+            }
+            else
+            {
+                _logger.LogWarning("Baseline snapshot missing for {Baseline:yyyy-MM-dd}; cannot calculate Apr–Sep lost revenue.", baselineDate);
+            }
+
+
             PopulateWaitingListAggregatesForPeriods(report.MonthlyStats, report.DataPoints);
             PopulateWaitingListAggregatesForPeriods(report.QuarterlyStats, report.DataPoints);
 
@@ -1287,5 +1315,126 @@ namespace BOTGC.API.Services.ReportServices
                 CategoryGroupTotals = categoryGroupTotals
             };
         }
+
+        private LostRevenueBreakdownDto CalculateAprToSepLostRevenueByMonth_ActualSums(
+    List<MembershipReportEntryDto> dataPoints,
+    List<MemberDto> baselineMembers,
+    DateTime baselineDate,
+    DateTime windowStart,
+    DateTime windowEnd,
+    Dictionary<(string category, DateTime date), Fee[]> categoryFeeLookup)
+        {
+            baselineDate = baselineDate.Date;
+            windowStart = windowStart.Date;
+            windowEnd = windowEnd.Date;
+
+            var baselinePoint = dataPoints.SingleOrDefault(d => d.Date.Date == baselineDate);
+            if (baselinePoint == null)
+            {
+                throw new InvalidOperationException($"No datapoint found for baseline date {baselineDate:yyyy-MM-dd}.");
+            }
+
+            var baselinePlayingCount = baselinePoint.PlayingMembers;
+            var baselineNonPlayingCount = baselinePoint.NonPlayingMembers;
+
+            var baselinePlayingDailyFeesDesc = BuildBaselineDailyFeesDescending(
+                baselineMembers.Where(m => m.IsActive == true && m.PrimaryCategory == MembershipPrimaryCategories.PlayingMember).ToList(),
+                baselineDate,
+                categoryFeeLookup);
+
+            var baselineNonPlayingDailyFeesDesc = BuildBaselineDailyFeesDescending(
+                baselineMembers.Where(m => m.IsActive == true && m.PrimaryCategory == MembershipPrimaryCategories.NonPlayingMember).ToList(),
+                baselineDate,
+                categoryFeeLookup);
+
+            var points = dataPoints
+                .Where(d => d.Date.Date >= windowStart && d.Date.Date <= windowEnd)
+                .OrderBy(d => d.Date.Date)
+                .ToList();
+
+            var byMonth = new Dictionary<string, decimal>(StringComparer.Ordinal);
+
+            foreach (var day in points)
+            {
+                var deficitPlaying = Math.Max(0, baselinePlayingCount - day.PlayingMembers);
+                var deficitNonPlaying = Math.Max(0, baselineNonPlayingCount - day.NonPlayingMembers);
+
+                var lostPlaying = SumTopK(baselinePlayingDailyFeesDesc, deficitPlaying);
+                var lostNonPlaying = SumTopK(baselineNonPlayingDailyFeesDesc, deficitNonPlaying);
+
+                var dailyLost = lostPlaying + lostNonPlaying;
+                if (dailyLost == 0m) continue;
+
+                var monthKey = day.Date.ToString("yyyy-MM");
+                byMonth[monthKey] = byMonth.GetValueOrDefault(monthKey) + dailyLost;
+            }
+
+            foreach (var k in byMonth.Keys.ToList())
+            {
+                byMonth[k] = Math.Round(byMonth[k], 2, MidpointRounding.AwayFromZero);
+            }
+
+            return new LostRevenueBreakdownDto
+            {
+                ByMonth = byMonth,
+                Total = Math.Round(byMonth.Values.Sum(), 2, MidpointRounding.AwayFromZero)
+            };
+        }
+
+        private List<decimal> BuildBaselineDailyFeesDescending(
+            List<MemberDto> members,
+            DateTime date,
+            Dictionary<(string category, DateTime date), Fee[]> categoryFeeLookup)
+        {
+            var fees = new List<decimal>(members.Count);
+
+            foreach (var m in members)
+            {
+                var cat = (m.MembershipCategory ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(cat)) continue;
+
+                if (!categoryFeeLookup.TryGetValue((cat, date.Date), out var arr) || arr.Length == 0) continue;
+
+                Fee? chosenFee;
+
+                if (date.Date < new DateTime(2025, 4, 1))
+                {
+                    chosenFee =
+                        (m.JoinDate.HasValue && m.JoinDate.Value.Date < new DateTime(2024, 4, 1))
+                            ? arr.FirstOrDefault(f => f.YearStart == 23)
+                            : arr.FirstOrDefault(f => f.YearStart == 24);
+
+                    chosenFee ??= arr.OrderBy(f => f.YearStart).FirstOrDefault();
+                }
+                else
+                {
+                    chosenFee = arr.FirstOrDefault();
+                }
+
+                if (chosenFee == null) continue;
+
+                fees.Add(chosenFee.Amount / 365m);
+            }
+
+            fees.Sort();
+            fees.Reverse();
+            return fees;
+        }
+
+        private decimal SumTopK(List<decimal> descFees, int k)
+        {
+            if (k <= 0 || descFees.Count == 0) return 0m;
+            if (k > descFees.Count) k = descFees.Count;
+
+            decimal sum = 0m;
+
+            for (var i = 0; i < k; i++)
+            {
+                sum += descFees[i];
+            }
+
+            return sum;
+        }
+
     }
 }
