@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "question": "Imagine you're ball is on the green but it's a bit mucky. You mark and pick it up and then clean it by rubbing it on the green before your next putt. Is this a problem?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "No, it's totally fine to clean your ball by rubbing it on the green"
+    },
+    {
+      "id": "b",
+      "text": "Yes, you get a one-stroke penalty for cleaning the ball in an unapproved manner."
+    },
+    {
+      "id": "c",
+      "text": "Yes, its a problem. You get a two-stroke penalty because it's seen as testing the green."
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "In golf, rubbing your ball on the green can result in a two-stroke penalty because it's considered \"testing the green.\" This rule prevents players from gaining unfair insights into the green's conditions, like speed or smoothness, ensuring fair play.",
+  "imageAlt": "Screenshot 2024-02-15 144149"
+}

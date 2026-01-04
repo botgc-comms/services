@@ -34,7 +34,7 @@ public sealed class DashboardService : IDashboardService
             {
                 Title = "Quizzers & Tasks",
                 Subtitle = "Complete daily activities to boost your progress.",
-                Href = "/tasks",
+                Href = "/quiz",
                 IconUrl = "/img/icons/nav_play.png"
             },
             new()

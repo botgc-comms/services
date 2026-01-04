@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "Julie think's it would be funny to stop your putt from going in by putting their foot in front of it. *",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "They should get a 2 shot penalty for deflecting a ball in motion on purpose"
+    },
+    {
+      "id": "b",
+      "text": "You have to now play the ball where it is"
+    },
+    {
+      "id": "c",
+      "text": "You have to pick the ball up and play your shot again"
+    },
+    {
+      "id": "d",
+      "text": "It was funny! Just laugh, your put would not have gone in anyway!"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "Julie should not mess around on a golf course. They get a 2 shot penalty, and you have to replace your ball to where it was and replay the shot otherwise you will too!",
+  "imageAlt": "Screenshot 2024-02-19 172759"
+}

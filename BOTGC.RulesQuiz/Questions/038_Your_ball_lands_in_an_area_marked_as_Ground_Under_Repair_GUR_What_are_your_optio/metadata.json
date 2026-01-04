@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "Your ball lands in an area marked as 'Ground Under Repair' (GUR). What are your options?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "You must take a penalty stroke and play the ball from where it lies within the GUR."
+    },
+    {
+      "id": "b",
+      "text": "You are allowed to move the ball outside the GUR without penalty, finding the nearest point of relief not nearer the hole."
+    },
+    {
+      "id": "c",
+      "text": "You can choose to play the ball as it lies within the GUR without any penalty."
+    },
+    {
+      "id": "d",
+      "text": "You have to move your ball"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "Unless you really want to play the ball where it lies you should take free relief. The area has been marked because it is being repaired so you should avoid damaging it further by taking your shot from inside a G.U.R. area.",
+  "imageAlt": "Screenshot 2024-04-01 100536"
+}

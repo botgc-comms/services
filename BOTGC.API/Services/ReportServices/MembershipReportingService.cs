@@ -335,7 +335,7 @@ namespace BOTGC.API.Services.ReportServices
             var windowStart = new DateTime(report.FinancialYearEnd.Year, 4, 1);
             var windowEnd = new DateTime(report.FinancialYearEnd.Year, 9, 30);
 
-            if (monthlySnapshots.TryGetValue(baselineDate.Date, out var baselineSnapshot))
+            if (monthlySnapshots.TryGetValue(baselineDate.Date.AddDays(-1), out var baselineSnapshot))
             {
                 report.LostRevenueAprToSep = CalculateAprToSepLostRevenueByMonth_ActualSums(
                     report.DataPoints,

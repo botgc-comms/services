@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "question": "You hit your ball, but after 3 minutes of searching, you can't find it. What do you do?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "Keep looking until you find it. There's no time limit for searching"
+    },
+    {
+      "id": "b",
+      "text": "Go back to where you last played from, add one penalty stroke, and play another ball"
+    },
+    {
+      "id": "c",
+      "text": "Drop a new ball anywhere near the area where you think it got lost and play with a two-stroke penalty"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "If you cant find your ball after 3 minutes then it's lost (even if you then find it). You need to go back to where you last hit it and take that shot again and add a penalty shot to your score.",
+  "imageAlt": "Screenshot 2024-01-19 141908"
+}

@@ -1,4 +1,5 @@
 using BOTGC.MemberPortal;
+using BOTGC.MemberPortal.Extensions;
 using BOTGC.MemberPortal.Hubs;
 using BOTGC.MemberPortal.Interfaces;
 using BOTGC.MemberPortal.Services;
@@ -75,7 +76,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
-builder.Services.AddJuniorQuizFromGitHub(builder.Configuration);
+builder.Services.AddJuniorQuizContentFromFileSystem();
 
 var app = builder.Build();
 

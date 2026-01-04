@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "Your golf ball is in a tough spot and you decide it's too hard to play. You know moving it costs an extra shot (penalty stroke). Which ways can you move your ball correctly?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "Go back and play from where you last hit it."
+    },
+    {
+      "id": "b",
+      "text": "Kick the ball away to somewhere where it is easier to hit"
+    },
+    {
+      "id": "c",
+      "text": "Drop the ball from knee height as far back in line with the hole as you like so that you can get over the trees in front of you"
+    },
+    {
+      "id": "d",
+      "text": "Drop the ball within two club lengths from where it was, not closer to the hole."
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "When your golf ball lands in a spot where you think it's too difficult to play, the rules give you options to move it, but each comes with a one-stroke penalty. You can go back and play from where you last hit the ball, which is called \"stroke and distance.\" Or, you can drop the ball in a straight line back from the tough spot, as far back as you want, keeping the line between the hole and where the ball originally was. Lastly, you have the option to drop the ball within two club-lengths of where it lay, but not nearer to the hole.",
+  "imageAlt": "Screenshot 2024-02-15 142911"
+}

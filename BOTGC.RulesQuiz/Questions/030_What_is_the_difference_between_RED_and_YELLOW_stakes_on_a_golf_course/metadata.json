@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "What is the difference between RED and YELLOW stakes on a golf course?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "Yellow stakes mark areas of the ground that are under repair, Red stakes mark a hazard"
+    },
+    {
+      "id": "b",
+      "text": "You are not allowed to play your ball in a RED area, but you are in a YELLOW area"
+    },
+    {
+      "id": "c",
+      "text": "RED and YELLOW penalty areas are the same, except that in a RED area you are additionally allowed to take relief within 2 club lengths of where the ball crossed the edge not nearer the hole"
+    },
+    {
+      "id": "d",
+      "text": "You are allowed to move YELLOW stakes but not RED ones."
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "Red and yellow stakes on a golf course mark special areas called penalty areas. If you want to take a drop Yellow stakes mean you have to drop your ball in a straight line behind the area where your ball went in. Red stakes give you more choices: you can drop your ball on either side of the area (called \"lateral relief\"), not just behind it. Think of yellow stakes like a straight path you have to follow, and red stakes like a crossroad where you can choose which way to go.",
+  "imageAlt": "Screenshot 2024-02-19 163211"
+}

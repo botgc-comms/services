@@ -32,7 +32,7 @@ public sealed class AppAuthController : Controller
 
         var key = CacheKeyPrefixWebSso + code;
 
-        var record = await _cacheService.GetAsync<AppAuthWebSsoRecord>(key);
+        var record = await _cacheService.GetAsync<AppAuthWebSsoRecord>(key, cancellationToken);
         if (record == null || record.ExpiresUtc <= DateTimeOffset.UtcNow)
         {
             await _cacheService.RemoveAsync(key);

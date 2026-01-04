@@ -1,4 +1,4 @@
-﻿// Services.cs
+﻿// QuizServices.cs
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,35 +14,102 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Data.Tables;
-using global::BOTGC.MemberPortal.Interfaces;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
+using BOTGC.MemberPortal.Interfaces;
 using BOTGC.MemberPortal.Models;
 
 namespace BOTGC.MemberPortal.Services;
 
+public sealed class QuizContentWarmupHostedService : IHostedService
+{
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ILogger<QuizContentWarmupHostedService> _logger;
+
+    public QuizContentWarmupHostedService(
+        IServiceScopeFactory scopeFactory,
+        ILogger<QuizContentWarmupHostedService> logger)
+    {
+        _scopeFactory = scopeFactory;
+        _logger = logger;
+    }
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        using var scope = _scopeFactory.CreateScope();
+
+        var cache = scope.ServiceProvider.GetRequiredService<QuizContentCache>();
+        var sync = scope.ServiceProvider.GetRequiredService<QuizContentSynchroniser>();
+
+        var primary = await cache.GetPrimaryAsync(cancellationToken);
+        if (primary is not null)
+        {
+            _logger.LogInformation("Junior quiz warmup: primary cache already present ({Count} questions).", primary.Questions.Count);
+            return;
+        }
+
+        var standby = await cache.GetStandbyAsync(cancellationToken);
+        if (standby is not null)
+        {
+            await cache.SetPrimaryAsync(standby, cancellationToken);
+            _logger.LogInformation("Junior quiz warmup: restored primary from standby ({Count} questions).", standby.Questions.Count);
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    using var refreshScope = _scopeFactory.CreateScope();
+                    var refresher = refreshScope.ServiceProvider.GetRequiredService<QuizContentSynchroniser>();
+                    await refresher.RefreshAsync(CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Junior quiz warmup: background refresh failed.");
+                }
+            });
+
+            return;
+        }
+
+        var loaded = await sync.RefreshAsync(cancellationToken);
+        _logger.LogInformation("Junior quiz warmup: loaded from source ({Count} questions).", loaded.Questions.Count);
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+}
 public sealed class QuizContentCache
 {
     private readonly ICacheService _cache;
-    private readonly JuniorQuizOptions _options;
+    private readonly AppSettings _settings;
 
-    public QuizContentCache(ICacheService cache, JuniorQuizOptions options)
+    public QuizContentCache(ICacheService cache, AppSettings settings)
     {
         _cache = cache;
-        _options = options;
+        _settings = settings;
     }
 
-    public string Key => $"{_options.CacheKeyPrefix}:content";
+    public string PrimaryKey => $"{_settings.Quiz.JuniorQuiz.CacheKeyPrefix}:content:primary";
+    public string StandbyKey => $"{_settings.Quiz.JuniorQuiz.CacheKeyPrefix}:content:standby";
 
-    public Task<QuizContentSnapshot?> GetAsync(CancellationToken ct = default)
+    public Task<QuizContentSnapshot?> GetPrimaryAsync(CancellationToken ct = default)
     {
-        return _cache.GetAsync<QuizContentSnapshot>(Key, ct);
+        return _cache.GetAsync<QuizContentSnapshot>(PrimaryKey, ct);
     }
 
-    public Task SetAsync(QuizContentSnapshot snapshot, CancellationToken ct = default)
+    public Task<QuizContentSnapshot?> GetStandbyAsync(CancellationToken ct = default)
     {
-        return _cache.SetAsync(Key, snapshot, _options.CacheTtl, ct);
+        return _cache.GetAsync<QuizContentSnapshot>(StandbyKey, ct);
+    }
+
+    public Task SetPrimaryAsync(QuizContentSnapshot snapshot, CancellationToken ct = default)
+    {
+        return _cache.SetAsync(PrimaryKey, snapshot, _settings.Quiz.JuniorQuiz.PrimaryCacheTtl, ct);
+    }
+
+    public Task SetStandbyAsync(QuizContentSnapshot snapshot, CancellationToken ct = default)
+    {
+        return _cache.SetAsync(StandbyKey, snapshot, _settings.Quiz.JuniorQuiz.StandbyCacheTtl, ct);
     }
 }
 
@@ -60,28 +127,51 @@ public sealed class QuizContentSynchroniser
     public async Task<QuizContentSnapshot> RefreshAsync(CancellationToken ct = default)
     {
         var snapshot = await _source.LoadAsync(ct);
-        await _cache.SetAsync(snapshot, ct);
-        return snapshot;
-    }
 
-    public Task<QuizContentSnapshot?> GetCachedAsync(CancellationToken ct = default)
-    {
-        return _cache.GetAsync(ct);
+        await _cache.SetPrimaryAsync(snapshot, ct);
+        await _cache.SetStandbyAsync(snapshot, ct);
+
+        return snapshot;
     }
 }
 
 public sealed class CachedQuizQuestionProvider : IQuizQuestionProvider
 {
     private readonly QuizContentCache _cache;
+    private readonly QuizContentSynchroniser _sync;
 
-    public CachedQuizQuestionProvider(QuizContentCache cache)
+    public CachedQuizQuestionProvider(QuizContentCache cache, QuizContentSynchroniser sync)
     {
         _cache = cache;
+        _sync = sync;
     }
 
-    public Task<QuizContentSnapshot?> GetSnapshotAsync(CancellationToken ct = default)
+    public async Task<QuizContentSnapshot?> GetSnapshotAsync(CancellationToken ct = default)
     {
-        return _cache.GetAsync(ct);
+        var primary = await _cache.GetPrimaryAsync(ct);
+        if (primary is not null)
+        {
+            return primary;
+        }
+
+        var standby = await _cache.GetStandbyAsync(ct);
+        if (standby is not null)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _sync.RefreshAsync(CancellationToken.None);
+                }
+                catch
+                {
+                }
+            });
+
+            return standby;
+        }
+
+        return null;
     }
 }
 
@@ -95,22 +185,24 @@ public sealed class GitHubZipQuizContentSource : IQuizContentSource
     };
 
     private readonly HttpClient _http;
-    private readonly GitHubQuizSourceOptions _options;
+    private readonly AppSettings _settings;
 
-    public GitHubZipQuizContentSource(HttpClient http, GitHubQuizSourceOptions options)
+    public GitHubZipQuizContentSource(HttpClient http, AppSettings settings)
     {
         _http = http;
-        _options = options;
+        _settings = settings;
     }
 
     public async Task<QuizContentSnapshot> LoadAsync(CancellationToken ct = default)
     {
-        var zipUrl = $"https://codeload.github.com/{_options.Owner}/{_options.Repo}/zip/refs/heads/{_options.Ref}";
+        var gh = _settings.Quiz.GitHub ?? throw new InvalidOperationException("AppSettings.Quiz.GitHub is not configured.");
+
+        var zipUrl = $"https://codeload.github.com/{gh.Owner}/{gh.Repo}/zip/refs/heads/{gh.Ref}";
         using var req = new HttpRequestMessage(HttpMethod.Get, zipUrl);
 
-        if (!string.IsNullOrWhiteSpace(_options.Token))
+        if (!string.IsNullOrWhiteSpace(gh.Token))
         {
-            req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.Token);
+            req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", gh.Token);
         }
 
         using var resp = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -119,7 +211,7 @@ public sealed class GitHubZipQuizContentSource : IQuizContentSource
         await using var zipStream = await resp.Content.ReadAsStreamAsync(ct);
         using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read, leaveOpen: false);
 
-        var rootPrefix = $"{_options.Repo}-{_options.Ref}/{_options.RootPath.Trim('/')}/";
+        var rootPrefix = $"{gh.Repo}-{gh.Ref}/{gh.RootPath.Trim('/')}/";
         var questions = new List<QuizQuestion>(capacity: 256);
 
         foreach (var entry in zip.Entries)
@@ -162,7 +254,15 @@ public sealed class GitHubZipQuizContentSource : IQuizContentSource
                        ?? throw new InvalidOperationException($"Unable to parse meta.json for {entry.FullName}.");
             }
 
-            var imageUrl = BuildRawUrl(difficultyFolder, questionFolder, "image.png");
+            var imageUrl = BuildRawUrl(
+                owner: gh.Owner,
+                repo: gh.Repo,
+                gitRef: gh.Ref,
+                rootPath: gh.RootPath,
+                difficultyFolder: difficultyFolder,
+                questionFolder: questionFolder,
+                fileName: "image.png"
+            );
 
             questions.Add(new QuizQuestion(
                 Id: questionFolder,
@@ -180,10 +280,10 @@ public sealed class GitHubZipQuizContentSource : IQuizContentSource
         return new QuizContentSnapshot(DateTimeOffset.UtcNow, questions);
     }
 
-    private string BuildRawUrl(string difficultyFolder, string questionFolder, string fileName)
+    private static string BuildRawUrl(string owner, string repo, string gitRef, string rootPath, string difficultyFolder, string questionFolder, string fileName)
     {
-        var path = $"{_options.RootPath.Trim('/')}/{difficultyFolder}/{questionFolder}/{fileName}";
-        return $"https://raw.githubusercontent.com/{_options.Owner}/{_options.Repo}/{_options.Ref}/{path}";
+        var path = $"{rootPath.Trim('/')}/{difficultyFolder}/{questionFolder}/{fileName}";
+        return $"https://raw.githubusercontent.com/{owner}/{repo}/{gitRef}/{path}";
     }
 
     private static QuizDifficulty? ParseDifficulty(string folder)
@@ -240,16 +340,18 @@ public sealed class FileSystemQuizContentSource : IQuizContentSource
         AllowTrailingCommas = true,
     };
 
-    private readonly FileSystemQuizSourceOptions _options;
+    private readonly AppSettings _settings;
 
-    public FileSystemQuizContentSource(FileSystemQuizSourceOptions options)
+    public FileSystemQuizContentSource(AppSettings settings)
     {
-        _options = options;
+        _settings = settings;
     }
 
     public async Task<QuizContentSnapshot> LoadAsync(CancellationToken ct = default)
     {
-        var questionsRoot = Path.Combine(_options.RootPath, _options.QuestionsFolderName);
+        var fsOpts = _settings.Quiz.FileSystem ?? throw new InvalidOperationException("AppSettings.Quiz.FileSystem is not configured.");
+
+        var questionsRoot = Path.Combine(fsOpts.RootPath, fsOpts.QuestionsFolderName);
         if (!Directory.Exists(questionsRoot))
         {
             return new QuizContentSnapshot(DateTimeOffset.UtcNow, Array.Empty<QuizQuestion>());
@@ -278,13 +380,13 @@ public sealed class FileSystemQuizContentSource : IQuizContentSource
                 }
 
                 QuizMeta meta;
-                await using (var fs = File.OpenRead(metaPath))
+                await using (var metaFs = File.OpenRead(metaPath))
                 {
-                    meta = await JsonSerializer.DeserializeAsync<QuizMeta>(fs, JsonOptions, ct)
+                    meta = await JsonSerializer.DeserializeAsync<QuizMeta>(metaFs, JsonOptions, ct)
                            ?? throw new InvalidOperationException($"Unable to parse {metaPath}.");
                 }
 
-                var imagePath = Path.Combine(questionDir, _options.ImageFileName);
+                var imagePath = Path.Combine(questionDir, fsOpts.ImageFileName);
                 var imageUrl = new Uri(imagePath).AbsoluteUri;
 
                 questions.Add(new QuizQuestion(
@@ -475,7 +577,12 @@ public sealed class QuizService
             return new StartQuizResult(false, existing);
         }
 
-        var (contentVersion, selected) = await _selector.SelectAsync(request.UserId, request.QuestionCount, request.AllowedDifficulties, ct);
+        var (contentVersion, selected) = await _selector.SelectAsync(
+            request.UserId,
+            request.QuestionCount,
+            request.AllowedDifficulties,
+            ct
+        );
 
         if (selected.Count == 0)
         {
@@ -548,7 +655,12 @@ public sealed class QuizService
         return snapshot.Questions.FirstOrDefault(q => string.Equals(q.Id, nextId, StringComparison.Ordinal));
     }
 
-    public async Task<AnswerQuestionResult?> AnswerAsync(string userId, string attemptId, string questionId, string selectedAnswerId, CancellationToken ct = default)
+    public async Task<AnswerQuestionResult?> AnswerAsync(
+        string userId,
+        string attemptId,
+        string questionId,
+        string selectedAnswerId,
+        CancellationToken ct = default)
     {
         var details = await _repo.GetAttemptDetailsAsync(userId, attemptId, ct);
         if (details is null)
@@ -668,12 +780,14 @@ public sealed class TableStorageQuizAttemptRepository : IQuizAttemptRepository
     private readonly TableClient _attempts;
     private readonly TableClient _answers;
 
-    public TableStorageQuizAttemptRepository(TableStorageQuizOptions options)
+    public TableStorageQuizAttemptRepository(AppSettings settings)
     {
-        var service = new TableServiceClient(options.ConnectionString);
+        var ts = settings.Quiz.TableStorage ?? throw new InvalidOperationException("AppSettings.Quiz.TableStorage is not configured.");
 
-        _attempts = service.GetTableClient(options.AttemptsTableName);
-        _answers = service.GetTableClient(options.AnswersTableName);
+        var service = new TableServiceClient(ts.ConnectionString);
+
+        _attempts = service.GetTableClient(ts.AttemptsTableName);
+        _answers = service.GetTableClient(ts.AnswersTableName);
 
         _attempts.CreateIfNotExists();
         _answers.CreateIfNotExists();
@@ -939,91 +1053,5 @@ public sealed class TableStorageQuizAttemptRepository : IQuizAttemptRepository
                 QuestionIndex = questionIndex,
             };
         }
-    }
-}
-
-public static class JuniorQuizServiceCollectionExtensions
-{
-    public static IServiceCollection AddJuniorQuizCommon(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddSingleton(sp =>
-        {
-            var opts = configuration.GetRequiredSection("JuniorQuiz").Get<JuniorQuizOptions>();
-            return opts ?? new JuniorQuizOptions();
-        });
-
-        services.AddSingleton<QuizContentCache>();
-        services.AddSingleton<IQuizQuestionProvider, CachedQuizQuestionProvider>();
-
-        services.AddSingleton<IQuizAttemptRepository>(sp =>
-        {
-            var opts = configuration.GetRequiredSection("JuniorQuiz:TableStorage").Get<TableStorageQuizOptions>();
-            if (opts is null)
-            {
-                throw new InvalidOperationException("Missing configuration: JuniorQuiz:TableStorage.");
-            }
-
-            return new TableStorageQuizAttemptRepository(opts);
-        });
-
-        services.AddSingleton<QuizSelectionEngine>();
-        services.AddSingleton<QuizService>();
-
-        return services;
-    }
-
-    public static IServiceCollection AddJuniorQuizContentFromGitHub(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddJuniorQuizCommon(configuration);
-
-        services.AddSingleton(sp =>
-        {
-            var opts = configuration.GetRequiredSection("JuniorQuiz:GitHub").Get<GitHubQuizSourceOptions>();
-            if (opts is null)
-            {
-                throw new InvalidOperationException("Missing configuration: JuniorQuiz:GitHub.");
-            }
-
-            return opts;
-        });
-
-        services.AddHttpClient<GitHubZipQuizContentSource>();
-
-        services.AddSingleton<IQuizContentSource>(sp =>
-        {
-            var http = sp.GetRequiredService<IHttpClientFactory>().CreateClient(typeof(GitHubZipQuizContentSource).FullName!);
-            var opts = sp.GetRequiredService<GitHubQuizSourceOptions>();
-            return new GitHubZipQuizContentSource(http, opts);
-        });
-
-        services.AddSingleton<QuizContentSynchroniser>();
-
-        return services;
-    }
-
-    public static IServiceCollection AddJuniorQuizContentFromFileSystem(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddJuniorQuizCommon(configuration);
-
-        services.AddSingleton(sp =>
-        {
-            var opts = configuration.GetRequiredSection("JuniorQuiz:FileSystem").Get<FileSystemQuizSourceOptions>();
-            if (opts is null)
-            {
-                throw new InvalidOperationException("Missing configuration: JuniorQuiz:FileSystem.");
-            }
-
-            return opts;
-        });
-
-        services.AddSingleton<IQuizContentSource>(sp =>
-        {
-            var opts = sp.GetRequiredService<FileSystemQuizSourceOptions>();
-            return new FileSystemQuizContentSource(opts);
-        });
-
-        services.AddSingleton<QuizContentSynchroniser>();
-
-        return services;
     }
 }

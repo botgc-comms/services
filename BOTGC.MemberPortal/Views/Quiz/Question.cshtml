@@ -1,0 +1,49 @@
+﻿@* Views/Quiz/Question.cshtml *@
+@model BOTGC.MemberPortal.Models.QuizQuestionViewModel
+
+@{
+    ViewData["Title"] = "Rules quiz";
+    var bgStyle = !string.IsNullOrWhiteSpace(Model.ImageUrl) ? $"background-image:url('{Model.ImageUrl}');" : "";
+}
+
+<div class="quiz">
+    <header class="quiz__header">
+        <a class="quiz__back" href="/quiz" aria-label="Back">‹</a>
+        <h1 class="quiz__title">Question @Model.QuestionNumber of @Model.TotalQuestions</h1>
+        <span class="quiz__spacer" aria-hidden="true"></span>
+    </header>
+
+    <section class="quizq" style="@bgStyle">
+        <div class="quizq__overlay">
+            <h2 class="quizq__question">@Model.QuestionText</h2>
+
+            @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+            {
+                <img class="quizq__img" src="@Model.ImageUrl" alt="@(Model.ImageAlt ?? "")" />
+            }
+
+            <form method="post" action="/quiz/@Model.AttemptId/answer" class="quizq__form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="QuestionId" value="@Model.QuestionId" />
+
+                <fieldset class="quizq__fieldset">
+                    <legend class="visually-hidden">Choose an answer</legend>
+
+                    <ul class="quizq__choices">
+                        @foreach (var c in Model.Choices)
+                        {
+                            var id = $"ans_{Model.QuestionId}_{c.Id}";
+
+                            <li class="quizq__choice">
+                                <input class="quizq__radio" type="radio" id="@id" name="SelectedAnswerId" value="@c.Id" required />
+                                <label class="quizq__label" for="@id">@c.Text</label>
+                            </li>
+                        }
+                    </ul>
+                </fieldset>
+
+                <button class="quiz__cta" type="submit">Submit answer</button>
+            </form>
+        </div>
+    </section>
+</div>

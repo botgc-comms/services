@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "question": "Julie has always struggled to line up their shots, so they take a spare club, and lie it down on the ground so that they can line their feet up with it before taking their shot. Is this allowed?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "No, they will get a two-stroke penalty. You are not allowed to place aids on the ground to help you line up your shot."
+    },
+    {
+      "id": "b",
+      "text": "Yes, it's what you do when you are practicing, so you can do it on a golf course"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "Unfortunately, Julie will get a two-stroke penalty. You cannot place something down on the ground to help with your alignment.",
+  "imageAlt": "Screenshot 2024-04-01 112535"
+}

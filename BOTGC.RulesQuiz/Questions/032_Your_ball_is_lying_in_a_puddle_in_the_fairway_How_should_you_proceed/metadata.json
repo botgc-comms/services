@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "Your ball is lying in a puddle in the fairway. How should you proceed?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "You have to hit the ball where it is"
+    },
+    {
+      "id": "b",
+      "text": "Drop the ball within 1 club length from the nearest point of complete relief no nearer the hole without any penalty"
+    },
+    {
+      "id": "c",
+      "text": "You have to declare the ball unplayable, move it, and take a penalty"
+    },
+    {
+      "id": "d",
+      "text": "Pick the pall up, and place it at the edge of the puddle and play it from there"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "Drop the ball within one club length of the nearest point of relief, no closer to the hole, without penalty.",
+  "imageAlt": "Screenshot 2024-02-19 170933"
+}

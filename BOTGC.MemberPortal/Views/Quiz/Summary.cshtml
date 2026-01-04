@@ -1,0 +1,44 @@
+﻿@* Views/Quiz/Summary.cshtml *@
+@model BOTGC.MemberPortal.Models.QuizAttemptSummaryViewModel
+
+@{
+    ViewData["Title"] = "Quiz summary";
+    var statusClass = Model.Passed ? "quizsum--pass" : "quizsum--fail";
+    var statusText = Model.Passed ? "Passed" : "Not passed";
+}
+
+<div class="quiz">
+    <header class="quiz__header">
+        <a class="quiz__back" href="/quiz" aria-label="Back">‹</a>
+        <h1 class="quiz__title">Quiz summary</h1>
+        <span class="quiz__spacer" aria-hidden="true"></span>
+    </header>
+
+    <section class="quizsum @statusClass">
+        <div class="quizsum__top">
+            <div class="quizsum__status">@statusText</div>
+            <div class="quizsum__score">@Model.CorrectCount / @Model.TotalQuestions</div>
+            <div class="quizsum__meta">
+                Pass mark @Model.PassMark
+                · Completed @Model.FinishedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+            </div>
+        </div>
+
+        <div class="quizsum__answers">
+            <h2 class="quiz__section-title">Your answers</h2>
+
+            <ul class="anslist">
+                @foreach (var a in Model.Answers.OrderBy(x => x.AnsweredAtUtc))
+                {
+                    var rowClass = a.IsCorrect ? "ansrow--ok" : "ansrow--bad";
+
+                    <li class="ansrow @rowClass">
+                        <div class="ansrow__q">Question: @a.QuestionId</div>
+                        <div class="ansrow__a">Your answer: @a.SelectedAnswerId</div>
+                        <div class="ansrow__r">@(a.IsCorrect ? "Correct" : "Incorrect")</div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </section>
+</div>

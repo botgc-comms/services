@@ -158,4 +158,9 @@ public class RedisCacheService : ICacheService
         ctx.Items[WarmedKeysItemsKey] = newSet;
         return newSet;
     }
+
+    public Task<T?> GetAsync<T>(string key, CancellationToken ct = default) where T : class
+    {
+        return this.GetAsync<T>(key, false, ct);    
+    }
 }

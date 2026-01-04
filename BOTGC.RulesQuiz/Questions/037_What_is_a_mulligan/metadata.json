@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "question": "What is a 'mulligan'?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "A mulligan is a free shot given if you're unhappy with your first shot, and it's allowed anytime during official competitions."
+    },
+    {
+      "id": "b",
+      "text": "A mulligan is where you take another shot if your first one wasn't very good, but it's not allowed in competitions."
+    },
+    {
+      "id": "c",
+      "text": "A mulligan allows you to move your ball out of a bunker without penalty, and it can be used once game."
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "A 'mulligan' gives a player the chance to repeat a shot, essentially acting as a \"free shot\" to make up for a poor one. However, it's important to know that mulligans are NOT to be used if you are in a competition of if you intend to put your card in for a handicap.",
+  "imageAlt": "Screenshot 2024-04-01 095541"
+}

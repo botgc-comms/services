@@ -130,7 +130,7 @@ public sealed partial class WasteSheetDailyFlusher : BackgroundService
                 var dto = new WasteEntryCommandDto(
                     WastageDateUtc: date,
                     ProductId: e.IGProductId,
-                    StockRoomId: null,
+                    StockRoomId: 1,
                     Quantity: qty,
                     Reason: e.Reason,
                     ClientEntryId: e.ClientEntryId,

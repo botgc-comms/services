@@ -11,7 +11,49 @@ public class AppSettings
     public List<TileDefinition> Tiles { get; set; } = new List<TileDefinition>();
     public Cache Cache { get; set; } = new();
     public WhatsNextSettings? WhatsNext { get; init; }
+
+    public QuizSettings Quiz { get; set; } = new();
 }
+
+public sealed class QuizSettings
+{
+    public JuniorQuizSettings JuniorQuiz { get; set; } = new();
+    public GitHubQuizSourceSettings? GitHub { get; set; }
+    public FileSystemQuizSourceSettings? FileSystem { get; set; }
+    public TableStorageQuizSettings? TableStorage { get; set; }
+}
+
+public sealed class JuniorQuizSettings
+{
+    public string CacheKeyPrefix { get; set; } = "junior-quiz";
+    public TimeSpan PrimaryCacheTtl { get; set; } = TimeSpan.FromHours(12);
+    public TimeSpan StandbyCacheTtl { get; set; } = TimeSpan.FromDays(7);
+    public TimeSpan RefreshInterval { get; set; } = TimeSpan.FromMinutes(30);
+}
+
+public sealed class GitHubQuizSourceSettings
+{
+    public string Owner { get; set; } = string.Empty;
+    public string Repo { get; set; } = string.Empty;
+    public string Ref { get; set; } = "main";
+    public string RootPath { get; set; } = "questions";
+    public string? Token { get; set; }
+}
+
+public sealed class FileSystemQuizSourceSettings
+{
+    public string RootPath { get; set; } = string.Empty;
+    public string QuestionsFolderName { get; set; } = "questions";
+    public string ImageFileName { get; set; } = "image.png";
+}
+
+public sealed class TableStorageQuizSettings
+{
+    public string ConnectionString { get; set; } = string.Empty;
+    public string AttemptsTableName { get; set; } = "QuizAttempts";
+    public string AnswersTableName { get; set; } = "QuizAnswers";
+}
+
 public sealed class WhatsNextSettings
 {
     public int MaxItems { get; init; } = 2;
@@ -44,7 +86,6 @@ public class Access
 
 public class Cache
 {
-    public string ConnectionString { get; set; }
+    public string ConnectionString { get; set; } = string.Empty;
     public string InstanceName { get; set; } = "BOTGC.API";
 }
-

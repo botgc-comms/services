@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "You are about to take a shot and notice a leaf next to your ball. You remove the leaf, but your ball moves. What is the rule in this situation?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "Continue to play from the new position of the ball without any penalty"
+    },
+    {
+      "id": "b",
+      "text": "Replace the ball to its original position and add one penalty stroke to your score"
+    },
+    {
+      "id": "c",
+      "text": "Replace the ball to its original position without any penalty"
+    },
+    {
+      "id": "d",
+      "text": "Leave the ball where it moved to and take a two-stroke penalty"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "If you move your ball accidentally you must return it to where it was before it moved and add a penalty stroke. If you don't put it back and play it then its 2 penalty shots.",
+  "imageAlt": "Screenshot 2024-01-19 140028"
+}

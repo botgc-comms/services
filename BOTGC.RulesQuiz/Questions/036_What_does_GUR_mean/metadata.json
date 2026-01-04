@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "What does G.U.R. mean?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "Grass Unusually Rough."
+    },
+    {
+      "id": "b",
+      "text": "Ground Under Repair."
+    },
+    {
+      "id": "c",
+      "text": "Greens Under Revonovation."
+    },
+    {
+      "id": "d",
+      "text": "Golf Umbrella Required."
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "\"Ground Under Repair\" (GUR) is a term used in golf for areas of the course that are being fixed or improved. If your ball lands in a GUR, you're allowed to move it to a better spot close by, without any penalty. This rule helps make sure you can still enjoy your game, even if parts of the course are under repair.",
+  "imageAlt": "Screenshot 2024-04-01 093742"
+}

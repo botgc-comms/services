@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "You hit a shot and you find that ball rolled past a white out-of-bounds (OB) post. What should you do?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "Play the ball as it lies without any penalty."
+    },
+    {
+      "id": "b",
+      "text": "Move the ball one club-length from the OB post."
+    },
+    {
+      "id": "c",
+      "text": "Add a one-shot penalty, and walk back and hit another ball from where your last shot was played from"
+    },
+    {
+      "id": "d",
+      "text": "Pull the post out of the ground and hit your ball"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "You are out-of-bounds. You are not allowed to play that ball, so you will need to pick it up and go back to where you last hit it and add 1 penalty shot to your score.",
+  "imageAlt": "Screenshot 2024-01-19 115444"
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "You go to take your shot but you notice your ball is cracked. What do you do?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "You are allowed to mark the position of the ball and replace it with a new one without a penalty."
+    },
+    {
+      "id": "b",
+      "text": "You must complete the hole with this ball."
+    },
+    {
+      "id": "c",
+      "text": "You can replace the ball with 1 shot penalty."
+    },
+    {
+      "id": "d",
+      "text": "You are not allowed to use this cracked ball, and must replace it with a penalty."
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "If a ball becomes visibly cut, cracked, or significantly deformed, the player may replace it without penalty. However, the damage must be such that it affects the ball's performance, and the player must first announce their intention to inspect the ball for damage to their fellow competitor or opponent.",
+  "imageAlt": "Screenshot 2024-02-19 160701"
+}

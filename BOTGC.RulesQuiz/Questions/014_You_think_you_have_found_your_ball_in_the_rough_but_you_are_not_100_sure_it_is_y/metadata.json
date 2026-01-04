@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "You think you have found your ball in the rough, but you are not 100% sure it is yours. What can you do.*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "Pick up the ball and all of the dirt and mud from the ball"
+    },
+    {
+      "id": "b",
+      "text": "Draw a smiley face on the ball before you start your round so you can tell it's your ball later."
+    },
+    {
+      "id": "c",
+      "text": "Lift it without marking its position to check its yours"
+    },
+    {
+      "id": "d",
+      "text": "Mark its position, and clean it enough to find the smiley face you drew on it earlier"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "Always mark your ball with something that is unique to you. If you need to check that the ball is yours then mark its position with something like a tee peg, and gently pick it up and check it. You are only allowed to clean it just enough to identify that it is yours. Then put it back. You might pick up a penalty shot if you don't follow this advice.",
+  "imageAlt": "Screenshot 2024-01-19 105309"
+}
