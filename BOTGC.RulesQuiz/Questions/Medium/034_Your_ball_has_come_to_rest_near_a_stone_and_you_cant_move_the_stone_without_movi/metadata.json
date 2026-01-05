@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "question": "Your ball has come to rest near a stone, and you can't move the stone without moving the ball. You don't want to risk damaging your club. What are your options?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "Play the ball as it lies with no penalty."
+    },
+    {
+      "id": "b",
+      "text": "Declare the ball unplayable."
+    },
+    {
+      "id": "c",
+      "text": "You can move the stone and if the ball moves simply put it back where it was without penalty."
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "You can ALWAYS declare a ball unplayable on a course as long as it is not in a penalty area.",
+  "imageAlt": "Screenshot 2024-04-01 091757"
+}

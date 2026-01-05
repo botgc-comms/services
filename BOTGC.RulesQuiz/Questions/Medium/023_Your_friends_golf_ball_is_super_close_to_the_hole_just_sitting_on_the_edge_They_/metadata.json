@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "Your friend's golf ball is super close to the hole, just sitting on the edge. They decide to get down and blow on it to help it into the hole.*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "It's all good, and they can count the shot."
+    },
+    {
+      "id": "b",
+      "text": "Oops! That's not allowed, and they get an extra 2 shots added to their score for trying to help the ball in."
+    },
+    {
+      "id": "c",
+      "text": "If they wait a bit before blowing, it's okay."
+    },
+    {
+      "id": "d",
+      "text": "Its perfectly ok to mess about on the golf course"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "In golf, you have to let the ball move into the hole on its own. If your ball stops right next to the hole, you might really want it to fall in, but you can't blow on it or touch it to help it along. If someone does that, they've broken a golf rule and will get an extra two penalty shots added to their score. And it's never ok to mess around on a golf course, it can be dangerous, and risks damaging the course for others.",
+  "imageAlt": "Screenshot 2024-02-15 130116"
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "During your golf round, your ball comes to rest against a rake in a bunker. According to the rules of golf, what should you do?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "Play the ball as it lies without moving the rake."
+    },
+    {
+      "id": "b",
+      "text": "Move the rake and if the ball moves, place it back where it was without penalty."
+    },
+    {
+      "id": "c",
+      "text": "Take a penalty stroke and drop the ball outside the bunker."
+    },
+    {
+      "id": "d",
+      "text": "Move the rake and if the ball moves, add a penalty shot to your score"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "In this situation, the rake is considered a movable obstruction. According to the rules, you are allowed to move the obstruction (the rake). If the ball moves as a result of moving the obstruction, there is no penalty, but you must replace the ball to its original position before the obstruction was moved.",
+  "imageAlt": "Screenshot 2024-01-22 120347"
+}

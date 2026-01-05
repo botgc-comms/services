@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "question": "You are in a match play competition and you hit your putt which finishes 6 inches from the hole. Your opponent says \"You can have that one\". You take the putt anyway for a bit of practice and miss. Whats the rule*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "Your hole finished as soon as the other player gave you the putt. The fact you took it anyway and missed does not make any difference."
+    },
+    {
+      "id": "b",
+      "text": "Bad luck, the missed putt counts if you hit it. You should have picked it up."
+    },
+    {
+      "id": "c",
+      "text": "You automatically loose the hole because you should not have hit that final putt."
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "In match play, if your opponent concedes a hole, the hole is considered finished at that point, and the result is determined based on the concession. If you decide to hit your putt anyway after the concession and miss, it doesn't affect the outcome of the hole.",
+  "imageAlt": "Screenshot 2024-02-19 164731"
+}

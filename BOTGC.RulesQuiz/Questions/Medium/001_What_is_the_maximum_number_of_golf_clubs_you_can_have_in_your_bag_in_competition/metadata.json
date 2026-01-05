@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "question": "What is the maximum number of golf clubs you can have in your bag in competition? *",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "13"
+    },
+    {
+      "id": "b",
+      "text": "14"
+    },
+    {
+      "id": "c",
+      "text": "15"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "you can carry a maximum of 14 clubs. If you find you have more than 14, add a two-stroke penalty per hole (max 4 strokes) to your score. To avoid using the extra club(s), turn them upside down in your bag as a reminder they're out of play.",
+  "imageAlt": "Screenshot 2024-01-22 095642"
+}

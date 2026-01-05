@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "You decided to declare the ball unplayable so you did not damage your club trying to hit it. What can you now do?*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "Take a one-stroke penalty, then drop your ball up to two club-lengths away from where it was, but not closer to the hole."
+    },
+    {
+      "id": "b",
+      "text": "Take a one-stroke penalty, and then drop your ball anywhere on a straight line from the hole through where your ball was, going back as far as you want."
+    },
+    {
+      "id": "c",
+      "text": "Take a one-stroke penalty and hit your next shot from where you hit the ball last time."
+    },
+    {
+      "id": "d",
+      "text": "Pick up your ball, clean it, and place it down one club-length away with a one-stoke penalty"
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "A, B, and C are all things you can do if your ball is in a place where you can't or don't want to play it. You say it's 'unplayable,' and then you can move the ball, but you always have to add one extra stroke to your score as a penalty for moving it. You can drop it within 2 club lengths no nearer the hole, go back as far as you want or play it from where you last hit it. Each time you MUST drop it from knee height.",
+  "imageAlt": "Screenshot 2024-04-01 093416"
+}

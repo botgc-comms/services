@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "question": "You're in the middle of a golf tournament and Julie says \"I think you need an 8-Iron for this hole\". Which of these is true*",
+  "type": "multiple_choice",
+  "choices": [
+    {
+      "id": "a",
+      "text": "You should use an 8-Iron because they know best"
+    },
+    {
+      "id": "b",
+      "text": "They have broken the rules by giving you advice, and they should receive a 2-shot penalty"
+    },
+    {
+      "id": "c",
+      "text": "If you take their advice you run the risk of getting a 2 shot penalty"
+    },
+    {
+      "id": "d",
+      "text": "If they are there as your caddy then its ok for them to say this."
+    }
+  ],
+  "correctAnswer": null,
+  "explanation": "You are allowed to discuss anything with your caddy, but if you are talking to another player about a shot you are about to take then you can only discuss direction and distances. If you offer advice, like what club to hit, or what club you just used then you will pick up a penalty and if you follow advice then you will also be penalised.",
+  "imageAlt": "Screenshot 2024-01-19 111015"
+}
