@@ -40,17 +40,16 @@ public sealed class QuizContentWarmupHostedService : IHostedService
         var sync = scope.ServiceProvider.GetRequiredService<QuizContentSynchroniser>();
 
         var primary = await cache.GetPrimaryAsync(cancellationToken);
-        if (primary is not null)
+        if (primary is not null && primary.Questions.Count > 0)
         {
-            _logger.LogInformation("Junior quiz warmup: primary cache already present ({Count} questions).", primary.Questions.Count);
+            _logger.LogInformation("Junior quiz warmup: primary present ({Count} questions).", primary.Questions.Count);
             return;
         }
 
         var standby = await cache.GetStandbyAsync(cancellationToken);
-        if (standby is not null)
+        if (standby is not null && standby.Questions.Count > 0)
         {
-            await cache.SetPrimaryAsync(standby, cancellationToken);
-            _logger.LogInformation("Junior quiz warmup: restored primary from standby ({Count} questions).", standby.Questions.Count);
+            _logger.LogInformation("Junior quiz warmup: primary missing, standby present ({Count} questions). Background refresh will repopulate primary.", standby.Questions.Count);
 
             _ = Task.Run(async () =>
             {
@@ -70,6 +69,13 @@ public sealed class QuizContentWarmupHostedService : IHostedService
         }
 
         var loaded = await sync.RefreshAsync(cancellationToken);
+
+        if (loaded.Questions.Count == 0)
+        {
+            _logger.LogWarning("Junior quiz warmup: loaded from source but zero questions were found.");
+            return;
+        }
+
         _logger.LogInformation("Junior quiz warmup: loaded from source ({Count} questions).", loaded.Questions.Count);
     }
 
@@ -78,6 +84,7 @@ public sealed class QuizContentWarmupHostedService : IHostedService
         return Task.CompletedTask;
     }
 }
+
 public sealed class QuizContentCache
 {
     private readonly ICacheService _cache;
@@ -127,6 +134,11 @@ public sealed class QuizContentSynchroniser
     public async Task<QuizContentSnapshot> RefreshAsync(CancellationToken ct = default)
     {
         var snapshot = await _source.LoadAsync(ct);
+
+        if (snapshot.Questions.Count == 0)
+        {
+            return snapshot;
+        }
 
         await _cache.SetPrimaryAsync(snapshot, ct);
         await _cache.SetStandbyAsync(snapshot, ct);
@@ -373,7 +385,7 @@ public sealed class FileSystemQuizContentSource : IQuizContentSource
                 ct.ThrowIfCancellationRequested();
 
                 var questionId = Path.GetFileName(questionDir);
-                var metaPath = Path.Combine(questionDir, "meta.json");
+                var metaPath = Path.Combine(questionDir, "metadata.json");
                 if (!File.Exists(metaPath))
                 {
                     continue;
@@ -586,7 +598,7 @@ public sealed class QuizService
 
         if (selected.Count == 0)
         {
-            throw new InvalidOperationException("No quiz questions available.");
+            return new StartQuizResult(false, null);
         }
 
         var attemptId = CreateAttemptId();
