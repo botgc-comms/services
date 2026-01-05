@@ -454,13 +454,13 @@ h1, h2 {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  colour: #2c3e50;
+  color: #2c3e50;
 }
 
 .membership-description {
   font-size: 1rem;
   line-height: 1.6;
-  colour: #4a4a4a;
+  color: #4a4a4a;
 }
 
 .membership-categories {
