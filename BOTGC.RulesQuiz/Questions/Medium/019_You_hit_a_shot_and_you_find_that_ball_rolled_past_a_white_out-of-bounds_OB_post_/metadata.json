@@ -20,7 +20,7 @@
       "text": "Pull the post out of the ground and hit your ball"
     }
   ],
-  "correctAnswer": null,
+  "correctAnswer": "a",
   "explanation": "You are out-of-bounds. You are not allowed to play that ball, so you will need to pick it up and go back to where you last hit it and add 1 penalty shot to your score.",
   "imageAlt": "Screenshot 2024-01-19 115444"
 }

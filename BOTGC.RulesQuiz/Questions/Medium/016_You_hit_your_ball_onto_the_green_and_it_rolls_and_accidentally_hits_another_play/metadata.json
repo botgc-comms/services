@@ -20,7 +20,7 @@
       "text": "You have to retake your shot"
     }
   ],
-  "correctAnswer": null,
+  "correctAnswer": "a",
   "explanation": "There isn't a penalty as long as the ball you hit is returned to its original position.",
   "imageAlt": "Screenshot 2024-01-19 113537"
 }

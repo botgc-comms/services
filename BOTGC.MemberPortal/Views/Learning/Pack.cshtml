@@ -1,0 +1,64 @@
+﻿@* Views/Learning/Pack.cshtml *@
+@model BOTGC.MemberPortal.Models.LearningPackViewModel
+
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "_SubpageLayout";
+    ViewData["BackHref"] = "/learning";
+    ViewData["BackLabel"] = "Back to learning";
+}
+
+@section PageHeader
+{
+    <h1 class="learning__title">@Model.Title</h1>
+    <p class="learning__subtitle">@(Model.Description ?? Model.Summary)</p>
+}
+
+<div class="learning">
+
+    <div class="learningpack__summary">
+        <div class="learningpack__summary-line">
+            <span>@Model.EstimatedMinutes min</span>
+            <span class="learningpack__dot">·</span>
+            <span>@(Model.IsMandatory ? "Required" : "Extra")</span>
+            @if (Model.IsCompleted && Model.CompletedAtUtc.HasValue)
+            {
+                <span class="learningpack__dot">·</span>
+                <span>Completed @Model.CompletedAtUtc.Value.ToLocalTime().ToString("dd MMM yyyy")</span>
+            }
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.ContinueHref))
+        {
+            <a class="learningpack__continue" href="@Model.ContinueHref">Continue reading</a>
+        }
+    </div>
+
+    <ul class="lplist">
+        @foreach (var p in Model.Pages)
+        {
+            var statusClass = p.IsRead ? "lpcard--complete" : (p.IsCurrent ? "lpcard--started" : "");
+            var subtitle = p.Summary;
+            @* var subtitle = p.IsRead ? "Read" : (p.IsCurrent ? "Continue" : "Tap to read"); *@
+
+            <li>
+                <a class="lpcard lpcard--page @statusClass" href="/learning/@Model.PackId/page/@p.PageId">
+                    <div class="lpcard__meta">
+                        <div class="lpcard__minutes">
+                            <span class="lpcard__minutes-main">@p.Index</span>
+                            @* <span class="lpcard__minutes-sub">page</span> *@
+                        </div>
+                    </div>
+
+                    <div class="lpcard__main">
+                        <div class="lpcard__title">@p.Title</div>
+                        <div class="lpcard__subtitle">@subtitle</div>
+                    </div>
+
+                    <span class="lpcard__chev" aria-hidden="true">›</span>
+                </a>
+            </li>
+        }
+    </ul>
+
+</div>

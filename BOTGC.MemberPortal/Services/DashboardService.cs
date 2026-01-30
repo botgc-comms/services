@@ -32,8 +32,8 @@ public sealed class DashboardService : IDashboardService
             },
             new()
             {
-                Title = "Quizzers & Tasks",
-                Subtitle = "Complete daily activities to boost your progress.",
+                Title = "Learning",
+                Subtitle = "Access learning material and quizes.",
                 Href = "/quiz",
                 IconUrl = "/img/icons/nav_play.png"
             },
@@ -115,7 +115,7 @@ public sealed class DashboardService : IDashboardService
         return new DashboardBuildResult
         {
             AvatarUrl = "/img/buddy.jpg",
-            LevelLabel = "Cadet Level",
+            LevelLabel = "Junior Cadet",
             LevelName = "Beginner",
             LevelProgressPercent = 34,
             QuickActions = quickActions,

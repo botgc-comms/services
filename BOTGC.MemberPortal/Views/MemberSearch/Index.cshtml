@@ -1,0 +1,319 @@
+﻿@{
+    ViewData["Title"] = "Child search";
+    Layout = "_AdminLayout";
+    ViewData["AdminBackHref"] = "/";
+    ViewData["AdminBackLabel"] = "Back to admin dashboard";
+    ViewData["ShowSelectedChild"] = false;
+
+    var returnUrl = ViewData["ReturnUrl"] as string ?? string.Empty;
+}
+
+@section AdminHeader
+{
+    <h1 class="dashboard__title">Child search</h1>
+    <p class="checkride__subtitle">Find a child to work with.</p>
+}
+
+<section class="dashboard__section">
+    <div class="dashboard__card p-3">
+        <div class="typeahead" data-endpoint="/Admin/MemberSearch/Search">
+            <label class="typeahead__label" for="child-search">Start typing a name or member number</label>
+
+            <input id="child-search"
+                   class="typeahead__input"
+                   type="text"
+                   autocomplete="off"
+                   spellcheck="false"
+                   placeholder="e.g. Benji or 3194"
+                   aria-autocomplete="list"
+                   aria-expanded="false"
+                   aria-controls="child-search-results" />
+
+            <div class="typeahead__status" aria-live="polite" aria-atomic="true"></div>
+
+            <ul id="child-search-results" class="typeahead__results" role="listbox" hidden></ul>
+        </div>
+
+        <form id="child-select-form" method="post" action="/Admin/MemberSearch/Select" hidden>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="playerId" id="selected-playerId" />
+            <input type="hidden" name="memberNumber" id="selected-memberNumber" />
+            <input type="hidden" name="fullName" id="selected-fullName" />
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+            <input type="hidden" name="avatarDataUri" id="selected-avatarDataUri" />
+        </form>
+    </div>
+</section>
+
+<script>
+    (() => {
+        const root = document.querySelector(".typeahead");
+        if (!root) return;
+
+        const endpoint = root.getAttribute("data-endpoint");
+        const input = root.querySelector(".typeahead__input");
+        const resultsEl = root.querySelector(".typeahead__results");
+        const statusEl = root.querySelector(".typeahead__status");
+
+        const form = document.getElementById("child-select-form");
+        const playerIdField = document.getElementById("selected-playerId");
+        const fullNameField = document.getElementById("selected-fullName");
+        const memberNumberField = document.getElementById("selected-memberNumber");
+        const avatarField = document.getElementById("selected-avatarDataUri");
+
+        let items = [];
+        let activeIndex = -1;
+        let debounceTimer = null;
+        let inflight = null;
+
+        const setExpanded = (expanded) => {
+            input.setAttribute("aria-expanded", expanded ? "true" : "false");
+        };
+
+        const clearResults = () => {
+            items = [];
+            activeIndex = -1;
+            resultsEl.innerHTML = "";
+            resultsEl.hidden = true;
+            setExpanded(false);
+        };
+
+        const setStatus = (text) => {
+            statusEl.textContent = text || "";
+        };
+
+        const updateActive = () => {
+            const children = Array.from(resultsEl.querySelectorAll(".typeahead__item"));
+            children.forEach((el, idx) => {
+                const isActive = idx === activeIndex;
+                el.classList.toggle("is-active", isActive);
+                if (isActive) {
+                    input.setAttribute("aria-activedescendant", el.id);
+                }
+            });
+
+            if (activeIndex < 0) {
+                input.removeAttribute("aria-activedescendant");
+            }
+        };
+
+        const makeAvatar = (avatarDataUri) => {
+            const avatar = document.createElement("div");
+            avatar.className = "typeahead__avatar";
+            avatar.setAttribute("aria-hidden", "true");
+
+            const setFallback = () => {
+                avatar.innerHTML = "";
+                const fallback = document.createElement("span");
+                fallback.className = "typeahead__avatar-fallback";
+                fallback.textContent = "👤";
+                avatar.appendChild(fallback);
+            };
+
+            if (avatarDataUri) {
+                const img = document.createElement("img");
+                img.className = "typeahead__avatar-img";
+                img.src = "data:image/webp;base64," + String(avatarDataUri);
+                img.alt = "";
+                img.addEventListener("error", () => setFallback());
+                avatar.appendChild(img);
+            } else {
+                setFallback();
+            }
+
+            return avatar;
+        };
+
+        const renderResults = () => {
+            resultsEl.innerHTML = "";
+            if (items.length === 0) {
+                resultsEl.hidden = true;
+                setExpanded(false);
+                return;
+            }
+
+            items.forEach((x, idx) => {
+                const li = document.createElement("li");
+                li.className = "typeahead__item";
+                li.setAttribute("role", "option");
+                li.setAttribute("id", `child-opt-${idx}`);
+                li.dataset.index = String(idx);
+
+                const row = document.createElement("div");
+                row.className = "typeahead__row";
+
+                const avatar = makeAvatar(x.avatarDataUri);
+
+                const main = document.createElement("div");
+                main.className = "typeahead__main";
+
+                const title = document.createElement("div");
+                title.className = "typeahead__item-title";
+                title.textContent = x.fullName || "Unnamed member";
+
+                const meta = document.createElement("div");
+                meta.className = "typeahead__item-meta";
+
+                const bits = [];
+
+                if (x.membershipCategory) {
+                    bits.push(String(x.membershipCategory));
+                }
+
+                if (x.memberNumber != null && Number(x.memberNumber) > 0) {
+                    bits.push(`#${x.memberNumber}`);
+                }
+
+                meta.textContent = bits.join(" · ");
+
+                const chev = document.createElement("div");
+                chev.className = "typeahead__chev";
+                chev.setAttribute("aria-hidden", "true");
+                chev.textContent = "›";
+
+                main.appendChild(title);
+                main.appendChild(meta);
+
+                row.appendChild(avatar);
+                row.appendChild(main);
+                row.appendChild(chev);
+
+                li.appendChild(row);
+
+                li.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                    selectIndex(idx);
+                });
+
+                resultsEl.appendChild(li);
+            });
+
+            resultsEl.hidden = false;
+            setExpanded(true);
+            updateActive();
+        };
+
+        const selectIndex = (idx) => {
+            const picked = items[idx];
+            if (!picked) return;
+
+            input.value = picked.fullName || "";
+            clearResults();
+            setStatus(`Selected: ${picked.fullName || "member"}`);
+
+            if (picked.playerId == null) {
+                return;
+            }
+
+            playerIdField.value = String(picked.playerId);
+            fullNameField.value = picked.fullName || "";
+
+            if (picked.memberNumber != null) {
+                memberNumberField.value = String(picked.memberNumber);
+            } else {
+                memberNumberField.value = "";
+            }
+
+            if (picked.avatarDataUri) {
+                avatarField.value = String(picked.avatarDataUri);
+            } else {
+                avatarField.value = "";
+            }
+
+            form.submit();
+        };
+
+        const fetchResults = async (q) => {
+            if (inflight) inflight.abort();
+            inflight = new AbortController();
+
+            const url = `${endpoint}?q=${encodeURIComponent(q)}`;
+
+            try {
+                setStatus("Searching…");
+                const res = await fetch(url, {
+                    method: "GET",
+                    headers: { "Accept": "application/json" },
+                    signal: inflight.signal
+                });
+
+                if (!res.ok) {
+                    clearResults();
+                    setStatus("Search failed.");
+                    return;
+                }
+
+                if (res.status === 204) {
+                    items = [];
+                    activeIndex = -1;
+                    renderResults();
+                    setStatus("No matches.");
+                    return;
+                }
+
+                const data = await res.json();
+                items = Array.isArray(data) ? data : [];
+                activeIndex = items.length > 0 ? 0 : -1;
+
+                renderResults();
+                setStatus(items.length === 0 ? "No matches." : `${items.length} match${items.length === 1 ? "" : "es"}.`);
+            } catch (e) {
+                if (e && e.name === "AbortError") return;
+                clearResults();
+                setStatus("Search failed.");
+            }
+        };
+
+        const onInput = () => {
+            const q = (input.value || "").trim();
+            clearTimeout(debounceTimer);
+
+            if (q.length < 2) {
+                clearResults();
+                setStatus("");
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                fetchResults(q);
+            }, 150);
+        };
+
+        input.addEventListener("input", onInput);
+
+        input.addEventListener("keydown", (e) => {
+            if (resultsEl.hidden) return;
+
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                activeIndex = Math.min(activeIndex + 1, items.length - 1);
+                updateActive();
+            }
+
+            if (e.key === "ArrowUp") {
+                e.preventDefault();
+                activeIndex = Math.max(activeIndex - 1, 0);
+                updateActive();
+            }
+
+            if (e.key === "Enter") {
+                if (activeIndex >= 0) {
+                    e.preventDefault();
+                    selectIndex(activeIndex);
+                }
+            }
+
+            if (e.key === "Escape") {
+                e.preventDefault();
+                clearResults();
+                setStatus("");
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!root.contains(e.target)) {
+                clearResults();
+            }
+        });
+    })();
+</script>

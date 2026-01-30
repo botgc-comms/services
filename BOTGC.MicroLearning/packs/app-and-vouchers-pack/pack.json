@@ -1,0 +1,45 @@
+{
+  "id": "app-and-vouchers",
+  "title": "Using the app and the voucher scheme",
+  "summary": "How to use the junior app and voucher rewards.",
+  "estimatedMinutes": 6,
+  "priority": 500,
+  "mandatoryFor": [
+    "JuniorCadet", 
+    "JuniorCourseCadet"
+  ],
+  "version": 1,
+  "pages": [
+    {
+      "id": "00-title",
+      "title": "Why the app matters",
+      "file": "pages/00-title.md"
+    },
+    {
+      "id": "01-getting-started",
+      "title": "Getting started",
+      "file": "pages/01-getting-started.md"
+    },
+    {
+      "id": "02-using-the-app",
+      "title": "Using the app",
+      "file": "pages/02-using-the-app.md"
+    },
+    {
+      "id": "03-voucher-scheme",
+      "title": "The voucher scheme",
+      "file": "pages/03-voucher-scheme.md"
+    },
+    {
+      "id": "04-using-vouchers",
+      "title": "Using vouchers",
+      "file": "pages/04-using-vouchers.md"
+    },
+    {
+      "id": "90-quick-check",
+      "title": "Quick check",
+      "file": "pages/90-quick-check.md",
+      "type": "quiz"
+    }
+  ]
+}

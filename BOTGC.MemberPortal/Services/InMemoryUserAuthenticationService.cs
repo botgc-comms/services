@@ -13,11 +13,21 @@ public sealed class InMemoryUserAuthenticationService : IUserAuthenticationServi
         {
             new AppUser
             {
-                Id = 3677,
-                Username = "3677",
-                DisplayName = "Seth Parsons", 
-                FirstName = "Seth", 
-                LastName = "Parsons"
+                Id = 3194,
+                Username = "3194",
+                DisplayName = "Benji Toone",
+                FirstName = "Benji",
+                LastName = "Toone",
+                Category = "JuniorCadet"
+            },
+            new AppUser
+            {
+                Id = 1,
+                Username = "admin",
+                DisplayName = "Admin User",
+                FirstName = "Admin",
+                LastName = "User", 
+                Category = "Admin"
             }
         };
     }
@@ -27,13 +37,15 @@ public sealed class InMemoryUserAuthenticationService : IUserAuthenticationServi
         string password,
         CancellationToken cancellationToken = default)
     {
-        // Hard-coded accepted credentials for now
-        const string acceptedUsername = "3677";
-        const string acceptedPassword = "3677";
-
-        if (username == acceptedUsername && password == acceptedPassword)
+        if (username == "3194" && password == "3194")
         {
-            var user = _users.Single(x => x.Username == acceptedUsername);
+            var user = _users.Single(x => x.Username == "3194");
+            return Task.FromResult<AppUser?>(user);
+        }
+
+        if (username == "admin" && password == "admin")
+        {
+            var user = _users.Single(x => x.Username == "admin");
             return Task.FromResult<AppUser?>(user);
         }
 

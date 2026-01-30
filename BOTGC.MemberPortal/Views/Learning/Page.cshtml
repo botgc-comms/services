@@ -1,0 +1,47 @@
+﻿@* Views/Learning/Page.cshtml *@
+@model BOTGC.MemberPortal.Models.LearningPackPageViewModel
+
+@{
+    ViewData["Title"] = Model.PageTitle;
+    Layout = "_SubpageLayout";
+    ViewData["BackHref"] = $"/learning/{Model.PackId}";
+    ViewData["BackLabel"] = Model.PackTitle;
+}
+
+@section PageHeader
+{
+    <h1 class="learning__title">@Model.PackTitle</h1>
+    <p class="learning__subtitle">@Model.PageTitle</p>
+}
+
+<div class="learning">
+
+    <section class="learningpage__card">
+        <p class="learningpage__meta">Page @Model.PageNumber of @Model.TotalPages</p>
+    </section>
+
+    <article class="learningmd" aria-label="@Model.PageTitle">
+        @Model.Html
+    </article>
+
+    <nav class="learningpage__nav" aria-label="Page navigation">
+        @if (!string.IsNullOrWhiteSpace(Model.PreviousPageId))
+        {
+            <a class="learningpage__navbtn" href="/learning/@Model.PackId/page/@Model.PreviousPageId">Previous</a>
+        }
+        else
+        {
+            <span class="learningpage__navspacer" aria-hidden="true"></span>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.NextPageId))
+        {
+            <a class="learningpage__navbtn" href="/learning/@Model.PackId/page/@Model.NextPageId">Next</a>
+        }
+        else
+        {
+            <a class="learningpage__navbtn" href="/learning/@Model.PackId">Back to pack</a>
+        }
+    </nav>
+
+</div>

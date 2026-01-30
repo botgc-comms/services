@@ -33,6 +33,7 @@ public sealed record StartQuizRequest(
     string UserId,
     int QuestionCount,
     int PassMark,
+    QuizDifficulty Difficulty,  
     IReadOnlyCollection<QuizDifficulty>? AllowedDifficulties
 );
 
@@ -51,6 +52,7 @@ public sealed record QuizAttempt(
     int CorrectCount,
     int PassMark,
     string ContentVersion,
+    QuizDifficulty Difficulty,
     IReadOnlyList<string> QuestionIdsInOrder
 );
 

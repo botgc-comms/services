@@ -1,0 +1,68 @@
+@use "variables" as v;
+
+@mixin page-shell {
+    padding: v.$space-4 16px v.$space-5;
+    max-width: v.$container-max;
+    margin: 0 auto;
+}
+
+@mixin heading-xl {
+    margin: 0 0 10px;
+    font-size: 2.5rem;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+}
+
+@mixin heading-lg {
+    margin: 0 0 10px;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+@mixin heading-md {
+    margin: 0 0 10px;
+    font-size: calc(1.375rem + 3.5vw);
+    letter-spacing: -0.01em;
+    font-weight: 700;
+}
+
+@mixin heading-sm {
+    margin: 0 0 10px;
+    font-size: calc(1.375rem + 2.5vw);
+    letter-spacing: -0.01em;
+    font-weight: 700;
+}
+
+@mixin card-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+@mixin card-subtitle {
+    margin: 0;
+    color: v.$color-muted;
+    font-weight: 400;
+    font-size: .82rem;
+}
+
+@mixin subtitle {
+    margin: 0;
+    color: v.$color-muted;
+    font-size: .95rem;
+}
+
+@mixin card {
+    background: v.$color-surface;
+    border-radius: v.$radius-lg;
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: v.$shadow-card;
+}
+
+@mixin focus-ring($radius: v.$radius-md) {
+    &:focus {
+        outline: v.$focus-outline;
+        outline-offset: v.$focus-offset;
+        border-radius: $radius;
+    }
+}

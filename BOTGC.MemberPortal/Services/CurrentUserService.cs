@@ -13,6 +13,37 @@ public sealed class CurrentUserService : ICurrentUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
+    public bool IsAdmin
+    {
+        get
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.IsAuthenticated != true)
+            {
+                return false;
+            }
+
+            if (user.IsInRole("Admin"))
+            {
+                return true;
+            }
+
+            var role =
+                user.FindFirstValue(ClaimTypes.Role)
+                ?? user.FindFirstValue("role")
+                ?? user.FindFirstValue("roles");
+
+            if (string.IsNullOrWhiteSpace(role))
+            {
+                return false;
+            }
+
+            return string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)
+                || role.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                       .Any(r => string.Equals(r, "Admin", StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
     public bool IsAuthenticated =>
         _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
 

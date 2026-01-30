@@ -1,4 +1,5 @@
-﻿using BOTGC.API.Controllers;
+﻿using BOTGC.API.Common;
+using BOTGC.API.Controllers;
 using System.Text.Json.Serialization;
 
 namespace BOTGC.API
@@ -25,6 +26,7 @@ namespace BOTGC.API
         public IG IG { get; set; } = new();
 
         public QueueSettings Queue { get; set; } = new();
+
         public Invoices Invoices { get; set; } = new();
 
         public StorageSettings Storage { get; set; } = new();   
@@ -46,6 +48,31 @@ namespace BOTGC.API
 
         public EposBenefitsSettings EposBenefits { get; set; } = new();
 
+        public EventsSettings Events { get; set; } = new();
+
+        public QuizSettings QuizSettings {  get; set; } = new();
+
+        public CourseAssessmentSettings CourseAssessmentSettings { get; set; } = new();
+    }
+
+    public sealed class EventsSettings
+    {
+        public int DetectorMaxConcurrency { get; set; } = 5;
+        public QuizMilestonesSettings QuizMilestones { get; set; } = new();
+        public string? DetectorFrequencyOverrideCron { get; set; }
+    }
+
+    public sealed class QuizMilestonesSettings
+    {
+        public List<QuizMilestoneRule> Rules { get; set; } = new();
+    }
+
+    public sealed class QuizMilestoneRule
+    {
+        public string Name { get; set; }
+        public string MembershipCategory { get; set; } = string.Empty;
+        public int RequiredPassedCount { get; set; }
+        public QuizDifficulty MinimumDifficulty { get; set; } = QuizDifficulty.Easy;
     }
 
     public class Invoices
@@ -75,6 +102,29 @@ namespace BOTGC.API
         public string ConnectionString { get; set; }
         public string LookupDataSource { get; set; } = "lookup";
         public string[] PublicContainers { get; set; } = Array.Empty<string>();
+    }
+
+    public sealed class QuizSettings
+    {
+        public TableStorageQuizSettings TableStorage { get; set; } = new();
+    }
+
+    public sealed class CourseAssessmentSettings
+    {
+        public TableStorageCourseAssessmentSettings TableStorage { get; set; } = new();
+    }
+
+    public sealed class TableStorageQuizSettings
+    {
+        public string ConnectionString { get; set; } = string.Empty;
+        public string AttemptsTableName { get; set; } = "QuizAttempts";
+        public string AnswersTableName { get; set; } = "QuizAnswers";
+    }
+
+    public sealed class TableStorageCourseAssessmentSettings
+    {
+        public string ConnectionString { get; set; } = string.Empty;
+        public string CourseAssessmentTableName { get; set; } = "CheckRideReports";
     }
 
     public class AuthSettings
@@ -161,6 +211,7 @@ namespace BOTGC.API
         public string RoundReportUrl { get; set; } = "/viewround.php?roundid={roundId}";
         public string MembershipReportingUrl { get; set; } = "/membership_reports.php?tab=report&section=viewreport&md=9be9f71c8988351887840f3826a552da";
         public string MembershipEventHistoryReportUrl { get; set; } = "/membership_reports.php?tab=categorychanges&requestType=ajax&ajaxaction=getreport";
+        public string MembersWithoutHandicapsReportUrl { get; set; } = "/hcapreports.php?report=12";
         public string NewMembershipApplicationUrl { get; set; } = "/membership_addmember.php?&requestType=ajax&ajaxaction=confirmadd";
         public string MemberCDHLookupUrl { get; set; } = "/membership_addmember.php?&requestType=ajax&ajaxaction=cdhidlookup";
         public string TeeBookingsUrl { get; set; } = "/teetimes.php?date={date}";

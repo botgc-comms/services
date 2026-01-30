@@ -688,5 +688,35 @@ namespace BOTGC.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving handicap data for all ladies.");
             }
         }
+
+        //[HttpGet("quiz/attempts/{memberId}")]
+        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<CompletedQuizAttemptDto>))]
+        //[ProducesResponseType(StatusCodes.Status204NoContent)]
+        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        //public async Task<IActionResult> GetCompletedQuizAttempts(int memberId)
+        //{
+        //    _logger.LogInformation($"Fetching completed Quiz attempts for member...");
+
+        //    try
+        //    {
+        //        var query = new GetCompletedQuizAttemptsQuery(memberId);
+
+        //        var playerResults = await _mediator.Send(query, HttpContext.RequestAborted);
+
+        //        if (playerResults == null)
+        //        {
+        //            _logger.LogWarning($"No attempted quizes found.");
+        //            return NoContent();
+        //        }
+
+        //        _logger.LogInformation($"Successfully retrieved {playerResults.Count} quiz attempts for member {memberId}.");
+        //        return Ok(playerResults);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, $"Error retrieving attempted quiz data for member {memberId}.");
+        //        return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving attempted quiz data for member {memberId}.");
+        //    }
+        //}
     }
 }

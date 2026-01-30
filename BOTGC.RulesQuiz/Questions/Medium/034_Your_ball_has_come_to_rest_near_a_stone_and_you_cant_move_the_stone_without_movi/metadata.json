@@ -16,7 +16,7 @@
       "text": "You can move the stone and if the ball moves simply put it back where it was without penalty."
     }
   ],
-  "correctAnswer": null,
+  "correctAnswer": "a",
   "explanation": "You can ALWAYS declare a ball unplayable on a course as long as it is not in a penalty area.",
   "imageAlt": "Screenshot 2024-04-01 091757"
 }

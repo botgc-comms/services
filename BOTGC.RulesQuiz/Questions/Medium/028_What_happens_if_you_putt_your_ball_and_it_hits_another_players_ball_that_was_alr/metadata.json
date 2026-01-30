@@ -20,7 +20,7 @@
       "text": "Your opponent has to replace their ball to the location where it was before you ball hit it"
     }
   ],
-  "correctAnswer": null,
+  "correctAnswer": "a",
   "explanation": "In stroke play, hitting another player's ball on the green with your putt incurs a two-stroke penalty. You must replace the moved ball to where it was before being hit. In match play, there's no penalty unless done intentionally. It is your responsibility to ask the player to mark their ball if it is in your way.",
   "imageAlt": "Screenshot 2024-02-15 150720"
 }

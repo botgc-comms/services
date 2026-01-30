@@ -1,0 +1,186 @@
+@use "./shared/index" as s;
+
+.checkride__subtitle {
+    @include s.subtitle;
+    margin: 6px 0 0;
+}
+
+.checkride__card {
+    padding: 18px;
+}
+
+@media (max-width: 520px) {
+    .checkride__card {
+        padding: 14px;
+    }
+}
+
+.wizard__top {
+    margin-bottom: 14px;
+    margin-top:16px;
+}
+
+.wizard__bar {
+    position: relative;
+    height: 34px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    overflow: hidden;
+}
+
+.wizard__bar-fill {
+    position: absolute;
+    inset: 0;
+    width: 0%;
+    height: 100%;
+    background: #f59e0b;
+    border-radius: 999px;
+    transition: width 180ms ease;
+}
+
+.wizard__bar-label {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    font-size: .95rem;
+    color: #111827;
+    text-shadow: 0 1px 0 rgba(255,255,255,.5);
+    pointer-events: none;
+}
+
+
+.wizard__legend {
+    @include s.heading-lg;
+    margin-bottom: 12px;
+}
+
+.checkride__field {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.checkride__field--mt {
+    margin-top: 16px;
+}
+
+.checkride__label {
+    font-weight: 900;
+}
+
+.checkride__input,
+.checkride__select,
+.checkride__textarea {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.12);
+    background: rgba(255,255,255,.9);
+    padding: 12px 12px;
+    font-size: 1rem;
+}
+
+.checkride__textarea {
+    resize: vertical;
+}
+
+.checkride__input:focus,
+.checkride__select:focus,
+.checkride__textarea:focus {
+    outline: 3px solid #9ecbff;
+    outline-offset: 2px;
+}
+
+.checkride__choices {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.checkride__choice {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 10px;
+    align-items: start;
+    padding: 12px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,.08);
+    background: rgba(17,24,39,.03);
+}
+
+.checkride__radio {
+    margin-top: 2px;
+}
+
+.checkride__choice-label {
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.wizard__error {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(245,158,11,.12);
+    border: 1px solid rgba(245,158,11,.22);
+    font-weight: 800;
+}
+
+.checkride__nav {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.checkride__btn {
+    height: 46px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-weight: 900;
+    border: 1px solid rgba(0,0,0,.10);
+    box-shadow: 0 14px 30px rgba(0,0,0,.10);
+    cursor: pointer;
+}
+
+.checkride__btn--primary {
+    background: #f59e0b;
+    color: #111827;
+}
+
+.checkride__btn--ghost {
+    background: rgba(255,255,255,.9);
+    color: #111827;
+}
+
+.checkride__btn--success {
+    background: #16a34a;
+    color: #fff;
+}
+
+.checkride__btn:focus {
+    outline: 3px solid #9ecbff;
+    outline-offset: 2px;
+}
+
+.checkride__signedoff-dl {
+    padding-bottom:5px;
+    margin-top: 1rem;
+}
+
+.checkride__signedoff-row {
+    dt {
+        font-weight: 600;
+        font-size: 1.35rem;
+    }
+
+    dd {
+        font-size: .82rem;
+        font-weight: 400;
+        color: #6b7280;
+    }
+}

@@ -1,19 +1,21 @@
 using System.Globalization;
-using System.Text.Json.Serialization;
 using System.Text;
+using System.Text.Json.Serialization;
+using Azure.Storage.Queues;
 using BOTGC.API;
 using BOTGC.API.Common;
 using BOTGC.API.Extensions;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Services;
 using BOTGC.API.Services.ReportServices;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RedLockNet.SERedis;
 using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +66,18 @@ builder.Services.AddSwaggerGen(options =>
 
     options.OperationFilter<CacheControlHeaderFilter>();
     options.OperationFilter<AllowAnonymousOperationFilter>();
+});
+
+builder.Services.AddSingleton(sp =>
+{
+    var app = sp.GetRequiredService<IOptions<AppSettings>>().Value;
+
+    if (string.IsNullOrWhiteSpace(app.Storage.ConnectionString))
+    {
+        throw new InvalidOperationException("AppSettings.Storage.ConnectionString is missing.");
+    }
+
+    return new QueueServiceClient(app.Storage.ConnectionString);
 });
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
@@ -151,6 +165,9 @@ else
 }
 
 builder.Services.AddIGSupport();
+builder.Services.RegisterEventDetectorsAndSubscribers();
+builder.Services.AddQuizAttemptQueries(appSettings.QuizSettings.TableStorage.AttemptsTableName);
+builder.Services.AddCourseAssessmentQueries(appSettings.CourseAssessmentSettings.TableStorage.CourseAssessmentTableName);
 
 builder.Services.AddHttpClient();
 

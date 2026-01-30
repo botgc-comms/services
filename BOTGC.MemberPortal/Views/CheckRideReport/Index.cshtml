@@ -1,0 +1,574 @@
+﻿@using BOTGC.MemberPortal.Models
+@model BOTGC.MemberPortal.Models.CheckRideReportViewModel
+
+@{
+    ViewData["Title"] = "Check ride report";
+    Layout = "_AdminLayout";
+    ViewData["BackHref"] = "/";
+    ViewData["BackLabel"] = "Back to admin dashboard";
+
+    var playedOnValue = Model.PlayedOn.HasValue ? Model.PlayedOn.Value.ToString("yyyy-MM-dd") : "";
+    var etiquetteYes = Model.EtiquetteAndSafetyOk == CheckRideAssessmentAnswer.Yes;
+    var etiquetteNo = Model.EtiquetteAndSafetyOk == CheckRideAssessmentAnswer.No;
+    var careYes = Model.CareForCourseOk == CheckRideAssessmentAnswer.Yes;
+    var careNo = Model.CareForCourseOk == CheckRideAssessmentAnswer.No;
+    var paceYes = Model.PaceAndImpactOk == CheckRideAssessmentAnswer.Yes;
+    var paceNo = Model.PaceAndImpactOk == CheckRideAssessmentAnswer.No;
+    var readyYes = Model.ReadyToPlayIndependently == CheckRideAssessmentAnswer.Yes;
+    var readyNo = Model.ReadyToPlayIndependently == CheckRideAssessmentAnswer.No;
+    var tee = (Model.RecommendedTeeBox ?? "").Trim();
+}
+
+@section PageHeader
+{
+    <h1 class="admin__title">Check ride report</h1>
+    <p class="admin__subtitle">Record a junior’s on-course sign-off and tee recommendation.</p>
+}
+
+@if (!(Model.IsAlreadySignedOff && Model.SignedOffSummary is not null))
+{
+    <div class="wizard__top">
+        <div class="wizard__bar" role="progressbar"
+             aria-label="Progress"
+             aria-valuemin="1"
+             aria-valuemax="6"
+             aria-valuenow="1">
+            <div class="wizard__bar-fill"></div>
+            <div class="wizard__bar-label" aria-hidden="true">Step 1 of 6</div>
+        </div>
+    </div>
+}
+
+<section class="dashboard__section">
+    <div class="dashboard__card checkride__card">
+        @if (Model.IsAlreadySignedOff && Model.SignedOffSummary is not null)
+        {
+            <div class="checkride__signedoff">
+                @* <h2 class="checkride__signedoff-title">This junior is already signed off</h2> *@
+                <p class="checkride__signedoff-body">
+                    A signed-off check ride has already been recorded, so no further check ride reports can be added.
+                </p>
+                <dl class="checkride__signedoff-dl">
+                    <div class="checkride__signedoff-row">
+                        <dt>Played on</dt>
+                        <dd>@Model.SignedOffSummary.PlayedOn.ToString("d MMM yyyy")</dd>
+                    </div>
+                    <div class="checkride__signedoff-row">
+                        <dt>Recommended tee</dt>
+                        <dd>@Model.SignedOffSummary.RecommendedTeeBox</dd>
+                    </div>
+                    <div class="checkride__signedoff-row">
+                        <dt>Recorded by</dt>
+                        <dd>@Model.SignedOffSummary.RecordedBy</dd>
+                    </div>
+                </dl>
+            </div>
+        }
+        else
+        {
+            <form method="post" action="/Admin/CheckRideReport" class="checkride__form" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div class="wizard" data-wizard>
+                    <fieldset class="wizard__step" data-step="1">
+                        <legend class="wizard__legend">When was the on-course assessment?</legend>
+
+                        <div class="checkride__field">
+                            <input class="checkride__input"
+                                    type="date"
+                                    id="PlayedOn"
+                                    name="PlayedOn"
+                                    value="@playedOnValue"
+                                    required />
+                            <div class="wizard__error" data-error-for="PlayedOn" hidden></div>
+                        </div>
+
+                        <div class="checkride__nav">
+                            <button type="button" class="checkride__btn checkride__btn--primary" data-next>Continue</button>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="wizard__step" data-step="2" hidden>
+                        <legend class="wizard__legend">Did the child show good awareness of safety and etiquette on the course?</legend>
+
+                        <ul class="checkride__choices" role="list">
+                            <li class="checkride__choice">
+                                @if (etiquetteYes)
+                                {
+                                    <input class="checkride__radio" type="radio" id="EtiquetteAndSafetyOk_Yes" name="EtiquetteAndSafetyOk" value="Yes" required checked="checked" />
+                                }
+                                else
+                                {
+                                    <input class="checkride__radio" type="radio" id="EtiquetteAndSafetyOk_Yes" name="EtiquetteAndSafetyOk" value="Yes" required />
+                                }
+                                <label class="checkride__choice-label" for="EtiquetteAndSafetyOk_Yes">Yes</label>
+                            </li>
+
+                            <li class="checkride__choice">
+                                @if (etiquetteNo)
+                                {
+                                    <input class="checkride__radio" type="radio" id="EtiquetteAndSafetyOk_No" name="EtiquetteAndSafetyOk" value="No" required checked="checked" />
+                                }
+                                else
+                                {
+                                    <input class="checkride__radio" type="radio" id="EtiquetteAndSafetyOk_No" name="EtiquetteAndSafetyOk" value="No" required />
+                                }
+                                <label class="checkride__choice-label" for="EtiquetteAndSafetyOk_No">No</label>
+                            </li>
+                        </ul>
+
+                        <div class="wizard__error" data-error-for="EtiquetteAndSafetyOk" hidden></div>
+
+                        <div class="checkride__nav">
+                            <button type="button" class="checkride__btn checkride__btn--ghost" data-back>Back</button>
+                            <button type="button" class="checkride__btn checkride__btn--primary" data-next>Continue</button>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="wizard__step" data-step="3" hidden>
+                        <legend class="wizard__legend">Did the child show they can look after the course (for example, replacing divots and repairing pitch marks)?</legend>
+
+                        <ul class="checkride__choices" role="list">
+                            <li class="checkride__choice">
+                                @if (careYes)
+                                {
+                                    <input class="checkride__radio" type="radio" id="CareForCourseOk_Yes" name="CareForCourseOk" value="Yes" required checked="checked" />
+                                }
+                                else
+                                {
+                                    <input class="checkride__radio" type="radio" id="CareForCourseOk_Yes" name="CareForCourseOk" value="Yes" required />
+                                }
+                                <label class="checkride__choice-label" for="CareForCourseOk_Yes">Yes</label>
+                            </li>
+
+                            <li class="checkride__choice">
+                                @if (careNo)
+                                {
+                                    <input class="checkride__radio" type="radio" id="CareForCourseOk_No" name="CareForCourseOk" value="No" required checked="checked" />
+                                }
+                                else
+                                {
+                                    <input class="checkride__radio" type="radio" id="CareForCourseOk_No" name="CareForCourseOk" value="No" required />
+                                }
+                                <label class="checkride__choice-label" for="CareForCourseOk_No">No</label>
+                            </li>
+                        </ul>
+
+                        <div class="wizard__error" data-error-for="CareForCourseOk" hidden></div>
+
+                        <div class="checkride__nav">
+                            <button type="button" class="checkride__btn checkride__btn--ghost" data-back>Back</button>
+                            <button type="button" class="checkride__btn checkride__btn--primary" data-next>Continue</button>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="wizard__step" data-step="4" hidden>
+                        <legend class="wizard__legend">Did the child play at a pace and standard that wouldn’t hold up other groups?</legend>
+
+                        <ul class="checkride__choices" role="list">
+                            <li class="checkride__choice">
+                                @if (paceYes)
+                                {
+                                    <input class="checkride__radio" type="radio" id="PaceAndImpactOk_Yes" name="PaceAndImpactOk" value="Yes" required checked="checked" />
+                                }
+                                else
+                                {
+                                    <input class="checkride__radio" type="radio" id="PaceAndImpactOk_Yes" name="PaceAndImpactOk" value="Yes" required />
+                                }
+                                <label class="checkride__choice-label" for="PaceAndImpactOk_Yes">Yes</label>
+                            </li>
+
+                            <li class="checkride__choice">
+                                @if (paceNo)
+                                {
+                                    <input class="checkride__radio" type="radio" id="PaceAndImpactOk_No" name="PaceAndImpactOk" value="No" required checked="checked" />
+                                }
+                                else
+                                {
+                                    <input class="checkride__radio" type="radio" id="PaceAndImpactOk_No" name="PaceAndImpactOk" value="No" required />
+                                }
+                                <label class="checkride__choice-label" for="PaceAndImpactOk_No">No</label>
+                            </li>
+                        </ul>
+
+                        <div class="wizard__error" data-error-for="PaceAndImpactOk" hidden></div>
+
+                        <div class="checkride__nav">
+                            <button type="button" class="checkride__btn checkride__btn--ghost" data-back>Back</button>
+                            <button type="button" class="checkride__btn checkride__btn--primary" data-next>Continue</button>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="wizard__step" data-step="5" hidden>
+                        <legend class="wizard__legend">Are you happy for the child to play on the course without supervision?</legend>
+
+                        <ul class="checkride__choices" role="list">
+                            <li class="checkride__choice">
+                                @if (readyYes)
+                                {
+                                    <input class="checkride__radio" type="radio" id="ReadyToPlayIndependently_Yes" name="ReadyToPlayIndependently" value="Yes" required checked="checked" />
+                                }
+                                else
+                                {
+                                    <input class="checkride__radio" type="radio" id="ReadyToPlayIndependently_Yes" name="ReadyToPlayIndependently" value="Yes" required />
+                                }
+                                <label class="checkride__choice-label" for="ReadyToPlayIndependently_Yes">Yes</label>
+                            </li>
+
+                            <li class="checkride__choice">
+                                @if (readyNo)
+                                {
+                                    <input class="checkride__radio" type="radio" id="ReadyToPlayIndependently_No" name="ReadyToPlayIndependently" value="No" required checked="checked" />
+                                }
+                                else
+                                {
+                                    <input class="checkride__radio" type="radio" id="ReadyToPlayIndependently_No" name="ReadyToPlayIndependently" value="No" required />
+                                }
+                                <label class="checkride__choice-label" for="ReadyToPlayIndependently_No">No</label>
+                            </li>
+                        </ul>
+
+                        <div class="wizard__error" data-error-for="ReadyToPlayIndependently" hidden></div>
+
+                        <div class="checkride__field checkride__field--mt">
+                            <label class="checkride__label" for="RecommendedTeeBox">Recommended tee colour</label>
+                            <select class="checkride__select" id="RecommendedTeeBox" name="RecommendedTeeBox" required>
+                                @if (string.IsNullOrWhiteSpace(tee))
+                                {
+                                    <option value="" selected="selected">Select a tee</option>
+                                }
+                                else
+                                {
+                                    <option value="">Select a tee</option>
+                                }
+
+                                @if (string.Equals(tee, "Red", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <option value="Red" selected="selected">Red</option>
+                                }
+                                else
+                                {
+                                    <option value="Red">Red</option>
+                                }
+
+                                @if (string.Equals(tee, "Yellow", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <option value="Yellow" selected="selected">Yellow</option>
+                                }
+                                else
+                                {
+                                    <option value="Yellow">Yellow</option>
+                                }
+
+                                @if (string.Equals(tee, "White", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <option value="White" selected="selected">White</option>
+                                }
+                                else
+                                {
+                                    <option value="White">White</option>
+                                }
+
+                                @if (string.Equals(tee, "Blue", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <option value="Blue" selected="selected">Blue</option>
+                                }
+                                else
+                                {
+                                    <option value="Blue">Blue</option>
+                                }
+                            </select>
+
+                            <div class="wizard__error" data-error-for="RecommendedTeeBox" hidden></div>
+                        </div>
+
+                        <div class="checkride__nav">
+                            <button type="button" class="checkride__btn checkride__btn--ghost" data-back>Back</button>
+                            <button type="button" class="checkride__btn checkride__btn--primary" data-next>Continue</button>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="wizard__step" data-step="6" hidden>
+                        <legend class="wizard__legend">Notes</legend>
+
+                        <div class="checkride__field">
+                            <label class="checkride__label" for="Notes">Notes (required if any answer is “No”)</label>
+                            <textarea class="checkride__textarea" id="Notes" name="Notes" rows="6">@Model.Notes</textarea>
+                            <div class="wizard__error" data-error-for="Notes" hidden></div>
+                        </div>
+
+                        <div class="checkride__nav">
+                            <button type="button" class="checkride__btn checkride__btn--ghost" data-back>Back</button>
+                            <button type="submit" class="checkride__btn checkride__btn--primary" data-submit>Save report</button>
+                        </div>
+                    </fieldset>
+                </div>
+            </form>
+        }
+    </div>
+</section>
+
+@section Scripts
+{
+    <script>
+        (() => {
+            const wizard = document.querySelector("[data-wizard]");
+            if (!wizard) return;
+
+            const steps = Array.from(wizard.querySelectorAll(".wizard__step"));
+            const barLabel = document.querySelector(".wizard__bar-label");
+            const barFill = document.querySelector(".wizard__bar-fill");
+            const bar = document.querySelector(".wizard__bar");
+
+            const maxStep = steps.length; // 6
+            const history = [];
+
+            const setNotesRequired = (required) => {
+                const notes = document.querySelector("#Notes");
+                if (!notes) return;
+                if (required) notes.setAttribute("required", "required");
+                else notes.removeAttribute("required");
+            };
+
+            const setError = (name, message) => {
+                const el = wizard.querySelector(`[data-error-for="${name}"]`);
+                if (!el) return;
+                if (!message) {
+                    el.hidden = true;
+                    el.textContent = "";
+                    return;
+                }
+                el.hidden = false;
+                el.textContent = message;
+            };
+
+            const clearStepErrors = (stepNo) => {
+                const stepEl = steps[stepNo - 1];
+                if (!stepEl) return;
+                stepEl.querySelectorAll("[data-error-for]").forEach(e => {
+                    e.hidden = true;
+                    e.textContent = "";
+                });
+            };
+
+            const isYes = (name) => {
+                const yes = document.querySelector(`input[name="${name}"][value="Yes"]`);
+                return !!(yes && yes.checked);
+            };
+
+            const isNo = (name) => {
+                const no = document.querySelector(`input[name="${name}"][value="No"]`);
+                return !!(no && no.checked);
+            };
+
+            const allPreReadyYes = () => {
+                return isYes("EtiquetteAndSafetyOk")
+                    && isYes("CareForCourseOk")
+                    && isYes("PaceAndImpactOk");
+            };
+
+            const anyNoAnywhere = () => {
+                const names = [
+                    "EtiquetteAndSafetyOk",
+                    "CareForCourseOk",
+                    "PaceAndImpactOk",
+                    "ReadyToPlayIndependently"
+                ];
+
+                for (const n of names) {
+                    if (isNo(n)) return true;
+                }
+
+                return false;
+            };
+
+            const showStep = (n, pushHistory = false) => {
+                const stepNo = Math.min(Math.max(n, 1), maxStep);
+
+                if (pushHistory) {
+                    const current = getCurrentStep();
+                    if (current !== stepNo) {
+                        history.push(current);
+                    }
+                }
+
+                steps.forEach(s => {
+                    const sn = parseInt(s.getAttribute("data-step"), 10);
+                    s.hidden = sn !== stepNo;
+                });
+
+                if (barLabel) barLabel.textContent = `Step ${stepNo} of ${maxStep}`;
+                if (bar) {
+                    bar.setAttribute("aria-valuenow", String(stepNo));
+                    bar.setAttribute("aria-valuemin", "1");
+                    bar.setAttribute("aria-valuemax", String(maxStep));
+                }
+                if (barFill) {
+                    const pct = Math.round((stepNo / maxStep) * 100);
+                    barFill.style.width = `${pct}%`;
+                }
+
+                location.hash = `step-${stepNo}`;
+
+                const stepEl = steps[stepNo - 1];
+                const first = stepEl.querySelector("input, select, textarea, button");
+                if (first) first.focus({ preventScroll: false });
+            };
+
+            const getCurrentStep = () => {
+                const visible = steps.find(s => !s.hidden);
+                if (!visible) return 1;
+                const n = parseInt(visible.getAttribute("data-step"), 10);
+                return Number.isNaN(n) ? 1 : n;
+            };
+
+            const validateStep = (n) => {
+                clearStepErrors(n);
+
+                let ok = true;
+
+                if (n === 1) {
+                    const playedOn = document.querySelector("#PlayedOn");
+                    if (!playedOn || !playedOn.value) {
+                        setError("PlayedOn", "Choose the date the check ride was played.");
+                        ok = false;
+                    }
+                }
+
+                if (n === 2) {
+                    if (!(isYes("EtiquetteAndSafetyOk") || isNo("EtiquetteAndSafetyOk"))) {
+                        setError("EtiquetteAndSafetyOk", "Select yes or no.");
+                        ok = false;
+                    }
+                }
+
+                if (n === 3) {
+                    if (!(isYes("CareForCourseOk") || isNo("CareForCourseOk"))) {
+                        setError("CareForCourseOk", "Select yes or no.");
+                        ok = false;
+                    }
+                }
+
+                if (n === 4) {
+                    if (!(isYes("PaceAndImpactOk") || isNo("PaceAndImpactOk"))) {
+                        setError("PaceAndImpactOk", "Select yes or no.");
+                        ok = false;
+                    }
+                }
+
+                // Step 5 only exists if we navigated there; validate if visible.
+                if (n === 5) {
+                    if (!(isYes("ReadyToPlayIndependently") || isNo("ReadyToPlayIndependently"))) {
+                        setError("ReadyToPlayIndependently", "Select yes or no.");
+                        ok = false;
+                    }
+
+                    const tee = document.querySelector("#RecommendedTeeBox");
+                    if (!tee || !tee.value) {
+                        setError("RecommendedTeeBox", "Select a recommended tee.");
+                        ok = false;
+                    }
+                }
+
+                if (n === 6) {
+                    const notes = document.querySelector("#Notes");
+                    const needsNotes = anyNoAnywhere();
+                    setNotesRequired(needsNotes);
+
+                    if (needsNotes && (!notes || !notes.value || !notes.value.trim())) {
+                        setError("Notes", "Add notes explaining the ‘No’ answer(s).");
+                        ok = false;
+                    }
+                }
+
+                return ok;
+            };
+
+            const nextFrom = (n) => {
+                if (n === 1) return 2;
+                if (n === 2) return 3;
+                if (n === 3) return 4;
+
+                if (n === 4) {
+                    // Only show Step 5 if steps 2–4 are all YES; otherwise skip straight to Notes.
+                    return allPreReadyYes() ? 5 : 6;
+                }
+
+                if (n === 5) return 6;
+
+                return 6;
+            };
+
+            wizard.addEventListener("click", (e) => {
+                const nextBtn = e.target.closest("[data-next]");
+                const backBtn = e.target.closest("[data-back]");
+
+                if (nextBtn) {
+                    e.preventDefault();
+
+                    const current = getCurrentStep();
+
+                    if (!validateStep(current)) {
+                        return;
+                    }
+
+                    const next = nextFrom(current);
+                    showStep(next, true);
+                    return;
+                }
+
+                if (backBtn) {
+                    e.preventDefault();
+
+                    const prev = history.pop();
+                    if (prev) {
+                        showStep(prev, false);
+                        return;
+                    }
+
+                    const current = getCurrentStep();
+                    showStep(Math.max(1, current - 1), false);
+                }
+            });
+
+            const form = wizard.closest("form");
+            if (form) {
+                form.addEventListener("submit", (e) => {
+                    // Ensure notes requirement reflects final state.
+                    if (!validateStep(6)) {
+                        e.preventDefault();
+                        showStep(6, true);
+                    }
+                });
+            }
+
+            // Initial step from hash (best-effort), but clamp + enforce visibility rule:
+            const initialFromHash = (() => {
+                const m = (location.hash || "").match(/step-(\d+)/i);
+                if (!m) return 1;
+                const n = parseInt(m[1], 10);
+                if (Number.isNaN(n)) return 1;
+                return Math.min(Math.max(n, 1), maxStep);
+            })();
+
+            // Don’t allow landing on step 5 unless it is actually allowed.
+            if (initialFromHash === 5 && !allPreReadyYes()) {
+                showStep(4, false);
+            } else {
+                showStep(initialFromHash, false);
+            }
+
+            // Keep notes requirement in sync when radios change:
+            document.addEventListener("change", (e) => {
+                const t = e.target;
+                if (!t || !t.name) return;
+                if (t.name === "EtiquetteAndSafetyOk"
+                    || t.name === "CareForCourseOk"
+                    || t.name === "PaceAndImpactOk"
+                    || t.name === "ReadyToPlayIndependently") {
+                    setNotesRequired(anyNoAnywhere());
+                }
+            });
+        })();
+    </script>
+}

@@ -1,0 +1,45 @@
+﻿
+@using BOTGC.MemberPortal.Extensions
+@inject System.Text.Json.JsonSerializerOptions Json
+
+@{
+    var selected = Context.Session.GetSelectedChild(Json);
+
+    if (selected is null)
+    {
+        return;
+    }
+
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+
+    var name = (selected.FullName ?? string.Empty).Trim();
+    var memberNumber = selected.MemberNumber;
+
+    if (string.IsNullOrWhiteSpace(name))
+    {
+        return;
+    }
+
+    var memberSuffix = (memberNumber.HasValue && memberNumber.Value > 0) ? $" ({memberNumber.Value})" : string.Empty;
+    var displayName = $"{name}{memberSuffix}";
+    var avatarDataUri = (selected.AvatarDataUri ?? string.Empty).Trim();
+}
+
+<div class="admin-selected" role="group" aria-label="Selected child">
+    <div class="admin-selected__person">
+        <div class="admin-selected__avatar" aria-hidden="true">
+            @if (!string.IsNullOrWhiteSpace(avatarDataUri))
+            {
+                <img class="admin-selected__avatar-img" src="data:image/webp;base64,@avatarDataUri" alt="" />
+            }
+            else
+            {
+                <span class="admin-selected__avatar-fallback">👤</span>
+            }
+        </div>
+
+        <div class="admin-selected__name">@displayName</div>
+    </div>
+
+    <a class="admin-selected__btn app-link" href="/Admin/MemberSearch/Change?returnUrl=@Uri.EscapeDataString(returnUrl)">Change</a>
+</div>

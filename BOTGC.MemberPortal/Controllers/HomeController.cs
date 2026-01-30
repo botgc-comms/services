@@ -28,6 +28,48 @@ public sealed class HomeController : Controller
             return RedirectToAction("Login", "Account");
         }
 
+        if (_currentUserService.IsAdmin)
+        {
+            var adminModel = new AdminDashboardViewModel
+            {
+                DisplayName = _currentUserService.DisplayName ?? "Admin",
+                AvatarUrl = "/img/buddy.jpg",
+                AdminActions = new List<QuickActionViewModel>
+                {
+                    new()
+                    {
+                        Title = "Child QR Codes",
+                        Subtitle = "Search for child and parent sign-up QR codes.",
+                        Href = "/admin/qr-codes",
+                        IconUrl = "/img/icons/nav_qr.png"
+                    },
+                    new()
+                    {
+                        Title = "Assessment",
+                        Subtitle = "Record whether a child is signed off and recommended tee colour.",
+                        Href = "Admin/CheckRideReport",
+                        IconUrl = "/img/icons/nav_checkgame.png"
+                    },
+                    new()
+                    {
+                        Title = "Award Vouchers",
+                        Subtitle = "Grant vouchers for achievements and rewards.",
+                        Href = "/admin/award-vouchers",
+                        IconUrl = "/img/icons/nav_vouchers.png"
+                    },
+                    new()
+                    {
+                        Title = "Send Messages",
+                        Subtitle = "Message members and parents with updates and reminders.",
+                        Href = "/admin/messages",
+                        IconUrl = "/img/icons/nav_messages.png"
+                    }
+                }
+            };
+
+            return View("AdminIndex", adminModel);
+        }
+
         var memberContext = new MemberContext
         {
             MemberId = _currentUserService.UserId.Value,

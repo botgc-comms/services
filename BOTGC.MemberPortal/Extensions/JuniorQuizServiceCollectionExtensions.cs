@@ -17,6 +17,7 @@ public static class JuniorQuizServiceCollectionExtensions
         services.AddScoped<QuizService>();
 
         services.AddHostedService<QuizContentWarmupHostedService>();
+        services.AddHttpClient<QuizImageCache>();
 
         return services;
     }

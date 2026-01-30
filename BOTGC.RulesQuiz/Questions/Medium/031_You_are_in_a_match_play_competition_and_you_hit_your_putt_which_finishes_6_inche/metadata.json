@@ -16,7 +16,7 @@
       "text": "You automatically loose the hole because you should not have hit that final putt."
     }
   ],
-  "correctAnswer": null,
+  "correctAnswer": "a",
   "explanation": "In match play, if your opponent concedes a hole, the hole is considered finished at that point, and the result is determined based on the concession. If you decide to hit your putt anyway after the concession and miss, it doesn't affect the outcome of the hole.",
   "imageAlt": "Screenshot 2024-02-19 164731"
 }

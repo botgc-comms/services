@@ -1,0 +1,46 @@
+﻿@model BOTGC.MemberPortal.Models.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin dashboard";
+}
+
+<div class="dashboard">
+    <header class="dashboard__header">
+        <div class="dashboard__greeting">
+            <h1 class="dashboard__title">
+                Hi, <span class="dashboard__name">@Model.DisplayName</span>!
+            </h1>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.AvatarUrl))
+        {
+            <img class="dashboard__avatar" src="@Model.AvatarUrl" alt="" />
+        }
+    </header>
+
+    <section class="dashboard__section">
+        <h2 class="dashboard__section-title">Admin Actions</h2>
+
+        <div class="dashboard__card">
+            <ul class="qa">
+                @foreach (var action in Model.AdminActions)
+                {
+                    <li class="qa__item">
+                        <a class="qa__link app-link" href="@action.Href">
+                            <span class="qa__icon" aria-hidden="true">
+                                <img src="@action.IconUrl" alt="" />
+                            </span>
+
+                            <span class="qa__text">
+                                <span class="qa__title">@action.Title</span>
+                                <span class="qa__subtitle">@action.Subtitle</span>
+                            </span>
+
+                            <span class="qa__chev" aria-hidden="true">›</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learning Pack</title>
+  <link rel="stylesheet" href="../_shared/theme.css">
+  <link rel="stylesheet" href="../_shared/components.css">
+</head>
+<body>
+  <main class="app" id="app">
+    <header class="topbar">
+      <button class="topbar__back" id="backBtn" type="button" aria-label="Back">‹</button>
+      <div class="topbar__meta">
+        <div class="topbar__pack" id="packTitle">Learning</div>
+        <div class="topbar__page" id="pageTitle"></div>
+      </div>
+      <div class="topbar__spacer" aria-hidden="true"></div>
+    </header>
+
+    <section class="progress" aria-label="Progress">
+      <div class="progress__track" aria-hidden="true">
+        <div class="progress__bar" id="progressBar"></div>
+      </div>
+      <div class="progress__text" id="progressText"></div>
+    </section>
+
+    <article class="content" id="content" tabindex="-1"></article>
+
+    <nav class="nav">
+      <button class="nav__btn" id="prevBtn" type="button">Back</button>
+      <button class="nav__btn nav__btn--primary" id="nextBtn" type="button">Next</button>
+    </nav>
+  </main>
+
+  <script src="../_shared/runtime.js"></script>
+</body>
+</html>

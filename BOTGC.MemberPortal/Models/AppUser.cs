@@ -7,4 +7,5 @@ public sealed class AppUser
     public string DisplayName { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
 }

@@ -16,8 +16,115 @@ using Azure;
 using Azure.Data.Tables;
 using BOTGC.MemberPortal.Interfaces;
 using BOTGC.MemberPortal.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace BOTGC.MemberPortal.Services;
+
+public sealed class QuizImageCache
+{
+    private readonly ICacheService _cache;
+    private readonly HttpClient _http;
+    private readonly AppSettings _settings;
+
+    public QuizImageCache(ICacheService cache, HttpClient http, AppSettings settings)
+    {
+        _cache = cache;
+        _http = http;
+        _settings = settings;
+    }
+
+    public string BaseKeyPrefix => $"{_settings.Quiz.JuniorQuiz.CacheKeyPrefix}:images";
+
+    public string GetImageKey(string contentVersion, string questionId)
+    {
+        return $"{BaseKeyPrefix}:{contentVersion}:{questionId}";
+    }
+
+    public async Task<string?> GetBase64Async(string contentVersion, string questionId, CancellationToken ct = default)
+    {
+        var key = GetImageKey(contentVersion, questionId);
+        return await _cache.GetAsync<string>(key, ct);
+    }
+
+    public async Task CacheImagesAsync(string contentVersion, IEnumerable<QuizQuestion> questions, CancellationToken ct = default)
+    {
+        foreach (var q in questions)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            if (string.IsNullOrWhiteSpace(q.ImageUrl))
+            {
+                continue;
+            }
+
+            var key = GetImageKey(contentVersion, q.Id);
+
+            var existing = await _cache.GetAsync<string>(key, ct);
+            if (!string.IsNullOrWhiteSpace(existing))
+            {
+                continue;
+            }
+
+            var bytes = await LoadImageBytesAsync(q.ImageUrl, ct);
+            if (bytes is null || bytes.Length == 0)
+            {
+                continue;
+            }
+
+            var base64 = Convert.ToBase64String(bytes);
+
+            await _cache.SetAsync(
+                key,
+                base64,
+                _settings.Quiz.JuniorQuiz.StandbyCacheTtl,
+                ct
+            );
+        }
+    }
+
+    private async Task<byte[]?> LoadImageBytesAsync(string imageUrl, CancellationToken ct)
+    {
+        if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri))
+        {
+            return null;
+        }
+
+        if (string.Equals(uri.Scheme, "file", StringComparison.OrdinalIgnoreCase))
+        {
+            var path = uri.LocalPath;
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            {
+                return null;
+            }
+
+            return await File.ReadAllBytesAsync(path, ct);
+        }
+
+        if (string.Equals(uri.Scheme, "http", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase))
+        {
+            using var req = new HttpRequestMessage(HttpMethod.Get, uri);
+
+            var gh = _settings.Quiz.GitHub;
+            if (gh is not null && !string.IsNullOrWhiteSpace(gh.Token))
+            {
+                req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", gh.Token);
+            }
+
+            using var resp = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
+            if (!resp.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            return await resp.Content.ReadAsByteArrayAsync(ct);
+        }
+
+        return null;
+    }
+}
 
 public sealed class QuizContentWarmupHostedService : IHostedService
 {
@@ -96,8 +203,8 @@ public sealed class QuizContentCache
         _settings = settings;
     }
 
-    public string PrimaryKey => $"{_settings.Quiz.JuniorQuiz.CacheKeyPrefix}:content:primary";
-    public string StandbyKey => $"{_settings.Quiz.JuniorQuiz.CacheKeyPrefix}:content:standby";
+    public string PrimaryKey => $"{_settings.Quiz.JuniorQuiz.CacheKeyPrefix}:data:primary";
+    public string StandbyKey => $"{_settings.Quiz.JuniorQuiz.CacheKeyPrefix}:data:standby";
 
     public Task<QuizContentSnapshot?> GetPrimaryAsync(CancellationToken ct = default)
     {
@@ -181,6 +288,12 @@ public sealed class CachedQuizQuestionProvider : IQuizQuestionProvider
             });
 
             return standby;
+        }
+
+        var loaded = await _sync.RefreshAsync(ct);
+        if (loaded.Questions.Count > 0)
+        {
+            return loaded;
         }
 
         return null;
@@ -477,7 +590,7 @@ public sealed class QuizSelectionEngine
     public async Task<(string ContentVersion, IReadOnlyList<QuizQuestion> Selected)> SelectAsync(
         string userId,
         int count,
-        IReadOnlyCollection<QuizDifficulty>? allowedDifficulties,
+        QuizDifficulty requestedDifficulty,
         CancellationToken ct = default)
     {
         if (count <= 0)
@@ -495,48 +608,76 @@ public sealed class QuizSelectionEngine
 
         var all = snapshot.Questions;
 
-        if (allowedDifficulties is not null && allowedDifficulties.Count > 0)
-        {
-            var allowed = new HashSet<QuizDifficulty>(allowedDifficulties);
-            all = all.Where(q => allowed.Contains(q.Difficulty)).ToArray();
-        }
-
-        if (all.Count == 0)
-        {
-            return (contentVersion, Array.Empty<QuizQuestion>());
-        }
-
         var previouslyAsked = await _attempts.GetPreviouslyAskedQuestionIdsAsync(userId, ct);
         var previouslyCorrect = await _attempts.GetPreviouslyCorrectQuestionIdsAsync(userId, ct);
 
         var selected = new List<QuizQuestion>(count);
+        var selectedIds = new HashSet<string>(StringComparer.Ordinal);
 
-        var strictPool = all.Where(q => !previouslyAsked.Contains(q.Id)).ToList();
-        FillRandomly(selected, strictPool, count);
+        var difficultyOrder = GetDifficultyFallbackOrder(requestedDifficulty);
 
-        if (selected.Count < count)
+        foreach (var difficulty in difficultyOrder)
         {
-            var mediumPool = all
+            if (selected.Count >= count)
+            {
+                break;
+            }
+
+            var tier = all.Where(q => q.Difficulty == difficulty).ToArray();
+            if (tier.Length == 0)
+            {
+                continue;
+            }
+
+            var strictPool = tier
+                .Where(q => !previouslyAsked.Contains(q.Id))
+                .Where(q => !selectedIds.Contains(q.Id))
+                .ToList();
+
+            FillRandomly(selected, selectedIds, strictPool, count);
+
+            if (selected.Count >= count)
+            {
+                continue;
+            }
+
+            var mediumPool = tier
                 .Where(q => !previouslyCorrect.Contains(q.Id))
-                .Where(q => selected.All(s => !string.Equals(s.Id, q.Id, StringComparison.Ordinal)))
+                .Where(q => !selectedIds.Contains(q.Id))
                 .ToList();
 
-            FillRandomly(selected, mediumPool, count);
-        }
+            FillRandomly(selected, selectedIds, mediumPool, count);
 
-        if (selected.Count < count)
-        {
-            var fallbackPool = all
-                .Where(q => selected.All(s => !string.Equals(s.Id, q.Id, StringComparison.Ordinal)))
+            if (selected.Count >= count)
+            {
+                continue;
+            }
+
+            var fallbackPool = tier
+                .Where(q => !selectedIds.Contains(q.Id))
                 .ToList();
 
-            FillRandomly(selected, fallbackPool, count);
+            FillRandomly(selected, selectedIds, fallbackPool, count);
         }
 
-        return (contentVersion, selected);
+        return (contentVersion, selected.ToArray());
     }
 
-    private static void FillRandomly(List<QuizQuestion> target, List<QuizQuestion> pool, int targetCount)
+    private static IReadOnlyList<QuizDifficulty> GetDifficultyFallbackOrder(QuizDifficulty requested)
+    {
+        return requested switch
+        {
+            QuizDifficulty.Hard => new[] { QuizDifficulty.Hard, QuizDifficulty.Medium, QuizDifficulty.Easy },
+            QuizDifficulty.Medium => new[] { QuizDifficulty.Medium, QuizDifficulty.Easy },
+            _ => new[] { QuizDifficulty.Easy },
+        };
+    }
+
+    private static void FillRandomly(
+        List<QuizQuestion> target,
+        HashSet<string> targetIds,
+        List<QuizQuestion> pool,
+        int targetCount)
     {
         if (target.Count >= targetCount || pool.Count == 0)
         {
@@ -553,8 +694,13 @@ public sealed class QuizSelectionEngine
 
         for (var i = 0; i < pool.Count && needed > 0; i++)
         {
-            target.Add(pool[i]);
-            needed--;
+            var q = pool[i];
+
+            if (targetIds.Add(q.Id))
+            {
+                target.Add(q);
+                needed--;
+            }
         }
     }
 
@@ -592,7 +738,7 @@ public sealed class QuizService
         var (contentVersion, selected) = await _selector.SelectAsync(
             request.UserId,
             request.QuestionCount,
-            request.AllowedDifficulties,
+            request.Difficulty,
             ct
         );
 
@@ -614,7 +760,8 @@ public sealed class QuizService
             CorrectCount: 0,
             PassMark: request.PassMark,
             ContentVersion: contentVersion,
-            QuestionIdsInOrder: selected.Select(q => q.Id).ToArray()
+            QuestionIdsInOrder: selected.Select(q => q.Id).ToArray(),
+            Difficulty: request.Difficulty
         );
 
         var created = await _repo.CreateAttemptAsync(attempt, ct);
@@ -962,6 +1109,16 @@ public sealed class TableStorageQuizAttemptRepository : IQuizAttemptRepository
         return value.Replace("'", "''", StringComparison.Ordinal);
     }
 
+    private static QuizDifficulty ParseDifficultyOrDefault(string? value)
+    {
+        if (Enum.TryParse<QuizDifficulty>(value, ignoreCase: true, out var d))
+        {
+            return d;
+        }
+
+        return QuizDifficulty.Easy;
+    }
+
     private sealed class AttemptEntity : ITableEntity
     {
         public string PartitionKey { get; set; } = string.Empty;
@@ -978,6 +1135,7 @@ public sealed class TableStorageQuizAttemptRepository : IQuizAttemptRepository
         public int PassMark { get; set; }
         public string ContentVersion { get; set; } = string.Empty;
         public string QuestionIdsJson { get; set; } = "[]";
+        public string Difficulty { get; set; } = string.Empty;
 
         public QuizAttempt ToModel()
         {
@@ -991,7 +1149,8 @@ public sealed class TableStorageQuizAttemptRepository : IQuizAttemptRepository
                 CorrectCount: CorrectCount,
                 PassMark: PassMark,
                 ContentVersion: ContentVersion,
-                QuestionIdsInOrder: GetQuestionIds()
+                QuestionIdsInOrder: GetQuestionIds(),
+                Difficulty: ParseDifficultyOrDefault(Difficulty)
             );
         }
 
@@ -1023,6 +1182,7 @@ public sealed class TableStorageQuizAttemptRepository : IQuizAttemptRepository
                 PassMark = attempt.PassMark,
                 ContentVersion = attempt.ContentVersion,
                 QuestionIdsJson = JsonSerializer.Serialize(attempt.QuestionIdsInOrder.ToArray(), JsonOptions),
+                Difficulty = attempt.Difficulty.ToString(),
             };
         }
     }

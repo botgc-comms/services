@@ -1,7 +1,7 @@
-﻿using BOTGC.MemberPortal.Interfaces;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Text.Json;
+using BOTGC.MemberPortal.Interfaces;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace BOTGC.MemberPortal.Services;
 

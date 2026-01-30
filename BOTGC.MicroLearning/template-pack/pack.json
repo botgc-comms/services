@@ -1,0 +1,26 @@
+{
+  "id": "template-pack",
+  "title": "Template pack (copy me)",
+  "summary": "A starter pack you can duplicate and rename.",
+  "estimatedMinutes": 5,
+  "mandatoryFor": [],
+  "version": 1,
+  "pages": [
+    {
+      "id": "00-title",
+      "title": "Before you start",
+      "file": "pages/00-title.md"
+    },
+    {
+      "id": "01-example",
+      "title": "Example page",
+      "file": "pages/01-example.md"
+    },
+    {
+      "id": "90-quick-check",
+      "title": "Quick check",
+      "file": "pages/90-quick-check.md",
+      "type": "quiz"
+    }
+  ]
+}

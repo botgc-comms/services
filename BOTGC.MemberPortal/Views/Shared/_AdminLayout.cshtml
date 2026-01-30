@@ -1,0 +1,38 @@
+﻿@{
+    Layout = "_Layout";
+
+    var backHref = ViewData["BackHref"] as string;
+    var backLabel = ViewData["BackLabel"] as string ?? "Back";
+
+    var showSelectedObj = ViewData["ShowSelectedChild"];
+    var showSelected =
+        showSelectedObj is bool b ? b :
+        showSelectedObj is string s && bool.TryParse(s, out var parsed) ? parsed :
+        true;
+}
+
+<div class="admin">
+    <header class="admin__header">
+        <a class="admin__back" href="@(string.IsNullOrWhiteSpace(backHref) ? "/" : backHref)" aria-label="@backLabel">‹</a> <span class="dashboard_subtitle">@backLabel</span>
+    </header>
+
+    <div class="admin__head">
+        @RenderSection("PageHeader", required: true)
+    </div>
+
+    <span class="admin__spacer" aria-hidden="true"></span>
+
+    <div class="admin__content">
+        @if (showSelected)
+        {
+            @await Html.PartialAsync("_AdminSelectedChildInline")
+        }
+
+        @RenderBody()
+    </div>
+</div>
+
+@section Scripts
+{
+    @RenderSection("Scripts", required: false)
+}

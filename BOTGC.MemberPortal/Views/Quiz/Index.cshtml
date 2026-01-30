@@ -2,39 +2,46 @@
 @model BOTGC.MemberPortal.Models.QuizGatekeeperViewModel
 
 @{
-    ViewData["Title"] = "Rules quiz";
+    ViewData["Title"] = "Learning";
 }
 
 <div class="quiz">
     <header class="quiz__header">
         <a class="quiz__back" href="/" aria-label="Back">‹</a>
-        <h1 class="quiz__title">Rules quiz</h1>
+        <h1 class="quiz__title">Learning</h1>
         <span class="quiz__spacer" aria-hidden="true"></span>
     </header>
 
     @if (Model.HasInProgress && !string.IsNullOrWhiteSpace(Model.AttemptId))
     {
-        <section class="quiz__card">
-            <h2 class="quiz__card-title">You have a quiz in progress</h2>
-            <p class="quiz__card-subtitle">
-                You must finish it before starting another.
-            </p>
+        <h2 class="quiz__card-title">You have a quiz in progress</h2>
+        <p class="quiz__card-subtitle">
+            You must finish it before starting another.
+        </p>
 
-            <div class="quiz__pill">
-                <span class="quiz__pill-strong">Score so far:</span>
-                <span>@Model.CorrectCount / @Model.TotalQuestions</span>
-            </div>
+        <ul class="qzlist pt-3">
+            <li>
+                <a class="qzcard qzcard--inprogress" href="/quiz/@Model.AttemptId">
+                    <div class="qzcard__score qzcard__score--inprogress">
+                        <div class="qzcard__score-main">@Model.CompletedQuestions <span class="qzcard__score-sub">/ @Model.TotalQuestions</span></div>
+                        <div class="qzcard__score-note">@Model.Difficulty</div>
+                    </div>
 
-            @if (Model.NextQuestionNumber.HasValue)
-            {
-                <div class="quiz__pill">
-                    <span class="quiz__pill-strong">Next:</span>
-                    <span>Question @Model.NextQuestionNumber of @Model.TotalQuestions</span>
-                </div>
-            }
+                    <div class="qzcard__main">
+                        <div class="qzcard__title">Continue quiz</div>
+                        <div class="qzcard__subtitle">
+                            @Model.StartedLabel
+                            @if (Model.NextQuestionNumber.HasValue)
+                            {
+                                <span> · Click to continue the quiz from question @Model.NextQuestionNumber</span>
+                            }
+                        </div>
+                    </div>
 
-            <a class="quiz__cta" href="/quiz/@Model.AttemptId">Continue quiz</a>
-        </section>
+                    <span class="qzcard__chev" aria-hidden="true">›</span>
+                </a>
+            </li>
+        </ul>
     }
     else
     {
@@ -49,45 +56,44 @@
                 <button class="quiz__cta" type="submit">Start quiz</button>
             </form>
         </section>
-
-        <section class="quiz__section">
-            <h2 class="quiz__section-title">Completed quizzes</h2>
-
-            @if (Model.Completed is null || Model.Completed.Count == 0)
-            {
-                <div class="quiz__empty">
-                    <p class="quiz__empty-title">No completed quizzes yet</p>
-                    <p class="quiz__empty-subtitle">Start one when you’re ready.</p>
-                </div>
-            }
-            else
-            {
-                <ul class="qzlist">
-                    @foreach (var q in Model.Completed)
-                    {
-                        var statusClass = q.Passed ? "qzcard--pass" : "qzcard--fail";
-
-                        <li>
-                            <a class="qzcard @statusClass" href="/quiz/completed/@q.AttemptId">
-                                <div class="qzcard__score">
-                                    <div class="qzcard__score-main">@q.CorrectCount</div>
-                                    <div class="qzcard__score-sub">/ @q.TotalQuestions</div>
-                                </div>
-
-                                <div class="qzcard__main">
-                                    <div class="qzcard__title">Quiz complete</div>
-                                    <div class="qzcard__subtitle">
-                                        @q.FinishedAtUtc.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
-                                        · Pass mark @q.PassMark
-                                    </div>
-                                </div>
-
-                                <span class="qzcard__chev" aria-hidden="true">›</span>
-                            </a>
-                        </li>
-                    }
-                </ul>
-            }
-        </section>
     }
+
+    <section class="quiz__section pt-3">
+        <h2 class="quiz__section-title">Completed quizzes</h2>
+
+        @if (Model.Completed is null || Model.Completed.Count == 0)
+        {
+            <div class="quiz__empty">
+                <p class="quiz__empty-title">No completed quizzes yet</p>
+                <p class="quiz__empty-subtitle">Start one when you’re ready.</p>
+            </div>
+        }
+        else
+        {
+            <ul class="qzlist pt-3">
+                @foreach (var q in Model.Completed)
+                {
+                    var statusClass = q.Passed ? "qzcard--pass" : "qzcard--fail";
+
+                    <li>
+                        <a class="qzcard @statusClass" href="/quiz/completed/@q.AttemptId">
+                            <div class="qzcard__score">
+                                <div class="qzcard__score-main">@q.CorrectCount <span class="qzcard__score-sub">/ @q.TotalQuestions</span></div>
+                            </div>
+
+                            <div class="qzcard__main">
+                                <div class="qzcard__title">Quiz complete</div>
+                                <div class="qzcard__subtitle">
+                                    @q.FinishedAtUtc.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+                                    · Pass mark @q.PassMark
+                                </div>
+                            </div>
+
+                            <span class="qzcard__chev" aria-hidden="true">›</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
 </div>

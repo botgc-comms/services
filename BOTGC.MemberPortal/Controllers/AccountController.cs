@@ -48,15 +48,25 @@ public sealed class AccountController : Controller
             return View(model);
         }
 
+        var isAdmin =
+            string.Equals(user.Username, "admin", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(user.Username, "1", StringComparison.OrdinalIgnoreCase);
 
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString(CultureInfo.InvariantCulture)),
             new Claim(ClaimTypes.Name, user.Username),
-            new Claim("display_name", user.DisplayName), 
-            new Claim("firstName", user.FirstName), 
-            new Claim("lastName", user.LastName)
+            new Claim("display_name", user.DisplayName),
+            new Claim("firstName", user.FirstName),
+            new Claim("lastName", user.LastName), 
+            new Claim("category", user.Category)
         };
+
+        if (isAdmin)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            claims.Add(new Claim("role", "Admin"));
+        }
 
         var identity = new ClaimsIdentity(
             claims,

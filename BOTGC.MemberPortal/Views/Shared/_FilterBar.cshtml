@@ -1,0 +1,12 @@
+﻿@* Views/Shared/_FilterBar.cshtml *@
+@model BOTGC.MemberPortal.Models.FilterBarViewModel
+
+<nav class="filterbar" aria-label="@Model.AriaLabel">
+    @foreach (var opt in Model.Options)
+    {
+        var isActive = string.Equals(opt.Value, Model.CurrentValue, StringComparison.OrdinalIgnoreCase);
+        var cls = isActive ? "filterbar__item filterbar__item--active" : "filterbar__item";
+
+        <a class="@cls" href="@opt.Href">@opt.Label</a>
+    }
+</nav>

@@ -13,6 +13,40 @@ public class AppSettings
     public WhatsNextSettings? WhatsNext { get; init; }
 
     public QuizSettings Quiz { get; set; } = new();
+    public AdminSettings Admin { get; set; } = new();
+    public LearningPackSettings LearningPacks { get; set; } = new();
+}
+
+public sealed class LearningPackSettings
+{
+    public string CacheKeyPrefix { get; set; } = "learningpacks";
+    public TimeSpan PrimaryCacheTtl { get; set; } = TimeSpan.FromHours(12);
+    public TimeSpan StandbyCacheTtl { get; set; } = TimeSpan.FromDays(7);
+
+    public LearningPackGitHubSettings? GitHub { get; set; }
+    public LearningPackFileSystemSettings? FileSystem { get; set; }
+    public LearningPackTableStorageSettings? TableStorage { get; set; }
+}
+
+public sealed class LearningPackGitHubSettings
+{
+    public string Owner { get; set; } = string.Empty;
+    public string Repo { get; set; } = string.Empty;
+    public string Ref { get; set; } = "main";
+    public string RootPath { get; set; } = "learning-packs";
+    public string? Token { get; set; }
+}
+
+public sealed class LearningPackFileSystemSettings
+{
+    public string RootPath { get; set; } = string.Empty;
+}
+
+public sealed class LearningPackTableStorageSettings
+{
+    public string ConnectionString { get; set; } = string.Empty;
+    public string ProgressTableName { get; set; } = "LearningPackProgress";
+    public string PageViewsTableName { get; set; } = "LearningPackPageViews";
 }
 
 public sealed class QuizSettings
@@ -88,4 +122,16 @@ public class Cache
 {
     public string ConnectionString { get; set; } = string.Empty;
     public string InstanceName { get; set; } = "BOTGC.API";
+}
+
+public sealed class AdminSettings
+{
+    public AdminTableStorageSettings? TableStorage { get; set; }
+}
+
+public sealed class AdminTableStorageSettings
+{
+    public string ConnectionString { get; set; } = string.Empty;
+
+    public string CheckRideReportsTableName { get; set; } = "CheckRideReports";
 }

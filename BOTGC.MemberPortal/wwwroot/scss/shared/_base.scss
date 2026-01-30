@@ -1,3 +1,20 @@
+@use "variables" as v;
+
+html, body {
+    font-family: v.$font-sans;
+    color: v.$color-text;
+    background: v.$color-bg;
+}
+
+h1, h2, h3 {
+    color: v.$color-text;
+}
+
+p {
+    margin: 0;
+}
+
+/*
 @use "./variables" as *;
 
 * {
@@ -21,3 +38,4 @@ body {
     margin: 1rem auto;
     padding: 0 1rem 2rem;
 }
+*/

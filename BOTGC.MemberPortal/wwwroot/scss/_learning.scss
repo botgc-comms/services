@@ -1,0 +1,308 @@
+/* wwwroot/scss/_learning.scss */
+@use "./shared/index" as s;
+
+.learning {
+    padding: 0;
+}
+
+.learning__title {
+    @include s.heading-xl;
+}
+
+.learning__subtitle {
+    @include s.subtitle;
+    margin-top: 6px;
+}
+
+.learning__filters {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.learning__filter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 900;
+    border: 1px solid rgba(0,0,0,.08);
+    background: rgba(255,255,255,.7);
+    color: #111827;
+    box-shadow: 0 10px 18px rgba(0,0,0,.06);
+}
+
+.learning__filter--active {
+    background: #111827;
+    color: #fff;
+    border-color: rgba(0,0,0,.12);
+}
+
+.learning__empty {
+    margin-top: 18px;
+    text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 14px;
+    background: rgba(255,255,255,.7);
+    border: 1px solid rgba(0,0,0,.06);
+    border-radius: 16px;
+}
+
+.learning__empty-title {
+    @include s.heading-lg;
+}
+
+.learning__empty-subtitle {
+    @include s.subtitle;
+}
+
+.lplist {
+    list-style: none;
+    margin: 16px 0 0 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.lpcard {
+    display: grid;
+    grid-template-columns: 92px 1fr 18px;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: 0 14px 30px rgba(0,0,0,.08);
+    text-decoration: none;
+    color: inherit;
+    min-height: 130px;
+}
+
+.lpcard:focus {
+    outline: 3px solid #9ecbff;
+    outline-offset: 2px;
+}
+
+.lpcard__meta {
+    height: 100%;
+    border-radius: 14px;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    padding: 10px 8px;
+    min-height: 90px;
+    background: #111827;
+    color: #fff;
+    position: relative;
+}
+
+.lpcard--complete .lpcard__meta {
+    background: #16a34a;
+}
+
+.lpcard--started .lpcard__meta {
+    background: #f59e0b;
+    color: #111827;
+}
+
+.lpcard__minutes-main {
+    font-size: 2.2rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.lpcard__minutes-sub {
+    margin-left: -4px;
+    font-size: .9rem;
+    font-weight: 800;
+    opacity: .95;
+}
+
+.lpcard__mark {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.35);
+    box-shadow: 0 10px 18px rgba(0,0,0,.18);
+}
+
+.lpcard__mark--required {
+    background: #ef4444;
+}
+
+.lpcard__mark--extra {
+    background: rgba(255,255,255,.65);
+}
+
+.lpcard__main {
+    display: grid;
+    gap: 4px;
+}
+
+.lpcard__title {
+    @include s.card-title;
+}
+
+.lpcard__subtitle {
+    @include s.card-subtitle;
+}
+
+.lpcard__chev {
+    font-size: 1.6rem;
+    line-height: 1;
+    opacity: .7;
+}
+
+.learningpack__summary {
+    margin-top: 12px;
+    padding: 14px;
+    background: rgba(255,255,255,.7);
+    border: 1px solid rgba(0,0,0,.06);
+    border-radius: 16px;
+    box-shadow: 0 14px 30px rgba(0,0,0,.06);
+    display: grid;
+    gap: 10px;
+}
+
+.learningpack__summary-line {
+    @include s.subtitle;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.learningpack__dot {
+    opacity: .6;
+}
+
+.learningpack__continue {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 900;
+    border: 1px solid rgba(0,0,0,.08);
+    background: #111827;
+    color: #fff;
+    box-shadow: 0 10px 18px rgba(0,0,0,.10);
+}
+
+.lpcard--page {
+    min-height: 108px;
+    grid-template-columns: 82px 1fr 18px;
+}
+
+.lpcard--page .lpcard__meta {
+    border-radius: 14px;
+}
+
+.learningpage__card {
+    margin-top: 12px;
+    padding: 14px;
+    background: rgba(255,255,255,.7);
+    border: 1px solid rgba(0,0,0,.06);
+    border-radius: 16px;
+    box-shadow: 0 14px 30px rgba(0,0,0,.06);
+}
+
+.learningpage__meta {
+    @include s.subtitle;
+    margin: 0;
+}
+
+.learningmd {
+    margin-top: 14px;
+    padding: 14px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.06);
+    border-radius: 16px;
+    box-shadow: 0 14px 30px rgba(0,0,0,.08);
+}
+
+.learningmd > :first-child {
+    margin-top: 0;
+}
+
+.learningmd h1 {
+    @include s.heading-lg;
+    margin: 0 0 10px 0;
+}
+
+.learningmd h2 {
+    @include s.heading-md;
+    margin: 18px 0 10px 0;
+}
+
+.learningmd h3 {
+    @include s.heading-sm;
+    margin: 16px 0 8px 0;
+}
+
+.learningmd p {
+    margin: 0 0 12px 0;
+    line-height: 1.55;
+}
+
+.learningmd ul,
+.learningmd ol {
+    margin: 0 0 12px 20px;
+}
+
+.learningmd li {
+    margin: 6px 0;
+}
+
+.learningmd img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,.06);
+    margin: 12px 0;
+}
+
+.learningpage__nav {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+}
+
+.learningpage__navbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 900;
+    border: 1px solid rgba(0,0,0,.08);
+    background: #111827;
+    color: #fff;
+    box-shadow: 0 10px 18px rgba(0,0,0,.10);
+}
+
+.learningpage__navbtn:focus {
+    outline: 3px solid #9ecbff;
+    outline-offset: 2px;
+}
+
+.learningpage__navspacer {
+    height: 44px;
+}

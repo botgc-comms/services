@@ -1,17 +1,24 @@
-﻿using BOTGC.API.Services;
+﻿using System.Net;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Azure.Data.Tables;
+using Azure.Storage.Queues;
 using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
-using BOTGC.API.Services.BackgroundServices;
-using BOTGC.API.Services.CompetitionProcessors;
-using System.Net;
-using RedLockNet.SERedis.Configuration;
-using RedLockNet.SERedis;
-using StackExchange.Redis;
-using BOTGC.API.Services.Queries;
 using BOTGC.API.Models;
+using BOTGC.API.Services;
+using BOTGC.API.Services.BackgroundServices;
 using BOTGC.API.Services.Behaviours;
+using BOTGC.API.Services.CompetitionProcessors;
+using BOTGC.API.Services.EventBus.Subscribers;
+using BOTGC.API.Services.Events;
+using BOTGC.API.Services.Queries;
 using MediatR;
+using RedLockNet.SERedis;
+using RedLockNet.SERedis.Configuration;
+using StackExchange.Redis;
 using static BOTGC.API.Models.BottleCalibrationEntity;
 
 namespace BOTGC.API.Extensions
@@ -46,6 +53,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton(cookieContainer);
             services.AddSingleton(httpClient);
             services.AddSingleton<IGSessionService>(); 
+
             services.AddHostedService(provider => provider.GetRequiredService<IGSessionService>());
 
             services.AddSingleton<IDataProvider, IGDataProvider>();
@@ -110,6 +118,10 @@ namespace BOTGC.API.Extensions
                 );
             });
 
+            services.AddSingleton<IQueryCacheOptionsAccessor, QueryCacheOptionsAccessor>();
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(QueryCacheOptionsBehaviour<,>));
+
+
             // Order matters.
             services.AddTransient<IPipelineBehavior<GetStockTakeSheetQuery, StockTakeSheetDto>, CacheStockTakeSheetBehaviour>();
             services.AddTransient<IPipelineBehavior<GetStockTakeSheetQuery, StockTakeSheetDto>, EnrichBottleCalibrationBehaviour>();
@@ -117,6 +129,79 @@ namespace BOTGC.API.Extensions
 
             return services;
         }
+
+        public static IServiceCollection RegisterEventDetectorsAndSubscribers(this IServiceCollection services, params Assembly[] scanAssemblies)
+        {
+            services.AddSingleton(new JsonSerializerOptions(JsonSerializerDefaults.Web)
+            {
+                PropertyNameCaseInsensitive = true,
+                ReadCommentHandling = JsonCommentHandling.Skip,
+                AllowTrailingCommas = true,
+                NumberHandling = JsonNumberHandling.AllowReadingFromString,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+
+            services.AddAzureTableStore<DetectorStateEntity>("DetectorState");
+            services.AddAzureTableStore<EventStreamEntity>("MemberEventStream");
+
+            services.AddSingleton<IDetectorStateStore, TableDetectorStateStore>();
+            services.AddSingleton<IMemberEventWindowReader, TableMemberEventWindowReader>();
+
+            services.AddSingleton<IEventStore, TableEventStore>();
+            services.AddSingleton<IEventPublisher, EventPublisher>();
+
+            var assemblies = (scanAssemblies is { Length: > 0 } ? scanAssemblies : new[] { typeof(IGSupportExtensions).Assembly })
+                .Append(typeof(IEvent).Assembly)
+                .Distinct()
+                .ToArray();
+
+            services.AddSingleton<IEventTypeRegistry>(_ => new EventTypeRegistry(assemblies));
+
+            services.AddSingleton<ISubscriberQueueFactory, SubscriberQueueFactory>();
+            services.AddSingleton<IQueueService<EventEnvelope>, EventDispatchQueueService>();
+
+            services.AddSingleton<IJuniorProgressEvaluator, JuniorProgressEvaluator>();
+            services.AddSingleton<IJuniorProgressCategoryEvaluator, JuniorCadetProgressCategoryEvaluator>();
+            services.AddSingleton<IJuniorProgressCategoryEvaluator, JuniorCourseCadetProgressCategoryEvaluator>();
+            
+
+            var allTypes = assemblies
+                .SelectMany(a => a.DefinedTypes)
+                .Where(t => !t.IsAbstract && !t.IsInterface)
+                .Select(t => t.AsType())
+                .ToArray();
+
+            var detectorTypes = allTypes
+                .Where(t => typeof(IDetector).IsAssignableFrom(t))
+                .ToArray();
+
+            foreach (var detectorType in detectorTypes)
+            {
+                services.AddScoped(typeof(IDetector), detectorType);
+            }
+
+            var subscriberTypes = allTypes
+                .Where(t => t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISubscriber<>)))
+                .ToArray();
+
+            foreach (var subscriberType in subscriberTypes)
+            {
+                services.AddSingleton(subscriberType);
+
+                if (typeof(BackgroundService).IsAssignableFrom(subscriberType) || typeof(IHostedService).IsAssignableFrom(subscriberType))
+                {
+                    services.AddSingleton(typeof(IHostedService), sp => (IHostedService)sp.GetRequiredService(subscriberType));
+                }
+            }
+
+            services.AddSingleton<ISubscriberCatalogue>(_ => new SubscriberCatalogue(subscriberTypes));
+
+            services.AddHostedService<EventDispatcher>();
+            services.AddHostedService<DetectorSchedulerHostedService>();
+
+            return services;
+        }
+
     }
 
     public static class RegisterReportParsersExtensions

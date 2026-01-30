@@ -20,7 +20,7 @@
       "text": "It's an invalid shot. Replace the ball to where it was and try again."
     }
   ],
-  "correctAnswer": null,
+  "correctAnswer": "a",
   "explanation": "It counts as one stroke only, and there is no penalty. You can't use this rule to your advantage though, intentionally hitting the ball twice will land you with penalty strokes!",
   "imageAlt": "Screenshot 2024-04-01 111802"
 }

@@ -1,4 +1,5 @@
 ﻿// Controllers/NgrokController.cs
+using BOTGC.MemberPortal.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BOTGC.MemberPortal.Controllers

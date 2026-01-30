@@ -1,5 +1,11 @@
 @use "./shared/index";
 
-@forward "dashboard";
-@forward "vouchers";
-@forward "quiz";
+@use "./dashboard";
+@use "./admin";
+@use "./subpage";
+@use "./quiz";
+@use "./vouchers";
+@use "./checkridereport";
+@use "./membersearch";
+@use "./learning";
+

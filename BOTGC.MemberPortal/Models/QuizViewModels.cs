@@ -5,6 +5,7 @@ using BOTGC.MemberPortal.Services;
 
 namespace BOTGC.MemberPortal.Models;
 
+// Models/QuizViewModels.cs
 public sealed class QuizGatekeeperViewModel
 {
     public string DisplayName { get; set; } = string.Empty;
@@ -17,8 +18,13 @@ public sealed class QuizGatekeeperViewModel
     public int PassMark { get; set; }
     public int? NextQuestionNumber { get; set; }
 
+    public int CompletedQuestions { get; set; }
+    public string? StartedLabel { get; set; }
+    public QuizDifficulty Difficulty { get; set; }
+
     public List<QuizAttemptListItemViewModel> Completed { get; set; } = new List<QuizAttemptListItemViewModel>();
 }
+
 
 public sealed class QuizAttemptListItemViewModel
 {
@@ -85,6 +91,7 @@ public sealed class QuizStartForm
 {
     public int QuestionCount { get; set; } = 10;
     public int PassMark { get; set; } = 7;
+    public QuizDifficulty Difficulty { get; set; } = QuizDifficulty.Medium; 
     public List<QuizDifficulty>? AllowedDifficulties { get; set; }
 }
 

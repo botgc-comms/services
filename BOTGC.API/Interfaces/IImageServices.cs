@@ -1,7 +1,6 @@
-﻿namespace BOTGC.API.Interfaces
+﻿namespace BOTGC.API.Interfaces;
+
+public interface IImageServices
 {
-    public interface IImageServices
-    {
-        Task<Stream?> CropAndCentreFacesAsync(Stream imageStream);
-    }
+    Task<Stream?> CropAndCentreFacesAsync(Stream imageStream);
 }

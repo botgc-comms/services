@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using QRCoder;
-using System.Text;
 
 namespace BOTGC.MemberPortal.Controllers;
 

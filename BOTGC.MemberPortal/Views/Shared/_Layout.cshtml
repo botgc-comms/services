@@ -69,6 +69,7 @@
 </head>
 <body>
     <header>
+        @RenderSection("Header", required: false)
     </header>
     <div class="container-md">
         <main role="main" class="pb-3">
@@ -110,34 +111,42 @@
                 var accessPath;
 
                 if (key) {
-                // Gatekeeper enabled: /access?k=<key>&returnUrl=<path>
-                accessPath = "/access?k=" + encodeURIComponent(key) +
-                                "&returnUrl=" + encodeURIComponent(path);
+                    accessPath = "/access?k=" + encodeURIComponent(key) +
+                                 "&returnUrl=" + encodeURIComponent(path);
                 } else {
-                // No key configured: just use the current path directly
-                accessPath = path || "/";
+                    accessPath = path || "/";
                 }
 
-                block.innerHTML = "";
+                fetch("/device-link/create?returnUrl=" + encodeURIComponent(accessPath), { credentials: "same-origin" })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (j) {
+                        if (!j || !j.path) return;
 
-                var a = document.createElement("a");
-                a.className = "qr-link";
-                a.href = accessPath;
-                a.setAttribute("aria-label", "Open this page on your phone");
+                        var deviceLinkPath = j.path;
 
-                var img = document.createElement("img");
-                img.className = "qr-img";
-                img.width = 84;
-                img.height = 84;
-                img.loading = "lazy";
-                img.decoding = "async";
-                img.alt = "Open this page on your phone";
-                img.src = "/qr/page.png?pathAndQuery=" + encodeURIComponent(accessPath);
+                        block.innerHTML = "";
 
-                a.appendChild(img);
-                block.appendChild(a);
-                block.style.display = "";
+                        var a = document.createElement("a");
+                        a.className = "qr-link";
+                        a.href = deviceLinkPath;
+                        a.setAttribute("aria-label", "Open this page on your phone");
+
+                        var img = document.createElement("img");
+                        img.className = "qr-img";
+                        img.width = 84;
+                        img.height = 84;
+                        img.loading = "lazy";
+                        img.decoding = "async";
+                        img.alt = "Open this page on your phone";
+                        img.src = "/qr/page.png?pathAndQuery=" + encodeURIComponent(deviceLinkPath);
+
+                        a.appendChild(img);
+                        block.appendChild(a);
+                        block.style.display = "";
+                    })
+                    .catch(function () { });
             }
+
 
             // 1. If the server already knows the ngrok URL, just use it.
             if (initialNgrokUrl) {

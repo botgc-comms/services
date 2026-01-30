@@ -1,0 +1,27 @@
+﻿@{
+    Layout = "_Layout";
+
+    var backHref = ViewData["BackHref"] as string;
+    var backLabel = ViewData["BackLabel"] as string ?? "Back";
+}
+
+<div class="subpage">
+    <header class="subpage__header">
+        <a class="subpage__back" href="@(string.IsNullOrWhiteSpace(backHref) ? "/" : backHref)" aria-label="@backLabel">‹</a> <span class="dashboard_subtitle">@backLabel</span>
+    </header>
+
+    <div class="subpage__head">
+        @RenderSection("PageHeader", required: true)
+    </div>
+
+    <span class="subpage__spacer" aria-hidden="true"></span>
+
+    <div class="subpage__content">
+        @RenderBody()
+    </div>
+</div>
+
+@section Scripts
+{
+    @RenderSection("Scripts", required: false)
+}

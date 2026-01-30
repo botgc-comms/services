@@ -10,9 +10,13 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using BOTGC.MemberPortal.Hubs;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,6 +31,89 @@ public static class NgrokExtensions
         var enabled = config.GetValue<bool>("Ngrok:Enable") || config.GetValue<bool>("AppSettings:Ngrok:Enable");
         if (!app.Environment.IsDevelopment() || !enabled) return;
 
+        app.MapGet("/device-link/create", async (HttpContext ctx, string? returnUrl) =>
+        {
+            if (ctx.User?.Identity?.IsAuthenticated != true)
+            {
+                return Results.Unauthorized();
+            }
+
+            var cache = ctx.RequestServices.GetRequiredService<IDistributedCache>();
+            var token = CreateToken();
+
+            var payload = new DeviceLinkPayload
+            {
+                ReturnUrl = NormaliseReturnUrl(returnUrl),
+                Claims = ctx.User.Claims.Select(c => new DeviceLinkClaim { Type = c.Type, Value = c.Value }).ToList()
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+
+            await cache.SetStringAsync(
+                DeviceLinkKey(token),
+                json,
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+                });
+
+            return Results.Json(new { path = $"/device-link/consume?t={Uri.EscapeDataString(token)}" });
+        });
+
+        app.MapGet("/device-link/consume", async (HttpContext ctx, string? t) =>
+        {
+            if (string.IsNullOrWhiteSpace(t))
+            {
+                return Results.Redirect("/Account/Login");
+            }
+
+            var cache = ctx.RequestServices.GetRequiredService<IDistributedCache>();
+            var key = DeviceLinkKey(t);
+
+            var json = await cache.GetStringAsync(key);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return Results.Redirect("/Account/Login");
+            }
+
+            await cache.RemoveAsync(key);
+
+            DeviceLinkPayload? payload;
+            try
+            {
+                payload = JsonSerializer.Deserialize<DeviceLinkPayload>(json);
+            }
+            catch
+            {
+                return Results.Redirect("/Account/Login");
+            }
+
+            if (payload == null || payload.Claims == null || payload.Claims.Count == 0)
+            {
+                return Results.Redirect("/Account/Login");
+            }
+
+            var claims = payload.Claims.Select(c => new System.Security.Claims.Claim(c.Type, c.Value)).ToList();
+            var identity = new System.Security.Claims.ClaimsIdentity(
+                claims,
+                CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+
+            await ctx.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                principal,
+                new AuthenticationProperties { IsPersistent = false });
+
+            var ru = payload.ReturnUrl;
+            if (!string.IsNullOrWhiteSpace(ru) && ru.StartsWith("/", StringComparison.Ordinal))
+            {
+                return Results.Redirect(ru);
+            }
+
+            return Results.Redirect("/");
+        });
+
         app.Lifetime.ApplicationStarted.Register(() =>
         {
             _ = Task.Run(async () =>
@@ -39,7 +126,6 @@ public static class NgrokExtensions
 
                     var targetUri = ResolveListeningAddress(app);
 
-                    // Reuse an existing tunnel if it already forwards to the current target.
                     var reused = await TryReuseExistingLocalTunnelAsync(app, targetUri);
                     if (reused) return;
 
@@ -68,6 +154,45 @@ public static class NgrokExtensions
         });
     }
 
+    private static string DeviceLinkKey(string token) => $"dev:device-link:{token}";
+
+    private static string CreateToken()
+    {
+        Span<byte> bytes = stackalloc byte[32];
+        System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
+
+        var s = Convert.ToBase64String(bytes);
+        s = s.Replace("+", "-").Replace("/", "_").TrimEnd('=');
+        return s;
+    }
+
+    private static string NormaliseReturnUrl(string? returnUrl)
+    {
+        if (string.IsNullOrWhiteSpace(returnUrl))
+        {
+            return "/";
+        }
+
+        if (!returnUrl.StartsWith("/", StringComparison.Ordinal))
+        {
+            return "/" + returnUrl;
+        }
+
+        return returnUrl;
+    }
+
+    private sealed class DeviceLinkPayload
+    {
+        public string ReturnUrl { get; set; } = "/";
+        public System.Collections.Generic.List<DeviceLinkClaim> Claims { get; set; } = new();
+    }
+
+    private sealed class DeviceLinkClaim
+    {
+        public string Type { get; set; } = "";
+        public string Value { get; set; } = "";
+    }
+
     private static async Task<bool> TryReuseExistingLocalTunnelAsync(WebApplication app, Uri targetUri)
     {
         var desiredHttps = string.Equals(targetUri.Scheme, "https", StringComparison.OrdinalIgnoreCase);
@@ -83,7 +208,6 @@ public static class NgrokExtensions
                 var tunnels = info?.tunnels ?? new System.Collections.Generic.List<TunnelApi.Tunnel>();
                 if (tunnels.Count == 0) continue;
 
-                // Find any tunnel whose config.addr matches our Kestrel binding. Prefer HTTPS public URL when available.
                 var match = tunnels
                     .Where(t =>
                         !string.IsNullOrWhiteSpace(t.config?.addr) &&
@@ -242,7 +366,9 @@ public static class NgrokExtensions
             var cfg = app.Services.GetRequiredService<IConfiguration>();
             var urls = cfg["ASPNETCORE_URLS"] ?? cfg["urls"];
             if (!string.IsNullOrWhiteSpace(urls))
+            {
                 addrs = urls.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+            }
         }
 
         if (addrs.Count == 0) throw new InvalidOperationException("Could not determine listening addresses.");
@@ -252,7 +378,9 @@ public static class NgrokExtensions
                   ?? addrs[0];
 
         if (!Uri.TryCreate(target, UriKind.Absolute, out var uri))
+        {
             throw new InvalidOperationException($"Invalid address: '{target}'.");
+        }
 
         return uri;
 

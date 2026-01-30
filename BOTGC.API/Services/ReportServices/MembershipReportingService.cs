@@ -315,7 +315,7 @@ namespace BOTGC.API.Services.ReportServices
             var plotTo = fyEnd.AddMonths(6);
 
             EnsureFullYearData(dataPoints, plotTo, dailyTargetRevenue);
-            ApplyGrowthTargets(dataPoints, fyStart, plotTo);
+            ApplyGrowthTargets(dataPoints, fyStart, fyEnd);
 
             report.DataPoints = dataPoints
                 .Where(dp => dp.Date >= plotFrom && dp.Date <= plotTo)

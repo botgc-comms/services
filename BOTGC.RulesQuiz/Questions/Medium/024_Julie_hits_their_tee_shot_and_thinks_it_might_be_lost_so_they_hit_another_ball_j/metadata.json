@@ -20,7 +20,7 @@
       "text": "Their next shot counts as their 2nd shot"
     }
   ],
-  "correctAnswer": null,
+  "correctAnswer": "a",
   "explanation": "In golf, if you're unsure about your first ball and decide to hit another, you must say it's a \"provisional\" ball. If you don't and play a second ball, that one counts even if you find the first. Without calling it provisional, your next shot with the second ball is your third shot.",
   "imageAlt": "Screenshot 2024-02-15 135518"
 }

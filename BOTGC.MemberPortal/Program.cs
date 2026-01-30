@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using BOTGC.MemberPortal;
 using BOTGC.MemberPortal.Extensions;
 using BOTGC.MemberPortal.Hubs;
@@ -7,6 +9,8 @@ using BOTGC.MemberPortal.Services.TileAdapters;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
+using RedLockNet.SERedis;
+using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +28,13 @@ builder.Services.Configure<ForwardedHeadersOptions>(o =>
                        | ForwardedHeaders.XForwardedHost;
     o.KnownNetworks.Clear();
     o.KnownProxies.Clear();
+});
+
+builder.Services.AddSingleton(new JsonSerializerOptions
+{
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    PropertyNameCaseInsensitive = true,
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
 });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -57,10 +68,13 @@ builder.Services.AddScoped<ITileAdapter, HandicapSessionTileAdapter>();
 builder.Services.AddScoped<ITileAdapter, CategoryProgressTileAdapter>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
+builder.Services.AddScoped<IJuniorMemberDirectoryService, JuniorMemberDirectoryService>();
+builder.Services.AddScoped<ICheckRideReportRepository, TableStorageCheckRideReportRepository>();
+
+var settings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
+
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    var settings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
-
     if (string.IsNullOrWhiteSpace(settings?.Cache?.ConnectionString))
     {
         throw new InvalidOperationException("AppSettings:Cache:ConnectionString is required.");
@@ -76,7 +90,26 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
+var redisConnection = ConnectionMultiplexer.Connect(settings?.Cache?.ConnectionString);
+var redLockFactory = RedLockFactory.Create(new List<RedLockMultiplexer> { redisConnection });
+
+builder.Services.AddSingleton(redLockFactory);
+builder.Services.AddSingleton<IDistributedLockManager, RedLockDistributedLockManager>();
+
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(8);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
+
+
 builder.Services.AddJuniorQuizContentFromFileSystem();
+
+builder.Services.AddLearningPacksCommon();
+builder.Services.AddLearningPacksFromFileSystem();
 
 var app = builder.Build();
 
@@ -84,6 +117,7 @@ app.UseForwardedHeaders();
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
