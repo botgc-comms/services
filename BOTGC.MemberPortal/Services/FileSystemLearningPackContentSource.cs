@@ -16,11 +16,6 @@ public sealed class FileSystemLearningPackContentSource : ILearningPackContentSo
         AllowTrailingCommas = true,
     };
 
-    private static readonly Regex MarkdownAssetRegex = new(
-        @"(!\[[^\]]*\]\()(?<path>\.\./assets/(?<file>[^)\s]+))(\))",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase
-    );
-
     private readonly AppSettings _settings;
 
     public FileSystemLearningPackContentSource(AppSettings settings)
@@ -75,13 +70,11 @@ public sealed class FileSystemLearningPackContentSource : ILearningPackContentSo
                 }
 
                 var markdown = await File.ReadAllTextAsync(pagePath, Encoding.UTF8, ct);
-                var resolved = ResolveMarkdownAssets(markdown, assetBaseUrl);
 
                 packPages.Add(new LearningPackPage(
                     Id: pageRef.Id,
                     Title: pageRef.Title,
-                    Markdown: markdown,
-                    MarkdownWithResolvedAssets: resolved
+                    Markdown: markdown
                 ));
             }
 
@@ -95,16 +88,6 @@ public sealed class FileSystemLearningPackContentSource : ILearningPackContentSo
             .ToArray();
 
         return new LearningPackContentSnapshot(DateTimeOffset.UtcNow, ordered);
-    }
-
-    private static string ResolveMarkdownAssets(string markdown, string assetBaseUrl)
-    {
-        return MarkdownAssetRegex.Replace(markdown, m =>
-        {
-            var file = m.Groups["file"].Value;
-            var url = $"{assetBaseUrl}/{ImageHelpers.EncodePath(file)}";
-            return $"{m.Groups[1].Value}{url}{m.Groups[4].Value}";
-        });
     }
 
     private static async Task<IReadOnlyList<LearningPackAsset>> LoadAssetsFromFileSystemAsync(string packFolder, CancellationToken ct)

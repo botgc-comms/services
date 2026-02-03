@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
 using System.Security.Claims;
+using System.Text.Json;
 using BOTGC.MemberPortal.Interfaces;
+using BOTGC.MemberPortal.Models;
 
 namespace BOTGC.MemberPortal.Services;
 
@@ -8,9 +10,74 @@ public sealed class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     public CurrentUserService(IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;
+    }
+
+    public bool IsParent
+    {
+        get
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.IsAuthenticated != true)
+            {
+                return false;
+            }
+
+            if (user.IsInRole("Parent"))
+            {
+                return true;
+            }
+
+            var role =
+                user.FindFirstValue(ClaimTypes.Role)
+                ?? user.FindFirstValue("role")
+                ?? user.FindFirstValue("roles");
+
+            if (string.IsNullOrWhiteSpace(role))
+            {
+                return false;
+            }
+
+            return string.Equals(role, "Parent", StringComparison.OrdinalIgnoreCase)
+                || role.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                       .Any(r => string.Equals(r, "Parent", StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    public IReadOnlyCollection<AppAuthChildLink> ChildLinks
+    {
+        get
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.IsAuthenticated != true)
+            {
+                return Array.Empty<AppAuthChildLink>();
+            }
+
+            var json = user.FindFirstValue("child_links");
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return Array.Empty<AppAuthChildLink>();
+            }
+
+            try
+            {
+                var retVal = JsonSerializer.Deserialize<List<AppAuthChildLink>>(json, JsonOptions);
+                if (retVal == null) return  Array.Empty<AppAuthChildLink>();
+                return retVal;
+            }
+            catch
+            {
+                return Array.Empty<AppAuthChildLink>();
+            }
+        }
     }
 
     public bool IsAdmin

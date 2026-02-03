@@ -5,8 +5,8 @@
   "estimatedMinutes": 7,
   "priority": 800,
   "mandatoryFor": [
-    "JuniorCadet", 
-    "JuniorCourseCadet"
+    "Junior Cadet", 
+    "Junior Course Cadet"
   ],
   "version": 1,
   "pages": [

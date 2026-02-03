@@ -8,4 +8,6 @@ public sealed class AppUser
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
+    public IReadOnlyCollection<AppAuthChildLink> Children { get; set; } = Array.Empty<AppAuthChildLink>();
 }
+

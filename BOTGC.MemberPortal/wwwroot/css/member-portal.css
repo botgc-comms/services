@@ -438,32 +438,43 @@
 @forward "forms";
 @forward "dialogs";
 @forward "categories";*/
+/* wwwroot/scss/_filterbar.scss */
 .filterbar {
   margin-top: 14px;
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 0;
+  flex-wrap: nowrap;
+  padding: 6px;
+  border-radius: 999px;
+  background: #f59e0b;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
 }
 
 .filterbar__item {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 38px;
-  padding: 0 14px;
-  border-radius: 999px;
   text-decoration: none;
   font-weight: 900;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.7);
-  color: #111827;
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.06);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.filterbar__item:focus {
+  outline: 3px solid #9ecbff;
+  outline-offset: 2px;
 }
 
 .filterbar__item--active {
-  background: #111827;
-  color: #fff;
-  border-color: rgba(0, 0, 0, 0.12);
+  background: #fff;
+  color: #111827;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.1);
 }
 
 /*@forward "fonts";
@@ -2568,4 +2579,67 @@ body {
 
 .learningpage__navspacer {
   height: 44px;
+}
+
+.plink__title {
+  margin: 0 0 10px;
+  font-size: 2.5rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.plink__subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-top: 6px;
+}
+
+.plink {
+  margin-top: 12px;
+}
+
+.plink__card {
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  text-align: center;
+}
+
+.plink__qr {
+  width: min(320px, 100%);
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fff;
+}
+
+.plink__expires {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.plink__details {
+  width: 100%;
+  text-align: left;
+}
+
+.plink__details-text {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 10px 0 6px 0;
+}
+
+.plink__details-link {
+  margin: 0;
+  word-break: break-all;
 }

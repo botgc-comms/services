@@ -2,9 +2,7 @@
 
 public sealed class FilterBarViewModel
 {
-    public string AriaLabel { get; set; } = "Filters";
-
-    public string CurrentValue { get; set; } = "all";
-
+    public string AriaLabel { get; set; } = string.Empty;
+    public string CurrentValue { get; set; } = string.Empty;
     public List<FilterBarOptionViewModel> Options { get; set; } = new();
 }

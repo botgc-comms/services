@@ -67,7 +67,6 @@ var env = "Production";
         builder.Services.AddTransient<MetallicSplashPage>();
 
         builder.Services.AddSingleton<AppNavigationCoordinator>();
-        builder.Services.AddSingleton<DateOfBirthFlowHandler>();
 
         builder.Services.AddSingleton<IAppAuthService, AppAuthService>();
         builder.Services.AddSingleton<IDeepLinkService, DeepLinkService>();

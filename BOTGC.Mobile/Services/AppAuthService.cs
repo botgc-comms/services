@@ -1,6 +1,5 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Json;
-using System.Web;
 using BOTGC.Mobile.Interfaces;
 using Microsoft.Maui.Storage;
 
@@ -61,12 +60,17 @@ public sealed class AppAuthService : IAppAuthService
             var accessToken = await GetValidAccessTokenAsync(cancellationToken);
             return new IAppAuthService.AuthCheckResult(!string.IsNullOrWhiteSpace(accessToken), null);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             await ClearTokensAsync();
             return new IAppAuthService.AuthCheckResult(false, ex.Message);
         }
     }
+
 
     public async Task<IAppAuthService.AppAuthRedeemResponse> RedeemAsync(string code, CancellationToken cancellationToken = default)
     {
@@ -120,12 +124,21 @@ public sealed class AppAuthService : IAppAuthService
             throw new InvalidOperationException("Token response invalid.");
         }
 
-        await SecureStorage.SetAsync(StorageAccessToken, tokens.AccessToken);
-        await SecureStorage.SetAsync(StorageAccessTokenExpiresUtc, tokens.AccessTokenExpiresUtc.ToUnixTimeSeconds().ToString());
+        await _tokenGate.WaitAsync();
+        try
+        {
+            await SecureStorage.SetAsync(StorageAccessToken, tokens.AccessToken);
+            await SecureStorage.SetAsync(StorageAccessTokenExpiresUtc, tokens.AccessTokenExpiresUtc.ToUnixTimeSeconds().ToString());
 
-        await SecureStorage.SetAsync(StorageRefreshToken, tokens.RefreshToken);
-        await SecureStorage.SetAsync(StorageRefreshTokenExpiresUtc, tokens.RefreshTokenExpiresUtc.ToUnixTimeSeconds().ToString());
+            await SecureStorage.SetAsync(StorageRefreshToken, tokens.RefreshToken);
+            await SecureStorage.SetAsync(StorageRefreshTokenExpiresUtc, tokens.RefreshTokenExpiresUtc.ToUnixTimeSeconds().ToString());
+        }
+        finally
+        {
+            _tokenGate.Release();
+        }
     }
+
 
     public Task<string?> GetRefreshTokenAsync()
     {
@@ -171,6 +184,15 @@ public sealed class AppAuthService : IAppAuthService
 
             return tokens.AccessToken;
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (AuthInvalidException)
+        {
+            await ClearTokensAsync();
+            return null;
+        }
         catch
         {
             await ClearTokensAsync();
@@ -193,37 +215,65 @@ public sealed class AppAuthService : IAppAuthService
 
     public string? ExtractCodeFromRedeemUrl(string raw)
     {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+
         if (!Uri.TryCreate(raw, UriKind.Absolute, out var uri))
         {
             return null;
         }
 
-        var qs = HttpUtility.ParseQueryString(uri.Query);
-
-        var code = qs.Get("code");
-        if (!string.IsNullOrWhiteSpace(code))
+        var query = uri.Query;
+        if (string.IsNullOrWhiteSpace(query))
         {
-            return code.Trim();
+            return null;
         }
 
-        var q = qs.Get("q");
-        if (!string.IsNullOrWhiteSpace(q))
+        if (query.StartsWith("?", StringComparison.Ordinal))
         {
-            return q.Trim();
+            query = query.Substring(1);
+        }
+
+        foreach (var part in query.Split('&', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var idx = part.IndexOf('=', StringComparison.Ordinal);
+            var key = idx >= 0 ? part.Substring(0, idx) : part;
+            var value = idx >= 0 ? part.Substring(idx + 1) : string.Empty;
+
+            key = Uri.UnescapeDataString(key);
+            value = Uri.UnescapeDataString(value);
+
+            if (key.Equals("code", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(value))
+            {
+                return value.Trim();
+            }
+
+            if (key.Equals("q", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(value))
+            {
+                return value.Trim();
+            }
         }
 
         return null;
     }
+
 
     private async Task<IAppAuthService.AuthTokenResponse> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
     {
         var client = _httpClientFactory.CreateClient(ApiClientName);
 
         using var req = new HttpRequestMessage(HttpMethod.Post, "api/auth/app/refresh");
-
         req.Content = JsonContent.Create(new AuthRefreshRequest { RefreshToken = refreshToken });
 
         var res = await client.SendAsync(req, cancellationToken);
+
+        if (res.StatusCode == System.Net.HttpStatusCode.Unauthorized || res.StatusCode == System.Net.HttpStatusCode.Forbidden)
+        {
+            throw new AuthInvalidException("Refresh token invalid.");
+        }
+
         res.EnsureSuccessStatusCode();
 
         var body = await res.Content.ReadFromJsonAsync<IAppAuthService.AuthTokenResponse>(cancellationToken: cancellationToken);
@@ -234,6 +284,7 @@ public sealed class AppAuthService : IAppAuthService
 
         return body;
     }
+
 
     private static bool TryParseUnixSeconds(string? value, out DateTimeOffset utc)
     {
@@ -251,16 +302,6 @@ public sealed class AppAuthService : IAppAuthService
 
         utc = DateTimeOffset.FromUnixTimeSeconds(seconds);
         return true;
-    }
-
-    private static string GetApiKey()
-    {
-        return Preferences.Get("botgc.api_key", string.Empty);
-    }
-
-    private static string GetClientId()
-    {
-        return Preferences.Get("botgc.client_id", "botgc-maui");
     }
 
     private sealed class AppAuthRedeemRequest
@@ -288,4 +329,12 @@ public sealed class AppAuthService : IAppAuthService
         public string Code { get; set; } = string.Empty;
         public DateTimeOffset ExpiresUtc { get; set; }
     }
+
+    private sealed class AuthInvalidException : Exception
+    {
+        public AuthInvalidException(string message) : base(message)
+        {
+        }
+    }
 }
+

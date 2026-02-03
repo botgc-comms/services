@@ -1,16 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using BOTGC.MemberPortal.Models;
-using BOTGC.MemberPortal.Interfaces;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Security.Claims;
+using System.Text.Json;
+using BOTGC.MemberPortal.Interfaces;
+using BOTGC.MemberPortal.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 
-namespace BOTGC.ManagementReports.Controllers;
+namespace BOTGC.MemberPortal.Controllers;
 
 public sealed class AccountController : Controller
 {
     private readonly IUserAuthenticationService _authService;
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
 
     public AccountController(IUserAuthenticationService authService)
     {
@@ -52,15 +58,46 @@ public sealed class AccountController : Controller
             string.Equals(user.Username, "admin", StringComparison.OrdinalIgnoreCase)
             || string.Equals(user.Username, "1", StringComparison.OrdinalIgnoreCase);
 
+        var hasNumericUsername = int.TryParse(
+            user.Username,
+            NumberStyles.Integer,
+            CultureInfo.InvariantCulture,
+            out var memberNumber);
+
+        var childLinks = (user.Children ?? Array.Empty<AppAuthChildLink>())
+            .Where(x => x != null)
+            .Take(3)
+            .ToArray();
+
+        var isParent = !isAdmin && childLinks.Length > 0;
+
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString(CultureInfo.InvariantCulture)),
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim("display_name", user.DisplayName),
-            new Claim("firstName", user.FirstName),
-            new Claim("lastName", user.LastName), 
-            new Claim("category", user.Category)
+            new Claim("memberId", user.Id.ToString(CultureInfo.InvariantCulture)),
+            new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
+            new Claim("firstName", user.FirstName ?? string.Empty),
+            new Claim("surname", user.LastName ?? string.Empty),
+            new Claim("category", user.Category ?? string.Empty)
         };
+
+        if (hasNumericUsername)
+        {
+            claims.Add(new Claim("memberNumber", memberNumber.ToString(CultureInfo.InvariantCulture)));
+        }
+
+        claims.Add(new Claim("child_links", JsonSerializer.Serialize(childLinks, JsonOptions)));
+
+        if (isParent)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, "Parent"));
+            claims.Add(new Claim("role", "Parent"));
+        }
+        else
+        {
+            claims.Add(new Claim(ClaimTypes.Role, "Child"));
+            claims.Add(new Claim("role", "Child"));
+        }
 
         if (isAdmin)
         {

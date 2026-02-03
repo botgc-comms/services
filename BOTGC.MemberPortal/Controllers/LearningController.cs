@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BOTGC.MemberPortal.Common;
 using BOTGC.MemberPortal.Interfaces;
 using BOTGC.MemberPortal.Models;
 using BOTGC.MemberPortal.Services;
@@ -19,8 +20,8 @@ public sealed class LearningController : Controller
     private readonly ICurrentUserService _currentUserService;
     private readonly LearningPackService _packs;
     private readonly LearningMarkdownRenderer _markdown;
-    private readonly AppSettings _appSettings;
-
+    private readonly AppSettings _appSettings; 
+    
     public LearningController(
         ICurrentUserService currentUserService,
         LearningPackService packs,
@@ -44,6 +45,14 @@ public sealed class LearningController : Controller
         var userId = _currentUserService.UserId.Value.ToString();
         var category = _currentUserService.Category;
 
+        var mandatoryCategories = _currentUserService.IsParent
+            ? _currentUserService.ChildLinks
+                .Select(x => x.Category)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray()
+            : (string.IsNullOrWhiteSpace(category) ? Array.Empty<string>() : new[] { category });
+
         var catalogue = await _packs.ListAvailableAsync(cancellationToken);
         var progress = await _packs.ListUserProgressAsync(userId, cancellationToken);
 
@@ -58,7 +67,7 @@ public sealed class LearningController : Controller
 
                 var isVisited = pr?.FirstViewedAtUtc.HasValue == true;
                 var isCompleted = pr?.IsCompleted == true;
-                var mandatory = IsMandatoryForCategory(p.MandatoryFor, category);
+                var mandatory = IsMandatoryForAnyCategory(p.MandatoryFor, mandatoryCategories);
 
                 return new LearningPackListItemViewModel
                 {
@@ -96,6 +105,15 @@ public sealed class LearningController : Controller
 
         var userId = _currentUserService.UserId.Value.ToString();
         var category = _currentUserService.Category;
+
+        var mandatoryCategories = _currentUserService.IsParent
+            ? _currentUserService.ChildLinks
+                .Select(x => x.Category)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray()
+            : (string.IsNullOrWhiteSpace(category) ? Array.Empty<string>() : new[] { category });
+
 
         var pack = await _packs.GetPackAsync(packId, cancellationToken);
         if (pack is null)
@@ -145,7 +163,7 @@ public sealed class LearningController : Controller
             Summary = pack.Manifest.Summary,
             Description = pack.Manifest.Description,
             EstimatedMinutes = pack.Manifest.EstimatedMinutes,
-            IsMandatory = IsMandatoryForCategory(pack.Manifest.MandatoryFor, category),
+            IsMandatory = IsMandatoryForAnyCategory(pack.Manifest.MandatoryFor, mandatoryCategories),
             IsCompleted = progress?.IsCompleted == true,
             CompletedAtUtc = progress?.CompletedAtUtc,
             ContinueHref = continueHref,
@@ -213,7 +231,7 @@ public sealed class LearningController : Controller
             }
         }
 
-        var html = _markdown.ToHtml(page.MarkdownWithResolvedAssets);
+        var html = _markdown.ToHtml(page.Markdown, pack.AssetBaseUrl);
 
         var vm = new LearningPackPageViewModel
         {
@@ -236,16 +254,52 @@ public sealed class LearningController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Get(string packId, string fileName, CancellationToken ct)
     {
-        var snapshot = await _packs.ListAvailableAsync(ct);
-        var contentVersion = snapshot.ContentVersion;
-
-        var asset = await _assetCache.GetAsync(contentVersion, packId, fileName, ct);
-        if (asset is null)
+        var pack = await _packs.GetPackAsync(packId, ct);
+        if (pack is null)
+        {
             return NotFound();
+        }
+
+        var normalised = ImageHelpers.NormaliseAssetKey(fileName);
+
+        var asset = pack.Assets.FirstOrDefault(a => string.Equals(a.FileName, normalised, StringComparison.OrdinalIgnoreCase));
+        if (asset is null)
+        {
+            return NotFound();
+        }
 
         Response.Headers["Cache-Control"] = "public, max-age=86400";
-        return File(asset.Value.Bytes, asset.Value.ContentType);
+        return File(asset.Bytes, asset.ContentType);
     }
+    private static bool IsMandatoryForAnyCategory(IReadOnlyList<string>? mandatoryFor, IReadOnlyList<string> categories)
+    {
+        if (mandatoryFor is null || mandatoryFor.Count == 0)
+        {
+            return false;
+        }
+
+        if (categories is null || categories.Count == 0)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < categories.Count; i++)
+        {
+            var c = categories[i];
+            if (string.IsNullOrWhiteSpace(c))
+            {
+                continue;
+            }
+
+            if (mandatoryFor.Any(x => string.Equals(x, c, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 
 
     private static bool IsMandatoryForCategory(IReadOnlyList<string>? mandatoryFor, string? category)

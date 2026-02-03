@@ -432,6 +432,47 @@ namespace BOTGC.API.Controllers
         }
 
         /// <summary>
+        /// Retrieves details about the specified member
+        /// </summary>
+        /// <returns>Details about the specified member</returns>
+        /// <response code="200">Returns the list of junior members.</response>
+        /// <response code="204">No junior members found.</response>
+        /// <response code="500">An internal server error occurred.</response>
+        [HttpGet("{memberId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MemberDetailsDto))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<MemberDetailsDto?>> GetMemberDetails(int memberId)
+        {
+            _logger.LogInformation($"Fetching member details for member {memberId}...");
+
+            try
+            {
+                var query = new GetMemberQuery() { MemberNumber = memberId };
+                var memberDetails = await _mediator.Send(query, HttpContext.RequestAborted);
+
+                if (memberDetails == null)
+                {
+                    _logger.LogWarning($"No record found for member {memberId}.");
+                    return NoContent();
+                }
+
+                _logger.LogInformation($"Successfully retrieved details for member {memberId}.");
+                return Ok(memberDetails);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "No member found for member ID {MemberId}", memberId);
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving details for member {memberId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving details for member {memberId}.");
+            }
+        }
+
+        /// <summary>
         /// Retrieves the handicap history for a specific member.
         /// </summary>
         /// <returns> Returns the handicap history for the specified member </returns>

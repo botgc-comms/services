@@ -3,8 +3,9 @@
   "title": "Scoring and competitions",
   "summary": "How scoring works and what to expect in junior competitions.",
   "estimatedMinutes": 7,
+  "priority": 1400,  
   "mandatoryFor": [
-    "cadetToCourseCadet"
+    "Junior Course Cadet"
   ],
   "version": 1,
   "pages": [

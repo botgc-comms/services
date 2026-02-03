@@ -50,8 +50,12 @@ namespace BOTGC.API.Extensions
             services.AddAzureTableStore<EposProShopInvoiceLineEntity>("EPOSVoucherInvoiceLines");
             services.AddAzureTableStore<EposAccountTransactionEntity>("EPOSAccountTransactions");
 
+            services.AddAzureTableStore<LearningPackProgressEntity>("LearningPackProgress");
+            services.AddAzureTableStore<LearningPackCatalogueEntity>("LearningPackCatalogue");
+
             services.AddSingleton(cookieContainer);
             services.AddSingleton(httpClient);
+
             services.AddSingleton<IGSessionService>(); 
 
             services.AddHostedService(provider => provider.GetRequiredService<IGSessionService>());
@@ -70,6 +74,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IQueueService<ProcessPrizeInvoiceCommand>, PrizeInvoiceQueueService>();
             services.AddSingleton<IQueueService<SendPrizeNotificationEmailCommand>, PrizeNotificationsQueueService>(); 
             services.AddSingleton<IQueueService<ProcessCompetitionWinningsBatchCompletedCommand>, NewCompetitionPrizesCalcualtedQueueService>();
+
             services.AddSingleton<IEposStore, EposStore>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
@@ -92,6 +97,9 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<ICompetitionPayoutStore, CompetitionPayoutService>();
             services.AddSingleton<IBlobStorageService, AzureBlobStorageService>();
             services.AddSingleton<IBenefitsQrTokenService, BenefitsQrTokenService>();
+
+            services.AddSingleton<ILearningPackProgressReadStore, TableStorageLearningPackProgressReadStore>();
+            services.AddSingleton<ILearningPackRequirementResolver, TableStorageLearningPackRequirementResolver>();
 
             services.AddHostedService<EposProductSeedService>();
             services.AddHostedService<CompetitionBackgroundService>();

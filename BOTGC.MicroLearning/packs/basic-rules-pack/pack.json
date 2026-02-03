@@ -3,7 +3,10 @@
   "title": "Basic rules",
   "summary": "A simple introduction to the most important golf rules juniors need to know.",
   "estimatedMinutes": 7,
-  "mandatoryFor": [],
+  "priority": 1100,
+  "mandatoryFor": [
+    "Junior Course Cadet"
+  ],
   "version": 1,
   "pages": [
     {

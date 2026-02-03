@@ -47,6 +47,7 @@ public sealed class LearningPackTableStorageSettings
     public string ConnectionString { get; set; } = string.Empty;
     public string ProgressTableName { get; set; } = "LearningPackProgress";
     public string PageViewsTableName { get; set; } = "LearningPackPageViews";
+    public string CatalogueTableName { get; set; } = "LearningPackCatalogue";
 }
 
 public sealed class QuizSettings

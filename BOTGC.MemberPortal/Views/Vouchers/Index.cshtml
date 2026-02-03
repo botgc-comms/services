@@ -2,22 +2,38 @@
 
 @{
     ViewData["Title"] = "My Vouchers";
+    Layout = "_SubpageLayout";
+    ViewData["BackHref"] = "/";
+    ViewData["BackLabel"] = "Back to dashboard";
+
+    var tab = (Context.Request.Query["tab"].ToString() ?? "active").ToLowerInvariant();
+    if (tab is not ("active" or "used" or "expired"))
+    {
+        tab = "active";
+    }
+
+    var filterVm = new BOTGC.MemberPortal.Models.FilterBarViewModel
+    {
+        AriaLabel = "Voucher filters",
+        CurrentValue = tab,
+        Options = new()
+        {
+            new() { Value = "active", Label = "Active", Href = "/vouchers?tab=active" },
+            new() { Value = "used", Label = "Used", Href = "/vouchers?tab=used" },
+            new() { Value = "expired", Label = "Expired", Href = "/vouchers?tab=expired" },
+        }
+    };
+}
+
+@section PageHeader
+{
+    <h1 class="learning__title">My vouchers</h1>
 }
 
 <div class="vouchers">
-    <header class="vouchers__header">
-        <a class="vouchers__back app-link" href="/" aria-label="Back">‹</a>
-        <h1 class="vouchers__title">My Vouchers</h1>
-        <span class="vouchers__spacer" aria-hidden="true"></span>
-    </header>
+    @await Html.PartialAsync("_FilterBar", filterVm)
 
-    <nav class="vouchers__tabs" aria-label="Voucher filters">
-        <button type="button" class="vouchers__tab is-active" data-tab="active">Active</button>
-        <button type="button" class="vouchers__tab" data-tab="used">Used</button>
-        <button type="button" class="vouchers__tab" data-tab="expired">Expired</button>
-    </nav>
-
-    <section class="vouchers__panel is-active" data-panel="active" aria-label="Active vouchers">
+    <section class="vouchers__panel @(tab == "active" ? "is-active" : "")" data-panel="active" aria-label="Active vouchers">
         @if (Model.Active.Count == 0)
         {
             <div class="vouchers__empty">
@@ -51,7 +67,7 @@
         }
     </section>
 
-    <section class="vouchers__panel" data-panel="used" aria-label="Used vouchers">
+    <section class="vouchers__panel @(tab == "used" ? "is-active" : "")" data-panel="used" aria-label="Used vouchers">
         @if (Model.Used.Count == 0)
         {
             <div class="vouchers__empty">
@@ -84,7 +100,7 @@
         }
     </section>
 
-    <section class="vouchers__panel" data-panel="expired" aria-label="Expired vouchers">
+    <section class="vouchers__panel @(tab == "expired" ? "is-active" : "")" data-panel="expired" aria-label="Expired vouchers">
         @if (Model.Expired.Count == 0)
         {
             <div class="vouchers__empty">
@@ -120,16 +136,46 @@
 
 <script>
     (() => {
-        const tabs = Array.from(document.querySelectorAll(".vouchers__tab"));
+        const tabs = Array.from(document.querySelectorAll(".filterbar--segmented .filterbar__item"));
         const panels = Array.from(document.querySelectorAll(".vouchers__panel"));
 
-        const activate = (key) => {
-            tabs.forEach(t => t.classList.toggle("is-active", t.dataset.tab === key));
-            panels.forEach(p => p.classList.toggle("is-active", p.dataset.panel === key));
+        const setQuery = (key) => {
+            const url = new URL(window.location.href);
+            url.searchParams.set("tab", key);
+            window.history.replaceState({}, "", url);
         };
 
+        const activate = (key) => {
+            tabs.forEach(t => {
+                const href = t.getAttribute("href") || "";
+                const u = new URL(href, window.location.origin);
+                const v = (u.searchParams.get("tab") || u.searchParams.get("filter") || u.pathname.split("/").pop() || "").toLowerCase();
+                const isActive = v === key;
+                t.classList.toggle("filterbar__item--active", isActive);
+                if (isActive) t.setAttribute("aria-current", "page");
+                else t.removeAttribute("aria-current");
+            });
+
+            panels.forEach(p => p.classList.toggle("is-active", p.dataset.panel === key));
+            setQuery(key);
+        };
+
+        const readTab = () => {
+            const url = new URL(window.location.href);
+            const t = (url.searchParams.get("tab") || "active").toLowerCase();
+            return (t === "active" || t === "used" || t === "expired") ? t : "active";
+        };
+
+        activate(readTab());
+
         tabs.forEach(t => {
-            t.addEventListener("click", () => activate(t.dataset.tab));
+            t.addEventListener("click", (e) => {
+                e.preventDefault();
+                const href = t.getAttribute("href") || "";
+                const u = new URL(href, window.location.origin);
+                const key = (u.searchParams.get("tab") || "active").toLowerCase();
+                activate(key);
+            });
         });
     })();
 </script>

@@ -13,6 +13,8 @@ public static class LearningPackServiceCollectionExtensions
 
         services.AddScoped<LearningPackService>();
         services.AddSingleton<LearningMarkdownRenderer>();
+        services.AddSingleton<LearningPackMarkdownAssetResolver>();
+        services.AddSingleton<LearningPackCataloguePublisher>();
 
         services.AddHostedService<LearningPackContentWarmupHostedService>();
 

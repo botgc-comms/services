@@ -3,14 +3,18 @@
 
 @{
     ViewData["Title"] = "Learning";
+    Layout = "_SubpageLayout";
+    ViewData["BackHref"] = "/";
+    ViewData["BackLabel"] = "Back to dashboard";
+}
+
+@section PageHeader
+{
+    <h1 class="learning__title">Learning</h1>
+    <p class="learning__subtitle">Quick rules quizzes to help build confidence on the course.</p>
 }
 
 <div class="quiz">
-    <header class="quiz__header">
-        <a class="quiz__back" href="/" aria-label="Back">‹</a>
-        <h1 class="quiz__title">Learning</h1>
-        <span class="quiz__spacer" aria-hidden="true"></span>
-    </header>
 
     @if (Model.HasInProgress && !string.IsNullOrWhiteSpace(Model.AttemptId))
     {

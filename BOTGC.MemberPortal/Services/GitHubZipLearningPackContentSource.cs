@@ -18,11 +18,6 @@ public sealed class GitHubZipLearningPackContentSource : ILearningPackContentSou
         AllowTrailingCommas = true,
     };
 
-    private static readonly Regex MarkdownAssetRegex = new(
-        @"(!\[[^\]]*\]\()(?<path>\.\./assets/(?<file>[^)\s]+))(\))",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase
-    );
-
     private readonly HttpClient _http;
     private readonly AppSettings _settings;
 
@@ -99,13 +94,10 @@ public sealed class GitHubZipLearningPackContentSource : ILearningPackContentSou
                     markdown = await sr.ReadToEndAsync(ct);
                 }
 
-                var resolved = ResolveMarkdownAssets(markdown, assetBaseUrl);
-
                 packPages.Add(new LearningPackPage(
                     Id: pageRef.Id,
                     Title: pageRef.Title,
-                    Markdown: markdown,
-                    MarkdownWithResolvedAssets: resolved
+                    Markdown: markdown
                 ));
             }
 
@@ -159,15 +151,5 @@ public sealed class GitHubZipLearningPackContentSource : ILearningPackContentSou
         return list
             .OrderBy(a => a.FileName, StringComparer.OrdinalIgnoreCase)
             .ToArray();
-    }
-
-    private static string ResolveMarkdownAssets(string markdown, string assetBaseUrl)
-    {
-        return MarkdownAssetRegex.Replace(markdown, m =>
-        {
-            var file = m.Groups["file"].Value;
-            var url = $"{assetBaseUrl}/{ImageHelpers.EncodePath(file)}";
-            return $"{m.Groups[1].Value}{url}{m.Groups[4].Value}";
-        });
     }
 }

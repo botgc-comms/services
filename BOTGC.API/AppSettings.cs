@@ -239,6 +239,7 @@ namespace BOTGC.API
         public string TillProductInformationUrl { get; set; } = "/tilladmin.php?tab=products&section=addedit&id={productid}";
         public string TillProductsReportUrl { get; set; } = "/tilladmin.php?tab=products";
         public string TrophyCompetitionsUrl { get; set; } = "/trophy_competitions";
+        public string ParentChildUrl { get; set; } = "/membership_reports_custom.php?report=21";
 
     }
 

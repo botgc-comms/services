@@ -20,5 +20,6 @@
         public string? County { get; set; }
         public string? Postcode { get; set; }
         public string? Email { get; set; }
+        public Dictionary<string, List<string>> FurtherInformation { get; set; }
     }
 }

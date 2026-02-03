@@ -10,18 +10,18 @@ using Microsoft.Extensions.Options;
 
 namespace BOTGC.API.Services.EventBus.Subscribers;
 
-[SubscriberName("juniorprogress-learningcompleted")]
-public sealed class RecalculateJuniorProgressOnLearningCompletedSubscriber(
-    ILogger<RecalculateJuniorProgressOnLearningCompletedSubscriber> logger,
+[SubscriberName("juniorprogress-parentlearningmilestone")]
+public sealed class RecalculateJuniorProgressOnParentLearningMilestoneSubscriber(
+    ILogger<RecalculateJuniorProgressOnParentLearningMilestoneSubscriber> logger,
     ISubscriberQueueFactory queues,
     IOptions<EventPipelineOptions> options,
     JsonSerializerOptions json,
     IJuniorProgressEvaluator evaluator)
-    : SubscriberBase<LearningCompletedEvent, RecalculateJuniorProgressOnLearningCompletedSubscriber>(logger, queues, options, json)
+    : SubscriberBase<ParentLearningMilestoneAchievedEvent, RecalculateJuniorProgressOnParentLearningMilestoneSubscriber>(logger, queues, options, json)
 {
     private readonly IJuniorProgressEvaluator _evaluator = evaluator ?? throw new ArgumentNullException(nameof(evaluator));
 
-    protected override Task ProcessAsync(LearningCompletedEvent evt, CancellationToken cancellationToken)
+    protected override Task ProcessAsync(ParentLearningMilestoneAchievedEvent evt, CancellationToken cancellationToken)
     {
         return _evaluator.EvaluateAsync(evt.MemberId, cancellationToken);
     }

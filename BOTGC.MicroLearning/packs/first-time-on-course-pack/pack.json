@@ -3,7 +3,10 @@
   "title": "First time on the course",
   "summary": "What juniors and parents should expect the first time playing on the course.",
   "estimatedMinutes": 5,
-  "mandatoryFor": [],
+  "priority": 1000,
+  "mandatoryFor": [
+    "Junior Course Cadet"
+  ],
   "version": 1,
   "pages": [
     {

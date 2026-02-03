@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
+using BOTGC.API.Models;
 using BOTGC.API.Services.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -24,6 +25,7 @@ namespace BOTGC.API.Controllers
         private const string CacheKeyPrefixSession = "AppAuth:Session-";
         private const string CacheKeyPrefixRefresh = "AppAuth:Refresh-";
         private const string CacheKeyPrefixWebSso = "AppAuth:WebSSO-";
+        private const string CacheKeyPrefixParentLink = "AppAuth:ParentLink-";
 
         private readonly ILogger<AuthController> _logger;
         private readonly IMediator _mediator;
@@ -178,6 +180,8 @@ namespace BOTGC.API.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Redeem([FromBody] AppAuthRedeemRequest request)
         {
+            Response.Headers.CacheControl = "no-store";
+
             if (request == null || string.IsNullOrWhiteSpace(request.Code))
             {
                 return NotFound(Problem(title: "Code not found.", detail: "The code is missing."));
@@ -201,6 +205,8 @@ namespace BOTGC.API.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> RedeemGet([FromQuery] string code)
         {
+            Response.Headers.CacheControl = "no-store";
+
             if (string.IsNullOrWhiteSpace(code))
             {
                 return NotFound(Problem(title: "Code not found.", detail: "The code is missing."));
@@ -293,6 +299,51 @@ namespace BOTGC.API.Controllers
             });
         }
 
+        [HttpPost("app/parent-link")]
+        [AllowAnonymous]
+        [Consumes("application/json")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(AppAuthWebSsoResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> IssueParentLink([FromBody] AppAuthIssueParentLinkRequest request)
+        {
+            Response.Headers.CacheControl = "no-store";
+
+            if (request == null || request.ChildMembershipId <= 0 || request.ChildMembershipNumber <= 0)
+            {
+                return BadRequest(Problem(title: "Invalid request.", detail: "childMembershipId and childMembershipNumber are required."));
+            }
+
+            var nowUtc = DateTimeOffset.UtcNow;
+
+            var ttlSeconds = 120;
+            var expiresUtc = nowUtc.AddSeconds(ttlSeconds);
+
+            var code = Guid.NewGuid().ToString("N");
+            var key = CacheKeyPrefixParentLink + code;
+
+            var record = new AppAuthParentLinkRecord
+            {
+                Code = code,
+                IssuedUtc = nowUtc,
+                ExpiresUtc = expiresUtc,
+                ChildMembershipNumber = request.ChildMembershipNumber,
+                ChildMembershipId = request.ChildMembershipId,
+                ChildFirstName = request.ChildFirstName?.Trim() ?? string.Empty,
+                ChildSurname = request.ChildSurname?.Trim() ?? string.Empty,
+                ChildCategory = request.ChildCategory?.Trim() ?? string.Empty
+            };
+
+            await _cacheService.SetAsync(key, record, TimeSpan.FromSeconds(ttlSeconds));
+
+            return Ok(new AppAuthWebSsoResponse
+            {
+                Code = code,
+                ExpiresUtc = expiresUtc
+            });
+        }
+
+
         [HttpPost("app/token")]
         [Consumes("application/json")]
         [Produces("application/json")]
@@ -301,6 +352,9 @@ namespace BOTGC.API.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> IssueToken([FromHeader(Name = "X-CLIENT-ID")] string clientId, [FromBody] AppAuthVerifyDobRequest request)
         {
+
+            Response.Headers.CacheControl = "no-store";
+
             clientId = clientId?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(clientId))
             {
@@ -429,19 +483,21 @@ namespace BOTGC.API.Controllers
                 throw new KeyNotFoundException("Member not found.");
             }
 
-            var getMemberQuery = new GetMemberQuery() { MemberNumber = member.MemberNumber };
-            var memberDetails = await _mediator.Send(getMemberQuery, cancellationToken);   
+            var getMemberQuery = new GetMemberQuery { MemberNumber = member.MemberNumber };
+            var memberDetails = await _mediator.Send(getMemberQuery, cancellationToken);
 
-            var payload = BuildPayload(memberDetails);
+            var payload = await BuildPayloadAsync(memberDetails, cancellationToken);
 
             var code = Guid.NewGuid().ToString("N");
             var cacheKey = CacheKeyPrefixCode + code;
 
+            var nowUtc = DateTimeOffset.UtcNow;
+
             var codeRecord = new AppAuthCodeRecord
             {
                 Code = code,
-                CreatedUtc = DateTimeOffset.UtcNow,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(_settings.Auth.App.QrCodeTtlMinutes),
+                CreatedUtc = nowUtc,
+                ExpiresUtc = nowUtc.AddMinutes(_settings.Auth.App.QrCodeTtlMinutes),
                 Payload = payload,
                 Redeemed = false
             };
@@ -653,8 +709,10 @@ namespace BOTGC.API.Controllers
             return true;
         }
 
-        private static AppAuthPayload BuildPayload(MemberDetailsDto member)
+        private async Task<AppAuthPayload> BuildPayloadAsync(MemberDetailsDto member, CancellationToken cancellationToken)
         {
+            var childLinks = await ExtractChildLinksAsync(member, cancellationToken);
+
             return new AppAuthPayload
             {
                 FirstName = member.Forename ?? string.Empty,
@@ -664,8 +722,58 @@ namespace BOTGC.API.Controllers
                 MembershipNumber = member.MemberNumber,
                 CurrentCategory = member.MembershipCategory ?? string.Empty,
                 EmailAddress = member.Email ?? string.Empty,
-                Parents = Array.Empty<AppAuthParentPayload>()
+                ChildLinks = childLinks
             };
+        }
+
+        private async Task<IReadOnlyCollection<AppAuthChildLink>> ExtractChildLinksAsync(MemberDetailsDto member, CancellationToken cancellationToken)
+        {
+            if (member.FurtherInformation == null)
+            {
+                return Array.Empty<AppAuthChildLink>();
+            }
+
+            if (!member.FurtherInformation.TryGetValue("Parent-Child Relationship", out var values) || values == null)
+            {
+                return Array.Empty<AppAuthChildLink>();
+            }
+
+            var ids = new List<int>();
+            foreach (var v in values)
+            {
+                if (int.TryParse((v ?? string.Empty).Trim(), out var id) && id > 0)
+                {
+                    ids.Add(id);
+                }
+            }
+
+            ids = ids.Distinct().Take(3).ToList();
+            if (ids.Count == 0)
+            {
+                return Array.Empty<AppAuthChildLink>();
+            }
+
+            var tasks = ids.Select(async id =>
+            {
+                var childDetailsQuery = new GetMemberQuery { MemberNumber = id };
+                var childDetails = await _mediator.Send(childDetailsQuery, cancellationToken);
+
+                if (childDetails == null)
+                {
+                    return null;
+                }
+
+                return new AppAuthChildLink
+                {
+                    MembershipId = id,
+                    Name = childDetails.Forename ?? string.Empty,
+                    Category = childDetails.MembershipCategory ?? string.Empty
+                };
+            }).ToArray();
+
+            var results = await Task.WhenAll(tasks);
+
+            return results.Where(x => x != null).Cast<AppAuthChildLink>().ToArray();
         }
 
         private string BuildRedeemUrl(string code)
@@ -701,6 +809,8 @@ namespace BOTGC.API.Controllers
             var now = DateTime.UtcNow;
             var expires = now.AddMinutes(_settings.Auth.App.AccessTokenTtlMinutes);
 
+            var childLinksJson = JsonSerializer.Serialize(payload.ChildLinks ?? Array.Empty<AppAuthChildLink>());
+
             var claims = new List<Claim>
             {
                 new Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub, payload.MembershipNumber.ToString()),
@@ -709,8 +819,23 @@ namespace BOTGC.API.Controllers
                 new Claim("memberId", payload.MembershipId.ToString()),
                 new Claim("firstName", payload.FirstName),
                 new Claim("surname", payload.Surname),
-                new Claim("category", payload.CurrentCategory)
+                new Claim("category", payload.CurrentCategory),
+                new Claim("child_links", childLinksJson)
             };
+
+            if (payload.ChildLinks != null && payload.ChildLinks.Count > 0)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Parent"));
+            }
+            else
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Child"));
+            }
+
+            if (payload.IsAdmin)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            }
 
             var descriptor = new SecurityTokenDescriptor
             {
@@ -792,6 +917,16 @@ namespace BOTGC.API.Controllers
         public string Category { get; set; } = string.Empty;
     }
 
+    public sealed class AppAuthIssueParentLinkRequest
+    {
+        public int ChildMembershipId { get; set; }
+        public int ChildMembershipNumber { get; set; }
+        public string ChildFirstName { get; set; } = string.Empty;
+        public string ChildSurname { get; set; } = string.Empty;
+        public string ChildCategory { get; set; } = string.Empty;
+    }
+
+
     public sealed class AppAuthWebSsoResponse
     {
         public string Code { get; set; } = string.Empty;
@@ -813,6 +948,13 @@ namespace BOTGC.API.Controllers
         public string? MemberType { get; set; }
     }
 
+    public sealed class AppAuthChildLink
+    {
+        public int MembershipId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+    }
+
     public sealed class AppAuthPayload
     {
         public string FirstName { get; set; } = string.Empty;
@@ -822,14 +964,8 @@ namespace BOTGC.API.Controllers
         public int MembershipNumber { get; set; }
         public string CurrentCategory { get; set; } = string.Empty;
         public string EmailAddress { get; set; } = string.Empty;
-        public IReadOnlyCollection<AppAuthParentPayload> Parents { get; set; } = Array.Empty<AppAuthParentPayload>();
-    }
-
-    public sealed class AppAuthParentPayload
-    {
-        public string Name { get; set; } = string.Empty;
-        public string EmailAddress { get; set; } = string.Empty;
-        public int MembershipNumber { get; set; }
+        public IReadOnlyCollection<AppAuthChildLink> ChildLinks { get; set; } = Array.Empty<AppAuthChildLink>();
+        public bool IsAdmin { get; set; } = false;
     }
 
     public sealed class AppAuthCodeRecord

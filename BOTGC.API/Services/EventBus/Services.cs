@@ -517,12 +517,36 @@ public abstract class MemberDetectorBase<TState>(
     protected override async Task<IReadOnlyList<MemberScope>> GetScopesAsync(CancellationToken cancellationToken)
     {
         var members = await Mediator.Send(new GetJuniorMembersQuery(), cancellationToken);
+        var parents = await Mediator.Send(new GetParentsQuery(), cancellationToken);
 
-        return members
+        var childScopes = members
             .Where(m => m.MemberNumber.HasValue && m.MemberNumber.Value > 0)
             .Select(m => new MemberScope(
                 MemberNumber: m.MemberNumber!.Value,
                 PlayerId: m.PlayerId))
+            .ToList();
+
+        var childMemberNumbers = childScopes
+            .Select(s => s.MemberNumber)
+            .ToHashSet();
+
+        var parentMemberNumbers = parents
+            .Where(p => p.Children != null && p.Children.Any(c => childMemberNumbers.Contains(c)))
+            .Select(p => p.ParentMemberId)
+            .Where(n => n > 0)
+            .Distinct()
+            .ToHashSet();
+
+        var parentScopes = parentMemberNumbers
+            .Select(n => new MemberScope(
+                MemberNumber: n,
+                PlayerId: null))
+            .ToList();
+
+        return childScopes
+            .Concat(parentScopes)
+            .GroupBy(s => s.MemberNumber)
+            .Select(g => g.First())
             .ToArray();
     }
 

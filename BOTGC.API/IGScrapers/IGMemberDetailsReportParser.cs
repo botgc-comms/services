@@ -49,6 +49,8 @@ namespace BOTGC.API.IGScrapers
 
                 ParseAddressBlock(document, dto);
 
+                dto.FurtherInformation = ParseFurtherInformation(document);
+
                 result.Add(dto);
             }
             catch (Exception ex)
@@ -94,6 +96,57 @@ namespace BOTGC.API.IGScrapers
             if (DateTime.TryParseExact(input.Trim(), formats, Uk, DateTimeStyles.AssumeLocal, out dt)) return dt;
 
             return null;
+        }
+
+        private static Dictionary<string, List<string>> ParseFurtherInformation(HtmlDocument doc)
+        {
+            var result = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+            var table = doc.DocumentNode.SelectSingleNode("//div[@id='membership_custom_params']//table");
+            if (table == null) return result;
+
+            var rows = table.SelectNodes(".//tbody/tr");
+            if (rows == null || rows.Count == 0) return result;
+
+            foreach (var row in rows)
+            {
+                var cells = row.SelectNodes("./td");
+                if (cells == null || cells.Count < 2) continue;
+
+                var nameCell = cells[0];
+                var valueCell = cells[1];
+
+                var name = Clean(HtmlEntity.DeEntitize(nameCell.InnerText));
+                if (string.IsNullOrWhiteSpace(name)) continue;
+
+                var values = new List<string>();
+
+                var links = valueCell.SelectNodes(".//a");
+                if (links != null && links.Count > 0)
+                {
+                    foreach (var a in links)
+                    {
+                        var v = Clean(HtmlEntity.DeEntitize(a.InnerText));
+                        if (!string.IsNullOrWhiteSpace(v)) values.Add(v);
+                    }
+                }
+                else
+                {
+                    var v = Clean(HtmlEntity.DeEntitize(valueCell.InnerText));
+                    if (!string.IsNullOrWhiteSpace(v)) values.Add(v);
+                }
+
+                if (result.TryGetValue(name, out var existing))
+                {
+                    existing.AddRange(values);
+                }
+                else
+                {
+                    result[name] = values;
+                }
+            }
+
+            return result;
         }
 
         private static void ParseAddressBlock(HtmlDocument doc, MemberDetailsDto dto)

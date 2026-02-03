@@ -1,23 +1,15 @@
 ﻿// LearningPackServices.cs
-using System;
 using System.Buffers;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Azure;
 using Azure.Data.Tables;
+using BOTGC.MemberPortal.Common;
 using BOTGC.MemberPortal.Interfaces;
 using Markdig;
+using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
 using Microsoft.AspNetCore.Html;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace BOTGC.MemberPortal.Services;
 
@@ -52,8 +44,7 @@ public sealed record LearningPack(
 public sealed record LearningPackPage(
     string Id,
     string Title,
-    string Markdown,
-    string MarkdownWithResolvedAssets
+    string Markdown
 );
 
 public sealed record LearningPackSummary(
@@ -151,12 +142,16 @@ public sealed class LearningPackContentSynchroniser
 {
     private readonly ILearningPackContentSource _source;
     private readonly LearningPackContentCache _cache;
+    private readonly LearningPackCataloguePublisher _publisher;
     private readonly SemaphoreSlim _refreshLock = new SemaphoreSlim(1, 1);
 
-    public LearningPackContentSynchroniser(ILearningPackContentSource source, LearningPackContentCache cache)
+    public LearningPackContentSynchroniser(ILearningPackContentSource source, 
+        LearningPackContentCache cache,
+        LearningPackCataloguePublisher publisher)
     {
         _source = source;
         _cache = cache;
+        _publisher = publisher;
     }
 
     public async Task<LearningPackContentSnapshot> RefreshAsync(CancellationToken ct = default)
@@ -173,6 +168,7 @@ public sealed class LearningPackContentSynchroniser
 
             await _cache.SetPrimaryAsync(snapshot, ct);
             await _cache.SetStandbyAsync(snapshot, ct);
+            await _publisher.PublishAsync(snapshot, ct);
 
             return snapshot;
         }
@@ -683,22 +679,174 @@ public sealed class TableStorageLearningPackProgressRepository : ILearningPackPr
     }
 }
 
+public sealed class LearningPackMarkdownAssetResolver
+{
+    public MarkdownDocument Resolve(MarkdownDocument doc, string assetBaseUrl)
+    {
+        assetBaseUrl ??= string.Empty;
+
+        foreach (var link in doc.Descendants<LinkInline>())
+        {
+            if (!link.IsImage)
+            {
+                continue;
+            }
+
+            var url = link.Url;
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                continue;
+            }
+
+            if (url.StartsWith("../assets/", StringComparison.OrdinalIgnoreCase))
+            {
+                var relative = url.Substring("../assets/".Length);
+                link.Url = $"{assetBaseUrl}/{ImageHelpers.EncodePath(relative)}";
+            }
+        }
+
+        return doc;
+    }
+}
 
 public sealed class LearningMarkdownRenderer
 {
     private readonly MarkdownPipeline _pipeline;
+    private readonly LearningPackMarkdownAssetResolver _assetResolver;
 
-    public LearningMarkdownRenderer()
+    public LearningMarkdownRenderer(LearningPackMarkdownAssetResolver assetResolver)
     {
+        _assetResolver = assetResolver;
+
         _pipeline = new MarkdownPipelineBuilder()
             .DisableHtml()
             .UseAdvancedExtensions()
             .Build();
     }
 
-    public IHtmlContent ToHtml(string markdown)
+    public IHtmlContent ToHtml(string markdown, string assetBaseUrl)
     {
-        var html = Markdig.Markdown.ToHtml(markdown ?? string.Empty, _pipeline);
+        var doc = Markdig.Markdown.Parse(markdown ?? string.Empty, _pipeline);
+
+        _assetResolver.Resolve(doc, assetBaseUrl);
+
+        var html = Markdig.Markdown.ToHtml(doc, _pipeline);
         return new HtmlString(html);
+    }
+}
+
+public sealed class LearningPackCataloguePublisher
+{
+    private const string MetaPartition = "META";
+    private const string MetaRow = "CURRENT";
+    private const string PacksPartition = "PACKS";
+
+    private readonly TableClient _catalogue;
+
+    public LearningPackCataloguePublisher(AppSettings settings)
+    {
+        var ts = settings.LearningPacks.TableStorage ?? throw new InvalidOperationException("AppSettings.LearningPacks.TableStorage is not configured.");
+
+        var service = new TableServiceClient(ts.ConnectionString);
+        _catalogue = service.GetTableClient(ts.CatalogueTableName);
+
+        _catalogue.CreateIfNotExists();
+    }
+
+    public async Task PublishAsync(LearningPackContentSnapshot snapshot, CancellationToken ct = default)
+    {
+        var contentVersion = LearningPackService.ComputeContentVersion(snapshot);
+
+        var meta = new CatalogueMetaEntity
+        {
+            PartitionKey = MetaPartition,
+            RowKey = MetaRow,
+            ContentVersion = contentVersion,
+            PublishedAtUtc = DateTimeOffset.UtcNow
+        };
+
+        await _catalogue.UpsertEntityAsync(meta, TableUpdateMode.Replace, ct);
+
+        var actions = new List<TableTransactionAction>(100);
+
+        foreach (var pack in snapshot.Packs)
+        {
+            var e = new CataloguePackEntity
+            {
+                PartitionKey = PacksPartition,
+                RowKey = PackRowKey(pack.Manifest.Id),
+                PackId = pack.Manifest.Id,
+                Title = pack.Manifest.Title,
+                Summary = pack.Manifest.Summary,
+                EstimatedMinutes = pack.Manifest.EstimatedMinutes,
+                Priority = pack.Manifest.Priority,
+                Version = pack.Manifest.Version,
+                MandatoryForCsv = ToCsv(pack.Manifest.MandatoryFor),
+                ContentVersion = contentVersion
+            };
+
+            actions.Add(new TableTransactionAction(TableTransactionActionType.UpsertReplace, e));
+
+            if (actions.Count == 100)
+            {
+                await _catalogue.SubmitTransactionAsync(actions, ct);
+                actions.Clear();
+            }
+        }
+
+        if (actions.Count > 0)
+        {
+            await _catalogue.SubmitTransactionAsync(actions, ct);
+        }
+    }
+
+    private static string PackRowKey(string packId)
+    {
+        return $"PACK_{packId.ToLowerInvariant()}";
+    }
+
+    private static string? ToCsv(IReadOnlyList<string>? values)
+    {
+        if (values == null || values.Count == 0)
+        {
+            return null;
+        }
+
+        var filtered = values
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        return filtered.Length == 0 ? null : string.Join("|", filtered);
+    }
+
+    private sealed class CatalogueMetaEntity : ITableEntity
+    {
+        public string PartitionKey { get; set; } = string.Empty;
+        public string RowKey { get; set; } = string.Empty;
+        public DateTimeOffset? Timestamp { get; set; }
+        public ETag ETag { get; set; }
+
+        public string ContentVersion { get; set; } = string.Empty;
+        public DateTimeOffset PublishedAtUtc { get; set; }
+    }
+
+    private sealed class CataloguePackEntity : ITableEntity
+    {
+        public string PartitionKey { get; set; } = string.Empty;
+        public string RowKey { get; set; } = string.Empty;
+        public DateTimeOffset? Timestamp { get; set; }
+        public ETag ETag { get; set; }
+
+        public string PackId { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Summary { get; set; } = string.Empty;
+        public int EstimatedMinutes { get; set; }
+        public int? Priority { get; set; }
+        public int Version { get; set; }
+        public string? MandatoryForCsv { get; set; }
+        public string ContentVersion { get; set; } = string.Empty;
     }
 }
