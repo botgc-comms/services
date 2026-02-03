@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using RedLockNet;
 using RedLockNet.SERedis;
 using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
@@ -144,13 +145,24 @@ if (string.Equals(cacheServiceType, "Redis", StringComparison.OrdinalIgnoreCase)
         options.InstanceName = $"{appSettings.Cache.RedisCache.InstanceName}:";
     });
 
-    builder.Services.AddScoped<ICacheService, RedisCacheService>();
+    builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+    {
+        return ConnectionMultiplexer.Connect(appSettings.Cache.RedisCache.ConnectionString);
+    });
 
-    var redisConnection = ConnectionMultiplexer.Connect(appSettings.Cache.RedisCache.ConnectionString);
-    var redLockFactory = RedLockFactory.Create(new List<RedLockMultiplexer> { redisConnection });
+    builder.Services.AddSingleton<RedLockFactory>(sp =>
+    {
+        var mux = sp.GetRequiredService<IConnectionMultiplexer>();
 
-    builder.Services.AddSingleton(redLockFactory);
+        return (RedLockFactory)RedLockFactory.Create(new List<RedLockMultiplexer>
+        {
+            new RedLockMultiplexer(mux),
+        });
+    });
+
     builder.Services.AddSingleton<IDistributedLockManager, RedLockDistributedLockManager>();
+
+    builder.Services.AddSingleton<ICacheService, RedisCacheService>();
 }
 else if (string.Equals(cacheServiceType, "Memory", StringComparison.OrdinalIgnoreCase))
 {

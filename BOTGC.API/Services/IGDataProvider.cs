@@ -13,22 +13,26 @@ namespace BOTGC.API.Services
 
         private readonly AppSettings _settings;
         private readonly ILogger<IGDataProvider> _logger;
-        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ICacheService _cacheService;
         private readonly IGSessionService _igSessionManagementService;
         private readonly IQueryCacheOptionsAccessor _cacheOptions;
+
+        private readonly IDistributedLockManager _lockManager;
 
         public IGDataProvider(
             IOptions<AppSettings> settings,
             ILogger<IGDataProvider> logger,
             IGSessionService igSessionManagementService,
-            IServiceScopeFactory serviceScopeFactory,
-            IQueryCacheOptionsAccessor cacheOptions)
+            ICacheService cacheService,
+            IQueryCacheOptionsAccessor cacheOptions,
+            IDistributedLockManager lockManager)
         {
             _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
             _igSessionManagementService = igSessionManagementService ?? throw new ArgumentNullException(nameof(igSessionManagementService));
             _cacheOptions = cacheOptions ?? throw new ArgumentNullException(nameof(cacheOptions));
+            _lockManager = lockManager ?? throw new ArgumentNullException(nameof(lockManager));
         }
 
         public async Task<string?> PostData(string reportUrl,
@@ -49,14 +53,11 @@ namespace BOTGC.API.Services
         {
             var cache = _cacheOptions.Current;
 
-            ICacheService? cacheService = null;
+            ICacheService? cacheService = _cacheService;
             HtmlDocument? doc = null;
 
             if (!string.IsNullOrEmpty(cacheKey))
             {
-                using var scope = _serviceScopeFactory.CreateScope();
-                cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
-
                 if (!cache.NoCache)
                 {
                     var cachedResults = await cacheService.GetAsync<List<T>>(cacheKey).ConfigureAwait(false);
@@ -83,6 +84,85 @@ namespace BOTGC.API.Services
                             {
                                 _logger.LogError("Failed to load cached HTML for {ReportType}...", typeof(T).Name);
                                 doc = null;
+                            }
+                        }
+                    }
+
+                    if (doc == null)
+                    {
+                        var lockResource = BuildReportLockResource(cacheKey);
+                        await using var distLock = await _lockManager.AcquireLockAsync(lockResource, cancellationToken: CancellationToken.None);
+
+                        if (distLock.IsAcquired)
+                        {
+                            var cachedResultsAfterLock = await cacheService.GetAsync<List<T>>(cacheKey).ConfigureAwait(false);
+                            if (cachedResultsAfterLock != null && cachedResultsAfterLock.Any())
+                            {
+                                _logger.LogInformation("Retrieving results from cache for {ReportType} after lock...", typeof(T).Name);
+                                return cachedResultsAfterLock;
+                            }
+
+                            if (_settings.UseCachedHtml)
+                            {
+                                var rawKey = cacheKey + __RAWSUFFIX;
+                                var rawHtml = await cacheService.GetAsync<string>(rawKey, true).ConfigureAwait(false);
+                                if (!string.IsNullOrWhiteSpace(rawHtml))
+                                {
+                                    try
+                                    {
+                                        _logger.LogInformation("Using cached raw HTML for {ReportType} after lock...", typeof(T).Name);
+                                        doc = BuildHtmlDocumentFromRaw(rawHtml);
+
+                                        _logger.LogInformation("Successfully loaded cached raw HTML for {ReportType} after lock...", typeof(T).Name);
+                                    }
+                                    catch (Exception)
+                                    {
+                                        _logger.LogError("Failed to load cached HTML for {ReportType} after lock...", typeof(T).Name);
+                                        doc = null;
+                                    }
+                                }
+                            }
+
+                            _logger.LogInformation("Starting report retrieval for {ReportType}...", typeof(T).Name);
+
+                            await _igSessionManagementService.WaitForLoginAsync();
+
+                            _logger.LogInformation("Fetching {ReportType} report from {Url}", typeof(T).Name, reportUrl);
+                            if (doc == null) doc = await _igSessionManagementService.PostPageContent(reportUrl, data);
+
+                            if (doc != null)
+                            {
+                                var items = await parser.ParseReport(doc);
+
+                                if (linkBuilder != null)
+                                {
+                                    foreach (var item in items)
+                                    {
+                                        item.Links = linkBuilder(item);
+                                    }
+                                }
+
+                                if (!string.IsNullOrEmpty(cacheKey) && cache.WriteThrough)
+                                {
+                                    var ttl = cacheTTL ?? TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins);
+                                    var rawTtl = TimeSpan.FromMinutes(15);
+
+                                    await cacheService!.SetAsync(cacheKey!, items, ttl).ConfigureAwait(false);
+
+                                    if (_settings.UseCachedHtml)
+                                    {
+                                        var rawKey = cacheKey + __RAWSUFFIX;
+                                        var rawHtml = doc.DocumentNode.OuterHtml;
+                                        await cacheService.SetAsync(rawKey, rawHtml, rawTtl).ConfigureAwait(false);
+                                    }
+                                }
+
+                                return items;
+                            }
+                            else
+                            {
+                                _logger.LogError("Failed to retrieve data from {Url} for {ReportType}", reportUrl, typeof(T).Name);
+                                return null!;
                             }
                         }
                     }
@@ -179,19 +259,23 @@ namespace BOTGC.API.Services
             var cache = _cacheOptions.Current;
             var effectiveNoCache = noCache || cache.NoCache;
 
-            ICacheService? cacheService = null;
+            _logger.LogInformation(
+                "Cache policy for {ReportType} (key={CacheKey}): NoCache={NoCache}, WriteThrough={WriteThrough}, EffectiveNoCache={EffectiveNoCache}",
+                typeof(T).Name,
+                cacheKey,
+                cache.NoCache,
+                cache.WriteThrough,
+                effectiveNoCache);
+
             HtmlDocument? doc = null;
 
             if (!string.IsNullOrEmpty(cacheKey))
             {
-                cacheTTL = cacheTTL ?? TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins);
-
-                using var scope = _serviceScopeFactory.CreateScope();
-                cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+                cacheTTL ??= TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins);
 
                 if (!effectiveNoCache)
                 {
-                    var cachedResults = await cacheService.GetAsync<List<T>>(cacheKey).ConfigureAwait(false);
+                    var cachedResults = await _cacheService.GetAsync<List<T>>(cacheKey).ConfigureAwait(false);
                     if (cachedResults != null && cachedResults.Any())
                     {
                         _logger.LogInformation("Retrieving results from cache for {ReportType}...", typeof(T).Name);
@@ -201,24 +285,101 @@ namespace BOTGC.API.Services
                     if (_settings.UseCachedHtml)
                     {
                         var rawKey = cacheKey + __RAWSUFFIX;
-                        var rawHtml = await cacheService.GetAsync<string>(rawKey, true).ConfigureAwait(false);
+                        var rawHtml = await _cacheService.GetAsync<string>(rawKey, true).ConfigureAwait(false);
                         if (!string.IsNullOrWhiteSpace(rawHtml))
                         {
                             try
                             {
                                 _logger.LogInformation("Using cached raw HTML for {ReportType}...", typeof(T).Name);
                                 doc = BuildHtmlDocumentFromRaw(rawHtml);
-
                                 _logger.LogInformation("Successfully loaded cached raw HTML for {ReportType}...", typeof(T).Name);
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
-                                _logger.LogError("Failed to load cached HTML for {ReportType}...", typeof(T).Name);
+                                _logger.LogError(ex, "Failed to load cached HTML for {ReportType}...", typeof(T).Name);
                                 doc = null;
                             }
                         }
                     }
+
+                    if (doc == null)
+                    {
+                        var lockResource = BuildReportLockResource(cacheKey);
+                        await using var distLock = await _lockManager.AcquireLockAsync(lockResource, cancellationToken: CancellationToken.None);
+
+                        if (distLock.IsAcquired)
+                        {
+                            var cachedResultsAfterLock = await _cacheService.GetAsync<List<T>>(cacheKey).ConfigureAwait(false);
+                            if (cachedResultsAfterLock != null && cachedResultsAfterLock.Any())
+                            {
+                                _logger.LogInformation("Retrieving results from cache for {ReportType} after lock...", typeof(T).Name);
+                                return cachedResultsAfterLock;
+                            }
+
+                            if (_settings.UseCachedHtml)
+                            {
+                                var rawKey = cacheKey + __RAWSUFFIX;
+                                var rawHtml = await _cacheService.GetAsync<string>(rawKey, true).ConfigureAwait(false);
+                                if (!string.IsNullOrWhiteSpace(rawHtml))
+                                {
+                                    try
+                                    {
+                                        _logger.LogInformation("Using cached raw HTML for {ReportType} after lock...", typeof(T).Name);
+                                        doc = BuildHtmlDocumentFromRaw(rawHtml);
+                                        _logger.LogInformation("Successfully loaded cached raw HTML for {ReportType} after lock...", typeof(T).Name);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _logger.LogError(ex, "Failed to load cached HTML for {ReportType} after lock...", typeof(T).Name);
+                                        doc = null;
+                                    }
+                                }
+                            }
+
+                            _logger.LogInformation("Starting report retrieval for {ReportType}...", typeof(T).Name);
+
+                            await _igSessionManagementService.WaitForLoginAsync();
+
+                            _logger.LogInformation("Fetching {ReportType} report from {Url}", typeof(T).Name, reportUrl);
+                            doc ??= await _igSessionManagementService.GetPageContent(reportUrl);
+
+                            var itemsLocked = await parse(doc);
+
+                            if (linkBuilder != null)
+                            {
+                                foreach (var item in itemsLocked)
+                                {
+                                    item.Links = linkBuilder(item);
+                                }
+                            }
+
+                            if (!string.IsNullOrEmpty(cacheKey) && cacheTTL != null && itemsLocked.Any() && cache.WriteThrough)
+                            {
+                                var rawTtl = TimeSpan.FromMinutes(15);
+
+                                await _cacheService.SetAsync(cacheKey, itemsLocked, cacheTTL.Value).ConfigureAwait(false);
+
+                                if (_settings.UseCachedHtml)
+                                {
+                                    var rawKey = cacheKey + __RAWSUFFIX;
+                                    await _cacheService.SetAsync(rawKey, doc.DocumentNode.OuterHtml, rawTtl).ConfigureAwait(false);
+                                }
+
+                                _logger.LogInformation("Wrote cache for {ReportType} (key={CacheKey}, count={Count})", typeof(T).Name, cacheKey, itemsLocked.Count);
+                            }
+
+                            return itemsLocked;
+                        }
+                    }
                 }
+                else
+                {
+                    _logger.LogInformation("no-cache configured for report type {ReportType} from {Url}", typeof(T).Name, reportUrl);
+                }
+            }
+            else
+            {
+                _logger.LogInformation("No cache key provided for report type {ReportType} from {Url}", typeof(T).Name, reportUrl);
             }
 
             _logger.LogInformation("Starting report retrieval for {ReportType}...", typeof(T).Name);
@@ -226,7 +387,7 @@ namespace BOTGC.API.Services
             await _igSessionManagementService.WaitForLoginAsync();
 
             _logger.LogInformation("Fetching {ReportType} report from {Url}", typeof(T).Name, reportUrl);
-            if (doc == null) doc = await _igSessionManagementService.GetPageContent(reportUrl);
+            doc ??= await _igSessionManagementService.GetPageContent(reportUrl);
 
             var items = await parse(doc);
 
@@ -238,18 +399,19 @@ namespace BOTGC.API.Services
                 }
             }
 
-            if (!string.IsNullOrEmpty(cacheKey) && cacheTTL != null && items.Any() && cache.WriteThrough)
+            if (!string.IsNullOrEmpty(cacheKey) && cacheTTL != null && items.Any() && cache.WriteThrough && _cacheService != null)
             {
                 var rawTtl = TimeSpan.FromMinutes(15);
 
-                await cacheService!.SetAsync(cacheKey!, items, cacheTTL.Value).ConfigureAwait(false);
+                await _cacheService.SetAsync(cacheKey, items, cacheTTL.Value).ConfigureAwait(false);
 
                 if (_settings.UseCachedHtml)
                 {
                     var rawKey = cacheKey + __RAWSUFFIX;
-                    var rawHtml = doc.DocumentNode.OuterHtml;
-                    await cacheService.SetAsync(rawKey, rawHtml, rawTtl).ConfigureAwait(false);
+                    await _cacheService.SetAsync(rawKey, doc.DocumentNode.OuterHtml, rawTtl).ConfigureAwait(false);
                 }
+
+                _logger.LogInformation("Wrote cache for {ReportType} (key={CacheKey}, count={Count})", typeof(T).Name, cacheKey, items.Count);
             }
 
             return items;
@@ -295,21 +457,17 @@ namespace BOTGC.API.Services
             var cache = _cacheOptions.Current;
 
             HtmlDocument? doc = null;
-            ICacheService? cacheService = null;
-
+            
             _logger.LogInformation("Starting retrieval of raw reponse for {reportUrl}", reportUrl);
 
             cacheTTL = cacheTTL ?? TimeSpan.FromMinutes(_settings.Cache.Default_TTL_Mins);
 
             if (!string.IsNullOrEmpty(cacheKey))
             {
-                using var scope = _serviceScopeFactory.CreateScope();
-                cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
-
                 if (!cache.NoCache)
                 {
                     var rawKey = cacheKey + __RAWSUFFIX;
-                    var rawHtml = await cacheService.GetAsync<string>(rawKey, true).ConfigureAwait(false);
+                    var rawHtml = await _cacheService.GetAsync<string>(rawKey, true).ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(rawHtml))
                     {
                         try
@@ -323,6 +481,57 @@ namespace BOTGC.API.Services
                         {
                             _logger.LogError("Failed to load cached HTML for {reportUrl}", reportUrl);
                             doc = null;
+                        }
+                    }
+
+                    if (doc == null)
+                    {
+                        var lockResource = BuildReportLockResource(cacheKey);
+                        await using var distLock = await _lockManager.AcquireLockAsync(lockResource, cancellationToken: CancellationToken.None);
+
+                        if (distLock.IsAcquired)
+                        {
+                            var rawKeyAfterLock = cacheKey + __RAWSUFFIX;
+                            var rawHtmlAfterLock = await _cacheService.GetAsync<string>(rawKeyAfterLock, true).ConfigureAwait(false);
+                            if (!string.IsNullOrWhiteSpace(rawHtmlAfterLock))
+                            {
+                                try
+                                {
+                                    _logger.LogInformation("Using cached raw HTML for {reportUrl} after lock", reportUrl);
+                                    doc = BuildHtmlDocumentFromRaw(rawHtmlAfterLock);
+
+                                    _logger.LogInformation("Successfully loaded cached raw HTML for {reportUrl} after lock", reportUrl);
+                                }
+                                catch (Exception)
+                                {
+                                    _logger.LogError("Failed to load cached HTML for {reportUrl} after lock", reportUrl);
+                                    doc = null;
+                                }
+                            }
+
+                            await _igSessionManagementService.WaitForLoginAsync();
+
+                            _logger.LogInformation("Starting report retrieval for {reportUrl}", reportUrl);
+
+                            await _igSessionManagementService.WaitForLoginAsync();
+
+                            _logger.LogInformation("Fetching report from {Url}", reportUrl);
+                            if (doc == null) doc = await _igSessionManagementService.GetPageContent(reportUrl);
+
+                            if (!string.IsNullOrEmpty(cacheKey) && cacheTTL != null && doc != null && doc.DocumentNode != null && doc.DocumentNode.OuterHtml.Length != 0 && cache.WriteThrough)
+                            {
+                                await _cacheService!.SetAsync(cacheKey + __RAWSUFFIX, doc.DocumentNode.OuterHtml, cacheTTL.Value).ConfigureAwait(false);
+                            }
+
+                            if (doc != null)
+                            {
+                                return doc.DocumentNode.OuterHtml;
+                            }
+                            else
+                            {
+                                _logger.LogError("Failed to retrieve data from {Url}", reportUrl);
+                                return string.Empty;
+                            }
                         }
                     }
                 }
@@ -341,7 +550,7 @@ namespace BOTGC.API.Services
             {
                 var rawKey = cacheKey + __RAWSUFFIX;
                 var rawHtml = doc.DocumentNode.OuterHtml;
-                await cacheService!.SetAsync(rawKey, rawHtml, cacheTTL.Value).ConfigureAwait(false);
+                await _cacheService!.SetAsync(rawKey, rawHtml, cacheTTL.Value).ConfigureAwait(false);
             }
 
             if (doc != null)
@@ -353,6 +562,11 @@ namespace BOTGC.API.Services
                 _logger.LogError("Failed to retrieve data from {Url}", reportUrl);
                 return string.Empty;
             }
+        }
+
+        private static string BuildReportLockResource(string cacheKey)
+        {
+            return $"ig-report:{cacheKey}";
         }
     }
 }

@@ -2,7 +2,7 @@
 
 public abstract record QueryBase<TResponse> : MediatR.IRequest<TResponse>
 {
-    public CacheOptions Cache { get; init; } = new();
+    public CacheOptions Cache { get; init; } = new(false, true);
 }
 
 public readonly record struct CacheOptions(
