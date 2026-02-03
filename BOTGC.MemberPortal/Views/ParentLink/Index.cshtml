@@ -1,0 +1,28 @@
+﻿@model BOTGC.MemberPortal.Models.ParentLinkViewModel
+
+@{
+    ViewData["Title"] = "Link a parent";
+    Layout = "_SubpageLayout";
+    ViewData["BackHref"] = "/";
+    ViewData["BackLabel"] = "Back to dashboard";
+
+    var qrSrc = $"/parent-link/qr.png?code={Uri.EscapeDataString(Model.Code)}";
+}
+
+@section PageHeader
+{
+    <h1 class="plink__title">Link a parent</h1>
+    <p class="plink__subtitle">Ask your parent or guardian to scan this QR code with their phone.</p>
+}
+
+<div class="plink">
+    <div class="plink__card">
+        <img class="plink__qr" src="@qrSrc" alt="QR code to link a parent device" />
+        <p class="plink__expires">Expires: @Model.ExpiresUtc.ToString("u")</p>
+        <details class="plink__details">
+            <summary>Having trouble scanning?</summary>
+            <p class="plink__details-text">Use this link instead:</p>
+            <p class="plink__details-link"><code>@Model.RedeemUrl</code></p>
+        </details>
+    </div>
+</div>

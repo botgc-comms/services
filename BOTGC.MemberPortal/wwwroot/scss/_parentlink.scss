@@ -1,0 +1,54 @@
+@use "./shared/index" as s;
+
+.plink__title {
+    @include s.heading-xl;
+}
+
+.plink__subtitle {
+    @include s.subtitle;
+    margin-top: 6px;
+}
+
+.plink {
+    margin-top: 12px;
+}
+
+.plink__card {
+    padding: 14px;
+    background: rgba(255,255,255,.7);
+    border: 1px solid rgba(0,0,0,.06);
+    border-radius: 16px;
+    box-shadow: 0 14px 30px rgba(0,0,0,.06);
+    display: grid;
+    gap: 10px;
+    justify-items: center;
+    text-align: center;
+}
+
+.plink__qr {
+    width: min(320px, 100%);
+    height: auto;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,.06);
+    background: #fff;
+}
+
+.plink__expires {
+    @include s.subtitle;
+    margin: 0;
+}
+
+.plink__details {
+    width: 100%;
+    text-align: left;
+}
+
+.plink__details-text {
+    @include s.subtitle;
+    margin: 10px 0 6px 0;
+}
+
+.plink__details-link {
+    margin: 0;
+    word-break: break-all;
+}
