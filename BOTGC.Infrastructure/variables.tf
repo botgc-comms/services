@@ -95,3 +95,8 @@ variable "wastage_secret" {
   sensitive = true
   default   = ""
 }
+
+variable "jwt_signing_key" {
+  type      = string
+  sensitive = true
+}

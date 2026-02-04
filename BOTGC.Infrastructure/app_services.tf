@@ -25,6 +25,8 @@ resource "azurerm_linux_web_app" "services_api_app" {
     "AppSettings__ApplicationInsights__ConnectionString"     = azurerm_application_insights.app_insights.connection_string   
 
     "AppSettings__Auth__XApiKey"                             = var.x_api_key
+    "AppSettings__Auth__App__JwtSigningKey"                  = var.app_signing_key
+    "AppSettings__Auth__App__UniversalLinkBaseUrl"           = "botgc://bind"
 
     "AppSettings__AzureFaceApi__EndPoint"                    = "https://face-botgc-shared.cognitiveservices.azure.com/"
     "AppSettings__AzureFaceApi__SubscriptionKey"             = var.azure_face_api_key

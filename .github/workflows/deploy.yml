@@ -65,6 +65,7 @@ jobs:
         TF_VAR_azure_face_api_key: ${{ secrets.AZURE_FACE_API_KEY }}
         TF_VAR_x_api_key: ${{ secrets.X_API_KEY }}
         TF_VAR_github_token: ${{ secrets.PAT_GITHUB }}
+        TF_VAR_app_signing_key: ${{ secrets.APP_SIGNING_KEY }}
 
     - name: Get Api App Name
       id: get_api_app_name
