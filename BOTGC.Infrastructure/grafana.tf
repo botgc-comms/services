@@ -4,7 +4,7 @@ resource "azurerm_dashboard_grafana" "grafana" {
   location                      = azurerm_resource_group.services_api_rg.location
   resource_group_name           = azurerm_resource_group.services_api_rg.name
   sku                           = "Standard"
-  grafana_major_version         = "12"
+  grafana_major_version         = "11"
   public_network_access_enabled = true
 
   identity {
