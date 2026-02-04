@@ -37,7 +37,6 @@ resource "azurerm_monitor_diagnostic_setting" "app_insights_diag" {
 
   metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
 
