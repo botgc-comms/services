@@ -2,14 +2,9 @@ resource "azurerm_resource_provider_registration" "dashboard" {
   name = "Microsoft.Dashboard"
 }
 
-resource "azurerm_resource_provider_registration" "grafana" {
-  name = "Microsoft.Grafana"
-}
-
 resource "azurerm_dashboard_grafana" "grafana" {
   depends_on = [
-    azurerm_resource_provider_registration.dashboard,
-    azurerm_resource_provider_registration.grafana
+    azurerm_resource_provider_registration.dashboard
   ]
 
   name                  = "gfn-${var.project_name}-${var.environment}"
