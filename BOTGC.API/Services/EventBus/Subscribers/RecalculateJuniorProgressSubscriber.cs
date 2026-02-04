@@ -273,7 +273,7 @@ public sealed class JuniorCadetProgressCategoryEvaluator(
     {
         var hasQuizMilestone = HasQuizMilestoneForCategoryInWindow(window, category);
         var hasSignedOffCheck = HasSignedOffOnCourseCheckInWindow(window);
-        var hasParentLearning = HasEventInWindow<LearningCompletedEvent>(window);
+        var hasParentLearning = HasEventInWindow<ParentLearningMilestoneAchievedEvent>(window);
 
         if (!hasQuizMilestone || !hasSignedOffCheck || !hasParentLearning)
         {
