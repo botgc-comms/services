@@ -1,6 +1,3 @@
-resource "azurerm_resource_provider_registration" "dashboard" {
-  name = "Microsoft.Dashboard"
-}
 
 resource "azurerm_dashboard_grafana" "grafana" {
   depends_on = [
