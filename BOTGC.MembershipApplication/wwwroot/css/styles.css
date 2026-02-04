@@ -450,6 +450,11 @@ h1, h2 {
   font-family: Arial, sans-serif;
 }
 
+.membership-info.waiting-list {
+  border-left: 4px solid #c00;
+  background-color: #fff5f5;
+}
+
 .membership-price {
   font-size: 1.25rem;
   font-weight: 600;

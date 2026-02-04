@@ -103,7 +103,8 @@
                         {
                             <option value="@category.Name"
                                     data-description="@category.Description"
-                                    data-finance="@category.FinanceAvailable.ToString().ToLowerInvariant()">
+                                    data-finance="@category.FinanceAvailable.ToString().ToLowerInvariant()"
+                                    data-waitinglist="@category.IsOnWaitingList.ToString().ToLowerInvariant()">
                                 @category.Title
                             </option>
                         }

@@ -59,11 +59,16 @@ namespace BOTGC.MembershipApplication
         public ContentSecurityPolicyBuilder WithGrowSurf()
         {
             _scriptSrc.Add("https://app.growsurf.com");
+
+            _styleSrc.Add("https://app.growsurf.com");
             _styleSrc.Add("https://use.typekit.net");
             _styleSrc.Add("https://p.typekit.net");
+
             _connectSrc.Add("https://api.growsurf.com");
+
             _fontSrc.Add("https://use.typekit.net");
             _fontSrc.Add("https://p.typekit.net");
+
             return this;
         }
 
@@ -117,6 +122,7 @@ namespace BOTGC.MembershipApplication
                     "default-src 'self';",
                     $"script-src {string.Join(" ", scriptSrcWithNonce)};",
                     $"style-src {string.Join(" ", _styleSrc.Distinct())};",
+                    $"style-src-elem {string.Join(" ", _styleSrc.Distinct())};",
                     "img-src 'self' data: https://growsurf-blog.s3-us-west-2.amazonaws.com;",
                     $"font-src {string.Join(" ", _fontSrc.Distinct())};",
                     $"connect-src {string.Join(" ", _connectSrc.Distinct())};",

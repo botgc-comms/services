@@ -43,6 +43,22 @@ public class MembershipController : Controller
         var newApplication = new MembershipApplication.Models.MembershipApplication();
         var categories = await _categoryCache.GetAll();
 
+        var categoryFromQuery = Request.Query["category"].ToString();
+
+        if (!string.IsNullOrWhiteSpace(categoryFromQuery))
+        {
+            var all = categories.SelectMany(g => g.Categories).ToList();
+
+            var match = all.FirstOrDefault(c =>
+                string.Equals(c.Name, categoryFromQuery, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(c.Title, categoryFromQuery, StringComparison.OrdinalIgnoreCase));
+
+            if (match != null)
+            {
+                newApplication.MembershipCategory = match.Name;
+            }
+        }
+
         var supressLogo = "false";
         var suppressLogoParamKey = Request.Query.Keys.FirstOrDefault(k => k.ToLower() == "suppresslogo");
         if (!string.IsNullOrEmpty(suppressLogoParamKey))

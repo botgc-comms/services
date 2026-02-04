@@ -9824,11 +9824,19 @@ function updateMembershipDescription() {
     }
 
     if (selected) {
+        const isWaitingList = !!selected.isOnWaitingList;
+
+        const waitingListHtml = isWaitingList
+            ? `<div class="waiting-list-message">This category currently has a waiting list.</div>`
+            : ``;
+
         const html = `
-<div class="membership-info">
+<div class="membership-info${isWaitingList ? ' waiting-list' : ''}">
   <p class="membership-price">Price: ${selected.price}</p>
   <p class="membership-description">${descriptionText}</p>
+  ${waitingListHtml}
 </div>`;
+
         $('#membership-description')
             .html(html)
             .show();
