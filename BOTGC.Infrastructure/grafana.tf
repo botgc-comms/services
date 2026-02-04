@@ -1,14 +1,17 @@
 
 resource "azurerm_dashboard_grafana" "grafana" {
-  name                  = "gfn-${var.project_name}-${var.environment}"
-  location              = azurerm_resource_group.services_api_rg.location
-  resource_group_name   = azurerm_resource_group.services_api_rg.name
-  grafana_major_version = 10
+  name                          = "gfn-${var.project_name}-${var.environment}"
+  location                      = azurerm_resource_group.services_api_rg.location
+  resource_group_name           = azurerm_resource_group.services_api_rg.name
+  sku                           = "Standard"
+  grafana_major_version         = "12"
+  public_network_access_enabled = true
 
   identity {
     type = "SystemAssigned"
   }
 }
+
 
 resource "azurerm_role_assignment" "grafana_reader_rg" {
   scope                = azurerm_resource_group.services_api_rg.id
