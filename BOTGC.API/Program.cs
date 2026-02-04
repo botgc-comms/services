@@ -100,7 +100,7 @@ if (!builder.Environment.IsDevelopment())
     });
 
     builder.Logging.AddApplicationInsights(
-        configureTelemetryConfiguration: (config) =>
+        configureTelemetryConfiguration: config =>
         {
             config.ConnectionString = appSettings.ApplicationInsights.ConnectionString;
         },
@@ -113,6 +113,12 @@ if (!builder.Environment.IsDevelopment())
 
     builder.Logging.AddFilter<Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider>(
         "", LogLevel.Information);
+
+    builder.Services.AddSingleton<IIGScrapeTelemetry, IGDataProviderTelemetry>();
+}
+else
+{
+    builder.Services.AddSingleton<IIGScrapeTelemetry, ConsoleIGScrapeTelemetry>();
 }
 
 builder.Services.AddSingleton<ITrophyFiles, TrophyFilesGitHub>();

@@ -1,22 +1,21 @@
 ﻿using BOTGC.API.Interfaces;
 using RedLockNet;
 
-namespace BOTGC.API.Services
+namespace BOTGC.API.Services;
+
+public class RedLockDistributedLock : IDistributedLock
 {
-    public class RedLockDistributedLock : IDistributedLock
+    private readonly IRedLock _redLock;
+
+    public RedLockDistributedLock(IRedLock redLock)
     {
-        private readonly IRedLock _redLock;
+        _redLock = redLock;
+    }
 
-        public RedLockDistributedLock(IRedLock redLock)
-        {
-            _redLock = redLock;
-        }
+    public bool IsAcquired => _redLock.IsAcquired;
 
-        public bool IsAcquired => _redLock.IsAcquired;
-
-        public async ValueTask DisposeAsync()
-        {
-            await _redLock.DisposeAsync();
-        }
+    public async ValueTask DisposeAsync()
+    {
+        await _redLock.DisposeAsync();
     }
 }
