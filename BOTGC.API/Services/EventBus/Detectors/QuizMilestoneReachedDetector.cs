@@ -13,6 +13,8 @@ namespace BOTGC.API.Services.Events.Detectors;
 
 public sealed class QuizMilestoneDetectorState
 {
+    public DateTimeOffset? WindowStartUtc { get; set; }
+    public DateTimeOffset? MilestoneRaisedAtUtc { get; set; }
 }
 
 [DetectorSchedule("0 22 * * *", runOnStartup: true)]
@@ -50,6 +52,28 @@ public sealed class QuizMilestoneReachedDetector(
         if (window.Count == 0)
         {
             return;
+        }
+
+        var windowIsReliable = window.Count < take && w.WindowStartUtc.HasValue;
+
+        if (windowIsReliable)
+        {
+            if (state.Value.WindowStartUtc.HasValue && w.WindowStartUtc!.Value > state.Value.WindowStartUtc.Value)
+            {
+                state.Value.WindowStartUtc = w.WindowStartUtc;
+                state.Value.MilestoneRaisedAtUtc = null;
+            }
+            else if (!state.Value.WindowStartUtc.HasValue)
+            {
+                state.Value.WindowStartUtc = w.WindowStartUtc;
+            }
+
+            if (state.Value.MilestoneRaisedAtUtc.HasValue &&
+                state.Value.WindowStartUtc.HasValue &&
+                state.Value.MilestoneRaisedAtUtc.Value >= state.Value.WindowStartUtc.Value)
+            {
+                return;
+            }
         }
 
         var sawPassedQuizInWindow = false;
@@ -130,6 +154,8 @@ public sealed class QuizMilestoneReachedDetector(
             return;
         }
 
+        var occurredAtUtc = DateTimeOffset.UtcNow;
+
         events.Add(new QuizMilestoneReachedEvent
         {
             MemberId = memberId,
@@ -137,12 +163,20 @@ public sealed class QuizMilestoneReachedDetector(
             RequiredPassedCount = rule.RequiredPassedCount,
             MinimumDifficulty = rule.MinimumDifficulty,
             PassedCountInWindow = passedCount,
-            WindowStartUtc = w.WindowStartUtc ?? DateTimeOffset.UtcNow,
-            WindowEndUtc = w.WindowEndUtc ?? DateTimeOffset.UtcNow,
-            OccurredAtUtc = DateTimeOffset.UtcNow,
+            WindowStartUtc = w.WindowStartUtc ?? occurredAtUtc,
+            WindowEndUtc = w.WindowEndUtc ?? occurredAtUtc,
+            OccurredAtUtc = occurredAtUtc,
             MilestoneAchieved = rule.Name
         });
+
+        state.Value.MilestoneRaisedAtUtc = occurredAtUtc;
+
+        if (windowIsReliable && w.WindowStartUtc.HasValue && !state.Value.WindowStartUtc.HasValue)
+        {
+            state.Value.WindowStartUtc = w.WindowStartUtc;
+        }
     }
+
 
     private QuizMilestoneRule? ResolveRule(string category)
     {
