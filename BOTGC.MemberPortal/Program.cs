@@ -51,8 +51,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSingleton<NgrokState>();
 
-
-builder.Services.AddPosApiClients(builder.Configuration);
+builder.Services.AddApiClients(builder.Configuration);
 
 builder.Services.AddSignalR();
 
@@ -98,6 +97,7 @@ var redLockFactory = RedLockFactory.Create(new List<RedLockMultiplexer> { redisC
 builder.Services.AddSingleton(redLockFactory);
 builder.Services.AddSingleton<IDistributedLockManager, RedLockDistributedLockManager>();
 
+builder.Services.AddSingleton<IMemberProgressService, MemberProgressService>();
 
 builder.Services.AddSession(options =>
 {

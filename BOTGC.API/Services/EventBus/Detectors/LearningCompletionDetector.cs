@@ -68,6 +68,7 @@ public sealed class LearningCompletionDetector(
             }
         }
 
-        detectorState.LastProcessedCompletedAtUtc = maxCompletedAt;
+        detectorState.LastProcessedCompletedAtUtc = maxCompletedAt.AddTicks(1);
+        
     }
 }

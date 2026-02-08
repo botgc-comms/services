@@ -35,3 +35,17 @@ public sealed class SubscriberNameAttribute(string name) : Attribute
 {
     public string Name { get; } = name ?? throw new ArgumentNullException(nameof(name));
 }
+
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public sealed class ProgressPillarAttribute : Attribute
+{
+    public ProgressPillarAttribute(string key, string defaultMilestoneEventType)
+    {
+        Key = key ?? throw new ArgumentNullException(nameof(key));
+        DefaultMilestoneEventType = defaultMilestoneEventType ?? throw new ArgumentNullException(nameof(defaultMilestoneEventType));
+    }
+
+    public string Key { get; }
+    public string DefaultMilestoneEventType { get; }
+}

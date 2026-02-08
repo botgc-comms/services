@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
 using BOTGC.MemberPortal.Interfaces;
 using BOTGC.MemberPortal.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -12,14 +10,17 @@ namespace BOTGC.MemberPortal.Controllers;
 public sealed class HomeController : Controller
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly IDashboardService _whatsNextService;
+    private readonly IDashboardService _dashboardService;
+    private readonly IMemberProgressService _memberProgressService;
 
     public HomeController(
         ICurrentUserService currentUserService,
-        IDashboardService whatsNextService)
+        IDashboardService dashboardService,
+        IMemberProgressService memberProgressService)
     {
         _currentUserService = currentUserService;
-        _whatsNextService = whatsNextService;
+        _dashboardService = dashboardService;
+        _memberProgressService = memberProgressService;
     }
 
     [HttpGet]
@@ -95,21 +96,25 @@ public sealed class HomeController : Controller
             return View("ParentIndex", parentModel);
         }
 
+        var memberId = _currentUserService.UserId.Value;
+
         var memberContext = new MemberContext
         {
-            MemberId = _currentUserService.UserId.Value,
+            MemberId = memberId,
             JuniorCategory = "Junior 12-18"
         };
 
-        var dashboard = await _whatsNextService.BuildDashboardAsync(memberContext, cancellationToken);
+        var dashboard = await _dashboardService.BuildDashboardAsync(memberContext, cancellationToken);
+
+        var progress = await _memberProgressService.GetMemberProgressAsync(memberId, cancellationToken);
 
         var model = new DashboardViewModel
         {
             DisplayName = _currentUserService.DisplayName ?? "Junior member",
             AvatarUrl = dashboard.AvatarUrl,
-            LevelLabel = dashboard.LevelLabel,
-            LevelName = dashboard.LevelName,
-            LevelProgressPercent = dashboard.LevelProgressPercent,
+            LevelLabel = "Category",
+            LevelName = progress?.Category ?? "Unknown",
+            LevelProgressPercent = progress?.ProgressPercentRounded ?? 0,
             QuickActions = dashboard.QuickActions,
             WhatsNext = dashboard.WhatsNext
         };

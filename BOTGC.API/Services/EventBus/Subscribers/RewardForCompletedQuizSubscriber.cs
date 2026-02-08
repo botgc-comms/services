@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace BOTGC.API.Services.EventBus.Subscribers;
 
+[SubscriberName("rewards-completedquiz")]
 public sealed class RewardForCompletedQuizSubscriber(
     ILogger<RewardForCompletedQuizSubscriber> logger,
     ISubscriberQueueFactory queues,

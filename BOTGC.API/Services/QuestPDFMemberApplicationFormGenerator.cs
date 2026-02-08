@@ -1,4 +1,5 @@
-﻿using BOTGC.API.Common;
+﻿using System.Globalization;
+using BOTGC.API.Common;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -6,7 +7,6 @@ using Microsoft.Extensions.Options;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using System.Globalization;
 
 namespace BOTGC.API.Services;
 

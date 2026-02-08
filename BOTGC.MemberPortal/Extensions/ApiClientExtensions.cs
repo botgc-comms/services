@@ -9,7 +9,7 @@ namespace BOTGC.MemberPortal;
 
 public static class ApiClientExtensions
 {
-    public static IServiceCollection AddPosApiClients(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddApiClients(this IServiceCollection services, IConfiguration config)
     {
         services.AddHttpClient("Api", (sp, client) =>
         {

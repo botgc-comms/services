@@ -59,7 +59,32 @@ namespace BOTGC.API
     {
         public int DetectorMaxConcurrency { get; set; } = 5;
         public QuizMilestonesSettings QuizMilestones { get; set; } = new();
+
+        public JuniorProgressSettings JuniorProgress { get; set; } = new();
         public string? DetectorFrequencyOverrideCron { get; set; }
+    }
+
+    public sealed class JuniorProgressSettings
+    {
+        public int CategoryWindowTake { get; set; } = 500;
+
+        public List<JuniorCategoryProgressRule> Categories { get; set; } = new();
+    }
+
+    public sealed class JuniorCategoryProgressRule
+    {
+        public string MembershipCategory { get; set; } = string.Empty;
+
+        public List<JuniorPillarRule> Pillars { get; set; } = new();
+    }
+
+    public sealed class JuniorPillarRule
+    {
+        public string Key { get; set; } = string.Empty;
+
+        public double WeightPercent { get; set; }
+
+        public Dictionary<string, string> Settings { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
     public sealed class QuizMilestonesSettings
@@ -356,5 +381,7 @@ namespace BOTGC.API
 
         public List<decimal> PairsTeamTop5 { get; set; } = new();
     }
+
+
     
 }

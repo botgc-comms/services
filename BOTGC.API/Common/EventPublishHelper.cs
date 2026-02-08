@@ -16,4 +16,3 @@ public sealed class EventPublishHelper(IEventPublisher publisher) : IEventPublis
         return _publisher.PublishAsync(evt, cancellationToken);
     }
 }
-

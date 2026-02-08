@@ -21,21 +21,24 @@
     <section class="dashboard_section">
         <div class="dashboard__meta-card">
             <div class="dashboard__meta-row">
-                <span class="dashboard__meta-label">@Model.LevelLabel</span>
-                <span class="dashboard__meta-sep">|</span>
+                @* <span class="dashboard__meta-label">@Model.LevelLabel</span>
+                <span class="dashboard__meta-sep">|</span> *@
                 <span class="dashboard__meta-value">@Model.LevelName</span>
             </div>
 
             <div class="dashboard__progress">
-                <div class="dashboard__progress-track" role="progressbar"
+                <div class="dashboard__progress-track"
+                     role="progressbar"
                      aria-valuemin="0"
                      aria-valuemax="100"
                      aria-valuenow="@Model.LevelProgressPercent"
-                     aria-label="Cadet progress">
-                    <div class="dashboard__progress-fill" style="width:@Model.LevelProgressPercent%"></div>
-                    <div class="dashboard__progress-knob" style="left:@Model.LevelProgressPercent%"></div>
+                     aria-label="Cadet progress"
+                     style="--pct:@Model.LevelProgressPercent;">
+                    <div class="dashboard__progress-fill"></div>
+                    <div class="dashboard__progress-knob" aria-hidden="true"></div>
                 </div>
             </div>
+
         </div>
     </section>
 

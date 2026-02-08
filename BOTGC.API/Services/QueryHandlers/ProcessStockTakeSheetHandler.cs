@@ -1,12 +1,12 @@
-﻿using System.Text.RegularExpressions;
-using System.Linq;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
 using BOTGC.API.Dto;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
 using BOTGC.API.Services.Queries;
 using MediatR;
-using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Options;
 
 namespace BOTGC.API.Services.QueryHandlers;
 

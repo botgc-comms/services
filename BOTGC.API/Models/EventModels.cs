@@ -91,26 +91,18 @@ public static class QueueNames
         return SubscriberQueueName.ForSubscriberType(subscriberClrType) + "-dlq";
     }
 
-    private static string Sanitise(string value)
-    {
-        var sb = new StringBuilder(value.Length);
-
-        foreach (var ch in value)
-        {
-            var lower = char.ToLowerInvariant(ch);
-
-            if ((lower >= 'a' && lower <= 'z') || (lower >= '0' && lower <= '9'))
-            {
-                sb.Append(lower);
-                continue;
-            }
-
-            sb.Append('-');
-        }
-
-        var s = sb.ToString().Trim('-');
-        return string.IsNullOrWhiteSpace(s) ? "subscriber" : s;
-    }
 }
 
+public sealed record JuniorCategoryProgressResult(
+    int MemberId,
+    string Category,
+    double PercentComplete,
+    IReadOnlyList<JuniorPillarProgressResult> Pillars);
+
+public sealed record JuniorPillarProgressResult(
+    string PillarKey,
+    double WeightPercent,
+    bool MilestoneAchieved,
+    double PillarCompletionFraction,
+    double ContributionPercent);
 

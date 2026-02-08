@@ -202,6 +202,17 @@ namespace BOTGC.API.Extensions
                 }
             }
 
+            var pillarTypes = allTypes
+                .Where(t => typeof(JuniorProgressPillarBase).IsAssignableFrom(t))
+                .ToArray();
+
+            foreach (var pillarType in pillarTypes)
+            {
+                services.AddSingleton(typeof(JuniorProgressPillarBase), pillarType);
+            }
+
+            services.AddSingleton<IJuniorCategoryProgressCalculator, JuniorCategoryProgressCalculator>();
+
             services.AddSingleton<ISubscriberCatalogue>(_ => new SubscriberCatalogue(subscriberTypes));
 
             services.AddHostedService<EventDispatcher>();
