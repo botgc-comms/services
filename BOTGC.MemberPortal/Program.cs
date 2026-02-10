@@ -68,6 +68,7 @@ builder.Services.AddScoped<ITileAdapter, HandicapSessionTileAdapter>();
 builder.Services.AddScoped<ITileAdapter, CategoryProgressTileAdapter>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IParentLinkService, ParentLinkService>();
+builder.Services.AddScoped<IApiEventService, ApiEventService>();
 
 builder.Services.AddScoped<IJuniorMemberDirectoryService, JuniorMemberDirectoryService>();
 builder.Services.AddScoped<ICheckRideReportRepository, TableStorageCheckRideReportRepository>();

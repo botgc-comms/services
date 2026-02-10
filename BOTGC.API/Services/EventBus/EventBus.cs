@@ -1239,3 +1239,28 @@ public static class QueueName
         return sb.ToString();
     }
 }
+
+
+public sealed class DetectorNameRegistry : IDetectorNameRegistry
+{
+    private readonly HashSet<string> _names;
+
+    public DetectorNameRegistry(IEnumerable<Type> detectorTypes)
+    {
+        _names = detectorTypes
+            .Select(t => DetectorName.For(t))
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    public IReadOnlyCollection<string> GetAll()
+    {
+        return _names.ToArray();
+    }
+
+    public bool IsValid(string detectorName)
+    {
+        if (string.IsNullOrWhiteSpace(detectorName)) return false;
+        return _names.Contains(detectorName.Trim());
+    }
+}

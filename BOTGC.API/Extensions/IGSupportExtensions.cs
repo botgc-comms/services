@@ -187,6 +187,8 @@ namespace BOTGC.API.Extensions
                 services.AddScoped(typeof(IDetector), detectorType);
             }
 
+            services.AddSingleton<IDetectorNameRegistry>(_ => new DetectorNameRegistry(detectorTypes));
+
             var subscriberTypes = allTypes
                 .Where(t => t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISubscriber<>)))
                 .ToArray();

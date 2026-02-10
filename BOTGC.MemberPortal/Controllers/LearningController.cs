@@ -300,20 +300,4 @@ public sealed class LearningController : Controller
         return false;
     }
 
-
-
-    private static bool IsMandatoryForCategory(IReadOnlyList<string>? mandatoryFor, string? category)
-    {
-        if (mandatoryFor is null || mandatoryFor.Count == 0)
-        {
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(category))
-        {
-            return false;
-        }
-
-        return mandatoryFor.Any(c => string.Equals(c, category, StringComparison.OrdinalIgnoreCase));
-    }
 }

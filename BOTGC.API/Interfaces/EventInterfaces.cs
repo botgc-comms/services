@@ -66,6 +66,12 @@ public interface ISubscriberCatalogue
     IReadOnlyList<Type> GetSubscribersFor(Type eventClrType);
 }
 
+public interface IDetectorNameRegistry
+{
+    IReadOnlyCollection<string> GetAll();
+    bool IsValid(string detectorName);
+}
+
 public interface ISubscriberQueueFactory
 {
     IQueueService<TPayload> Create<TPayload>(Type subscriberClrType);

@@ -6,6 +6,7 @@ using Azure;
 using Azure.Data.Tables;
 using BOTGC.MemberPortal.Common;
 using BOTGC.MemberPortal.Interfaces;
+using BOTGC.MemberPortal.Models;
 using Markdig;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
@@ -299,16 +300,13 @@ public sealed class LearningPackContentWarmupHostedService : IHostedService
     }
 }
 
-public sealed class LearningPackService
+public sealed class LearningPackService(ILearningPackProvider provider,
+    ILearningPackProgressRepository progress,
+    IApiEventService eventService)
 {
-    private readonly ILearningPackProvider _provider;
-    private readonly ILearningPackProgressRepository _progress;
-
-    public LearningPackService(ILearningPackProvider provider, ILearningPackProgressRepository progress)
-    {
-        _provider = provider;
-        _progress = progress;
-    }
+    private readonly ILearningPackProvider _provider = provider;
+    private readonly ILearningPackProgressRepository _progress = progress;
+    private readonly IApiEventService _eventService = eventService;
 
     public async Task<PackCatalogue> ListAvailableAsync(CancellationToken ct = default)
     {
@@ -381,6 +379,11 @@ public sealed class LearningPackService
 
         await _progress.MarkCompletedAsync(userId, pack.Manifest.Id, DateTimeOffset.UtcNow, contentVersion, ct);
 
+        if (int.TryParse(userId, out var memberId) && memberId > 0)
+        {
+            _eventService.TriggerDetector("learning-completion-detector", memberId);
+        }
+
         return true;
     }
 
@@ -396,9 +399,7 @@ public sealed class LearningPackService
         var hash = SHA256.HashData(bytes);
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
-
 }
-
 
 public sealed class TableStorageLearningPackProgressRepository : ILearningPackProgressRepository
 {
