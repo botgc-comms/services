@@ -13,7 +13,7 @@ public sealed class LearningCompletionDetectorState
     public DateTimeOffset LastProcessedCompletedAtUtc { get; set; } = DateTimeOffset.MinValue;
 }
 
-
+[DetectorName("learning-completion-detector")]
 [DetectorSchedule("0 21 * * *", runOnStartup: true)]
 public sealed class LearningCompletionDetector(
     IDetectorStateStore stateStore,
@@ -24,8 +24,6 @@ public sealed class LearningCompletionDetector(
     ILogger<LearningCompletionDetector> logger)
     : MemberDetectorBase<LearningCompletionDetectorState>(stateStore, publisher, mediator, lockManager, appSettings, logger)
 {
-    public override string Name => "learning-completion-detector";
-
     protected override async Task DetectAsync(
         MemberScope scopeKey,
         DetectorState<LearningCompletionDetectorState> state,

@@ -14,6 +14,7 @@ public sealed class CourseAssessmentDetectorState
     public DateTimeOffset LastProcessedRecordedAtUtc { get; set; } = DateTimeOffset.MinValue;
 }
 
+[DetectorName("course-assessment-completion-detector")]
 [DetectorSchedule("0 22 * * *", runOnStartup: true)]
 public sealed class CourseAssessmentCompletionDetector(
     IDetectorStateStore stateStore,
@@ -24,8 +25,6 @@ public sealed class CourseAssessmentCompletionDetector(
     ILogger<CourseAssessmentCompletionDetector> logger)
     : MemberDetectorBase<CourseAssessmentDetectorState>(stateStore, publisher, mediator, lockManager, appSettings, logger)
 {
-    public override string Name => "course-assessment-completion-detector";
-
     protected override async Task DetectAsync(
         MemberScope scopeKey,
         DetectorState<CourseAssessmentDetectorState> state,

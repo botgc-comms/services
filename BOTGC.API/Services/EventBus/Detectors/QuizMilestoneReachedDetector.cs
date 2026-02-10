@@ -17,6 +17,7 @@ public sealed class QuizMilestoneDetectorState
     public DateTimeOffset? MilestoneRaisedAtUtc { get; set; }
 }
 
+[DetectorName("quiz-milestone-reached-detector")]
 [DetectorSchedule("0 22 * * *", runOnStartup: true)]
 public sealed class QuizMilestoneReachedDetector(
     IDetectorStateStore stateStore,
@@ -32,8 +33,6 @@ public sealed class QuizMilestoneReachedDetector(
     private readonly IMemberEventWindowReader _windowReader = windowReader ?? throw new ArgumentNullException(nameof(windowReader));
     private readonly AppSettings _settings = appSettings?.Value ?? throw new ArgumentNullException(nameof(appSettings));
     private readonly JsonSerializerOptions _json = json ?? throw new ArgumentNullException(nameof(json));
-
-    public override string Name => "quiz-milestone-reached-detector";
 
     protected override async Task DetectAsync(
         MemberScope scopeKey,

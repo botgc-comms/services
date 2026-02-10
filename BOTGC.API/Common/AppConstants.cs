@@ -10,6 +10,7 @@ namespace BOTGC.API.Common
         public const string StockWastageQueueName = "stock-wastage";
         public const string StockTakeProcessQueueName = "stock-take-process";
         public const string StockTakeCompletedQueueName = "stock-takes-completed";
+        public const string DetectorTriggerQueueName = "detector-trigger";
 
         public const string PrizeNotificationQueueName = "prize-notifications";
         public const string PrizeInvoiceQueueName = "prize-invoices";

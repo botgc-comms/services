@@ -49,3 +49,19 @@ public sealed class ProgressPillarAttribute : Attribute
     public string Key { get; }
     public string DefaultMilestoneEventType { get; }
 }
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public sealed class DetectorNameAttribute : Attribute
+{
+    public DetectorNameAttribute(string name)
+    {
+        Name = (name ?? string.Empty).Trim();
+
+        if (string.IsNullOrWhiteSpace(Name))
+        {
+            throw new ArgumentException("Detector name cannot be empty.", nameof(name));
+        }
+    }
+
+    public string Name { get; }
+}

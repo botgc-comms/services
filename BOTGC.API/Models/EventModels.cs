@@ -73,24 +73,13 @@ public static class QueueNames
 
     public static string SubscriberQueue(Type subscriberClrType)
     {
-        if (subscriberClrType is null)
-        {
-            throw new ArgumentNullException(nameof(subscriberClrType));
-        }
-
-        return SubscriberQueueName.ForSubscriberType(subscriberClrType);
+        return QueueName.ForSubscriber(subscriberClrType);
     }
 
     public static string SubscriberDeadLetter(Type subscriberClrType)
     {
-        if (subscriberClrType is null)
-        {
-            throw new ArgumentNullException(nameof(subscriberClrType));
-        }
-
-        return SubscriberQueueName.ForSubscriberType(subscriberClrType) + "-dlq";
+        return QueueName.ForSubscriber(subscriberClrType, suffix: "dlq");
     }
-
 }
 
 public sealed record JuniorCategoryProgressResult(

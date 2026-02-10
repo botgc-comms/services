@@ -15,6 +15,7 @@ public sealed class QuizDetectorState
     public DateTimeOffset LastProcessedFinishedAtUtc { get; set; } = DateTimeOffset.MinValue;
 }
 
+[DetectorName("quiz-completion-detector")]
 [DetectorSchedule("0 22 * * *", runOnStartup: true)]
 public sealed class QuizCompletionDetector(
     IDetectorStateStore stateStore,
@@ -25,8 +26,6 @@ public sealed class QuizCompletionDetector(
     ILogger<QuizCompletionDetector> logger)
     : MemberDetectorBase<QuizDetectorState>(stateStore, publisher, mediator, lockManager, appSettings, logger)
 {
-    public override string Name => "quiz-completion-detector";
-
     protected override async Task DetectAsync(
         MemberScope scopeKey,
         DetectorState<QuizDetectorState> state,

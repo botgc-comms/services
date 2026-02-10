@@ -20,6 +20,13 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseDefaultServiceProvider(o =>
+{
+    o.ValidateScopes = true;
+    o.ValidateOnBuild = true;
+});
+
+
 var gb = CultureInfo.GetCultureInfo("en-GB");
 CultureInfo.DefaultThreadCurrentCulture = gb;
 CultureInfo.DefaultThreadCurrentUICulture = gb;

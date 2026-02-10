@@ -554,6 +554,26 @@ public abstract class MemberDetectorBase<TState>(
     {
         return scope.StableKey;
     }
+
+    public async Task RunForMemberAsync(int memberNumber, CancellationToken cancellationToken)
+    {
+        if (memberNumber <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(memberNumber));
+        }
+
+        var scopes = await GetScopesAsync(cancellationToken);
+
+        var scope = scopes.FirstOrDefault(s => s.MemberNumber == memberNumber);
+
+        if (scope.MemberNumber <= 0)
+        {
+            Logger.LogDebug("Detector {Detector} skipping member {MemberNumber} because they are not eligible.", Name, memberNumber);
+            return;
+        }
+
+        await ProcessScopeAsync(scope, cancellationToken);
+    }
 }
 
 public abstract class DetectorBase<TState, TScope>(
@@ -573,7 +593,7 @@ public abstract class DetectorBase<TState, TScope>(
 
     private readonly AppSettings _app = appSettings?.Value ?? throw new ArgumentNullException(nameof(appSettings));
 
-    public abstract string Name { get; }
+    public virtual string Name => DetectorName.For(GetType());
 
     public virtual int MaxConcurrency
     {
@@ -620,7 +640,7 @@ public abstract class DetectorBase<TState, TScope>(
         await Task.WhenAll(tasks);
     }
 
-    private async Task ProcessScopeAsync(TScope scope, CancellationToken cancellationToken)
+    protected async Task ProcessScopeAsync(TScope scope, CancellationToken cancellationToken)
     {
         var scopeKey = GetScopeKey(scope);
         var resource = GetLockResource(scopeKey);
@@ -714,69 +734,75 @@ public sealed class DetectorSchedulerHostedService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var scheduled = await BuildScheduleAsync(stoppingToken);
-
-        if (scheduled.Count == 0)
+        try
         {
-            _logger.LogWarning("Detector scheduler found no detectors with {Attribute}.", nameof(DetectorScheduleAttribute));
-            return;
+            var scheduled = await BuildScheduleAsync(stoppingToken);
+
+            if (scheduled.Count == 0)
+            {
+                _logger.LogWarning("Detector scheduler found no detectors with {Attribute}.", nameof(DetectorScheduleAttribute));
+                return;
+            }
+
+            var nowUtc = DateTimeOffset.UtcNow;
+
+            foreach (var sd in scheduled)
+            {
+                _runGates.TryAdd(sd.Name, new SemaphoreSlim(1, 1));
+
+                if (sd.RunOnStartup)
+                {
+                    _nextDueUtc[sd.Name] = nowUtc;
+                    continue;
+                }
+
+                var next = sd.Cron.GetNextOccurrence(nowUtc.UtcDateTime, TimeZoneInfo.Utc);
+                if (next is null)
+                {
+                    _logger.LogWarning("Detector {Detector} has no next occurrence for cron {Cron}.", sd.Name, sd.Cron.ToString());
+                    continue;
+                }
+
+                _nextDueUtc[sd.Name] = new DateTimeOffset(DateTime.SpecifyKind(next.Value, DateTimeKind.Utc));
+            }
+
+            _logger.LogInformation(
+                "Detector scheduler started with {Count} detectors. DevOverride={Override}.",
+                scheduled.Count,
+                GetDevOverrideCron() ?? "(none)");
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                nowUtc = DateTimeOffset.UtcNow;
+
+                var due = scheduled
+                    .Where(sd => _nextDueUtc.TryGetValue(sd.Name, out var next) && next <= nowUtc)
+                    .ToList();
+
+                foreach (var sd in due)
+                {
+                    _ = RunDetectorAsync(sd, stoppingToken);
+                    ScheduleNext(sd, nowUtc);
+                }
+
+                var nextWake = scheduled
+                    .Select(sd => _nextDueUtc.TryGetValue(sd.Name, out var next) ? next : (DateTimeOffset?)null)
+                    .Where(x => x.HasValue)
+                    .Select(x => x!.Value)
+                    .DefaultIfEmpty(nowUtc.AddSeconds(30))
+                    .Min();
+
+                var delay = nextWake - DateTimeOffset.UtcNow;
+                if (delay < TimeSpan.FromMilliseconds(250))
+                {
+                    delay = TimeSpan.FromMilliseconds(250);
+                }
+
+                await Task.Delay(delay, stoppingToken);
+            }
         }
-
-        var nowUtc = DateTimeOffset.UtcNow;
-
-        foreach (var sd in scheduled)
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
-            _runGates.TryAdd(sd.Name, new SemaphoreSlim(1, 1));
-
-            if (sd.RunOnStartup)
-            {
-                _nextDueUtc[sd.Name] = nowUtc;
-                continue;
-            }
-
-            var next = sd.Cron.GetNextOccurrence(nowUtc.UtcDateTime, TimeZoneInfo.Utc);
-            if (next is null)
-            {
-                _logger.LogWarning("Detector {Detector} has no next occurrence for cron {Cron}.", sd.Name, sd.Cron.ToString());
-                continue;
-            }
-
-            _nextDueUtc[sd.Name] = new DateTimeOffset(DateTime.SpecifyKind(next.Value, DateTimeKind.Utc));
-        }
-
-        _logger.LogInformation(
-            "Detector scheduler started with {Count} detectors. DevOverride={Override}.",
-            scheduled.Count,
-            GetDevOverrideCron() ?? "(none)");
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            nowUtc = DateTimeOffset.UtcNow;
-
-            var due = scheduled
-                .Where(sd => _nextDueUtc.TryGetValue(sd.Name, out var next) && next <= nowUtc)
-                .ToList();
-
-            foreach (var sd in due)
-            {
-                _ = RunDetectorAsync(sd, stoppingToken);
-                ScheduleNext(sd, nowUtc);
-            }
-
-            var nextWake = scheduled
-                .Select(sd => _nextDueUtc.TryGetValue(sd.Name, out var next) ? next : (DateTimeOffset?)null)
-                .Where(x => x.HasValue)
-                .Select(x => x!.Value)
-                .DefaultIfEmpty(nowUtc.AddSeconds(30))
-                .Min();
-
-            var delay = nextWake - DateTimeOffset.UtcNow;
-            if (delay < TimeSpan.FromMilliseconds(250))
-            {
-                delay = TimeSpan.FromMilliseconds(250);
-            }
-
-            await Task.Delay(delay, stoppingToken);
         }
     }
 
@@ -990,6 +1016,26 @@ public sealed class TableMemberEventWindowReader(
     }
 }
 
+public static class DetectorName
+{
+    public static string For(Type detectorClrType)
+    {
+        if (detectorClrType is null)
+        {
+            throw new ArgumentNullException(nameof(detectorClrType));
+        }
+
+        var attr = detectorClrType.GetCustomAttribute<DetectorNameAttribute>(inherit: false);
+
+        if (attr is not null && !string.IsNullOrWhiteSpace(attr.Name))
+        {
+            return attr.Name.Trim();
+        }
+
+        return detectorClrType.Name;
+    }
+}
+
 public static class SubscriberQueueName
 {
     public static string ForSubscriberType(Type subscriberType)
@@ -1076,6 +1122,107 @@ public static class SubscriberQueueName
         }
 
         return result;
+    }
+
+    private static string ShortHash(string s)
+    {
+        using var sha = SHA256.Create();
+        var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(s));
+
+        var sb = new StringBuilder(12);
+        for (var i = 0; i < 6; i++)
+        {
+            sb.Append(bytes[i].ToString("x2"));
+        }
+
+        return sb.ToString();
+    }
+}
+
+public static class QueueName
+{
+    public static string ForSubscriber(Type subscriberType, string? suffix = null)
+    {
+        if (subscriberType is null) throw new ArgumentNullException(nameof(subscriberType));
+
+        var explicitName = subscriberType.GetCustomAttribute<SubscriberNameAttribute>(inherit: false)?.Name;
+        var baseName = !string.IsNullOrWhiteSpace(explicitName)
+            ? "sub-" + explicitName.Trim()
+            : "sub-" + subscriberType.Name;
+
+        return EnsureValidQueueName(baseName, suffix);
+    }
+
+    public static string EnsureValidQueueName(string rawBase, string? suffix = null)
+    {
+        var basePart = Normalise(rawBase);
+        var suffixPart = string.IsNullOrWhiteSpace(suffix) ? string.Empty : Normalise(suffix);
+
+        if (basePart.Length < 3) basePart = (basePart + "xxx").Substring(0, 3);
+
+        var fullCandidate = string.IsNullOrWhiteSpace(suffixPart)
+            ? basePart
+            : $"{basePart}-{suffixPart}";
+
+        if (fullCandidate.Length <= 63)
+        {
+            return fullCandidate;
+        }
+
+        var hash = ShortHash(fullCandidate);
+
+        var reserved = 1 + hash.Length;
+        var suffixWithDash = string.IsNullOrWhiteSpace(suffixPart) ? string.Empty : "-" + suffixPart;
+        reserved += suffixWithDash.Length;
+
+        var maxPrefixLen = 63 - reserved;
+        if (maxPrefixLen < 3) maxPrefixLen = 3;
+
+        var prefix = basePart.Length > maxPrefixLen ? basePart.Substring(0, maxPrefixLen) : basePart;
+        prefix = prefix.Trim('-');
+        if (prefix.Length < 3) prefix = (prefix + "xxx").Substring(0, 3);
+
+        var finalName = string.IsNullOrWhiteSpace(suffixPart)
+            ? $"{prefix}-{hash}"
+            : $"{prefix}{suffixWithDash}-{hash}";
+
+        if (finalName.Length > 63)
+        {
+            finalName = finalName.Substring(0, 63).Trim('-');
+            if (finalName.Length < 3) finalName = (finalName + "xxx").Substring(0, 3);
+        }
+
+        return finalName;
+    }
+
+    private static string Normalise(string input)
+    {
+        var s = (input ?? string.Empty).Trim().ToLowerInvariant();
+
+        var sb = new StringBuilder(s.Length);
+        var lastWasDash = false;
+
+        for (var i = 0; i < s.Length; i++)
+        {
+            var c = s[i];
+            var isAlphaNum = (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
+
+            if (isAlphaNum)
+            {
+                sb.Append(c);
+                lastWasDash = false;
+                continue;
+            }
+
+            if (!lastWasDash)
+            {
+                sb.Append('-');
+                lastWasDash = true;
+            }
+        }
+
+        var result = sb.ToString().Trim('-');
+        return result.Length == 0 ? "q" : result;
     }
 
     private static string ShortHash(string s)

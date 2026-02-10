@@ -20,6 +20,7 @@ public sealed class JuniorProgressChangeDetectorState
     public string? LastSignature { get; set; }
 }
 
+[DetectorName("junior-progress-change-detector")]
 [DetectorSchedule("0 22 * * *", runOnStartup: true)]
 public sealed class JuniorProgressChangeDetector(
     IDetectorStateStore stateStore,
@@ -33,8 +34,6 @@ public sealed class JuniorProgressChangeDetector(
 {
     private readonly IJuniorCategoryProgressCalculator _progressCalculator =
         progressCalculator ?? throw new ArgumentNullException(nameof(progressCalculator));
-
-    public override string Name => "junior-progress-change-detector";
 
     protected override async Task DetectAsync(
         MemberScope scopeKey,

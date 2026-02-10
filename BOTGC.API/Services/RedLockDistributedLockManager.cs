@@ -6,7 +6,6 @@ using RedLockNet.SERedis.Configuration;
 
 namespace BOTGC.API.Services;
 
-
 public class RedLockDistributedLockManager : IDistributedLockManager
 {
     private readonly RedLockFactory _redLockFactory;

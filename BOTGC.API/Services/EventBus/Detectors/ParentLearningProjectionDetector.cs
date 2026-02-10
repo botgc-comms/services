@@ -15,6 +15,7 @@ public sealed class ParentLearningProjectionDetectorState
     public Dictionary<int, DateTimeOffset> LastProcessedCompletedAtUtcByParent { get; set; } = new();
 }
 
+[DetectorName("parent-learning-projection-detector")]
 [DetectorSchedule("0 20 * * *", runOnStartup: true)]
 public sealed class ParentLearningProjectionDetector(
     IDetectorStateStore stateStore,
@@ -30,8 +31,6 @@ public sealed class ParentLearningProjectionDetector(
     private readonly IMemberEventWindowReader _windowReader = windowReader ?? throw new ArgumentNullException(nameof(windowReader));
     private readonly AppSettings _app = appSettings?.Value ?? throw new ArgumentNullException(nameof(appSettings));
     private readonly JsonSerializerOptions _json = json ?? throw new ArgumentNullException(nameof(json));
-
-    public override string Name => "parent-learning-projection-detector";
 
     protected override async Task DetectAsync(
         MemberScope scopeKey,

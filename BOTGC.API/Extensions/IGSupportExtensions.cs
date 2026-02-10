@@ -74,7 +74,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IQueueService<ProcessPrizeInvoiceCommand>, PrizeInvoiceQueueService>();
             services.AddSingleton<IQueueService<SendPrizeNotificationEmailCommand>, PrizeNotificationsQueueService>(); 
             services.AddSingleton<IQueueService<ProcessCompetitionWinningsBatchCompletedCommand>, NewCompetitionPrizesCalcualtedQueueService>();
-
+            
             services.AddSingleton<IEposStore, EposStore>();
 
             services.AddTransient<JuniorEclecticCompetitionProcessor>();
@@ -97,7 +97,7 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<ICompetitionPayoutStore, CompetitionPayoutService>();
             services.AddSingleton<IBlobStorageService, AzureBlobStorageService>();
             services.AddSingleton<IBenefitsQrTokenService, BenefitsQrTokenService>();
-
+            
             services.AddSingleton<ILearningPackProgressReadStore, TableStorageLearningPackProgressReadStore>();
             services.AddSingleton<ILearningPackRequirementResolver, TableStorageLearningPackRequirementResolver>();
 
@@ -172,7 +172,6 @@ namespace BOTGC.API.Extensions
             services.AddSingleton<IJuniorProgressCategoryEvaluator, JuniorCadetProgressCategoryEvaluator>();
             services.AddSingleton<IJuniorProgressCategoryEvaluator, JuniorCourseCadetProgressCategoryEvaluator>();
             
-
             var allTypes = assemblies
                 .SelectMany(a => a.DefinedTypes)
                 .Where(t => !t.IsAbstract && !t.IsInterface)
@@ -215,8 +214,13 @@ namespace BOTGC.API.Extensions
 
             services.AddSingleton<ISubscriberCatalogue>(_ => new SubscriberCatalogue(subscriberTypes));
 
+            services.AddSingleton<IMemberDetectorTriggerScheduler, MemberDetectorTriggerScheduler>();
+
+            services.AddSingleton<IQueueService<DetectorTriggerCommand>, DetectorTriggerQueueService>();
+
             services.AddHostedService<EventDispatcher>();
             services.AddHostedService<DetectorSchedulerHostedService>();
+            services.AddHostedService<DetectorTriggerQueueProcessor>();
 
             return services;
         }

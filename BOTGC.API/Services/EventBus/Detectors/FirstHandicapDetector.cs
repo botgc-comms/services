@@ -15,6 +15,7 @@ public sealed class FirstHandicapByNoHandicapReportDetectorState
     public DateTime LastCheckedUtc { get; set; } = DateTime.UtcNow.AddDays(-14);
 }
 
+[DetectorName("first-handicap")]
 [DetectorSchedule("0 22 * * *", runOnStartup: true)]
 public sealed class FirstHandicapByNoHandicapReportDetector(
     IMediator mediator,
@@ -27,8 +28,6 @@ public sealed class FirstHandicapByNoHandicapReportDetector(
         : MemberDetectorBase<FirstHandicapByNoHandicapReportDetectorState>(stateStore, publisher, mediator, lockManager, appSettings, logger)
 {
     private readonly IEventStore _eventStore = eventStore ?? throw new ArgumentNullException(nameof(eventStore));
-
-    public override string Name => "first-handicap";
 
     protected override async Task DetectAsync(MemberScope scopeKey, DetectorState<FirstHandicapByNoHandicapReportDetectorState> state, IDetectorEventSink sink, CancellationToken cancellationToken)
     {
