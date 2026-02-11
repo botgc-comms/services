@@ -88,4 +88,3 @@ public sealed class TriggerJuniorProgressOnParentLearningCompletedSubscriber(
         return Task.CompletedTask;
     }
 }
-

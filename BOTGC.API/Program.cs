@@ -220,9 +220,31 @@ builder.Services
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromSeconds(30)
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var path = context.HttpContext.Request.Path;
+
+                if (path.StartsWithSegments("/hubs/events"))
+                {
+                    var accessToken = context.Request.Query["access_token"].ToString();
+
+                    if (!string.IsNullOrWhiteSpace(accessToken))
+                    {
+                        context.Token = accessToken;
+                    }
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 

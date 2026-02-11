@@ -7,13 +7,16 @@ using System.Text.Json;
 using Azure;
 using Azure.Data.Tables;
 using Azure.Storage.Queues;
+using BOTGC.API.Hubs;
 using BOTGC.API.Interfaces;
 using BOTGC.API.Models;
 using BOTGC.API.Services.EventBus;
 using BOTGC.API.Services.EventBus.Events;
 using BOTGC.API.Services.Queries;
+using BOTGC.API.Services.Realtime;
 using Cronos;
 using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 
 
@@ -466,6 +469,48 @@ public abstract class SubscriberBase<TEvent, TSubscriber>(
     protected abstract Task ProcessAsync(TEvent evt, CancellationToken cancellationToken);
 }
 
+public abstract class SignalRSubscriberBase<TEvent, TSubscriber>(
+    ILogger<TSubscriber> logger,
+    ISubscriberQueueFactory queues,
+    IOptions<EventPipelineOptions> options,
+    JsonSerializerOptions json,
+    IHubContext<EventsHub> hub)
+    : SubscriberBase<TEvent, TSubscriber>(logger, queues, options, json)
+    where TEvent : class, IEvent
+    where TSubscriber : class, ISubscriber<TEvent>
+{
+    private readonly IHubContext<EventsHub> _hub = hub ?? throw new ArgumentNullException(nameof(hub));
+
+    protected virtual string HubMethodName => "eventPublished";
+
+    protected sealed override Task ProcessAsync(TEvent evt, CancellationToken cancellationToken)
+    {
+        var eventTypeName = GetEventTypeName(typeof(TEvent));
+        var group = EventTopics.MemberEvent(evt.MemberId, eventTypeName);
+
+        return _hub.Clients.Group(group).SendAsync(
+            HubMethodName,
+            new
+            {
+                type = eventTypeName,
+                memberId = evt.MemberId,
+                eventId = evt.EventId,
+                occurredAtUtc = evt.OccurredAtUtc,
+            },
+            cancellationToken);
+    }
+
+    private static string GetEventTypeName(Type eventClrType)
+    {
+        var attr = eventClrType.GetCustomAttribute<EventTypeAttribute>(inherit: false);
+        if (attr is null || string.IsNullOrWhiteSpace(attr.Name))
+        {
+            throw new InvalidOperationException($"{eventClrType.FullName} is missing [EventType(\"name\", version)].");
+        }
+
+        return attr.Name.Trim();
+    }
+}
 
 public abstract class DetectorBase : IDetector
 {

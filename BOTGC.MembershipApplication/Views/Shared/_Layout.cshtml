@@ -3,6 +3,16 @@
 
 @{
     var nonce = Context.Items["CSPNonce"] as string ?? "";
+
+    string Abs(string appRelative)
+    {
+        var baseUri = new Uri($"{Context.Request.Scheme}://{Context.Request.Host}");
+        return new Uri(baseUri, Url.Content(appRelative)).ToString();
+    }
+
+    var pageUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
+    var ogLandscape = Abs("~/img/Burton on Trent  - 1894.png");
+    var ogSquare = ogLandscape;
 }
 
 <!DOCTYPE html>
@@ -11,6 +21,40 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Membership Application</title>
+
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="Burton on Trent Golf Club">
+    <meta property="og:title" content="Wastage - Management Reports">
+    <meta property="og:description" content="Log and review wastage at Burton on Trent GC.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="@pageUrl">
+    <meta property="og:image" content="@ogLandscape" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image" content="@ogSquare" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Wastage - Management Reports">
+    <meta name="twitter:description" content="Log and review wastage at Burton on Trent GC.">
+    <meta name="twitter:image" content="@ogLandscape">
+
+    <!-- Manifest-->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Stock Control">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+    <!-- Favicons / icons -->
+    <link rel="icon" type="image/png" sizes="16x16"
+          href="~/img/favicon-16x16.png" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="32x32"
+          href="~/img/favicon-32x32.png" asp-append-version="true" />
+    <link rel="shortcut icon" type="image/png"
+          href="~/img/Burton on Trent  - 1894.png" asp-append-version="true" />
+    <link rel="apple-touch-icon" sizes="180x180"
+          href="~/img/apple-touch-icon.png" asp-append-version="true" />
 
     @if (Env.IsDevelopment())
     {
