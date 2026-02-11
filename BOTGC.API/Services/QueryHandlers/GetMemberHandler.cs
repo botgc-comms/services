@@ -32,8 +32,20 @@ public class GetMemberHandler(IOptions<AppSettings> settings,
 
         if (playerLookupId == null)
         {
-            _logger.LogWarning($"Failed to lookup player id for member {request.MemberNumber}");
-            throw new KeyNotFoundException($"No player found for member ID {request.MemberNumber}");
+            playerIdsQuery = new GetPlayerIdsByMemberQuery()
+            {
+                Cache = new CacheOptions(NoCache: true, WriteThrough: true)
+            };
+
+            playerIdLookup = await _mediator.Send(playerIdsQuery, cancellationToken);
+
+            playerLookupId = playerIdLookup.Where(id => (request.MemberNumber.HasValue && id.MemberId == request.MemberNumber) || (request.PlayerId.HasValue && id.PlayerId == request.PlayerId)).SingleOrDefault();
+
+            if (playerLookupId == null)
+            {
+                _logger.LogWarning($"Failed to lookup player id for member {request.MemberNumber}");
+                return null;
+            }
         }
 
         var reportUrl = $"{_settings.IG.BaseUrl}{_settings.IG.Urls.MemberDetailsUrl}".Replace("{memberid}", playerLookupId.PlayerId.ToString());

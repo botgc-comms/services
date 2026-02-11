@@ -59,29 +59,42 @@ namespace BOTGC.API.Services.QueryHandlers
                 {
                     return await _mediator.Send(query, cancellationToken);
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "New member query failed: {QueryType} {@Query}", query.GetType().Name, query);
+                    throw;
+                }
                 finally
                 {
                     semaphore.Release();
                 }
             }).ToList();
 
-            var newMembers = (await Task.WhenAll(newMemberTasks)).ToList();
+            List<MemberDetailsDto> newMembers;
+            try
+            {
+                newMembers = (await Task.WhenAll(newMemberTasks)).Where(x => x != null).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "One or more new member queries failed during Task.WhenAll.");
+                throw;
+            }
 
             newMembers = newMembers.Select(nm =>
             {
-                var md = nm;
-
-                var member = members.FirstOrDefault(m => m.PlayerId == nm.ID);
+                var member = members?.FirstOrDefault(m => m.PlayerId == nm.ID);
                 if (member != null)
                 {
-                    md.Forename = member.Forename;
-                    md.Surname = member.Surname;
+                    nm.Forename = member.Forename;
+                    nm.Surname = member.Surname;
                 }
 
-                return md;
+                return nm;
             }).ToList();
 
             _logger.LogInformation("{Count} members were found.", newMembers.Count);
+
 
             return newMembers;
         }
